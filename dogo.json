@@ -1,0 +1,9 @@
+{
+  "WorkingDir": "./cmd",
+  "SourceExt": [
+    ".go",
+    ".toml"
+  ],
+  "BuildCmd": "go build .",
+  "RunCmd": "./cmd -conf ../configs"
+}
