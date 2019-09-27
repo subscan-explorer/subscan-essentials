@@ -32,16 +32,14 @@ func GetSessionLength() int {
 			if r, err := GetStorage(nil, "Session", "SessionLength"); err == nil {
 				SessionLength = r.ToInt()
 				return SessionLength
-			} else {
-				return DefaultSessionLength
 			}
+			return DefaultSessionLength
 		} else {
 			s, err := GetConstants("babe", "epochDuration") //kusama
 			if err != nil {
 				return KusamaEpochDuration
-			} else {
-				return int(s.ToU32FromCodec())
 			}
+			return int(s.ToU32FromCodec())
 		}
 	}
 }

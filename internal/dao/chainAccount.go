@@ -36,16 +36,15 @@ func (d *Dao) UpdateBalance(c context.Context, account *model.ChainAccount, bala
 	return nil
 }
 
-func (d *Dao) GetBalanceFromNetwork(c context.Context, address, module string) (decimal.Decimal, error) {
+func (d *Dao) GetBalanceFromNetwork(c context.Context, address, module string) (balance decimal.Decimal, err error) {
 	balanceModule := enableBalancesModule[module]
 	if balanceModule == "" {
 		return decimal.Zero, errors.New("disable module")
 	}
-	if balance, err := d.substrateApi.GetFreeBalance(balanceModule, address); err != nil {
-		return decimal.Zero, err
-	} else {
+	if balance, err := d.substrateApi.GetFreeBalance(balanceModule, address); err == nil {
 		return utiles.BigToDecimal(balance), nil
 	}
+	return decimal.Zero, err
 }
 
 func (d *Dao) GetBalanceAndUpdate(c context.Context, account *model.ChainAccount, module string) error {

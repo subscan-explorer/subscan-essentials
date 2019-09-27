@@ -63,21 +63,13 @@ func Subscribe() {
 			}
 			lockId.Unlock()
 			if err != nil {
-				log.Info("write:", err)
+				log.Error("write websocket error: %v", err)
 			} else {
 				setHeartBeat("substrate")
 			}
 		case <-interrupt:
 			log.Info("interrupt")
-			err := SubscribeConn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-			if err != nil {
-				log.Error("write close:", err)
-				return
-			}
-			select {
-			case <-done:
-			case <-time.After(time.Second):
-			}
+			_ = SubscribeConn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			return
 		default:
 			if !SubscribeConn.IsConnected() {

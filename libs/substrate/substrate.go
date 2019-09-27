@@ -15,13 +15,13 @@ type Websocket struct {
 	Provider string `json:"provider"`
 }
 
-func (w *Websocket) GetFreeBalance(module, accountId string) (*big.Int, error) {
+func (w *Websocket) GetFreeBalance(module, accountId string) (balanceValue *big.Int, err error) {
 	module = strings.ToUpper(string(module[0])) + string(module[1:])
-	if balanceValue, err := GetStorage(nil, module, "FreeBalance", utiles.TrimHex(accountId)); err != nil {
-		return nil, err
-	} else {
+	if balanceValue, err := GetStorage(nil, module, "FreeBalance", utiles.TrimHex(accountId)); err == nil {
 		return balanceValue.ToBigInt(), nil
 	}
+	return nil, err
+
 }
 
 func (w *Websocket) GetChainInfo(c *websocket.Conn) (err error) {
@@ -58,12 +58,11 @@ func GetStorageAt(c *websocket.Conn, hash, section, method string, arg ...string
 		return
 	}
 	_ = c.ReadJSON(v)
-	if dataHex, err := v.ToString(); err != nil {
-		return r, err
-	} else {
+	if dataHex, err := v.ToString(); err == nil {
 		decodeMsg, err := codec_protos.DecodeStorage(dataHex, scaleType)
 		return storage.StateStorage(decodeMsg), err
 	}
+	return r, err
 }
 
 // Get storage without hash
@@ -79,10 +78,10 @@ func GetStorage(c *websocket.Conn, section, method string, arg ...string) (r sto
 		return
 	}
 	_ = c.ReadJSON(v)
-	if dataHex, err := v.ToString(); err != nil {
-		return r, err
-	} else {
+	if dataHex, err := v.ToString(); err == nil {
 		decodeMsg, err := codec_protos.DecodeStorage(dataHex, scaleType)
 		return storage.StateStorage(decodeMsg), err
+	} else {
+		return r, err
 	}
 }

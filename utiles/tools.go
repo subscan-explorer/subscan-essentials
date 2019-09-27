@@ -15,11 +15,10 @@ func IntToString(i int) string {
 }
 
 func StringToInt(s string) int {
-	if i, err := strconv.Atoi(s); err != nil {
-		return 0
-	} else {
+	if i, err := strconv.Atoi(s); err == nil {
 		return i
 	}
+	return 0
 }
 
 func InsertInts(o []int, index int, new int) []int {
@@ -116,10 +115,8 @@ func UTCtoTimestamp(utcTime string) int {
 	if strings.HasSuffix(utcTime, "Z") == false {
 		utcTime = utcTime + "Z"
 	}
-	if t, err := time.Parse(time.RFC3339, utcTime); err != nil {
-		fmt.Println(err)
-		return 0
-	} else {
+	if t, err := time.Parse(time.RFC3339, utcTime); err == nil {
 		return int(t.Unix())
 	}
+	return 0
 }

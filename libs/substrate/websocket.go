@@ -1,7 +1,6 @@
 package substrate
 
 import (
-	"errors"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"subscan-end/utiles"
@@ -15,7 +14,7 @@ func SendWsRequest(v interface{}, action []byte) error {
 		return nil
 	}
 	if err = c.WriteMessage(websocket.TextMessage, action); err != nil {
-		return errors.New(fmt.Sprintf("websocket send error: %v", err))
+		return fmt.Errorf("websocket send error: %v", err)
 	}
 	return c.ReadJSON(v)
 }

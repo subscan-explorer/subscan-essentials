@@ -755,19 +755,19 @@ func (s *StorageHasher) Init(data ScaleBytes, subType string, arg ...interface{}
 	s.Enum.Init(data, "", valueList)
 }
 
-func (s *StorageHasher) is_blake2_128() bool {
+func (s *StorageHasher) isBlake2_128() bool {
 	return s.Index == 0
 }
-func (s *StorageHasher) is_blake2_256() bool {
+func (s *StorageHasher) isBlake2_256() bool {
 	return s.Index == 1
 }
-func (s *StorageHasher) is_twox128() bool {
+func (s *StorageHasher) isTwox128() bool {
 	return s.Index == 2
 }
-func (s *StorageHasher) is_twox256() bool {
+func (s *StorageHasher) isTwox256() bool {
 	return s.Index == 3
 }
-func (s *StorageHasher) is_twox128_concat() bool {
+func (s *StorageHasher) isTwox128Concat() bool {
 	return s.Index == 4
 }
 

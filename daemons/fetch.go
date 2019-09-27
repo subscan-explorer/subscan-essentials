@@ -43,7 +43,7 @@ func fillALLBlock(srv *service.Service) {
 func fillBlockData(c *websocket.Conn, i int, srv *service.Service) (err error) {
 	v := &substrate.JsonRpcResult{}
 	if err = c.WriteMessage(websocket.TextMessage, substrate.ChainGetBlockHash(2001, i)); err != nil {
-		return errors.New(fmt.Sprintf("websocket send error: %v", err))
+		return fmt.Errorf("websocket send error: %v", err)
 	}
 	_ = c.ReadJSON(v)
 	blockHash, _ := v.ToString()
@@ -51,11 +51,11 @@ func fillBlockData(c *websocket.Conn, i int, srv *service.Service) (err error) {
 	blockWsId := 2002
 	eventWsId := 2003
 	if err = c.WriteMessage(websocket.TextMessage, substrate.ChainGetBlock(blockWsId, blockHash)); err != nil {
-		return errors.New(fmt.Sprintf("websocket send error: %v", err))
+		return fmt.Errorf("websocket send error: %v", err)
 	}
 	// event
 	if err = c.WriteMessage(websocket.TextMessage, substrate.StateGetStorageAt(eventWsId, "0xcc956bdb7605e3547539f321ac2bc95c", blockHash)); err != nil {
-		return errors.New(fmt.Sprintf("websocket send error: %v", err))
+		return fmt.Errorf("websocket send error: %v", err)
 	}
 	var (
 		block *substrate.BlockResult
@@ -64,7 +64,7 @@ func fillBlockData(c *websocket.Conn, i int, srv *service.Service) (err error) {
 	for i := 0; i < 2; i++ {
 		v = &substrate.JsonRpcResult{}
 		if err = c.ReadJSON(v); err != nil {
-			return errors.New(fmt.Sprintf("websocket read json error %v", err))
+			return fmt.Errorf("websocket read json error %v", err)
 		}
 		if v.Id == blockWsId {
 			block = v.ToBlock()

@@ -20,13 +20,8 @@ import (
 )
 
 func main() {
-	flag.Parse()
-	if err := paladin.Init(); err != nil {
-		panic(err)
-	}
-	log.Init(nil)
-	defer afterClose()
-	jobs.Init()
+	defer log.Close()
+	defer substrate.CloseWsConnection()
 	if err := setupApp().Run(os.Args); err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -34,25 +29,24 @@ func main() {
 }
 
 func setupApp() *cli.App {
-	return &cli.App{
-		Name:  "Subscan",
-		Usage: "Subscan End",
-		Action: func(c *cli.Context) error {
-			if len(c.Args()) == 0 {
-				runServe()
-			}
-			return nil
-		},
-		Version:  "1.0",
-		Commands: sub.Commands,
-		Flags: []cli.Flag{
-			cli.StringFlag{Name: "config, conf"},
-		},
-		Before: func(context *cli.Context) error {
-			runtime.GOMAXPROCS(runtime.NumCPU())
-			return nil
-		},
+	app := cli.NewApp()
+	app.Name = "Subscan"
+	app.Usage = "Subscan End"
+	app.Version = "1.0"
+	app.Action = func() error { runServe(); return nil }
+	app.Commands = sub.Commands
+	app.Flags = []cli.Flag{cli.StringFlag{Name: "conf"}}
+	app.Before = func(context *cli.Context) error {
+		flag.Parse()
+		if err := paladin.Init(); err != nil {
+			panic(err)
+		}
+		jobs.Init()
+		log.Init(nil)
+		runtime.GOMAXPROCS(runtime.NumCPU())
+		return nil
 	}
+	return app
 }
 
 func runServe() {
@@ -78,9 +72,4 @@ func runServe() {
 			return
 		}
 	}
-}
-
-func afterClose() {
-	_ = log.Close()
-	substrate.CloseWsConnection()
 }
