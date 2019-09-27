@@ -1,12 +1,14 @@
-# subscan-end
+subscan-end
+========================================
+
+[![License: GPL](https://img.shields.io/badge/license-GPL-blue.svg)][license]
+[![Code Quality](https://goreportcard.com/badge/github.com/itering/subscan_end)][goreport]
  
-### run
+## Run
     go run main.go -conf ../configs
 
-### substrate
-     go run main.go -conf ../configs start substrate
+## Substrate
+    go run main.go -conf ../configs start substrate
  
-### protoc
-    cd libs/substrate/protos
-    protoc -I codec_protos  codec_protos/rpc.proto --go_out=plugins=grpc:codec_protos
-
+## Docker
+    docker-compose up -d 

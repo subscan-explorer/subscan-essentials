@@ -11,4 +11,3 @@ func InitEsClient() {
 		esClient, _ = es.NewEsClient()
 	}
 }
-

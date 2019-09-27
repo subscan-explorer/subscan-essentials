@@ -3,9 +3,9 @@ package utiles
 import "github.com/bilibili/kratos/pkg/ecode"
 
 var (
-	ParamsError               = ecode.New(10001)
-	InvalidAccountAddress     = ecode.New(10002)
-	RecordNotFound            = ecode.New(10004)
+	ParamsError           = ecode.New(10001)
+	InvalidAccountAddress = ecode.New(10002)
+	RecordNotFound        = ecode.New(10004)
 )
 
 func init() {

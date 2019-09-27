@@ -127,8 +127,8 @@ func (s *Service) CreateChainBlock(hash string, block *substrate.Block, event st
 		blockTimestamp  int
 		validator       string
 	)
-	hashMap := make(map[string]string)
 	if codecError == false {
+		var hashMap map[string]string
 		var e []model.ChainEvent
 		_ = json.Unmarshal([]byte(decodeEvent), &e)
 		blockNumInt := utiles.StringToInt(utiles.HexToNumStr(block.Header.Number))
