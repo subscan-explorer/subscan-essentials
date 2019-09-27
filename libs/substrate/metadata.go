@@ -18,9 +18,10 @@ func InitMetaData() *MetadataType {
 	}
 	m := scalecodec.MetadataDecoder{}
 	m.Init(utiles.HexToBytes(getCurrentMetadata()))
-	m.Process()
+	_ = m.Process()
 	d := MetadataType(m.Metadata)
-	return &d
+	metadata = &d
+	return metadata
 }
 
 func (m *MetadataType) getModuleStorageMapType(section, method string) (map[string]interface{}, error) {
