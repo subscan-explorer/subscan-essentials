@@ -18,7 +18,6 @@ var (
 	lockId         sync.Mutex
 	substrateRpcId int
 	SubscribeConn  *recws.RecConn
-	subscribeOnce  sync.Once
 )
 
 func Subscribe() {
@@ -46,7 +45,12 @@ func Subscribe() {
 			parserDistribution(message, srv)
 		}
 	}()
-
+	if err = SubscribeConn.WriteMessage(websocket.TextMessage, substrate.ChainGetRuntimeVersion(1)); err != nil {
+		log.Info("write:", err)
+	}
+	if err = SubscribeConn.WriteMessage(websocket.TextMessage, substrate.ChainSubscribeNewHead(101)); err != nil {
+		log.Info("write:", err)
+	}
 	ticker := time.NewTicker(time.Second * 3)
 	defer ticker.Stop()
 	substrateRpcId = 1
@@ -71,18 +75,6 @@ func Subscribe() {
 			log.Info("interrupt")
 			_ = SubscribeConn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			return
-		default:
-			if !SubscribeConn.IsConnected() {
-				continue
-			}
-			subscribeOnce.Do(func() {
-				if err = SubscribeConn.WriteMessage(websocket.TextMessage, substrate.ChainGetRuntimeVersion(1)); err != nil {
-					log.Info("write:", err)
-				}
-				if err = SubscribeConn.WriteMessage(websocket.TextMessage, substrate.ChainSubscribeNewHead(101)); err != nil {
-					log.Info("write:", err)
-				}
-			})
 		}
 	}
 
