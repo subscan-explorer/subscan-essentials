@@ -167,7 +167,7 @@ func (d *Dao) GetHeartBeatNow(c context.Context) map[string]bool {
 	defer conn.Close()
 	status := map[string]bool{}
 	for _, dt := range DaemonAction {
-		cacheKey := fmt.Sprintf("%s:heartBeat:%s", redisKeyPrefix(), dt)
+		cacheKey := fmt.Sprintf("%s:heartBeat:%s", utiles.NetworkNode, dt)
 		t, err := redis.Int64(conn.Do("get", cacheKey))
 		if err != nil || time.Now().Unix()-t > 60 {
 			status[dt] = false
