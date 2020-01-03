@@ -33,7 +33,7 @@ func setupApp() *cli.App {
 	app.Name = "Subscan"
 	app.Usage = "Subscan End"
 	app.Version = "1.0"
-	app.Action = func() error { runServe(); return nil }
+	app.Action = func(*cli.Context) error { runServe(); return nil }
 	app.Commands = sub.Commands
 	app.Flags = []cli.Flag{cli.StringFlag{Name: "conf"}}
 	app.Before = func(context *cli.Context) error {
