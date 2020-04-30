@@ -234,6 +234,7 @@ topic
 
 `POST /api/scan/extrinsics`
 
+
 ### payload
 
 | Name          | Type   | Require |
@@ -242,6 +243,8 @@ topic
 | page| int | yes     |
 | signed| string | no     |
 | address| string | no     |
+| module| string | no     |
+| call| string | no     |
 
 
 >signed: signed|all
