@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"encoding/binary"
 	"github.com/freehere107/go-scale-codec/types"
+	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/util/base58"
 	"golang.org/x/crypto/blake2b"
-	"subscan/utiles"
-	"subscan/utiles/base58"
 )
 
 func Decode(address string, addressType int) string {
@@ -16,21 +16,21 @@ func Decode(address string, addressType int) string {
 		return ""
 	}
 	var checksumLength int
-	if utiles.IntInSlice(len(ss58Format), []int{3, 4, 6, 10}) {
+	if util.IntInSlice(len(ss58Format), []int{3, 4, 6, 10}) {
 		checksumLength = 1
-	} else if utiles.IntInSlice(len(ss58Format), []int{5, 7, 11, 35}) {
+	} else if util.IntInSlice(len(ss58Format), []int{5, 7, 11, 35}) {
 		checksumLength = 2
-	} else if utiles.IntInSlice(len(ss58Format), []int{8, 12}) {
+	} else if util.IntInSlice(len(ss58Format), []int{8, 12}) {
 		checksumLength = 3
-	} else if utiles.IntInSlice(len(ss58Format), []int{9, 13}) {
+	} else if util.IntInSlice(len(ss58Format), []int{9, 13}) {
 		checksumLength = 4
-	} else if utiles.IntInSlice(len(ss58Format), []int{14}) {
+	} else if util.IntInSlice(len(ss58Format), []int{14}) {
 		checksumLength = 5
-	} else if utiles.IntInSlice(len(ss58Format), []int{15}) {
+	} else if util.IntInSlice(len(ss58Format), []int{15}) {
 		checksumLength = 6
-	} else if utiles.IntInSlice(len(ss58Format), []int{16}) {
+	} else if util.IntInSlice(len(ss58Format), []int{16}) {
 		checksumLength = 7
-	} else if utiles.IntInSlice(len(ss58Format), []int{17}) {
+	} else if util.IntInSlice(len(ss58Format), []int{17}) {
 		checksumLength = 8
 	} else {
 		return ""
@@ -38,21 +38,25 @@ func Decode(address string, addressType int) string {
 	bss := ss58Format[0 : len(ss58Format)-checksumLength]
 	checksum, _ := blake2b.New(64, []byte{})
 	w := append(checksumPrefix[:], bss[:]...)
-	checksum.Write(w)
-	h := checksum.Sum(nil)
-	if utiles.BytesToHex(h[0:checksumLength]) != utiles.BytesToHex(ss58Format[len(ss58Format)-checksumLength:]) {
+	_, err := checksum.Write(w)
+	if err != nil {
 		return ""
 	}
-	return utiles.BytesToHex(ss58Format[1 : len(ss58Format)-checksumLength])
+
+	h := checksum.Sum(nil)
+	if util.BytesToHex(h[0:checksumLength]) != util.BytesToHex(ss58Format[len(ss58Format)-checksumLength:]) {
+		return ""
+	}
+	return util.BytesToHex(ss58Format[1 : len(ss58Format)-checksumLength])
 }
 
 func Encode(address string, addressType int) string {
 	checksumPrefix := []byte("SS58PRE")
-	addressBytes := utiles.HexToBytes(address)
+	addressBytes := util.HexToBytes(address)
 	var checksumLength int
 	if len(addressBytes) == 32 {
 		checksumLength = 2
-	} else if utiles.IntInSlice(len(addressBytes), []int{1, 2, 4, 8}) {
+	} else if util.IntInSlice(len(addressBytes), []int{1, 2, 4, 8}) {
 		checksumLength = 1
 	} else {
 		return ""
@@ -60,7 +64,11 @@ func Encode(address string, addressType int) string {
 	addressFormat := append([]byte{byte(addressType)}[:], addressBytes[:]...)
 	checksum, _ := blake2b.New(64, []byte{})
 	w := append(checksumPrefix[:], addressFormat[:]...)
-	checksum.Write(w)
+	_, err := checksum.Write(w)
+	if err != nil {
+		return ""
+	}
+
 	h := checksum.Sum(nil)
 	b := append(addressFormat[:], h[:checksumLength][:]...)
 	return base58.Encode(b)
@@ -84,7 +92,7 @@ func EncodeAccountIndex(accountIndex int64, addressType int) string {
 	if err != nil {
 		return ""
 	}
-	return Encode(utiles.BytesToHex(buf.Bytes()), addressType)
+	return Encode(util.BytesToHex(buf.Bytes()), addressType)
 }
 
 func DecodeAccountIndex(accountIndex string, addressType int) int64 {
@@ -92,7 +100,7 @@ func DecodeAccountIndex(accountIndex string, addressType int) int64 {
 		return -1
 	}
 	index := Decode(accountIndex, addressType)
-	data := types.ScaleBytes{Data: utiles.HexToBytes(index)}
+	data := types.ScaleBytes{Data: util.HexToBytes(index)}
 	switch len(index) {
 	case 2:
 		byteInstant := types.U8{}

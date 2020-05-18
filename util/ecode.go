@@ -1,6 +1,6 @@
-package utiles
+package util
 
-import "github.com/bilibili/kratos/pkg/ecode"
+import "github.com/go-kratos/kratos/pkg/ecode"
 
 var (
 	ParamsError           = ecode.New(10001)

@@ -1,4 +1,4 @@
-package utiles
+package util
 
 import (
 	"bytes"

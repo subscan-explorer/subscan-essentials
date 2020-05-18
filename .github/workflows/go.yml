@@ -24,12 +24,16 @@ jobs:
       with:
         go-version: 1.13
       id: go
-
     # Checkout Go module directory
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
-
-    # Cache go modules
+    # Golang CI Lint
+    - name: Lint
+      uses: golangci/golangci-lint-action@v1
+      with:
+        version: v1.26
+      run: golangci-lint run
+    # Cache Go Modules
     - name: Cache Go Modules
       uses: actions/cache@v1
       env:
@@ -40,8 +44,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-build-
           ${{ runner.os }}-
-          
-    # Get deps
+    # Get Deps
     - name: Get dependencies
       run:  go mod download
 

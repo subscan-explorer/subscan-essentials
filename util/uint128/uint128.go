@@ -73,7 +73,7 @@ func (u Uint128) And(v Uint128) Uint128 {
 
 // And64 returns u&v.
 func (u Uint128) And64(v uint64) Uint128 {
-	return Uint128{u.lo & v, u.hi & 0}
+	return Uint128{u.lo & v, 0} // u.hi & 0 will always be 0
 }
 
 // Or returns u|v.
@@ -83,7 +83,7 @@ func (u Uint128) Or(v Uint128) Uint128 {
 
 // Or64 returns u|v.
 func (u Uint128) Or64(v uint64) Uint128 {
-	return Uint128{u.lo | v, u.hi | 0}
+	return Uint128{u.lo | v, u.hi} // u.hi | 0 will always be u.hi
 }
 
 // Xor returns u^v.
@@ -93,7 +93,7 @@ func (u Uint128) Xor(v Uint128) Uint128 {
 
 // Xor64 returns u^v.
 func (u Uint128) Xor64(v uint64) Uint128 {
-	return Uint128{u.lo ^ v, u.hi ^ 0}
+	return Uint128{u.lo ^ v, u.hi} // u.hi ^ 1 will always be u.hi
 }
 
 // Add returns u+v.
