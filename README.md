@@ -12,6 +12,10 @@ This repo has long time no updates because our team were busy with upgrading [su
 Subscan will catch up the progress of [subscan.io][subscan] soon, **early in June** if everything works fine,
 after that, appreciating for your contributions!
 
+## Docs
+
+Looking for docs? [here](./docs.md) it is.
+
 ## Authors
 
 The original author of Subscan is [itering][itering]/[bobin][bobin]
