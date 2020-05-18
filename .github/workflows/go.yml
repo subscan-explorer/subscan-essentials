@@ -5,7 +5,7 @@ name: subscan
 
 on:
   push:
-    branches: [ master, cl ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
