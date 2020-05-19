@@ -40,7 +40,7 @@ func TestContinuous(t *testing.T) {
 	rns := util.ContinuousSlice(0, 7, "desc")
 	rnsd := util.ContinuousSlice(0, 7, "sced")
 
-	for i, _ := range rns {
+	for i := range rns {
 		if rns[i] != ns[i] {
 			t.Errorf(
 				"Map string to string slice failed #%d, got %v, want %v",
@@ -51,7 +51,7 @@ func TestContinuous(t *testing.T) {
 		}
 	}
 
-	for i, _ := range rnsd {
+	for i := range rnsd {
 		if rnsd[i] != nsd[i] {
 			t.Errorf(
 				"Map string to string slice failed #%d, got %v, want %v",
@@ -66,7 +66,7 @@ func TestContinuous(t *testing.T) {
 func TestMap(t *testing.T) {
 	res := util.MapStringToSlice(ssm)
 
-	for i, _ := range res {
+	for i := range res {
 		if res[i] != ssf[i] {
 			t.Errorf(
 				"Map string to string slice failed #%d, got %v, want %v",
