@@ -6,15 +6,22 @@ import (
 	"strings"
 )
 
-// Hex
 func AddHex(s string) string {
-	if s == "" {
+	if strings.TrimSpace(s) == "" {
 		return ""
 	}
 	if strings.HasPrefix(s, "0x") {
 		return s
 	}
 	return strings.ToLower("0x" + s)
+}
+
+func TrimHex(s string) string {
+	return strings.TrimPrefix(s, "0x")
+}
+
+func IntToHex(i interface{}) string {
+	return fmt.Sprintf("%x", i)
 }
 
 func HexToNumStr(v string) string {
@@ -32,23 +39,4 @@ func BytesToHex(b []byte) string {
 	c := make([]byte, hex.EncodedLen(len(b)))
 	hex.Encode(c, b)
 	return string(c)
-}
-
-func IntToHex(i interface{}) string {
-	return fmt.Sprintf("%x", i)
-}
-
-func TrimHex(s string) string {
-	return strings.TrimPrefix(s, "0x")
-}
-
-// Bool
-func BoolFromInterface(i interface{}) bool {
-	switch i := i.(type) {
-	case string:
-		return strings.ToLower(i) == "true"
-	case bool:
-		return i
-	}
-	return false
 }
