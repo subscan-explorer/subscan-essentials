@@ -46,7 +46,7 @@ jobs:
     
     # Trigger api tests when merge
     - name: Tests
-      run: go test -v .
+      run: go test -v ./...
   golangci:
     name: Lint
     runs-on: ubuntu-latest

@@ -1,4 +1,4 @@
-package util
+package base58
 
 import (
 	"bytes"
