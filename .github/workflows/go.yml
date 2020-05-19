@@ -12,8 +12,6 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-    env:
-      tests-root: ./tests
     strategy:
       matrix:
         os: [macOS-latest, ubuntu-latest, windows-latest]
@@ -48,8 +46,7 @@ jobs:
     
     # Trigger api tests when merge
     - name: Tests
-      run: go test -v
-      working-directory: ${{ env.tests-root }}
+      run: go test -v .
   golangci:
     name: Lint
     runs-on: ubuntu-latest

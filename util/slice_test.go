@@ -1,7 +1,6 @@
-package tests
+package util
 
 import (
-	"github.com/itering/subscan/util"
 	"testing"
 )
 
@@ -19,7 +18,7 @@ var (
 )
 
 func TestLookup(t *testing.T) {
-	if util.StringInSlice(str, sst) == false {
+	if StringInSlice(str, sst) == false {
 		t.Errorf(
 			"Lookup string in string slice failed, got %v, want %v",
 			false,
@@ -27,7 +26,7 @@ func TestLookup(t *testing.T) {
 		)
 	}
 
-	if util.StringInSlice(str, ssf) == true {
+	if StringInSlice(str, ssf) == true {
 		t.Errorf(
 			"Lookup string in string slice failed, got %v, want %v",
 			true,
@@ -37,8 +36,8 @@ func TestLookup(t *testing.T) {
 }
 
 func TestContinuous(t *testing.T) {
-	rns := util.ContinuousSlice(0, 7, "desc")
-	rnsd := util.ContinuousSlice(0, 7, "sced")
+	rns := ContinuousSlice(0, 7, "desc")
+	rnsd := ContinuousSlice(0, 7, "sced")
 
 	for i := range rns {
 		if rns[i] != ns[i] {
@@ -64,7 +63,7 @@ func TestContinuous(t *testing.T) {
 }
 
 func TestMap(t *testing.T) {
-	res := util.MapStringToSlice(ssm)
+	res := MapStringToSlice(ssm)
 	resLen := len(res)
 	ssfLen := len(ssf)
 	if resLen != ssfLen {
@@ -76,7 +75,7 @@ func TestMap(t *testing.T) {
 	}
 
 	for i := range res {
-		if !util.StringInSlice(res[i], ssf) {
+		if !StringInSlice(res[i], ssf) {
 			t.Errorf(
 				"Map string to string slice failed #%d, got %v, want %v",
 				i,

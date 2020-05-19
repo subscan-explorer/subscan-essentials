@@ -1,9 +1,7 @@
-package tests
+package util
 
 import (
 	"testing"
-
-	"github.com/itering/subscan/util"
 )
 
 var (
@@ -20,7 +18,7 @@ func TestCamel(t *testing.T) {
 	// TODO
 	//
 	// This is not as expected
-	ucamel := util.CamelString(notCamel)
+	ucamel := CamelString(notCamel)
 	if ucamel != camel {
 		t.Errorf(
 			"Camel string failed, got: %s, want: %s",
@@ -29,7 +27,7 @@ func TestCamel(t *testing.T) {
 		)
 	}
 
-	uUpperCamel := util.UpperCamel(ucamel)
+	uUpperCamel := UpperCamel(ucamel)
 	if uUpperCamel != upperCamel {
 		t.Errorf(
 			"Camel string failed, got: %s, want: %s",
@@ -40,7 +38,7 @@ func TestCamel(t *testing.T) {
 }
 
 func TestSets(t *testing.T) {
-	uAbi := util.StringsIntersection(alice, bob)
+	uAbi := StringsIntersection(alice, bob)
 	abiLen := len(abi)
 	uAbiLen := len(uAbi)
 	if abiLen != uAbiLen {
@@ -52,7 +50,7 @@ func TestSets(t *testing.T) {
 	}
 
 	for i := range uAbi {
-		if !util.StringInSlice(uAbi[i], abi) {
+		if !StringInSlice(uAbi[i], abi) {
 			t.Errorf(
 				"Get string intersection failed #%d, got %v, want %v",
 				i,
@@ -62,9 +60,9 @@ func TestSets(t *testing.T) {
 		}
 	}
 
-	uAbe := util.StringsExclude(alice, bob)
+	uAbe := StringsExclude(alice, bob)
 	for i := range uAbe {
-		if !util.StringInSlice(uAbe[i], abe) {
+		if !StringInSlice(uAbe[i], abe) {
 			t.Errorf(
 				"Get string exclude failed #%d, got %v, want %v",
 				i,

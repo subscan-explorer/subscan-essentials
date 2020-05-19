@@ -1,7 +1,6 @@
-package tests
+package util
 
 import (
-	"github.com/itering/subscan/util"
 	"testing"
 )
 
@@ -17,10 +16,10 @@ var (
 
 func TestFunc(t *testing.T) {
 	callerNameRaw := "testing.tRunner"
-	funcNameRaw := "github.com/itering/subscan/tests.TestFunc"
+	funcNameRaw := "github.com/itering/subscan/util.TestFunc"
 
-	callerName := util.CallerName()
-	funcName := util.GetFuncName()
+	callerName := CallerName()
+	funcName := GetFuncName()
 
 	if funcName != funcNameRaw {
 		t.Errorf(
@@ -44,7 +43,7 @@ func TestBool(t *testing.T) {
 	rt := "true"
 	rf := "false"
 
-	if util.BoolFromInterface(boolean) == !boolean {
+	if BoolFromInterface(boolean) == !boolean {
 		t.Errorf(
 			"Parse bool failed, got %v, want %v",
 			!boolean,
@@ -52,7 +51,7 @@ func TestBool(t *testing.T) {
 		)
 	}
 
-	if util.BoolFromInterface(rt) == false {
+	if BoolFromInterface(rt) == false {
 		t.Errorf(
 			"Parse bool failed, got %v, want %v",
 			rf,
@@ -60,7 +59,7 @@ func TestBool(t *testing.T) {
 		)
 	}
 
-	if util.BoolFromInterface(rf) == true {
+	if BoolFromInterface(rf) == true {
 		t.Errorf(
 			"Parse bool failed, got %v, want %v",
 			rt,
@@ -70,8 +69,8 @@ func TestBool(t *testing.T) {
 }
 
 func TestFieldName(t *testing.T) {
-	a, _ := util.GetStringValueByFieldName(field, "A")
-	b, _ := util.GetStringValueByFieldName(field, "B")
+	a, _ := GetStringValueByFieldName(field, "A")
+	b, _ := GetStringValueByFieldName(field, "B")
 
 	if a != "a" {
 		t.Errorf(
