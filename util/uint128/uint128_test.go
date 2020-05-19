@@ -9,7 +9,10 @@ import (
 
 func randUint128() Uint128 {
 	randBuf := make([]byte, 16)
-	rand.Read(randBuf)
+	_, err := rand.Read(randBuf)
+	if err != nil {
+		panic(err)
+	}
 	return FromBytes(randBuf)
 }
 
@@ -72,7 +75,10 @@ func TestArithmetic(t *testing.T) {
 	// random values
 	randBuf := make([]byte, 17)
 	randUint128 := func() Uint128 {
-		rand.Read(randBuf)
+		_, err := rand.Read(randBuf)
+		if err != nil {
+			panic(err)
+		}
 		var lo, hi uint64
 		if randBuf[16]&1 != 0 {
 			lo = binary.LittleEndian.Uint64(randBuf[:8])
@@ -166,7 +172,10 @@ func TestString(t *testing.T) {
 func BenchmarkArithmetic(b *testing.B) {
 	randBuf := make([]byte, 17)
 	randUint128 := func() Uint128 {
-		rand.Read(randBuf)
+		_, err := rand.Read(randBuf)
+		if err != nil {
+			panic(err)
+		}
 		var lo, hi uint64
 		if randBuf[16]&1 != 0 {
 			lo = binary.LittleEndian.Uint64(randBuf[:8])
@@ -224,7 +233,10 @@ func BenchmarkArithmetic(b *testing.B) {
 func BenchmarkDivision(b *testing.B) {
 	randBuf := make([]byte, 8)
 	randU64 := func() uint64 {
-		rand.Read(randBuf)
+		_, err := rand.Read(randBuf)
+		if err != nil {
+			panic(err)
+		}
 		return binary.LittleEndian.Uint64(randBuf) | 3 // avoid divide-by-zero
 	}
 	x64 := From64(randU64())
@@ -289,7 +301,10 @@ func BenchmarkDivision(b *testing.B) {
 
 func BenchmarkString(b *testing.B) {
 	buf := make([]byte, 16)
-	rand.Read(buf)
+	_, err := rand.Read(buf)
+	if err != nil {
+		panic(err)
+	}
 	x := New(
 		binary.LittleEndian.Uint64(buf[:8]),
 		binary.LittleEndian.Uint64(buf[8:]),
