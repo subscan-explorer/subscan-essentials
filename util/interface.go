@@ -11,13 +11,13 @@ import (
 )
 
 // Func
-func GetFuncName() string {
-	pc, _, _, _ := runtime.Caller(1)
+func CallerName() string {
+	pc, _, _, _ := runtime.Caller(2)
 	return runtime.FuncForPC(pc).Name()
 }
 
-func CallerName() string {
-	pc, _, _, _ := runtime.Caller(2)
+func GetFuncName() string {
+	pc, _, _, _ := runtime.Caller(1)
 	return runtime.FuncForPC(pc).Name()
 }
 
