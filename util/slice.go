@@ -9,6 +9,14 @@ func StringInSlice(a string, list []string) bool {
 	return false
 }
 
+func MapStringToSlice(m map[string]bool) []string {
+	var l []string
+	for v := range m {
+		l = append(l, v)
+	}
+	return l
+}
+
 func ContinuousSlice(start, count int, order string) (r []int) {
 	if count <= 0 || start <= 0 {
 		return
@@ -24,12 +32,4 @@ func ContinuousSlice(start, count int, order string) (r []int) {
 		}
 	}
 	return
-}
-
-func MapStringToSlice(m map[string]bool) []string {
-	var l []string
-	for v := range m {
-		l = append(l, v)
-	}
-	return l
 }

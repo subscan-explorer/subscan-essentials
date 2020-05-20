@@ -2,24 +2,36 @@ package util
 
 import (
 	"encoding/json"
-	"github.com/shopspring/decimal"
 	"reflect"
 	"runtime"
 	"strconv"
+	"strings"
+
+	"github.com/shopspring/decimal"
 )
 
-// func
-func GetFuncName() string {
-	pc, _, _, _ := runtime.Caller(1)
-	return runtime.FuncForPC(pc).Name()
-}
-
+// Func
 func CallerName() string {
 	pc, _, _, _ := runtime.Caller(2)
 	return runtime.FuncForPC(pc).Name()
 }
 
-// interface
+func GetFuncName() string {
+	pc, _, _, _ := runtime.Caller(1)
+	return runtime.FuncForPC(pc).Name()
+}
+
+// Interface
+func BoolFromInterface(i interface{}) bool {
+	switch i := i.(type) {
+	case string:
+		return strings.ToLower(i) == "true"
+	case bool:
+		return i
+	}
+	return false
+}
+
 func InterfaceToString(i interface{}) string {
 	var val string
 	switch i := i.(type) {
