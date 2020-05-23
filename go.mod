@@ -10,6 +10,7 @@ require (
 	github.com/go-kratos/kratos v0.5.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/huandu/xstrings v1.3.1
+	github.com/jpillora/backoff v1.0.0
 	github.com/mailru/easyjson v0.7.1 // indirect
 	github.com/olivere/elastic v6.2.31+incompatible
 	github.com/panjf2000/ants/v2 v2.4.0
