@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/freehere107/go-scale-codec"
 	"github.com/freehere107/go-scale-codec/types"
+	"github.com/itering/subscan/util"
 	"io/ioutil"
 	"strings"
-	"github.com/itering/subscan/util"
 )
 
 const (
@@ -101,9 +101,9 @@ func RegNewMetadataType(spec int, coded string) *MetadataType {
 func (m *MetadataType) GetModuleStorageMapType(section, method string) (string, *types.StorageType) {
 	modules := m.Metadata.Modules
 	for _, value := range modules {
-		if strings.ToLower(value.Name) == strings.ToLower(section) {
+		if strings.EqualFold(value.Name, section) {
 			for _, storage := range value.Storage {
-				if strings.ToLower(storage.Name) == strings.ToLower(method) {
+				if strings.EqualFold(storage.Name, method) {
 					return value.Prefix, &storage.Type
 				}
 			}

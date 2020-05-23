@@ -250,7 +250,7 @@ func (p *JsonRpcResult) checkErr() error {
 	return nil
 }
 
-func (p *JsonRpcParams) checkErr() error {
+func (p *JsonRpcParams) CheckErr() error {
 	if p.Error != nil {
 		return errors.New(p.Error.Message)
 	}

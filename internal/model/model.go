@@ -23,16 +23,16 @@ type Subscriber struct {
 
 func ParsingEventParam(params interface{}) (param []EventParam, err error) {
 	var data []byte
-	switch params.(type) {
+	switch p := params.(type) {
 	case []uint8:
-		data = params.([]uint8)
+		data = p
 	case []interface{}:
-		data, err = json.Marshal(params)
+		data, err = json.Marshal(p)
 		if err != nil {
 			return
 		}
 	case string:
-		data = []byte(params.(string))
+		data = []byte(p)
 	}
 	err = json.Unmarshal(data, &param)
 	if err != nil {
@@ -44,13 +44,13 @@ func ParsingEventParam(params interface{}) (param []EventParam, err error) {
 func ParsingExtrinsicParam(params interface{}) (param []ExtrinsicParam) {
 	var data []byte
 	var err error
-	switch params.(type) {
+	switch p := params.(type) {
 	case []uint8:
-		data = params.([]uint8)
+		data = p
 	case string:
-		data = []byte(params.(string))
+		data = []byte(p)
 	default:
-		data, err = json.Marshal(params)
+		data, err = json.Marshal(p)
 		if err != nil {
 			return
 		}
@@ -65,13 +65,13 @@ func ParsingExtrinsicParam(params interface{}) (param []ExtrinsicParam) {
 func ParsingExtrinsicErrorParam(params interface{}) (param map[string]interface{}) {
 	var data []byte
 	var err error
-	switch params.(type) {
+	switch p := params.(type) {
 	case []uint8:
-		data = params.([]uint8)
+		data = p
 	case string:
-		data = []byte(params.(string))
+		data = []byte(p)
 	default:
-		data, err = json.Marshal(params)
+		data, err = json.Marshal(p)
 		if err != nil {
 			return
 		}

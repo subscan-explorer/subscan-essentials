@@ -62,7 +62,7 @@ func (c *channelPool) Get() (*PoolConn, error) {
 	var err error
 	select {
 	case conn := <-conns:
-		if conn == nil || conn.IsConnected() == false {
+		if conn == nil || !conn.IsConnected() {
 			conn, err = factory()
 			if err != nil {
 				return nil, err

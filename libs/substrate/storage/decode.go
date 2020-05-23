@@ -14,10 +14,14 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+func ding(raw string, decodeType string, r interface{}) {
+	_ = dingding.DingClient.Push("Subscan", util.NetworkNode, raw, decodeType, fmt.Sprintf("%v", r))
+}
+
 func Decode(raw string, decodeType string, metadata *metadata.MetadataType) (s StateStorage, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			go dingding.DingClient.Push("Subscan", util.NetworkNode, raw, decodeType, fmt.Sprintf("%v", r))
+			go ding(raw, decodeType, r)
 			err = fmt.Errorf("Recovering from panic in Decode error is: %v \n", r)
 		}
 	}()
