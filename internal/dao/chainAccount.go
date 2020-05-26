@@ -98,20 +98,6 @@ func (d *Dao) UpdateAccountBalance(c context.Context, account *model.ChainAccoun
 	return balance, additional, err
 }
 
-func (d *Dao) UpdateAccountIndex(c context.Context, address string, accountIndex int) {
-	_, err := d.TouchAccount(c, address)
-	if err != nil {
-		return
-	}
-
-	query := d.db.Model(model.ChainAccount{}).Where("address = ?", address).
-		Update(model.ChainAccount{AccountIndex: accountIndex})
-
-	if query != nil && query.RowsAffected > 0 {
-		_ = d.IncrMetadata(c, "count_account", 1)
-	}
-}
-
 func (d *Dao) AccountAsJson(c context.Context, account *model.ChainAccount) *model.AccountJson {
 	accountJson := model.AccountJson{
 		AccountSampleJson: d.AccountSampleJson(c, account),
@@ -181,38 +167,6 @@ func (d *Dao) GetAccountList(c context.Context, page, row int, order, field stri
 	var count int
 	queryOrigin.Count(&count)
 	return accounts, count
-}
-
-func (d *Dao) GetActiveAccountCount(c context.Context) int {
-	var count int
-	d.db.Model(&model.ChainAccount{}).Where("balance > ?", 0).Count(&count)
-	return count
-}
-
-func (d *Dao) RefreshAccount(account *model.ChainAccount, u map[string]interface{}) (err error) {
-	c := context.TODO()
-	if account == nil {
-		account, err = d.TouchAccount(c, u["address"].(string))
-		if err != nil {
-			return err
-		}
-	}
-	query := d.db.Model(account).UpdateColumn(u)
-	return query.Error
-}
-
-func (d *Dao) SetNickname(address, nickname string) {
-	d.db.Model(model.ChainAccount{}).Where("address = ?", util.TrimHex(address)).UpdateColumn(map[string]interface{}{
-		"nickname": nickname,
-	})
-}
-func (d *Dao) FindByNickname(c context.Context, nickname string) (*model.ChainAccount, error) {
-	var account model.ChainAccount
-	query := d.db.First(&account, &model.ChainAccount{Nickname: nickname})
-	if query == nil || query.Error != nil || query.RecordNotFound() {
-		return nil, errors.New("touch account error")
-	}
-	return &account, nil
 }
 
 func (d *Dao) FindByIndex(c context.Context, index int) (*model.ChainAccount, error) {
