@@ -41,8 +41,8 @@ jobs:
       run:  go mod download
 
     # Build packages
-    # - name: Build
-    #   run: make
+    - name: Build
+      run: make
     
     # Trigger api tests when merge
     - name: Tests
