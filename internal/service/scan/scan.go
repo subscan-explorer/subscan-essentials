@@ -40,13 +40,13 @@ func (s *Service) GetExtrinsicList(page, row int, order string, query ...string)
 func (s *Service) GetBlocksSampleByNums(page, row int) *[]model.SampleBlockJson {
 	c := context.TODO()
 	var blockJson []model.SampleBlockJson
-	var validatorList []string
+	// var validatorList []string
 
 	blocks := s.dao.GetBlockList(page, row)
 
-	for _, block := range blocks {
-		validatorList = append(validatorList, block.Validator)
-	}
+	// for _, block := range blocks {
+	// 	validatorList = append(validatorList, block.Validator)
+	// }
 
 	for _, block := range blocks {
 
@@ -135,7 +135,7 @@ func (s *Service) SearchByKey(key string, page int, row int) interface{} {
 	}
 
 	addressHex := ss58.Decode(key, substrate.AddressType)
-	if regexp.MustCompile(`^[0-9a-fA-F]{64}$`).MatchString(addressHex) == false { // try account index
+	if !regexp.MustCompile(`^[0-9a-fA-F]{64}$`).MatchString(addressHex) { // try account index
 		accountIndex := ss58.DecodeAccountIndex(key, substrate.AddressType)
 		if accountIndex >= 0 {
 			if account, _ := s.dao.FindByIndex(context.TODO(), int(accountIndex)); account != nil {

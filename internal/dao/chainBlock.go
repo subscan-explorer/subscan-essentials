@@ -134,7 +134,7 @@ func (d *Dao) GetBlockByHash(c context.Context, hash string) *model.ChainBlock {
 	blockNum, _ := d.GetCurrentBlockNum(context.TODO())
 	for index := int(blockNum / uint64(model.SplitTableBlockNum)); index >= 0; index-- {
 		query := d.db.Model(&model.ChainBlock{BlockNum: index * model.SplitTableBlockNum}).Where("hash = ?", hash).Scan(&block)
-		if query != nil && query.RecordNotFound() == false {
+		if query != nil && !query.RecordNotFound() {
 			return &block
 		}
 	}

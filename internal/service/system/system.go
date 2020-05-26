@@ -6,7 +6,6 @@ import (
 	"github.com/itering/subscan/internal/model"
 	"github.com/itering/subscan/libs/substrate"
 	"github.com/itering/subscan/util"
-	"github.com/shopspring/decimal"
 )
 
 type System interface {
@@ -22,7 +21,6 @@ type system struct {
 	event          *model.ChainEvent
 	eventParams    []model.EventParam
 	blockHash      string
-	sessionReward  decimal.Decimal
 	blockTimestamp int
 	spec           int
 }
@@ -52,7 +50,6 @@ func EmitExtrinsic(d System, method string) {
 	case "set_code":
 		d.SetCode()
 	}
-	return
 }
 
 func EmitEvent(s System, eventId string) {
@@ -91,7 +88,7 @@ func (s *system) ExtrinsicFailed() {
 func (s *system) NewAccount() {
 	c := context.TODO()
 	if account, err := s.dao.TouchAccount(c, util.TrimHex(util.InterfaceToString(s.eventParams[0].Value))); err == nil {
-		s.dao.UpdateAccountBalance(c, account, "balances")
+		_, _, _ = s.dao.UpdateAccountBalance(c, account, "balances")
 	}
 }
 

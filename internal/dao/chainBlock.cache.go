@@ -47,7 +47,7 @@ func (d *Dao) addCacheBlock(c context.Context, b *model.ChainBlock) {
 	defer conn.Close()
 	cacheKey := fmt.Sprintf(blockCacheKey, b.BlockNum)
 	bytes, _ := json.Marshal(b)
-	conn.Do("SETEX", cacheKey, 86400*7, string(bytes))
+	_, _ = conn.Do("SETEX", cacheKey, 86400*7, string(bytes))
 }
 
 func (d *Dao) BlockByHash(c context.Context, hash string) (b *model.ChainBlock) {
@@ -89,7 +89,7 @@ func (d *Dao) addCacheBlockByHash(c context.Context, b *model.ChainBlock) {
 	defer conn.Close()
 	cacheKey := fmt.Sprintf(blockByHashCacheKey, b.Hash)
 	bytes, _ := json.Marshal(b)
-	conn.Do("SETEX", cacheKey, 86400*7, string(bytes))
+	_, _ = conn.Do("SETEX", cacheKey, 86400*7, string(bytes))
 }
 
 func (d *Dao) delCacheBlock(c context.Context, b *model.ChainBlock) {

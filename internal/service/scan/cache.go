@@ -6,13 +6,13 @@ import (
 	"github.com/itering/subscan/util"
 )
 
-func (s *Service) cacheFunc(call func() interface{}, refresh bool) []byte {
+func (s *Service) CacheFunc(call func() interface{}, refresh bool) []byte {
 	ctx := context.TODO()
 
 	caller := util.CallerName()
 	key := fmt.Sprintf("%s:scan:%s", util.NetworkNode, caller)
 
-	if refresh == false {
+	if !refresh {
 		if cacheData := s.dao.GetCacheBytes(ctx, key); cacheData != nil {
 			return cacheData
 		}

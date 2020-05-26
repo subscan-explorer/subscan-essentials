@@ -48,7 +48,7 @@ func (s *Service) AddEvent(
 		} else {
 			return 0, err
 		}
-		if util.StringInSlice(event.EventId, []string{"ExtrinsicSuccess", "ExtrinsicFailed"}) == false {
+		if !util.StringInSlice(event.EventId, []string{"ExtrinsicSuccess", "ExtrinsicFailed"}) {
 			eventCount++
 		}
 

@@ -11,15 +11,15 @@ func (d *Dao) SetCache(c context.Context, key string, value interface{}, ttl int
 	conn := d.redis.Get(c)
 	defer conn.Close()
 	var val string
-	switch value.(type) {
+	switch v := value.(type) {
 	case string:
-		val = value.(string)
+		val = v
 	case int64:
-		val = strconv.FormatInt(value.(int64), 10)
+		val = strconv.FormatInt(v, 10)
 	case int:
-		val = strconv.Itoa(value.(int))
+		val = strconv.Itoa(v)
 	default:
-		b, _ := json.Marshal(value)
+		b, _ := json.Marshal(v)
 		if val = string(b); val == "null" {
 			return
 		}

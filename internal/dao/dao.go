@@ -22,10 +22,9 @@ var DaemonAction = []string{"substrate", "worker", "cronWorker"}
 
 // Dao dao.
 type Dao struct {
-	db          *gorm.DB
-	redis       *redis.Pool
-	redisExpire int32
-	cache       *fanout.Fanout
+	db    *gorm.DB
+	redis *redis.Pool
+	cache *fanout.Fanout
 }
 
 type GormDB struct {

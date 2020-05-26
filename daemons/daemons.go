@@ -54,7 +54,12 @@ func doAction(dt, signal string) {
 	if d != nil {
 		return
 	}
-	defer dc.Release()
+	defer func() {
+		err = dc.Release()
+		if err != nil {
+			log.Println("Error:", err)
+		}
+	}()
 
 	log.Println("- - - - - - - - - - - - - - -")
 	log.Println("daemon started")
