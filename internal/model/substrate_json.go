@@ -88,21 +88,6 @@ type ChainLogJson struct {
 	Data       string `json:"data"`
 }
 
-type ChainTransactionJson struct {
-	BlockTimestamp     int    `json:"block_timestamp"`
-	ExtrinsicIndex     string `json:"extrinsic_index"`
-	Signature          string `json:"signature"`
-	FromHex            string `json:"from_hex"`
-	Destination        string `json:"destination"`
-	Hash               string `json:"hash"`
-	BlockNum           int    `json:"block_num"`
-	CallCode           string `json:"call_code"`
-	CallModuleFunction string `json:"call_module_function"`
-	CallModule         string `json:"call_module"`
-	Params             string `json:"params"`
-	Success            bool   `json:"success"`
-}
-
 type TransferJson struct {
 	From           string          `json:"from"`
 	To             string          `json:"to"`

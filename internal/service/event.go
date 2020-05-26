@@ -70,17 +70,3 @@ func (s *Service) AnalysisEvent(blockHash string, blockTimestamp int, event mode
 	}
 
 }
-
-func (s *Service) getReward(e []model.ChainEvent) decimal.Decimal {
-	reward := decimal.Zero
-	for _, event := range e {
-		if strings.ToLower(event.ModuleId) == "staking" && strings.ToLower(event.EventId) == "reward" {
-			paramEvent, err := model.ParsingEventParam(event.Params)
-			if err != nil {
-				return reward
-			}
-			return util.DecimalFromInterface(paramEvent[0].Value)
-		}
-	}
-	return reward
-}

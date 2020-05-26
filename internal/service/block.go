@@ -30,21 +30,6 @@ func (s *Service) SetAlreadyBlockNum(num int) error {
 	return s.dao.SaveFillAlreadyBlockNum(c, num)
 }
 
-func (s *Service) GetRepairBlockBlockNum() (int, error) {
-	c := context.TODO()
-	return s.dao.GetRepairBlockBlockNum(c)
-}
-
-func (s *Service) SetRepairBlockBlockNum(num int) error {
-	c := context.TODO()
-	return s.dao.SaveRepairBlockBlockNum(c, num)
-}
-
-func (s *Service) GetBlockNumArr(start, end int) []int {
-	c := context.TODO()
-	return s.dao.GetBlockNumArr(c, start, end)
-}
-
 func (s *Service) GetBlockByHash(hash string) *model.ChainBlock {
 	c := context.TODO()
 	block := s.dao.BlockByHash(c, hash)
@@ -211,16 +196,6 @@ func (s *Service) checkoutExtrinsicEvents(e []model.ChainEvent, blockNumInt int)
 		eventMap[extrinsicIndex] = append(eventMap[extrinsicIndex], event)
 	}
 	return eventMap
-}
-
-func (s *Service) GetRawBlockByNum(blockNum int) *model.ChainBlock {
-	c := context.TODO()
-	return s.dao.GetBlockByNum(c, blockNum)
-}
-
-// SetBlockCodecError set block code error true
-func (s *Service) SetBlockCodecError(blockNum int) {
-	s.dao.SetBlockCodecError(blockNum)
 }
 
 func (s *Service) GetCurrentRuntimeSpecVersion(blockNum int) int {

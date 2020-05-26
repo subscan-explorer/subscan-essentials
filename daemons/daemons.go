@@ -17,7 +17,7 @@ var (
 
 func Run(dt, signal string) {
 	daemon.AddCommand(daemon.StringFlag(&signal, "stop"), syscall.SIGQUIT, termHandler)
-	daemon.AddCommand(daemon.StringFlag(&signal, "status"), syscall.SIGUSR1, statusHandler)
+	daemon.AddCommand(daemon.StringFlag(&signal, "status"), syscall.SIGSEGV, statusHandler)
 	doAction(dt, signal)
 }
 

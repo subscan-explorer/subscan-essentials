@@ -59,5 +59,7 @@ func (s *Service) initSubRuntimeLatest() {
 	// find metadata for blockChain
 	if raw := s.regCodecMetadata(); strings.HasPrefix(raw, "0x") {
 		metadata.Latest(&metadata.RuntimeRaw{Spec: 1, Raw: raw})
+		return
 	}
+	panic("can not find chain metadata")
 }

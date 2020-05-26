@@ -33,3 +33,11 @@ func (s *Service) Metadata() (map[string]string, error) {
 	m["addressType"] = util.IntToString(substrate.AddressType)
 	return m, err
 }
+
+func (s *Service) UpdateAccountAllBalance(address string) {
+	c := context.TODO()
+	if account, err := s.dao.TouchAccount(c, address); err == nil {
+		_, _, _ = s.dao.UpdateAccountBalance(c, account, "balances")
+		_ = s.dao.UpdateAccountLock(c, account.Address, "ring")
+	}
+}
