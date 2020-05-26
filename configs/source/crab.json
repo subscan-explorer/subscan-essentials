@@ -1,0 +1,726 @@
+{
+  "U256": "[u8; 32]",
+  "H128": "[u8; 16]",
+  "TsInMs": "u64",
+  "RingBalance": "Balance",
+  "KtonBalance": "Balance",
+  "MomentT": "Moment",
+  "Power": "u32",
+  "DepositId": "U256",
+  "EthBlockNumber": "u64",
+  "EthAddress": "H160",
+  "EthTransactionIndex": "(H256, u64)",
+  "BalanceInfo": "null",
+  "AddressT": "EthereumAddress",
+  "TronAddress": "EthereumAddress",
+  "Bloom": "[u8; 256]",
+  "H": "Hash",
+  "Address": "AccountId",
+  "Keys": "SessionKeysPolkadot",
+  "Weight": "u64",
+  "ModuleId": "[u8; 8]",
+  "RuntimeDbWeight": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "read",
+        "u128"
+      ],
+      [
+        "read",
+        "write"
+      ]
+    ]
+  },
+  "SpanRecord": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "slashed",
+        "RKT"
+      ],
+      [
+        "paid_out",
+        "RKT"
+      ]
+    ]
+  },
+  "StakingRuntimeDispatchInfo": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "power",
+        "Power"
+      ]
+    ]
+  },
+  "BalancesRuntimeDispatchInfo": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "usable_balance",
+        "Balance"
+      ]
+    ]
+  },
+  "StakingBalance": {
+    "type": "enum",
+    "type_mapping": [
+      [
+        "RingBalance",
+        "Balance"
+      ],
+      [
+        "KtonBalance",
+        "Balance"
+      ]
+    ]
+  },
+  "StakingLedger": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "stash",
+        "AccountId"
+      ],
+      [
+        "active_ring",
+        "Compact<Balance>"
+      ],
+      [
+        "active_deposit_ring",
+        "Compact<Balance>"
+      ],
+      [
+        "active_kton",
+        "Compact<Balance>"
+      ],
+      [
+        "deposit_items",
+        "Vec<TimeDepositItem>"
+      ],
+      [
+        "ring_staking_lock",
+        "StakingLock"
+      ],
+      [
+        "kton_staking_lock",
+        "StakingLock"
+      ],
+      [
+        "last_reward",
+        "Option<EraIndex>"
+      ]
+    ]
+  },
+  "TimeDepositItem": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "value",
+        "Compact<Balance>"
+      ],
+      [
+        "start_time",
+        "Compact<TsInMs>"
+      ],
+      [
+        "expire_time",
+        "Compact<TsInMs>"
+      ]
+    ]
+  },
+  "RewardDestination": {
+    "type": "enum",
+    "type_mapping": [
+      [
+        "Staked",
+        "Staked"
+      ],
+      [
+        "Stash",
+        "null"
+      ],
+      [
+        "Controller",
+        "null"
+      ]
+    ]
+  },
+  "Staked": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "promise_month",
+        "u8"
+      ]
+    ]
+  },
+  "Exposure": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "own_ring_balance",
+        "Compact<Balance>"
+      ],
+      [
+        "own_kton_balance",
+        "Compact<Balance>"
+      ],
+      [
+        "own_power",
+        "Power"
+      ],
+      [
+        "total_power",
+        "Power"
+      ],
+      [
+        "others",
+        "Vec<IndividualExposure>"
+      ]
+    ]
+  },
+  "IndividualExposure": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "who",
+        "AccountId"
+      ],
+      [
+        "ring_balance",
+        "Compact<Balance>"
+      ],
+      [
+        "kton_balance",
+        "Compact<Balance>"
+      ],
+      [
+        "power",
+        "Power"
+      ]
+    ]
+  },
+  "ValidatorReward": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "who",
+        "AccountId"
+      ],
+      [
+        "amount",
+        "Compact<Balance>"
+      ],
+      [
+        "nominators_reward",
+        "Vec<NominatorReward>"
+      ]
+    ]
+  },
+  "NominatorReward": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "who",
+        "AccountId"
+      ],
+      [
+        "amount",
+        "Compact<Balance>"
+      ]
+    ]
+  },
+  "RK": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "r",
+        "Balance"
+      ],
+      [
+        "k",
+        "Balance"
+      ]
+    ]
+  },
+  "BalanceLock<Balance, BlockNumber>": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "id",
+        "LockIdentifier"
+      ],
+      [
+        "lock_for",
+        "LockFor"
+      ],
+      [
+        "lock_reasons",
+        "LockReasons"
+      ]
+    ]
+  },
+  "LockFor": {
+    "type": "enum",
+    "type_mapping": [
+      [
+        "Common",
+        "Common"
+      ],
+      [
+        "Staking",
+        "StakingLock"
+      ]
+    ]
+  },
+  "Common": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "amount",
+        "Balance"
+      ]
+    ]
+  },
+  "StakingLock": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "staking_amount",
+        "Balance"
+      ],
+      [
+        "unbondings",
+        "Vec<Unbonding>"
+      ]
+    ]
+  },
+  "LockReasons": {
+    "type": "enum",
+    "type_mapping": [
+      [
+        "Fee",
+        "null"
+      ],
+      [
+        "Misc",
+        "null"
+      ],
+      [
+        "All",
+        "null"
+      ]
+    ]
+  },
+  "Unbonding": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "amount",
+        "Balance"
+      ],
+      [
+        "moment",
+        "BlockNumber"
+      ]
+    ]
+  },
+  "AccountData": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "free",
+        "Balance"
+      ],
+      [
+        "reserved",
+        "Balance"
+      ],
+      [
+        "free_kton",
+        "Balance"
+      ],
+      [
+        "reserved_kton",
+        "Balance"
+      ]
+    ]
+  },
+  "EthHeaderBrief": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "total_difficulty",
+        "U256"
+      ],
+      [
+        "parent_hash",
+        "H256"
+      ],
+      [
+        "number",
+        "EthBlockNumber"
+      ],
+      [
+        "relayer",
+        "AccountId"
+      ]
+    ]
+  },
+  "HeaderInfo": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "total_difficulty",
+        "U256"
+      ],
+      [
+        "parent_hash",
+        "H256"
+      ],
+      [
+        "number",
+        "EthBlockNumber"
+      ]
+    ]
+  },
+  "EthHeader": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "parent_hash",
+        "H256"
+      ],
+      [
+        "timestamp",
+        "u64"
+      ],
+      [
+        "number",
+        "EthBlockNumber"
+      ],
+      [
+        "auth",
+        "EthAddress"
+      ],
+      [
+        "transaction_root",
+        "H256"
+      ],
+      [
+        "uncles_hash",
+        "H256"
+      ],
+      [
+        "extra_data",
+        "Bytes"
+      ],
+      [
+        "state_root",
+        "H256"
+      ],
+      [
+        "receipts_root",
+        "H256"
+      ],
+      [
+        "log_bloom",
+        "Bloom"
+      ],
+      [
+        "gas_used",
+        "U256"
+      ],
+      [
+        "gas_limit",
+        "U256"
+      ],
+      [
+        "difficulty",
+        "U256"
+      ],
+      [
+        "seal",
+        "Vec<Bytes>"
+      ],
+      [
+        "hash",
+        "Option<H256>"
+      ]
+    ]
+  },
+  "Receipt": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "gas_used",
+        "U256"
+      ],
+      [
+        "log_bloom",
+        "Bloom"
+      ],
+      [
+        "logs",
+        "Vec<LogEntry>"
+      ],
+      [
+        "outcome",
+        "TransactionOutcome"
+      ]
+    ]
+  },
+  "EthReceiptProof": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "index",
+        "u64"
+      ],
+      [
+        "proof",
+        "Bytes"
+      ],
+      [
+        "header_hash",
+        "H256"
+      ]
+    ]
+  },
+  "EthNetworkType": {
+    "type": "enum",
+    "type_mapping": [
+      [
+        "Mainnet",
+        "null"
+      ],
+      [
+        "Ropsten",
+        "null"
+      ]
+    ]
+  },
+  "RedeemFor": {
+    "type": "enum",
+    "type_mapping": [
+      [
+        "Ring",
+        "EthReceiptProof"
+      ],
+      [
+        "Kton",
+        "EthReceiptProof"
+      ],
+      [
+        "Deposit",
+        "EthReceiptProof"
+      ]
+    ]
+  },
+  "OtherSignature": {
+    "type": "enum",
+    "type_mapping": [
+      [
+        "Eth",
+        "EcdsaSignature"
+      ],
+      [
+        "Tron",
+        "EcdsaSignature"
+      ]
+    ]
+  },
+  "OtherAddress": {
+    "type": "enum",
+    "type_mapping": [
+      [
+        "Eth",
+        "EthereumAddress"
+      ],
+      [
+        "Tron",
+        "EthereumAddress"
+      ]
+    ]
+  },
+  "MerkleMountainRangeRoot": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "data",
+        "Hash"
+      ]
+    ]
+  },
+  "ValidatorPrefs": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "commission",
+        "Compact<Balance>"
+      ]
+    ]
+  },
+  "MerkleMountainRangeRootLog": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "prefix",
+        "[u8; 4]"
+      ],
+      [
+        "mmr_root",
+        "Hash"
+      ]
+    ]
+  },
+  "DoubleNodeWithMerkleProof": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "dag_nodes",
+        "[H512; 2]"
+      ],
+      [
+        "proof",
+        "Vec<H128>"
+      ]
+    ]
+  },
+  "StakingBalanceT": {
+    "type": "enum",
+    "type_mapping": [
+      [
+        "RingBalance",
+        "Balance"
+      ],
+      [
+        "KtonBalance",
+        "Balance"
+      ]
+    ]
+  },
+  "StakingLedgerT": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "stash",
+        "AccountId"
+      ],
+      [
+        "active_ring",
+        "Compact<Balance>"
+      ],
+      [
+        "active_deposit_ring",
+        "Compact<Balance>"
+      ],
+      [
+        "active_kton",
+        "Compact<Balance>"
+      ],
+      [
+        "deposit_items",
+        "Vec<TimeDepositItem>"
+      ],
+      [
+        "ring_staking_lock",
+        "StakingLock"
+      ],
+      [
+        "kton_staking_lock",
+        "StakingLock"
+      ],
+      [
+        "claimed_rewards",
+        "Vec<EraIndex>"
+      ]
+    ]
+  },
+  "ExposureT": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "own_ring_balance",
+        "Compact<Balance>"
+      ],
+      [
+        "own_kton_balance",
+        "Compact<Balance>"
+      ],
+      [
+        "own_power",
+        "Power"
+      ],
+      [
+        "total_power",
+        "Power"
+      ],
+      [
+        "others",
+        "Vec<IndividualExposure>"
+      ]
+    ]
+  },
+  "FullIdentification": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "own_ring_balance",
+        "Compact<Balance>"
+      ],
+      [
+        "own_kton_balance",
+        "Compact<Balance>"
+      ],
+      [
+        "own_power",
+        "Power"
+      ],
+      [
+        "total_power",
+        "Power"
+      ],
+      [
+        "others",
+        "Vec<IndividualExposure>"
+      ]
+    ]
+  },
+  "RKT": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "r",
+        "Balance"
+      ],
+      [
+        "k",
+        "Balance"
+      ]
+    ]
+  },
+  "DispatchClass": {
+    "type": "enum",
+    "value_list": [
+      "Normal",
+      "Operational",
+      "Mandatory"
+    ]
+  },
+  "DispatchResult": {
+    "type": "enum",
+    "type_mapping": [
+      [
+        "Ok",
+        "Null"
+      ],
+      [
+        "Error",
+        "DispatchError"
+      ]
+    ]
+  }
+}

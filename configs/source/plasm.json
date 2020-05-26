@@ -1,0 +1,55 @@
+{
+  "Weight": "u32",
+  "DispatchClass": {
+    "type": "enum",
+    "value_list": [
+      "Normal",
+      "Operational",
+      "Mandatory"
+    ]
+  },
+  "DispatchResult": {
+    "type": "enum",
+    "type_mapping": [
+      [
+        "Ok",
+        "Null"
+      ],
+      [
+        "Error",
+        "DispatchError"
+      ]
+    ]
+  },
+  "Keys": "SessionKeysPolkadot",
+  "ValidatorPrefs": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "Commission",
+        "Compact<Balance>"
+      ]
+    ]
+  },
+  "Parameters": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "canBeNominated",
+        "bool"
+      ],
+      [
+        "optionExpired",
+        "u128"
+      ],
+      [
+        "optionP",
+        "u128"
+      ]
+    ]
+  },
+  "BTreeSet": {
+    "type": "struct",
+    "type_mapping": []
+  }
+}
