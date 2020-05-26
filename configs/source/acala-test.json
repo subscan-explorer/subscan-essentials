@@ -1,0 +1,391 @@
+{
+  "AccountIdOf": "AccountId",
+  "AssetId": "u32",
+  "BalanceOf": "Balance",
+  "StakingBalance": "Balance",
+  "LiquidBalance": "Balance",
+  "StakingBalanceOf": "Balance",
+  "LiquidBalanceOf": "Balance",
+  "PolkadotAccountId": "AccountId",
+  "PolkadotAccountIdOf": "AccountId",
+  "ExchangeRate": "FixedU128",
+  "Rate": "FixedU128",
+  "Ratio": "FixedU128",
+  "Hash": "H256",
+  "AuctionId": "u32",
+  "AuctionIdOf": "AuctionId",
+  "CurrencyIdOf": "CurrencyId",
+  "AmountOf": "Amount",
+  "DebitAmount": "Amount",
+  "DebitAmountOf": "Amount",
+  "DebitBalance": "Balance",
+  "DebitBalanceOf": "Balance",
+  "Index": "u32",
+  "Justification": "Bytes",
+  "KeyValue": "(StorageKey, StorageData)",
+  "KeyTypeId": "u32",
+  "LockIdentifier": "[u8; 8]",
+  "LookupSource": "Address",
+  "LookupTarget": "AccountId",
+  "Moment": "u64",
+  "Origin": "Null",
+  "Perbill": "u32",
+  "Percent": "u8",
+  "Permill": "u32",
+  "Perquintill": "u64",
+  "Phantom": "Null",
+  "PhantomData": "Null",
+  "PalletBalanceOf": "Balance",
+  "DepositBalanceOf": "Balance",
+  "StorageData": "Bytes",
+  "ValidatorId": "AccountId",
+  "Weight": "u32",
+  "WeightMultiplier": "Fixed64",
+  "OracleValue": "FixedU128",
+  "TimestampedValueOf": "TimestampedValue",
+  "Price": "FixedU128",
+  "OracleKey": "CurrencyId",
+  "Share": "u128",
+  "Amount": "i128",
+  "Fixed64": "i64",
+  "Fixed128": "i128",
+  "FixedU128": "u128",
+  "Keys": "SessionKeysPolkadot",
+  "BalanceLock<Balance>": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "id",
+        "LockIdentifier"
+      ],
+      [
+        "amount",
+        "Balance"
+      ],
+      [
+        "reasons",
+        "Reasons"
+      ]
+    ]
+  },
+  "ValidatorPrefs": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "Commission",
+        "Compact<Balance>"
+      ]
+    ]
+  },
+  "SignedBlock": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "block",
+        "Block"
+      ],
+      [
+        "justification",
+        "Justification"
+      ]
+    ]
+  },
+  "TimestampedValue": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "value",
+        "OracleValue"
+      ],
+      [
+        "timestamp",
+        "Moment"
+      ]
+    ]
+  },
+  "OrmlAccountData": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "free",
+        "Balance"
+      ],
+      [
+        "frozen",
+        "Balance"
+      ],
+      [
+        "reserved",
+        "Balance"
+      ]
+    ]
+  },
+  "OrmlBalanceLock": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "amount",
+        "Balance"
+      ],
+      [
+        "id",
+        "LockIdentifier"
+      ]
+    ]
+  },
+  "AuctionInfo": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "bid",
+        "Option<(AccountId, Balance)>"
+      ],
+      [
+        "start",
+        "BlockNumber"
+      ],
+      [
+        "end",
+        "Option<BlockNumber>"
+      ]
+    ]
+  },
+  "CollateralAuctionItem": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "owner",
+        "AccountId"
+      ],
+      [
+        "currencyId",
+        "CurrencyId"
+      ],
+      [
+        "amount",
+        "Compact<Balance>"
+      ],
+      [
+        "target",
+        "Compact<Balance>"
+      ],
+      [
+        "startTime",
+        "BlockNumber"
+      ]
+    ]
+  },
+  "DebitAuctionItem": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "amount",
+        "Compact<Balance>"
+      ],
+      [
+        "fix",
+        "Compact<Balance>"
+      ],
+      [
+        "startTime",
+        "BlockNumber"
+      ]
+    ]
+  },
+  "SurplusAuctionItem": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "amount",
+        "Compact<Balance>"
+      ],
+      [
+        "startTime",
+        "BlockNumber"
+      ]
+    ]
+  },
+  "BalanceWrapper": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "amount",
+        "Balance"
+      ]
+    ]
+  },
+  "BalanceRequest": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "amount",
+        "Balance"
+      ]
+    ]
+  },
+  "RedeemStrategy": {
+    "type": "enum",
+    "type_mapping": [
+      [
+        "Immediately",
+        "Null"
+      ],
+      [
+        "Target",
+        "EraIndex"
+      ],
+      [
+        "WaitForUnbonding",
+        "Null"
+      ]
+    ]
+  },
+  "HomaUnlockChunk": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "value",
+        "Compact<Balance>"
+      ],
+      [
+        "era",
+        "Compact<EraIndex>"
+      ]
+    ]
+  },
+  "BondingLedger": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "total",
+        "Compact<Balance>"
+      ],
+      [
+        "active",
+        "Compact<Balance>"
+      ],
+      [
+        "unlocking",
+        "Vec<UnlockChunk>"
+      ]
+    ]
+  },
+  "CurrencyId": {
+    "type": "enum",
+    "value_list": [
+      "ACA",
+      "AUSD",
+      "DOT",
+      "XBTC",
+      "LDOT"
+    ]
+  },
+  "LiquidationStrategy": {
+    "type": "enum",
+    "value_list": [
+      "Auction",
+      "Exchange"
+    ]
+  },
+  "AirDropCurrencyId": {
+    "type": "enum",
+    "value_list": [
+      "KAR",
+      "ACA"
+    ]
+  },
+  "ChangesTrieConfiguration": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "digestInterval",
+        "u32"
+      ],
+      [
+        "digestLevels",
+        "u32"
+      ]
+    ]
+  },
+  "Digest": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "logs",
+        "Vec<DigestItem>"
+      ]
+    ]
+  },
+  "DispatchClass": {
+    "type": "enum",
+    "value_list": [
+      "Normal",
+      "Operational",
+      "Mandatory"
+    ]
+  },
+  "DispatchInfo": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "weight",
+        "Weight"
+      ],
+      [
+        "class",
+        "DispatchClass"
+      ],
+      [
+        "paysFee",
+        "bool"
+      ]
+    ]
+  },
+  "AuctionIdLinkedItem": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "prev",
+        "Option<AuctionId>"
+      ],
+      [
+        "next",
+        "Option<AuctionId>"
+      ]
+    ]
+  },
+  "AuctionItem": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "owner",
+        "AccountId"
+      ],
+      [
+        "currencyId",
+        "CurrencyId"
+      ],
+      [
+        "amount",
+        "Balance"
+      ],
+      [
+        "target",
+        "Balance"
+      ],
+      [
+        "startTime",
+        "BlockNumber"
+      ]
+    ]
+  },
+  "BalanceInfo": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "amount",
+        "Balance"
+      ]
+    ]
+  }
+}

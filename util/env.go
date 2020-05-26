@@ -1,37 +1,20 @@
 package util
 
 import (
-	"math/rand"
 	"os"
-	"strings"
 )
 
 const (
-	CrabNetwork   = "darwinia-canary"
+	CrabNetwork   = "crab"
 	KusamaNetwork = "kusama"
 	Edgeware      = "edgeware"
-	Acala         = "acala-test"
-	Plasm         = "plasm"
 )
 
 var (
-	HostName     string
-	Environment  string
-	WSEndPoint   string
-	chainRpcUrls []string
-	NetworkNode  = GetEnv("NETWORK_NODE", KusamaNetwork)
-	IsDarwinia   = StringInSlice(NetworkNode, []string{CrabNetwork})
+	WSEndPoint  = GetEnv("CHAIN_WS_ENDPOINT", "wss://crab.darwinia.network")
+	NetworkNode = GetEnv("NETWORK_NODE", CrabNetwork)
+	IsDarwinia  = StringInSlice(NetworkNode, []string{CrabNetwork})
 )
-
-// TODO
-//
-// Config file
-func init() {
-	urls := GetEnv("CHAIN_WS_ENDPOINT", "")
-	chainRpcUrls = strings.Split(urls, ",")
-	WSEndPoint = chainRpcUrls[rand.Intn(len(chainRpcUrls))]
-	HostName, _ = os.Hostname()
-}
 
 func GetEnv(key, defaultValue string) string {
 	value := os.Getenv(key)
@@ -43,8 +26,4 @@ func GetEnv(key, defaultValue string) string {
 
 func IsProduction() bool {
 	return os.Getenv("DEPLOY_ENV") == "prod"
-}
-
-func IsK8s() bool {
-	return os.Getenv("K8S_ENV") == "true"
 }
