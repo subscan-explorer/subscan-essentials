@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"github.com/itering/subscan/libs/substrate"
+	"github.com/itering/subscan/internal/substrate"
 	"github.com/itering/subscan/util"
 )
 

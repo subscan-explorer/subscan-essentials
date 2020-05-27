@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/itering/subscan/libs/substrate/metadata"
-	"github.com/itering/subscan/libs/substrate/rpc"
+	"github.com/itering/subscan/internal/substrate/metadata"
+	"github.com/itering/subscan/internal/substrate/rpc"
 	"strings"
 )
 

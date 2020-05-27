@@ -2,10 +2,10 @@ package rpc
 
 import (
 	"fmt"
-	"github.com/itering/subscan/libs/substrate"
-	"github.com/itering/subscan/libs/substrate/storage"
-	"github.com/itering/subscan/libs/substrate/storageKey"
-	"github.com/itering/subscan/libs/substrate/websocket"
+	"github.com/itering/subscan/internal/substrate"
+	"github.com/itering/subscan/internal/substrate/storage"
+	"github.com/itering/subscan/internal/substrate/storageKey"
+	"github.com/itering/subscan/internal/substrate/websocket"
 	"github.com/itering/subscan/pkg/recws"
 	"github.com/shopspring/decimal"
 	"math/rand"

@@ -4,13 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/go-kratos/kratos/pkg/log"
 	"github.com/itering/subscan/internal/model"
-	"github.com/itering/subscan/libs/substrate"
-	"github.com/itering/subscan/libs/substrate/metadata"
-	"github.com/itering/subscan/libs/substrate/rpc"
-	"github.com/itering/subscan/libs/substrate/storage"
-
+	"github.com/itering/subscan/internal/substrate"
+	"github.com/itering/subscan/internal/substrate/metadata"
+	"github.com/itering/subscan/internal/substrate/rpc"
+	"github.com/itering/subscan/internal/substrate/storage"
 	"github.com/itering/subscan/util"
 	"github.com/shopspring/decimal"
 )

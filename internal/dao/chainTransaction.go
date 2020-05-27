@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/itering/subscan/internal/model"
-	"github.com/itering/subscan/libs/substrate"
+	"github.com/itering/subscan/internal/substrate"
 	"github.com/itering/subscan/util"
 	"github.com/shopspring/decimal"
 	"strings"

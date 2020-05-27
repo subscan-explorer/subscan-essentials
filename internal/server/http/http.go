@@ -44,8 +44,8 @@ func initRouter(e *bm.Engine) {
 	g := e.Group("/api")
 	{
 		g.GET("system/status", systemStatus)
-		g.POST("/now", now)
 		g.GET("tools/ss58/:p/:t", codecAddress)
+		g.POST("/now", now)
 		s := g.Group("/scan")
 		{
 			s.POST("metadata", metadata)

@@ -1,7 +1,7 @@
 package daemons
 
 import (
-	"github.com/itering/subscan/libs/substrate/rpc"
+	"github.com/itering/subscan/internal/substrate/rpc"
 	"github.com/itering/subscan/pkg/recws"
 	"github.com/itering/subscan/util"
 	"os"

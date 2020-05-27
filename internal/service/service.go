@@ -6,7 +6,7 @@ import (
 	"github.com/freehere107/go-scale-codec/types"
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/internal/service/scan"
-	"github.com/itering/subscan/libs/substrate/metadata"
+	"github.com/itering/subscan/internal/substrate/metadata"
 	"github.com/itering/subscan/util"
 	"io/ioutil"
 	"strings"

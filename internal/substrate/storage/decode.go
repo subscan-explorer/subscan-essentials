@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"github.com/itering/subscan/libs/substrate/metadata"
+	"github.com/itering/subscan/internal/substrate/metadata"
 	"strconv"
 	"strings"
 

@@ -6,7 +6,7 @@ import (
 	"github.com/itering/subscan/internal/jobs"
 	"github.com/itering/subscan/internal/server/http"
 	"github.com/itering/subscan/internal/service"
-	"github.com/itering/subscan/libs/substrate/websocket"
+	"github.com/itering/subscan/internal/substrate/websocket"
 	"github.com/itering/subscan/sub"
 	"os"
 	"os/signal"
