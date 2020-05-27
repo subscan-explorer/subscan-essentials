@@ -34,7 +34,7 @@ func (s *Service) EmitLog(c context.Context, txn *dao.GormDB, blockNum int, l []
 		}
 
 		// check validator
-		if strings.ToLower(logData.Type) == strings.ToLower("PreRuntime") {
+		if strings.EqualFold(logData.Type, "PreRuntime") {
 			validator = substrate.ExtractAuthor([]byte(dataStr), validatorList)
 		}
 

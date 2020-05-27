@@ -1,8 +1,9 @@
 .idea
 cmd/cmd
 cmd/subscan
-log/*
-node_modules
 configs/http.toml
 configs/mysql.toml
 configs/redis.toml
+log/*
+node_modules
+target

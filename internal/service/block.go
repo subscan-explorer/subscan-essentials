@@ -86,9 +86,9 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 	var (
 		eventCount, extrinsicsCount, blockTimestamp int
 		validator                                   string
+		extrinsicHash                               map[string]string
+		extrinsicFee                                map[string]decimal.Decimal
 	)
-	extrinsicHash := make(map[string]string)
-	extrinsicFee := make(map[string]decimal.Decimal)
 
 	validatorList, _ := rpc.GetValidatorFromSub(nil, hash)
 	txn := s.dao.DbBegin()

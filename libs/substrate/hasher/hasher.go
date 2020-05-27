@@ -7,35 +7,34 @@ import (
 
 // HashByCryptoName
 func HashByCryptoName(p []byte, hasher string) []byte {
-	h := p
 	switch hasher {
 	case "Blake2_128":
 		checksum, _ := blake2b.New(16, []byte{})
-		checksum.Write(p)
-		h = checksum.Sum(nil)
+		_, _ = checksum.Write(p)
+		p = checksum.Sum(nil)
 	case "Blake2_256":
 		checksum, _ := blake2b.New256([]byte{})
-		checksum.Write(p)
-		h = checksum.Sum(nil)
+		_, _ = checksum.Write(p)
+		p = checksum.Sum(nil)
 	case "Twox128":
-		p := twox.NewXXHash128(p)
-		h = p[:]
+		h := twox.NewXXHash128(p)
+		p = h[:]
 	case "Twox256":
-		p := twox.NewXXHash128(p)
-		h = p[:]
+		h := twox.NewXXHash128(p)
+		p = h[:]
 	case "Twox64Concat":
-		p := twox.TwoX64Concat(p)
-		h = p[:]
+		h := twox.TwoX64Concat(p)
+		p = h[:]
 	case "Identity":
-		h = p[:]
+		p = p[:]
 	case "Blake2_128Concat":
 		checksum, _ := blake2b.New(16, []byte{})
-		checksum.Write(p)
-		h = checksum.Sum(nil)
-		h = append(h, p...)
+		_, _ = checksum.Write(p)
+		h := checksum.Sum(nil)
+		p = append(h, p...)
 	default:
-		p := twox.TwoX64Concat(p)
-		h = p[:]
+		h := twox.TwoX64Concat(p)
+		p = h[:]
 	}
-	return h
+	return p
 }

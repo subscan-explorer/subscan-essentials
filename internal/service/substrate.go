@@ -144,7 +144,7 @@ const (
 
 func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 	block := s.dao.GetBlockByNum(context.TODO(), blockNum)
-	if block != nil && block.Finalized && block.CodecError == false {
+	if block != nil && block.Finalized && !block.CodecError {
 		return nil
 	}
 	const websocketTextMessage = 1
@@ -219,7 +219,7 @@ func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 	// refresh finalized info for update
 	if block != nil {
 		// Confirm data, set block Finalized
-		if block.ExtrinsicsRoot == rpcBlock.Block.Header.ExtrinsicsRoot && block.Event == event && block.CodecError == false && finalized {
+		if block.ExtrinsicsRoot == rpcBlock.Block.Header.ExtrinsicsRoot && block.Event == event && !block.CodecError && finalized {
 			s.dao.SetBlockFinalized(block)
 		} else {
 			block.ExtrinsicsRoot = rpcBlock.Block.Header.ExtrinsicsRoot

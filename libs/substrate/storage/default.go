@@ -7,7 +7,7 @@ type StakingLedgers struct {
 	TotalRing         decimal.Decimal   `json:"total_ring,omitempty"`
 	TotalRegularRing  decimal.Decimal   `json:"total_deposit_ring,omitempty"`
 	ActiveRing        decimal.Decimal   `json:"active_ring,omitempty"`
-	ActiveRegularRing decimal.Decimal   `json:"active_deposit_ring,omitempty"`
+	ActiveRegularRing decimal.Decimal   `json:"active_regular_ring,omitempty"`
 	TotalKton         decimal.Decimal   `json:"total_kton,omitempty"`
 	ActiveKton        decimal.Decimal   `json:"active_kton,omitempty"`
 	Total             decimal.Decimal   `json:"total,omitempty"`
@@ -187,7 +187,7 @@ type AccountVoteStandard struct {
 
 type AccountVoteSplit struct {
 	Aye decimal.Decimal `json:"aye"`
-	Nay decimal.Decimal `json:"aye"`
+	Nay decimal.Decimal `json:"nay"`
 }
 
 type Payee struct {

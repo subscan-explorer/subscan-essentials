@@ -48,7 +48,7 @@ func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.C
 }
 
 func (d *Dao) DropExtrinsicNotFinalizedData(c context.Context, blockNum int, finalized bool) bool {
-	var delExist bool
+	delExist := false
 	if finalized {
 		if query := d.db.Where("block_num = ?", blockNum).Delete(model.ChainExtrinsic{BlockNum: blockNum}); query.RowsAffected > 0 {
 			_ = d.IncrMetadata(c, "count_extrinsic", -int(query.RowsAffected))
@@ -57,6 +57,7 @@ func (d *Dao) DropExtrinsicNotFinalizedData(c context.Context, blockNum int, fin
 		var es []model.ChainTransaction
 		if query := d.db.Model(model.ChainTransaction{BlockNum: blockNum}).Where("block_num = ?", blockNum).
 			Scan(&es).Delete(model.ChainTransaction{BlockNum: blockNum}); query.RowsAffected > 0 && len(es) > 0 {
+			delExist = true
 		}
 	}
 	return delExist
@@ -119,7 +120,7 @@ func (d *Dao) GetExtrinsicsByHash(c context.Context, hash string) *model.ChainEx
 	blockNum, _ := d.GetFillAlreadyBlockNum(context.TODO())
 	for index := blockNum / (model.SplitTableBlockNum); index >= 0; index-- {
 		query := d.db.Model(model.ChainExtrinsic{BlockNum: index * model.SplitTableBlockNum}).Where("extrinsic_hash = ?", hash).First(&extrinsic)
-		if query != nil && query.RecordNotFound() == false {
+		if query != nil && !query.RecordNotFound() {
 			return &extrinsic
 		}
 	}
@@ -173,7 +174,7 @@ func (d *Dao) extrinsicsAsDetail(c context.Context, e *model.ChainExtrinsic) *mo
 
 	detail.Event = &events
 
-	if detail.Success == false {
+	if !detail.Success {
 		detail.Error = d.ExtrinsicError(detail.ExtrinsicHash)
 	}
 
