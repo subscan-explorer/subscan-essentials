@@ -1,7 +1,7 @@
 package hasher
 
 import (
-	"github.com/itering/subscan/util/twox"
+	"github.com/itering/subscan/internal/util/twox"
 	"golang.org/x/crypto/blake2b"
 )
 

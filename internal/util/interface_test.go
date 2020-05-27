@@ -16,7 +16,7 @@ var (
 
 func TestFunc(t *testing.T) {
 	callerNameRaw := "testing.tRunner"
-	funcNameRaw := "github.com/itering/subscan/util.TestFunc"
+	funcNameRaw := "github.com/itering/subscan/internal/util.TestFunc"
 
 	callerName := CallerName()
 	funcName := GetFuncName()

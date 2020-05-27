@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"github.com/itering/subscan/internal/substrate"
-	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/internal/util"
 )
 
 // Ping ping the resource.

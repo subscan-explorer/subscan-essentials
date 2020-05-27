@@ -10,7 +10,7 @@ import (
 	"github.com/shopspring/decimal"
 	"math/rand"
 
-	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/internal/util"
 )
 
 type Query interface {

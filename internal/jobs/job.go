@@ -2,7 +2,7 @@ package jobs
 
 import (
 	"github.com/freehere107/go-workers"
-	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/internal/util"
 )
 
 // Init worker instant

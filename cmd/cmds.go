@@ -8,7 +8,7 @@ import (
 	"github.com/itering/subscan/internal/service"
 	"os"
 
-	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/internal/util"
 	"github.com/urfave/cli"
 )
 

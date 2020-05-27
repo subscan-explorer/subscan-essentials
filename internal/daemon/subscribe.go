@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/itering/subscan/internal/substrate/rpc"
 	"github.com/itering/subscan/pkg/recws"
-	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/internal/util"
 )
 
 var (

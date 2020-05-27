@@ -11,7 +11,7 @@ import (
 	"github.com/itering/subscan/internal/substrate/metadata"
 	"github.com/itering/subscan/internal/substrate/rpc"
 	"github.com/itering/subscan/internal/substrate/storage"
-	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/internal/util"
 	"github.com/shopspring/decimal"
 )
 

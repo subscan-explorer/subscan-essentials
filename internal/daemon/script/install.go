@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/itering/subscan/internal/dao"
-	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/internal/util"
 )
 import "database/sql"
 

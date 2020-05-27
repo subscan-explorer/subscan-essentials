@@ -1,8 +1,8 @@
 package substrate
 
 import (
-	"github.com/itering/subscan/util"
-	"github.com/itering/subscan/util/ss58"
+	"github.com/itering/subscan/internal/util"
+	"github.com/itering/subscan/internal/util/ss58"
 )
 
 const (

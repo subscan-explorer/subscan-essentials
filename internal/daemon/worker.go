@@ -7,7 +7,7 @@ import (
 
 	"github.com/freehere107/go-workers"
 	"github.com/go-kratos/kratos/pkg/log"
-	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/internal/util"
 )
 
 func RunWorker() {

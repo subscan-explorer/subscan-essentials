@@ -5,7 +5,7 @@ import (
 	"github.com/freehere107/go-scale-codec/types"
 	"github.com/itering/subscan/internal/substrate/hasher"
 	"github.com/itering/subscan/internal/substrate/metadata"
-	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/internal/util"
 )
 
 type StorageKey struct {

@@ -6,7 +6,7 @@ import (
 	"github.com/itering/subscan/internal/model"
 	"github.com/itering/subscan/internal/substrate"
 	"github.com/itering/subscan/internal/substrate/storage"
-	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/internal/util"
 	"strings"
 )
 

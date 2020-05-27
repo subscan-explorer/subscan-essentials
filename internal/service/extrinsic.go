@@ -7,7 +7,7 @@ import (
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/internal/model"
 	"github.com/itering/subscan/internal/service/transaction"
-	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/internal/util"
 	"github.com/shopspring/decimal"
 	"strings"
 )

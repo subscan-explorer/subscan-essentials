@@ -10,7 +10,7 @@ import (
 	"github.com/itering/subscan/internal/substrate"
 	"github.com/itering/subscan/internal/substrate/rpc"
 	"github.com/itering/subscan/internal/substrate/websocket"
-	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/internal/util"
 	"github.com/panjf2000/ants/v2"
 	"sync"
 	"time"
