@@ -2,8 +2,8 @@ package sub
 
 import (
 	"fmt"
-	"github.com/itering/subscan/daemons"
-	"github.com/itering/subscan/daemons/script"
+	"github.com/itering/subscan/internal/daemon"
+	"github.com/itering/subscan/internal/daemon/script"
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/internal/service"
 	"os"

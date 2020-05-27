@@ -3,10 +3,11 @@ package daemons
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
+
 	"github.com/freehere107/go-workers"
 	"github.com/go-kratos/kratos/pkg/log"
 	"github.com/itering/subscan/util"
-	"reflect"
 )
 
 func RunWorker() {

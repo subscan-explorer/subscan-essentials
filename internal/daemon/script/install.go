@@ -2,6 +2,7 @@ package script
 
 import (
 	"fmt"
+
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/util"
 )

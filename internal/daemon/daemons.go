@@ -2,13 +2,14 @@ package daemons
 
 import (
 	"fmt"
-	"github.com/itering/subscan/internal/service"
-	"github.com/itering/subscan/util"
-	"github.com/sevlyar/go-daemon"
 	"log"
 	"os"
 	"syscall"
 	"time"
+
+	"github.com/itering/subscan/internal/service"
+	"github.com/itering/subscan/util"
+	"github.com/sevlyar/go-daemon"
 )
 
 var (

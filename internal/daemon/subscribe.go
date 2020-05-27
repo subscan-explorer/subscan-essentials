@@ -1,18 +1,17 @@
 package daemons
 
 import (
-	"github.com/itering/subscan/internal/substrate/rpc"
-	"github.com/itering/subscan/pkg/recws"
-	"github.com/itering/subscan/util"
 	"os"
 	"os/signal"
-
 	"sync"
 	"syscall"
 	"time"
 
 	"github.com/go-kratos/kratos/pkg/log"
 	"github.com/gorilla/websocket"
+	"github.com/itering/subscan/internal/substrate/rpc"
+	"github.com/itering/subscan/pkg/recws"
+	"github.com/itering/subscan/util"
 )
 
 var (
