@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/itering/subscan/internal/model"
-	"github.com/itering/subscan/libs/substrate/storage"
-	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/internal/substrate/storage"
+	"github.com/itering/subscan/internal/util"
 	"strings"
 )
 

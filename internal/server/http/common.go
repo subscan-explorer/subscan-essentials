@@ -3,8 +3,8 @@ package http
 import (
 	"github.com/go-kratos/kratos/pkg/log"
 	bm "github.com/go-kratos/kratos/pkg/net/http/blademaster"
-	"github.com/itering/subscan/libs/substrate"
-	"github.com/itering/subscan/util/ss58"
+	"github.com/itering/subscan/internal/substrate"
+	"github.com/itering/subscan/internal/util/ss58"
 	"net/http"
 	"time"
 )

@@ -1,8 +1,8 @@
 package dao
 
 import (
-	"github.com/itering/subscan/libs/substrate"
-	"github.com/itering/subscan/libs/substrate/metadata"
+	"github.com/itering/subscan/internal/substrate"
+	"github.com/itering/subscan/internal/substrate/metadata"
 )
 
 // func (d *Dao) getConstant(module, key string) (storage.StateStorage, error) {

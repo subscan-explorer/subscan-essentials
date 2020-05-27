@@ -14,7 +14,7 @@ import (
 	"github.com/go-kratos/kratos/pkg/log"
 	"github.com/go-kratos/kratos/pkg/sync/pipeline/fanout"
 	"github.com/go-sql-driver/mysql"
-	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/internal/util"
 	"github.com/jinzhu/gorm"
 )
 

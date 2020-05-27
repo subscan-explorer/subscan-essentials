@@ -2,7 +2,7 @@ package scan
 
 import (
 	"github.com/itering/subscan/internal/model"
-	"github.com/itering/subscan/libs/substrate/metadata"
+	"github.com/itering/subscan/internal/substrate/metadata"
 )
 
 func (s *Service) SubstrateRuntimeList() []model.RuntimeVersion {

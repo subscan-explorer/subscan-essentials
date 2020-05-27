@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/itering/subscan/internal/model"
-	"github.com/itering/subscan/libs/substrate"
-	"github.com/itering/subscan/util"
-	"github.com/itering/subscan/util/ss58"
+	"github.com/itering/subscan/internal/substrate"
+	"github.com/itering/subscan/internal/util"
+	"github.com/itering/subscan/internal/util/ss58"
 	"github.com/shopspring/decimal"
 	"strings"
 )

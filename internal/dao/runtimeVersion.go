@@ -2,7 +2,7 @@ package dao
 
 import (
 	"github.com/itering/subscan/internal/model"
-	"github.com/itering/subscan/libs/substrate/metadata"
+	"github.com/itering/subscan/internal/substrate/metadata"
 )
 
 func (d *Dao) CreateRuntimeVersion(name string, specVersion int) int64 {
