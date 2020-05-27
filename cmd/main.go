@@ -3,11 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/itering/subscan/internal/jobs"
-	"github.com/itering/subscan/internal/server/http"
-	"github.com/itering/subscan/internal/service"
-	"github.com/itering/subscan/internal/substrate/websocket"
-	"github.com/itering/subscan/sub"
 	"os"
 	"os/signal"
 	"runtime"
@@ -16,6 +11,10 @@ import (
 
 	"github.com/go-kratos/kratos/pkg/conf/paladin"
 	"github.com/go-kratos/kratos/pkg/log"
+	"github.com/itering/subscan/internal/jobs"
+	"github.com/itering/subscan/internal/server/http"
+	"github.com/itering/subscan/internal/service"
+	"github.com/itering/subscan/internal/substrate/websocket"
 	"github.com/urfave/cli"
 )
 
@@ -33,7 +32,7 @@ func setupApp() *cli.App {
 	app.Usage = "SubScan Backend Service, use -h get help"
 	app.Version = "1.0"
 	app.Action = func(*cli.Context) error { runServe(); return nil }
-	app.Commands = sub.Commands
+	app.Commands = Commands
 	app.Description = "SubScan Backend Service, substrate blockchain explorer"
 	app.Flags = []cli.Flag{cli.StringFlag{Name: "conf", Value: "../configs"}}
 	app.Before = func(context *cli.Context) error {
