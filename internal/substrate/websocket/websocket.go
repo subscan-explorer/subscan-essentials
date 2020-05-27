@@ -2,7 +2,7 @@ package websocket
 
 import (
 	"fmt"
-	"github.com/itering/subscan/pkg/recws"
+	"github.com/itering/subscan/internal/pkg/recws"
 	"github.com/itering/subscan/internal/util"
 	"time"
 )

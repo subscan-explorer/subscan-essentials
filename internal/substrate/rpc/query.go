@@ -6,7 +6,7 @@ import (
 	"github.com/itering/subscan/internal/substrate/storage"
 	"github.com/itering/subscan/internal/substrate/storageKey"
 	"github.com/itering/subscan/internal/substrate/websocket"
-	"github.com/itering/subscan/pkg/recws"
+	"github.com/itering/subscan/internal/pkg/recws"
 	"github.com/shopspring/decimal"
 	"math/rand"
 
