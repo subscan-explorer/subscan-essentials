@@ -2,8 +2,8 @@ package substrate
 
 import (
 	"fmt"
-	scalecodec "github.com/freehere107/go-scale-codec"
-	"github.com/freehere107/go-scale-codec/types"
+	scalecodec "github.com/itering/scale.go"
+	"github.com/itering/scale.go/types"
 	"github.com/itering/subscan/internal/substrate/metadata"
 	"github.com/itering/subscan/internal/util"
 )

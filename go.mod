@@ -6,12 +6,12 @@ require (
 	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
 	github.com/customerio/gospec v0.0.0-20130710230057-a5cc0e48aa39 // indirect
-	github.com/freehere107/go-scale-codec v0.0.0-20200518091816-4e2d86b8ba16
 	github.com/freehere107/go-workers v1.1.1
 	github.com/go-kratos/kratos v0.5.0
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/gorilla/websocket v1.4.2
 	github.com/huandu/xstrings v1.3.1
+	github.com/itering/scale.go v0.0.0-20200529093732-2bcd0f653e5b
 	github.com/jinzhu/gorm v1.9.12
 	github.com/jpillora/backoff v1.0.0
 	github.com/json-iterator/go v1.1.9

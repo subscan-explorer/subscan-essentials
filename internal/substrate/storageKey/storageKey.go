@@ -2,7 +2,7 @@ package storageKey
 
 import (
 	"fmt"
-	"github.com/freehere107/go-scale-codec/types"
+	"github.com/itering/scale.go/types"
 	"github.com/itering/subscan/internal/substrate/hasher"
 	"github.com/itering/subscan/internal/substrate/metadata"
 	"github.com/itering/subscan/internal/util"

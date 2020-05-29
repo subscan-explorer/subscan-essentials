@@ -69,8 +69,6 @@ github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 h1:Yzb9+7DP
 github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5/go.mod h1:a2zkGnVExMxdzMo3M0Hi/3sEU+cWnZpSni0O6/Yb/P0=
 github.com/fatih/color v1.7.0 h1:DkWD4oS2D8LGGgTQ6IvwJJXSL5Vp2ffcQg58nFV38Ys=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
-github.com/freehere107/go-scale-codec v0.0.0-20200518091816-4e2d86b8ba16 h1:l80T56jZZ2xqTXKWkL8NL3kvsMJZSA4rDSwKWGgBoo4=
-github.com/freehere107/go-scale-codec v0.0.0-20200518091816-4e2d86b8ba16/go.mod h1:jmiW1j8aqjSJB0ncCaZOAiwY7EkJ2E7ViWEZD3S+nrE=
 github.com/freehere107/go-workers v1.1.1 h1:RKL1SYJgJEu4kV7rNwfHlRGKpKSsq9TPaO2C3BNaaz4=
 github.com/freehere107/go-workers v1.1.1/go.mod h1:ACCvJRFusHRotWxBexKWcj3gu6GMAy8/GS2SRGTnq/E=
 github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV9I=
@@ -148,6 +146,8 @@ github.com/huandu/xstrings v1.3.1 h1:4jgBlKK6tLKFvO8u5pmYjG91cqytmDCDvGh7ECVFfFs
 github.com/huandu/xstrings v1.3.1/go.mod h1:y5/lhBue+AyNmUVz9RLU9xbLR0o4KIIExikq4ovT0aE=
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/influxdata/influxdb1-client v0.0.0-20190809212627-fc22c7df067e/go.mod h1:qj24IKcXYK6Iy9ceXlo3Tc+vtHo9lIhSX5JddghvEPo=
+github.com/itering/scale.go v0.0.0-20200529093732-2bcd0f653e5b h1:jQ+VUe/egfDGlj5TjpWzv6gr4Q1qualuL8oieFK0uho=
+github.com/itering/scale.go v0.0.0-20200529093732-2bcd0f653e5b/go.mod h1:ufrA/8oz/qi4mtK8TXz4LFZzfJ4ZUQ+4z+cUNpY9jts=
 github.com/jcmturner/gofork v0.0.0-20190328161633-dc7c13fece03/go.mod h1:MK8+TM0La+2rjBD4jE12Kj1pCCxK7d2LK/UM3ncEo0o=
 github.com/jinzhu/gorm v1.9.12 h1:Drgk1clyWT9t9ERbzHza6Mj/8FY/CqMyVzOiHviMo6Q=
 github.com/jinzhu/gorm v1.9.12/go.mod h1:vhTjlKSJUTWNtcbQtrMBFCxy7eXTzeCAzfL5fBZT/Qs=
