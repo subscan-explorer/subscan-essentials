@@ -1,4 +1,5 @@
 .idea
+.mypy_cache
 cmd/cmd
 cmd/subscan
 configs/http.toml

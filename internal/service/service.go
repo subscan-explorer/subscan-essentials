@@ -2,14 +2,15 @@ package service
 
 import (
 	"fmt"
+	"io/ioutil"
+	"strings"
+
 	"github.com/itering/scale.go/source"
 	"github.com/itering/scale.go/types"
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/internal/service/scan"
 	"github.com/itering/subscan/internal/substrate/metadata"
 	"github.com/itering/subscan/internal/util"
-	"io/ioutil"
-	"strings"
 )
 
 // Service service.

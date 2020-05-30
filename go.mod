@@ -9,6 +9,7 @@ require (
 	github.com/freehere107/go-workers v1.1.1
 	github.com/go-kratos/kratos v0.5.0
 	github.com/go-sql-driver/mysql v1.4.1
+	github.com/google/wire v0.4.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/huandu/xstrings v1.3.1
 	github.com/itering/scale.go v0.0.0-20200529093732-2bcd0f653e5b

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"flag"
 	"context"
+	"flag"
 	"os"
 	"os/signal"
 	"runtime"
@@ -18,7 +18,7 @@ import (
 )
 
 func main() {
-	defer func () {
+	defer func() {
 		_ = log.Close()
 		websocket.CloseWsConnection()
 	}()
@@ -62,4 +62,3 @@ func main() {
 		}
 	}
 }
-
