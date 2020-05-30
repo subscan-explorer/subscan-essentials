@@ -1,8 +1,8 @@
 package main
 
 import (
+	"flag"
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"runtime"
@@ -15,43 +15,26 @@ import (
 	"github.com/itering/subscan/internal/server/http"
 	"github.com/itering/subscan/internal/service"
 	"github.com/itering/subscan/internal/substrate/websocket"
-	"github.com/urfave/cli"
 )
 
 func main() {
-	defer afterClose()
-	if err := setupApp().Run(os.Args); err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-}
+	defer func () {
+		_ = log.Close()
+		websocket.CloseWsConnection()
+	}()
 
-func setupApp() *cli.App {
-	app := cli.NewApp()
-	app.Name = "SubScan"
-	app.Usage = "SubScan Backend Service, use -h get help"
-	app.Version = "1.0"
-	app.Action = func(*cli.Context) error { runServe(); return nil }
-	// app.Commands = Commands
-	app.Description = "SubScan Backend Service, substrate blockchain explorer"
-	app.Flags = []cli.Flag{cli.StringFlag{Name: "conf", Value: "../configs"}}
-	app.Before = func(context *cli.Context) error {
-		if client, err := paladin.NewFile(context.String("conf")); err != nil {
-			panic(err)
-		} else {
-			paladin.DefaultClient = client
-		}
-		jobs.Init()
-		log.Init(nil)
-		runtime.GOMAXPROCS(runtime.NumCPU())
-		return nil
-	}
-	return app
-}
+	// init configs
+	flag.Set("conf", "../configs")
+	paladin.Init()
+	jobs.Init()
+	log.Init(nil)
+	runtime.GOMAXPROCS(runtime.NumCPU())
 
-func runServe() {
+	// start service
 	svc := service.New()
 	httpSrv := http.New(svc)
+
+	// handle signals
 	c := make(chan os.Signal, 1)
 	log.Info("SubScan End run ......")
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
@@ -74,7 +57,3 @@ func runServe() {
 	}
 }
 
-func afterClose() {
-	_ = log.Close()
-	websocket.CloseWsConnection()
-}
