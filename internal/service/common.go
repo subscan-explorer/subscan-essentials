@@ -6,11 +6,6 @@ import (
 	"github.com/itering/subscan/internal/util"
 )
 
-// Ping ping the resource.
-func (s *Service) Ping(ctx context.Context) (err error) {
-	return s.dao.Ping(ctx)
-}
-
 func (s *Service) SetHeartBeat(action string) {
 	ctx := context.TODO()
 	s.dao.SetHeartBeatNow(ctx, action)

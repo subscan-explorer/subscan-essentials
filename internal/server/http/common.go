@@ -10,7 +10,7 @@ import (
 )
 
 func ping(ctx *bm.Context) {
-	if err := svc.Ping(ctx); err != nil {
+	if _, err := svc.Ping(ctx, nil); err != nil {
 		log.Error("ping error(%v)", err)
 		ctx.AbortWithStatus(http.StatusServiceUnavailable)
 	}

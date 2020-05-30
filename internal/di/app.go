@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-kratos/kratos/pkg/log"
 	bm "github.com/go-kratos/kratos/pkg/net/http/blademaster"
-	"github.com/go-kratos/kratos/pkg/net/rpc/warden"
 	"github.com/itering/subscan/internal/service"
 )
 
@@ -17,7 +16,7 @@ type App struct {
 }
 
 func NewApp(
-	svc *service.Service, h *bm.Engine, g *warden.Server,
+	svc *service.Service, h *bm.Engine,
 ) (
 	app *App, closeFunc func(), err error,
 ) {

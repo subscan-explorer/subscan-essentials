@@ -26,10 +26,16 @@ var _ context.Context
 var _ binding.StructValidator
 
 var PathSubscanPing = "/subscan.service.v1.Subscan/Ping"
+var PathSubscanSayHello = "/subscan.service.v1.Subscan/SayHello"
+var PathSubscanSayHelloURL = "/kratos-demo/say_hello"
 
 // SubscanBMServer is the server API for Subscan service.
 type SubscanBMServer interface {
 	Ping(ctx context.Context, req *google_protobuf1.Empty) (resp *google_protobuf1.Empty, err error)
+
+	SayHello(ctx context.Context, req *HelloReq) (resp *google_protobuf1.Empty, err error)
+
+	SayHelloURL(ctx context.Context, req *HelloReq) (resp *HelloResp, err error)
 }
 
 var SubscanSvc SubscanBMServer
@@ -43,8 +49,28 @@ func subscanPing(c *bm.Context) {
 	c.JSON(resp, err)
 }
 
+func subscanSayHello(c *bm.Context) {
+	p := new(HelloReq)
+	if err := c.BindWith(p, binding.Default(c.Request.Method, c.Request.Header.Get("Content-Type"))); err != nil {
+		return
+	}
+	resp, err := SubscanSvc.SayHello(c, p)
+	c.JSON(resp, err)
+}
+
+func subscanSayHelloURL(c *bm.Context) {
+	p := new(HelloReq)
+	if err := c.BindWith(p, binding.Default(c.Request.Method, c.Request.Header.Get("Content-Type"))); err != nil {
+		return
+	}
+	resp, err := SubscanSvc.SayHelloURL(c, p)
+	c.JSON(resp, err)
+}
+
 // RegisterSubscanBMServer Register the blademaster route
 func RegisterSubscanBMServer(e *bm.Engine, server SubscanBMServer) {
 	SubscanSvc = server
 	e.GET("/subscan.service.v1.Subscan/Ping", subscanPing)
+	e.GET("/subscan.service.v1.Subscan/SayHello", subscanSayHello)
+	e.GET("/kratos-demo/say_hello", subscanSayHelloURL)
 }

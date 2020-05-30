@@ -16,6 +16,41 @@
         "application/json"
     ],
     "paths": {
+        "/kratos-demo/say_hello": {
+            "get": {
+                "summary": "/kratos-demo/say_hello",
+                "responses": {
+                    "200": {
+                        "description": "A successful response.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "integer"
+                                },
+                                "message": {
+                                    "type": "string"
+                                },
+                                "data": {
+                                    "$ref": "#/definitions/.subscan.service.v1.HelloResp"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "subscan.service.v1.Subscan"
+                ]
+            }
+        },
         "/subscan.service.v1.Subscan/Ping": {
             "get": {
                 "summary": "/subscan.service.v1.Subscan/Ping",
@@ -42,6 +77,41 @@
                     "subscan.service.v1.Subscan"
                 ]
             }
+        },
+        "/subscan.service.v1.Subscan/SayHello": {
+            "get": {
+                "summary": "/subscan.service.v1.Subscan/SayHello",
+                "responses": {
+                    "200": {
+                        "description": "A successful response.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "code": {
+                                    "type": "integer"
+                                },
+                                "message": {
+                                    "type": "string"
+                                },
+                                "data": {
+                                    "$ref": "#/definitions/.google.protobuf.Empty"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "subscan.service.v1.Subscan"
+                ]
+            }
         }
     },
     "definitions": {
@@ -49,6 +119,25 @@
             "type": "object",
             "properties": {},
             "description": "A generic empty message that you can re-use to avoid defining duplicated\n empty messages in your APIs. A typical example is to use it as the request\n or the response type of an API method. For instance:\n\n     service Foo {\n       rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty);\n     }\n\n The JSON representation for `Empty` is empty JSON object `{}`."
+        },
+        ".subscan.service.v1.HelloReq": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name"
+            ]
+        },
+        ".subscan.service.v1.HelloResp": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                }
+            }
         }
     }
 }
