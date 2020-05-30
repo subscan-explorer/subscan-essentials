@@ -3,6 +3,7 @@ package http
 import (
 	"github.com/go-kratos/kratos/pkg/conf/paladin"
 	bm "github.com/go-kratos/kratos/pkg/net/http/blademaster"
+	pb "github.com/itering/subscan/api"
 	"github.com/itering/subscan/internal/middleware"
 	"github.com/itering/subscan/internal/service"
 	"github.com/itering/subscan/internal/service/scan"
@@ -27,6 +28,7 @@ func New(s *service.Service) (engine *bm.Engine) {
 	svc = s
 	engine = bm.DefaultServer(hc.Server)
 	engine.HandleMethodNotAllowed = false
+	pb.RegisterSubscanBMServer(engine, s)
 	initRouter(engine)
 	ss = svc.NewScan()
 	if err := engine.Start(); err != nil {

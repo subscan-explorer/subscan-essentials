@@ -25,6 +25,7 @@ func NewApp(
 		http: h,
 	}
 	closeFunc = func() {
+		svc.Close()
 		ctx, cancel := context.WithTimeout(context.Background(), 35*time.Second)
 		if err := h.Shutdown(ctx); err != nil {
 			log.Error("httpSrv.Shutdown error(%v)", err)

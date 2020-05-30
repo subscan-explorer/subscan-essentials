@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"os"
 	"os/signal"
@@ -11,9 +10,8 @@ import (
 
 	"github.com/go-kratos/kratos/pkg/conf/paladin"
 	"github.com/go-kratos/kratos/pkg/log"
+	"github.com/itering/subscan/internal/di"
 	"github.com/itering/subscan/internal/jobs"
-	"github.com/itering/subscan/internal/server/http"
-	"github.com/itering/subscan/internal/service"
 	"github.com/itering/subscan/internal/substrate/websocket"
 )
 
@@ -37,8 +35,10 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	// start service
-	svc := service.New()
-	httpSrv := http.New(svc)
+	_, closeFunc, err := di.InitApp()
+	if err != nil {
+		panic(err)
+	}
 
 	// handle signals
 	c := make(chan os.Signal, 1)
@@ -49,11 +49,8 @@ func main() {
 		log.Info("get a signal %s", s.String())
 		switch s {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
-			ctx, cancel := context.WithTimeout(context.Background(), 35*time.Second)
-			_ = httpSrv.Shutdown(ctx)
+			closeFunc()
 			log.Info("SubScan End exit")
-			svc.Close()
-			cancel()
 			time.Sleep(time.Second)
 			return
 		case syscall.SIGHUP:
