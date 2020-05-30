@@ -5,13 +5,17 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"github.com/google/wire"
 	"github.com/itering/scale.go/source"
 	"github.com/itering/scale.go/types"
+	pb "github.com/itering/subscan/api"
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/internal/service/scan"
 	"github.com/itering/subscan/internal/substrate/metadata"
 	"github.com/itering/subscan/internal/util"
 )
+
+var Provider = wire.NewSet(New, wire.Bind(new(pb.SubscanServer), new(*Service)))
 
 // Service service.
 type Service struct {
