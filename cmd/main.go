@@ -24,8 +24,14 @@ func main() {
 	}()
 
 	// init configs
-	flag.Set("conf", "../configs")
-	paladin.Init()
+	err := flag.Set("conf", "../configs")
+	if err != nil {
+		panic(err)
+	}
+	err = paladin.Init()
+	if err != nil {
+		panic(err)
+	}
 	jobs.Init()
 	log.Init(nil)
 	runtime.GOMAXPROCS(runtime.NumCPU())
