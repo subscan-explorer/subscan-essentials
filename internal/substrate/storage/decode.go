@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/freehere107/go-scale-codec/types"
+	"github.com/itering/scale.go/types"
 	"github.com/itering/subscan/internal/util"
 	"github.com/shopspring/decimal"
 )

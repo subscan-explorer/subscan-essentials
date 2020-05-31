@@ -3,7 +3,7 @@ package ss58
 import (
 	"bytes"
 	"encoding/binary"
-	"github.com/freehere107/go-scale-codec/types"
+	"github.com/itering/scale.go/types"
 	"github.com/itering/subscan/internal/util"
 	"github.com/itering/subscan/internal/util/base58"
 	"golang.org/x/crypto/blake2b"

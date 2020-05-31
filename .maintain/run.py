@@ -16,7 +16,7 @@ def daemon_status():
 
 
 def system_do(op):
-    os.system('./subscan -conf ../configs start ' + op)
+    os.system('../target/subscan -conf ../configs start ' + op)
 
 
 def main():
@@ -26,7 +26,8 @@ def main():
     elif sys.argv[1] == "substrate":
         op = ["substrate", "worker", "cronWorker"]
     map(system_do, op)  # run,run,run
-    print("start to listen daemon status :", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+    print("start to listen daemon status :",
+          time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
     while len(op) > 0:
         j = daemon_status()
         for i in range(len(op)):
