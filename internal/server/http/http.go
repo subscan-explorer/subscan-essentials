@@ -28,9 +28,11 @@ func New(s *service.Service) (engine *bm.Engine) {
 	svc = s
 	engine = bm.DefaultServer(hc.Server)
 	engine.HandleMethodNotAllowed = false
+
 	pb.RegisterSubscanBMServer(engine, s)
 	initRouter(engine)
 	ss = svc.NewScan()
+
 	if err := engine.Start(); err != nil {
 		panic(err)
 	}
@@ -60,13 +62,11 @@ func initRouter(e *bm.Engine) {
 			s.POST("extrinsic", extrinsic)
 			// Event
 			s.POST("events", events)
-			s.POST("event", event)
 			// Search
 			s.POST("search", search)
 			s.POST("check_hash", checkSearchHash)
 			// Log
 			s.POST("logs", logs)
-			s.POST("log", logInfo)
 
 			s.POST("accounts", accounts)
 

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/freehere107/go-workers"
 	"github.com/go-kratos/kratos/pkg/log"
 	"github.com/itering/subscan/internal/substrate"
 	"github.com/itering/subscan/internal/substrate/rpc"
@@ -21,17 +20,29 @@ import (
 // so set Waiting block count to try avoid
 const FinalizedWaitingBlockCount = 5
 
+type subscription struct {
+	Id     float64 `json:"id"`
+	Topic  int     `json:"topic"`
+	Latest int64   `json:"latest"`
+}
+
 var (
 	onceNewHead, onceFinHead sync.Once
+	subscriptionIds          = []subscription{
+		{Topic: newHeader},
+		{Topic: finalizeHeader},
+		{Topic: stateChange},
+	}
 )
 
 type SubscribeService struct {
 	*Service
 	newHead    chan bool
 	newFinHead chan bool
+	done       chan struct{}
 }
 
-func (s *Service) InitSubscribeService() *SubscribeService {
+func (s *Service) InitSubscribeService(done chan struct{}) *SubscribeService {
 	return &SubscribeService{
 		Service:    s,
 		newHead:    make(chan bool, 1),
@@ -39,21 +50,40 @@ func (s *Service) InitSubscribeService() *SubscribeService {
 	}
 }
 
-func (s *SubscribeService) ParserSubscribe(message []byte) {
+func (s *SubscribeService) Parser(message []byte) {
+
+	upgradeHealth := func(topic int) {
+		for index, subscript := range subscriptionIds {
+			if subscript.Topic == topic {
+				subscriptionIds[index].Latest = time.Now().Unix()
+			}
+		}
+	}
+
 	var j rpc.JsonRpcResult
 	if err := json.Unmarshal(message, &j); err != nil {
 		return
 	}
-	if j.Id == 1 { // runtime version
+
+	switch j.Id {
+	case runtimeVersion:
 		r := j.ToRuntimeVersion()
 		_ = s.regRuntimeVersion(r.ImplName, r.SpecVersion)
 		_ = s.UpdateChainMetadata(map[string]interface{}{"implName": r.ImplName, "specVersion": r.SpecVersion})
 		substrate.CurrentRuntimeSpecVersion = r.SpecVersion
+	case newHeader, finalizeHeader, stateChange:
+		subscriptionIds = append(subscriptionIds, subscription{
+			Id:     j.ToFloat64(),
+			Topic:  j.Id,
+			Latest: time.Now().Unix(),
+		})
 	}
+
 	switch j.Method {
 	case substrate.ChainNewHead:
 		r := j.ToNewHead()
 		_ = s.UpdateChainMetadata(map[string]interface{}{"blockNum": util.HexToNumStr(r.Number)})
+		upgradeHealth(newHeader)
 		go func() {
 			s.newHead <- true
 			onceNewHead.Do(func() {
@@ -63,12 +93,15 @@ func (s *SubscribeService) ParserSubscribe(message []byte) {
 	case substrate.ChainFinalizedHead:
 		r := j.ToNewHead()
 		_ = s.UpdateChainMetadata(map[string]interface{}{"finalized_blockNum": util.HexToNumStr(r.Number)})
+		upgradeHealth(finalizeHeader)
 		go func() {
 			s.newFinHead <- true
 			onceFinHead.Do(func() {
 				go s.subscribeFetchBlock()
 			})
 		}()
+	case substrate.StateStorage:
+		upgradeHealth(stateChange)
 	default:
 		return
 	}
@@ -85,15 +118,14 @@ func (s *SubscribeService) subscribeFetchBlock() {
 		blockNum := i.(BlockFinalized)
 		func(bf BlockFinalized) {
 			if err := s.FillBlockData(bf.BlockNum, bf.Finalized); err != nil {
-				_, _ = workers.EnqueueWithOptions("block", "block",
-					map[string]interface{}{"block_num": bf.BlockNum, "finalized": bf.Finalized},
-					workers.EnqueueOptions{RetryCount: 2})
+				log.Error("ChainGetBlockHash get error %v", err)
 			} else {
 				s.SetHeartBeat(fmt.Sprintf("%s:heartBeat:%s", util.NetworkNode, "substrate"))
 			}
 		}(blockNum)
 		wg.Done()
 	})
+
 	defer p.Release()
 	for {
 		select {
@@ -131,6 +163,8 @@ func (s *SubscribeService) subscribeFetchBlock() {
 				_ = p.Invoke(BlockFinalized{BlockNum: i, Finalized: true})
 			}
 			wg.Wait()
+		case <-s.done:
+			p.Release()
 		}
 	}
 }
@@ -147,65 +181,48 @@ func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 	if block != nil && block.Finalized && !block.CodecError {
 		return nil
 	}
-	const websocketTextMessage = 1
-
-	wsPool, err := websocket.Init()
-	if err != nil {
-		return
-	}
-	c := wsPool.Conn
-	defer c.Close()
 
 	v := &rpc.JsonRpcResult{}
-	if err = c.WriteMessage(websocketTextMessage, rpc.ChainGetBlockHash(wsBlockHash, blockNum)); err != nil {
+
+	// Block Hash
+	if err = websocket.SendWsRequest(nil, v, rpc.ChainGetBlockHash(wsBlockHash, blockNum)); err != nil {
 		return fmt.Errorf("websocket send error: %v", err)
 	}
-	_ = c.ReadJSON(v)
 	blockHash, err := v.ToString()
-
-	if err != nil {
+	if err != nil || blockHash == "" {
 		return fmt.Errorf("ChainGetBlockHash get error %v", err)
 	}
-
 	log.Info("Block num %d hash %s", blockNum, blockHash)
-	if err = c.WriteMessage(websocketTextMessage, rpc.ChainGetBlock(wsBlock, blockHash)); err != nil {
+
+	// block
+	if err = websocket.SendWsRequest(nil, v, rpc.ChainGetBlock(wsBlock, blockHash)); err != nil {
 		return fmt.Errorf("websocket send error: %v", err)
 	}
+	rpcBlock := v.ToBlock()
+
 	// event
-	if err = c.WriteMessage(websocketTextMessage, rpc.StateGetStorage(wsEvent, substrate.EventStorageKey, blockHash)); err != nil {
+	if err = websocket.SendWsRequest(nil, v, rpc.StateGetStorage(wsEvent, substrate.EventStorageKey, blockHash)); err != nil {
 		return fmt.Errorf("websocket send error: %v", err)
 	}
-	if err = c.WriteMessage(websocketTextMessage, rpc.ChainGetRuntimeVersion(wsSpec, blockHash)); err != nil {
+	event, _ := v.ToString()
+
+	// runtime
+	if err = websocket.SendWsRequest(nil, v, rpc.ChainGetRuntimeVersion(wsSpec, blockHash)); err != nil {
 		return fmt.Errorf("websocket send error: %v", err)
+	}
+	var runtimeVersion = -1
+
+	if r := v.ToRuntimeVersion(); r == nil {
+		runtimeVersion = s.GetCurrentRuntimeSpecVersion(blockNum)
+	} else {
+		runtimeVersion = r.SpecVersion
+		_ = s.regRuntimeVersion(r.ImplName, runtimeVersion)
 	}
 
-	var (
-		rpcBlock       *rpc.BlockResult
-		event          string
-		runtimeVersion = -1
-	)
-	for i := 0; i < 3; i++ {
-		v = &rpc.JsonRpcResult{}
-		if err = c.ReadJSON(v); err != nil {
-			return fmt.Errorf("websocket read json error %v", err)
-		}
-		switch v.Id {
-		case wsBlock:
-			rpcBlock = v.ToBlock()
-		case wsEvent:
-			event, _ = v.ToString()
-		default:
-			if r := v.ToRuntimeVersion(); r == nil {
-				runtimeVersion = s.GetCurrentRuntimeSpecVersion(i)
-			} else {
-				runtimeVersion = r.SpecVersion
-				if runtimeVersion > substrate.CurrentRuntimeSpecVersion && substrate.CurrentRuntimeSpecVersion >= 0 {
-					substrate.CurrentRuntimeSpecVersion = runtimeVersion
-					_ = s.regRuntimeVersion(r.ImplName, runtimeVersion)
-				}
-			}
-		}
+	if runtimeVersion > substrate.CurrentRuntimeSpecVersion {
+		substrate.CurrentRuntimeSpecVersion = runtimeVersion
 	}
+
 	if rpcBlock == nil || runtimeVersion == -1 {
 		return errors.New("nil block data")
 	}
@@ -218,21 +235,18 @@ func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 
 	// refresh finalized info for update
 	if block != nil {
-		// Confirm data, set block Finalized
-		if block.ExtrinsicsRoot == rpcBlock.Block.Header.ExtrinsicsRoot && block.Event == event && !block.CodecError && finalized {
+		// Confirm data, only set block Finalized
+		if block.Hash == blockHash && block.ExtrinsicsRoot == rpcBlock.Block.Header.ExtrinsicsRoot && block.Event == event && block.CodecError == false && finalized {
 			s.dao.SetBlockFinalized(block)
 		} else {
+			// refresh all block data
 			block.ExtrinsicsRoot = rpcBlock.Block.Header.ExtrinsicsRoot
 			block.Hash = blockHash
 			block.ParentHash = rpcBlock.Block.Header.ParentHash
 			block.StateRoot = rpcBlock.Block.Header.StateRoot
 
-			extrinsicB, _ := json.Marshal(rpcBlock.Block.Extrinsics)
-			block.Extrinsics = string(extrinsicB)
-
-			logByte, _ := json.Marshal(rpcBlock.Block.Header.Digest.Logs)
-			block.Logs = string(logByte)
-
+			block.Extrinsics = util.InterfaceToString(rpcBlock.Block.Extrinsics)
+			block.Logs = util.InterfaceToString(rpcBlock.Block.Header.Digest.Logs)
 			block.Event = event
 
 			_ = s.UpdateBlockData(block, finalized)

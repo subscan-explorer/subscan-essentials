@@ -14,10 +14,11 @@ require (
 	github.com/google/wire v0.4.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/huandu/xstrings v1.3.1
-	github.com/itering/scale.go v0.0.0-20200529093732-2bcd0f653e5b
+	github.com/itering/scale.go v0.0.6
 	github.com/jinzhu/gorm v1.9.12
 	github.com/jpillora/backoff v1.0.0
 	github.com/json-iterator/go v1.1.9
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/orfjackal/nanospec.go v0.0.0-20120727230329-de4694c1d701 // indirect
 	github.com/panjf2000/ants/v2 v2.4.0
 	github.com/pierrec/xxHash v0.1.5

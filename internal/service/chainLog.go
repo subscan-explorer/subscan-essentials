@@ -25,10 +25,6 @@ func (s *Service) EmitLog(c context.Context, txn *dao.GormDB, blockNum int, l []
 	for index, logData := range l {
 		dataStr := util.InterfaceToString(logData.Value)
 
-		if strings.ToLower(logData.Type) == "other" {
-			dataStr = dealDarwiniaMmrRoot(dataStr)
-		}
-
 		if err = s.dao.CreateLog(c, txn, blockNum, index, &logData, []byte(dataStr), finalized); err != nil {
 			return "", err
 		}
@@ -40,12 +36,4 @@ func (s *Service) EmitLog(c context.Context, txn *dao.GormDB, blockNum int, l []
 
 	}
 	return validator, err
-}
-
-func dealDarwiniaMmrRoot(value string) string {
-	if util.IsDarwinia {
-		mmr := storage.MerkleMountainRangeRootLog{MmrRoot: strings.ReplaceAll(value, `"`, "")[8:]}
-		return util.InterfaceToString(mmr)
-	}
-	return value
 }

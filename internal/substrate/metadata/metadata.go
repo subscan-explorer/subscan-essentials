@@ -18,6 +18,7 @@ var (
 	latestSpec      = -1
 	isInit          bool
 	RuntimeMetadata = make(map[int]*MetadataType)
+	Decoder         *scalecodec.MetadataDecoder
 )
 
 func Latest(runtime *RuntimeRaw) *MetadataType {
@@ -31,6 +32,7 @@ func Latest(runtime *RuntimeRaw) *MetadataType {
 	m := scalecodec.MetadataDecoder{}
 	m.Init(util.HexToBytes(runtime.Raw))
 	_ = m.Process()
+	Decoder = &m
 	latestSpec = runtime.Spec
 	instant := MetadataType(m.Metadata)
 	RuntimeMetadata[latestSpec] = &instant
@@ -93,9 +95,9 @@ func RegNewMetadataType(spec int, coded string) *MetadataType {
 func (m *MetadataType) GetModuleStorageMapType(section, method string) (string, *types.StorageType) {
 	modules := m.Metadata.Modules
 	for _, value := range modules {
-		if strings.EqualFold(value.Name, section) {
+		if strings.ToLower(value.Name) == strings.ToLower(section) {
 			for _, storage := range value.Storage {
-				if strings.EqualFold(storage.Name, method) {
+				if strings.ToLower(storage.Name) == strings.ToLower(method) {
 					return value.Prefix, &storage.Type
 				}
 			}

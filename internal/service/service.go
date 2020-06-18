@@ -49,11 +49,12 @@ func (s *Service) Migration() {
 func (s *Service) initSubRuntimeLatest() {
 	// reg network custom type
 	defer func() {
+		go s.UnknownToken()
 		c, err := ioutil.ReadFile(fmt.Sprintf("../configs/source/%s.json", util.NetworkNode))
-		if err != nil {
-			panic(err)
+		if err == nil {
+			types.RegCustomTypes(source.LoadTypeRegistry(c))
 		}
-		types.RegCustomTypes(source.LoadTypeRegistry(c))
+
 	}()
 
 	// find db

@@ -81,12 +81,6 @@ func AccountNonce(id int, address string) []byte {
 	rpc := Param{Id: id, Method: "account_nextIndex", Params: []string{address}}
 	return rpc.structureQuery()
 }
-
-func StateUnsubscribeStorage(id int, subscriptionId int64) []byte {
-	rpc := Param{Id: id, Method: "state_unsubscribeStorage", Params: []int64{subscriptionId}}
-	return rpc.structureQuery()
-}
-
 func StateGetStorage(id int, storageKey string, hash string) []byte {
 	rpc := Param{Id: id, Method: "state_getStorage", Params: []string{storageKey}}
 	if hash != "" {

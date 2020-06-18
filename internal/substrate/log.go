@@ -39,9 +39,11 @@ func (p *PreRuntime) getBabeAuthor(sessionValidators []string) string {
 		if digest != nil {
 			if digest.Primary != nil {
 				return sessionValidators[digest.Primary.AuthorityIndex]
+			} else if digest.Secondary != nil {
+				return sessionValidators[digest.Secondary.AuthorityIndex]
+			} else {
+				return sessionValidators[digest.VRF.AuthorityIndex]
 			}
-			return sessionValidators[digest.Secondary.AuthorityIndex]
-
 		}
 	}
 	return ""

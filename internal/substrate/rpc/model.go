@@ -24,6 +24,12 @@ type JsonRpcParams struct {
 	Error   *Error      `json:"error,omitempty"`
 }
 
+type Properties struct {
+	Ss58Format    int    `json:"ss58Format"`
+	TokenDecimals int    `json:"tokenDecimals"`
+	TokenSymbol   string `json:"tokenSymbol"`
+}
+
 type Error struct {
 	Code    int         `json:"code"`
 	Message string      `json:"message"`
@@ -31,8 +37,7 @@ type Error struct {
 }
 
 type SubParams struct {
-	Result       interface{} `json:"result"`
-	Subscription int64       `json:"subscription,omitempty"`
+	Result interface{} `json:"result"`
 }
 
 type HealthResult struct {
@@ -115,6 +120,13 @@ func (p *JsonRpcResult) ToInt() uint64 {
 	return p.Result.(uint64)
 }
 
+func (p *JsonRpcResult) ToFloat64() float64 {
+	if p.checkErr() != nil {
+		return 0
+	}
+	return p.Result.(float64)
+}
+
 func (p *JsonRpcResult) ToRuntimeVersion() *RuntimeVersion {
 	if p.checkErr() != nil {
 		return nil
@@ -162,7 +174,7 @@ func (p *JsonRpcResult) ToStorage() (*StateStorageResult, int64) {
 		return nil, 0
 	}
 	_ = json.Unmarshal([]byte(marshal), v)
-	return v, (p).Params.Subscription
+	return v, 0
 }
 
 func (p *JsonRpcResult) ToNewHead() *ChainNewHeadResult {
@@ -249,12 +261,12 @@ func (p *JsonRpcResult) checkErr() error {
 	return nil
 }
 
-// func (p *JsonRpcParams) checkErr() error {
-// 	if p.Error != nil {
-// 		return errors.New(p.Error.Message)
-// 	}
-// 	if p.Params == nil {
-// 		return nilErr
-// 	}
-// 	return nil
-// }
+func (p *JsonRpcParams) checkErr() error {
+	if p.Error != nil {
+		return errors.New(p.Error.Message)
+	}
+	if p.Params == nil {
+		return nilErr
+	}
+	return nil
+}

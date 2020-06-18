@@ -24,6 +24,9 @@ func NewApp(
 		svc:  svc,
 		http: h,
 	}
+
+	go app.svc.Subscribe()
+
 	closeFunc = func() {
 		svc.Close()
 		ctx, cancel := context.WithTimeout(context.Background(), 35*time.Second)

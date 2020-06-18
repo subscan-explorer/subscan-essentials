@@ -24,7 +24,7 @@ func (s *Service) Metadata() (map[string]string, error) {
 	m, err := s.dao.GetMetadata(c)
 	m["blockTime"] = util.IntToString(substrate.BlockTime)
 	m["networkNode"] = util.NetworkNode
-	m["commissionAccuracy"] = substrate.CommissionAccuracy
+	m["commissionAccuracy"] = util.IntToString(substrate.CommissionAccuracy)
 	m["addressType"] = util.IntToString(substrate.AddressType)
 	return m, err
 }

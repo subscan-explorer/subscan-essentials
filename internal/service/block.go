@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
 	"github.com/go-kratos/kratos/pkg/log"
 	"github.com/itering/subscan/internal/model"
 	"github.com/itering/subscan/internal/substrate"
@@ -53,14 +52,17 @@ func (s *Service) GetBlockFixDataList(option ...string) []int {
 }
 
 func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, spec int, finalized bool) (err error) {
-	var decodeExtrinsics []interface{}
-	var decodeEvent interface{}
-	var logs []storage.DecoderLog
+	var (
+		decodeExtrinsics []map[string]interface{}
+		decodeEvent      interface{}
+		logs             []storage.DecoderLog
+	)
 	c := context.TODO()
 
 	blockNum := util.StringToInt(util.HexToNumStr(block.Header.Number))
 
 	metadataInstant := s.getMetadataInstant(spec)
+
 	// Extrinsic
 	decodeExtrinsics, err = substrate.DecodeExtrinsic(block.Extrinsics, metadataInstant, spec)
 	if err != nil {
@@ -86,9 +88,9 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 	var (
 		eventCount, extrinsicsCount, blockTimestamp int
 		validator                                   string
-		extrinsicHash                               map[string]string
-		extrinsicFee                                map[string]decimal.Decimal
 	)
+	extrinsicHash := make(map[string]string)
+	extrinsicFee := make(map[string]decimal.Decimal)
 
 	validatorList, _ := rpc.GetValidatorFromSub(nil, hash)
 	txn := s.dao.DbBegin()
@@ -124,7 +126,7 @@ func (s *Service) UpdateBlockData(block *model.ChainBlock, finalized bool) (err 
 	var (
 		decodeEvent      interface{}
 		encodeExtrinsics []string
-		decodeExtrinsics []interface{}
+		decodeExtrinsics []map[string]interface{}
 	)
 
 	_ = json.Unmarshal([]byte(block.Extrinsics), &encodeExtrinsics)
@@ -188,7 +190,6 @@ func (s *Service) UpdateBlockData(block *model.ChainBlock, finalized bool) (err 
 	txn.DbCommit()
 	return
 }
-
 func (s *Service) checkoutExtrinsicEvents(e []model.ChainEvent, blockNumInt int) map[string][]model.ChainEvent {
 	eventMap := make(map[string][]model.ChainEvent)
 	for _, event := range e {

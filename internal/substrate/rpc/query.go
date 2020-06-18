@@ -2,11 +2,11 @@ package rpc
 
 import (
 	"fmt"
+	"github.com/itering/subscan/internal/pkg/recws"
 	"github.com/itering/subscan/internal/substrate"
 	"github.com/itering/subscan/internal/substrate/storage"
 	"github.com/itering/subscan/internal/substrate/storageKey"
 	"github.com/itering/subscan/internal/substrate/websocket"
-	"github.com/itering/subscan/internal/pkg/recws"
 	"github.com/shopspring/decimal"
 	"math/rand"
 
@@ -237,4 +237,14 @@ func GetValidatorFromSub(c *recws.RecConn, hash string) ([]string, error) {
 		r = append(r, util.TrimHex(address))
 	}
 	return r, nil
+}
+
+func GetSystemProperties() (*Properties, error) {
+	var t Properties
+	v := &JsonRpcResult{}
+	if err := websocket.SendWsRequest(nil, v, SystemProperties(rand.Intn(1000))); err != nil {
+		return nil, err
+	}
+	err := v.ToAnyThing(&t)
+	return &t, err
 }
