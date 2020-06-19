@@ -4,11 +4,8 @@ import (
 	"context"
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/internal/model"
-	"github.com/itering/subscan/internal/substrate"
 	"github.com/itering/subscan/internal/util"
-	"github.com/itering/subscan/internal/util/ss58"
 	"github.com/json-iterator/go"
-	"regexp"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
@@ -113,47 +110,6 @@ func (s *Service) GetEventList(page, row int, order string, where ...string) ([]
 		result = append(result, ej)
 	}
 	return result, count
-}
-
-func (s *Service) GetAccountListJson(page, row int, order, field string, queryWhere ...string) ([]model.AccountSampleJson, int) {
-	c := context.TODO()
-	list, count := s.dao.GetAccountList(c, page, row, order, field, queryWhere...)
-	var j []model.AccountSampleJson
-	for _, account := range list {
-		j = append(j, *s.dao.AccountSampleJson(c, account))
-	}
-	return j, count
-}
-
-func (s *Service) SearchByKey(key string, page int, row int) interface{} {
-	c := context.TODO()
-	if regexp.MustCompile("^[0-9]+$").MatchString(key) { // block_num
-		return s.GetBlockByNum(util.StringToInt(key))
-	}
-	if regexp.MustCompile(`^0x[0-9a-fA-F]{64}$`).MatchString(key) { // Extrinsic
-		return s.dao.GetExtrinsicsDetailByHash(c, key)
-	}
-
-	addressHex := ss58.Decode(key, substrate.AddressType)
-	if !regexp.MustCompile(`^[0-9a-fA-F]{64}$`).MatchString(addressHex) { // try account index
-		accountIndex := ss58.DecodeAccountIndex(key, substrate.AddressType)
-		if accountIndex >= 0 {
-			if account, _ := s.dao.FindByIndex(context.TODO(), int(accountIndex)); account != nil {
-				return map[string]interface{}{"account": s.dao.AccountAsJson(c, account)}
-			}
-		}
-		return nil
-	}
-	account, _ := s.dao.FindByAddress(addressHex)
-	if account == nil {
-		// check balance, if balance positive, create account
-		if amount, _, _ := s.dao.GetBalanceFromNetwork(c, addressHex, "balances"); amount.IsPositive() {
-			account, _ = s.dao.TouchAccount(c, addressHex)
-		} else {
-			return nil
-		}
-	}
-	return map[string]interface{}{"account": s.dao.AccountAsJson(c, account)}
 }
 
 func (s *Service) GetBlockByNum(num int) *model.ChainBlockJson {

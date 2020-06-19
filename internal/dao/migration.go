@@ -6,15 +6,14 @@ import (
 )
 
 func (d *Dao) Migration() {
-	db := d.db
+	db := d.Db
 	d.splitTableMigrate()
 	db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
-		&model.ChainAccount{},
+		// &model.ChainAccount{},
 		&model.RuntimeVersion{},
 		&model.ExtrinsicError{},
 	)
-	db.Model(model.ChainAccount{}).AddUniqueIndex("address", "address")
-	db.Model(model.ChainAccount{}).AddIndex("account_index", "account_index")
+	// db.Model(model.ChainAccount{}).AddUniqueIndex("address", "address")
 	db.Model(model.RuntimeVersion{}).AddUniqueIndex("spec_version", "spec_version")
 	db.Model(model.RuntimeVersion{}).ModifyColumn("modules", "text")
 
@@ -38,7 +37,7 @@ func (d *Dao) blockMigrate(blockNum int) {
 	transactionModel := model.ChainTransaction{BlockNum: blockNum}
 	logModel := model.ChainLog{BlockNum: blockNum}
 
-	db := d.db
+	db := d.Db
 	db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
 		blockModel,
 		&eventModel,

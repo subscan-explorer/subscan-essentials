@@ -60,7 +60,7 @@ func (d *Dao) GetTransactionCount(c context.Context, where ...string) int {
 	blockNum, _ := d.GetFillAlreadyBlockNum(context.TODO())
 	for index := blockNum / model.SplitTableBlockNum; index >= 0; index-- {
 		var tableCount int
-		queryOrigin := d.db.Model(model.ChainTransaction{BlockNum: index * model.SplitTableBlockNum})
+		queryOrigin := d.Db.Model(model.ChainTransaction{BlockNum: index * model.SplitTableBlockNum})
 		for _, w := range where {
 			queryOrigin = queryOrigin.Where(w)
 		}
@@ -80,7 +80,7 @@ func (d *Dao) GetTransactionList(c context.Context, page, row int, order string,
 	for index := blockNum / model.SplitTableBlockNum; index >= 0; index-- {
 		var tableData []model.ExtrinsicsJson
 		var tableCount int
-		queryOrigin := d.db.Model(model.ChainTransaction{BlockNum: index * model.SplitTableBlockNum})
+		queryOrigin := d.Db.Model(model.ChainTransaction{BlockNum: index * model.SplitTableBlockNum})
 
 		for _, w := range where {
 			queryOrigin = queryOrigin.Where(w)

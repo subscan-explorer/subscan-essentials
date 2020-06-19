@@ -127,21 +127,6 @@ func (c ChainTransaction) TableName() string {
 	return fmt.Sprintf("chain_transactions_%d", c.BlockNum/SplitTableBlockNum)
 }
 
-type ChainAccount struct {
-	ID               uint            `gorm:"primary_key"`
-	CreatedAt        time.Time       `json:"created_at"`
-	Address          string          `sql:"default: null;size:100" json:"address"`
-	Nickname         string          `sql:"default: null;size:100" json:"nickname"`
-	AccountIndex     int             `json:"account_index"`
-	Nonce            int             `json:"nonce"`
-	Balance          decimal.Decimal `json:"balance" sql:"type:decimal(30,15);"`
-	KtonBalance      decimal.Decimal `json:"kton_balance" sql:"type:decimal(30,15);"`
-	CountExtrinsic   int             `json:"count_extrinsic"`
-	RingLock         decimal.Decimal `json:"ring_lock" sql:"type:decimal(30,0);"`
-	KtonLock         decimal.Decimal `json:"kton_lock" sql:"type:decimal(30,0);"`
-	OutputBlockCount int             `json:"output_block_count" sql:"default: 0"`
-}
-
 type ExtrinsicParam struct {
 	Name     string      `json:"name"`
 	Type     string      `json:"type"`

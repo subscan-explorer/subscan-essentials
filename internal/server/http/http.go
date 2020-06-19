@@ -62,18 +62,14 @@ func initRouter(e *bm.Engine) {
 			s.POST("extrinsic", extrinsic)
 			// Event
 			s.POST("events", events)
-			// Search
-			s.POST("search", search)
+
 			s.POST("check_hash", checkSearchHash)
 			// Log
 			s.POST("logs", logs)
-
-			s.POST("accounts", accounts)
 
 			s.POST("runtime/metadata", runtimeMetadata)
 			s.POST("runtime/list", runtimeList)
 
 		}
 	}
-
 }

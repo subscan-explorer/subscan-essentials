@@ -42,7 +42,6 @@ func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.C
 	}
 	if err := d.CreateTransaction(c, txn, &ce, extrinsic.BlockTimestamp); err == nil {
 		_ = d.IncrMetadata(c, "count_signed_extrinsic", 1)
-		d.UpdateAccountCountExtrinsic(c, extrinsic.AccountId, nonce)
 	}
 	return d.checkDBError(query.Error)
 }
@@ -50,12 +49,12 @@ func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.C
 func (d *Dao) DropExtrinsicNotFinalizedData(c context.Context, blockNum int, finalized bool) bool {
 	delExist := false
 	if finalized {
-		if query := d.db.Where("block_num = ?", blockNum).Delete(model.ChainExtrinsic{BlockNum: blockNum}); query.RowsAffected > 0 {
+		if query := d.Db.Where("block_num = ?", blockNum).Delete(model.ChainExtrinsic{BlockNum: blockNum}); query.RowsAffected > 0 {
 			_ = d.IncrMetadata(c, "count_extrinsic", -int(query.RowsAffected))
 		}
 
 		var es []model.ChainTransaction
-		if query := d.db.Model(model.ChainTransaction{BlockNum: blockNum}).Where("block_num = ?", blockNum).
+		if query := d.Db.Model(model.ChainTransaction{BlockNum: blockNum}).Where("block_num = ?", blockNum).
 			Scan(&es).Delete(model.ChainTransaction{BlockNum: blockNum}); query.RowsAffected > 0 && len(es) > 0 {
 			delExist = true
 		}
@@ -65,7 +64,7 @@ func (d *Dao) DropExtrinsicNotFinalizedData(c context.Context, blockNum int, fin
 
 func (d *Dao) GetExtrinsicsByBlockNum(c context.Context, blockNum int) []*model.ChainExtrinsicJson {
 	var extrinsics []model.ChainExtrinsic
-	query := d.db.Model(model.ChainExtrinsic{BlockNum: blockNum}).
+	query := d.Db.Model(model.ChainExtrinsic{BlockNum: blockNum}).
 		Where("block_num = ?", blockNum).Order("id asc").Scan(&extrinsics)
 	if query == nil || query.RecordNotFound() {
 		return nil
@@ -85,7 +84,7 @@ func (d *Dao) GetExtrinsicList(c context.Context, page, row int, order string, q
 	for index := blockNum / model.SplitTableBlockNum; index >= 0; index-- {
 		var tableData []model.ChainExtrinsic
 		var tableCount int
-		queryOrigin := d.db.Model(model.ChainExtrinsic{BlockNum: index * model.SplitTableBlockNum})
+		queryOrigin := d.Db.Model(model.ChainExtrinsic{BlockNum: index * model.SplitTableBlockNum})
 		for _, w := range queryWhere {
 			queryOrigin = queryOrigin.Where(w)
 		}
@@ -119,7 +118,7 @@ func (d *Dao) GetExtrinsicsByHash(c context.Context, hash string) *model.ChainEx
 	var extrinsic model.ChainExtrinsic
 	blockNum, _ := d.GetFillAlreadyBlockNum(context.TODO())
 	for index := blockNum / (model.SplitTableBlockNum); index >= 0; index-- {
-		query := d.db.Model(model.ChainExtrinsic{BlockNum: index * model.SplitTableBlockNum}).Where("extrinsic_hash = ?", hash).First(&extrinsic)
+		query := d.Db.Model(model.ChainExtrinsic{BlockNum: index * model.SplitTableBlockNum}).Where("extrinsic_hash = ?", hash).First(&extrinsic)
 		if query != nil && !query.RecordNotFound() {
 			return &extrinsic
 		}
@@ -137,7 +136,7 @@ func (d *Dao) GetExtrinsicsDetailByHash(c context.Context, hash string) *model.E
 func (d *Dao) GetExtrinsicsDetailByIndex(c context.Context, index string) *model.ExtrinsicDetail {
 	var extrinsic model.ChainExtrinsic
 	indexArr := strings.Split(index, "-")
-	query := d.db.Model(model.ChainExtrinsic{BlockNum: util.StringToInt(indexArr[0])}).
+	query := d.Db.Model(model.ChainExtrinsic{BlockNum: util.StringToInt(indexArr[0])}).
 		Where("extrinsic_index = ?", index).Scan(&extrinsic)
 	if query == nil || query.RecordNotFound() {
 		return nil

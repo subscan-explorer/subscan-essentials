@@ -1,7 +1,6 @@
 package system
 
 import (
-	"context"
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/internal/model"
 	"github.com/itering/subscan/internal/substrate"
@@ -86,14 +85,14 @@ func (s *system) ExtrinsicFailed() {
 
 }
 func (s *system) NewAccount() {
-	c := context.TODO()
-	if account, err := s.dao.TouchAccount(c, util.TrimHex(util.InterfaceToString(s.eventParams[0].Value))); err == nil {
-		_, _, _ = s.dao.UpdateAccountBalance(c, account, "balances")
-	}
+	// c := context.TODO()
+	// if account, err := s.dao.TouchAccount(c, util.TrimHex(util.InterfaceToString(s.eventParams[0].Value))); err == nil {
+	// 	_, _, _ = s.dao.UpdateAccountBalance(c, account, "balances")
+	// }
 }
 
 func (s *system) KilledAccount() {
-	s.dao.ResetAccountNonce(context.TODO(), util.TrimHex(util.InterfaceToString(s.eventParams[0].Value)))
+	// s.dao.ResetAccountNonce(context.TODO(), util.TrimHex(util.InterfaceToString(s.eventParams[0].Value)))
 }
 
 func (s *system) SetCode() {}

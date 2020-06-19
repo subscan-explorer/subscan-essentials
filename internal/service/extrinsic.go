@@ -13,7 +13,7 @@ import (
 )
 
 func (s *Service) GetTransactionList(page, row int, order string, where ...string) ([]model.ExtrinsicsJson, int) {
-	return s.dao.GetTransactionList(context.TODO(), page, row, order, where...)
+	return s.Dao.GetTransactionList(context.TODO(), page, row, order, where...)
 }
 
 func (s *Service) createExtrinsic(c context.Context,
@@ -63,13 +63,13 @@ func (s *Service) createExtrinsic(c context.Context,
 		extrinsicList = append(extrinsicList, extrinsic)
 	}
 
-	s.dao.DropExtrinsicNotFinalizedData(c, blockNum, finalized)
+	s.Dao.DropExtrinsicNotFinalizedData(c, blockNum, finalized)
 
 	for _, extrinsic := range extrinsicList {
 		nonce := s.getAccountNewNonce(extrinsic.AccountId, extrinsic.Nonce, eventMap[extrinsic.ExtrinsicIndex]) // check ReapedAccount
 
 		extrinsicValue := extrinsic
-		err = s.dao.CreateExtrinsic(c, txn, &extrinsicValue, nonce)
+		err = s.Dao.CreateExtrinsic(c, txn, &extrinsicValue, nonce)
 		if err != nil {
 			return 0, 0, nil, nil, err
 		}

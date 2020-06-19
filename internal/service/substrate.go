@@ -47,11 +47,11 @@ func (s *Service) InitSubscribeService(done chan struct{}) *SubscribeService {
 		Service:    s,
 		newHead:    make(chan bool, 1),
 		newFinHead: make(chan bool, 1),
+		done:       done,
 	}
 }
 
 func (s *SubscribeService) Parser(message []byte) {
-
 	upgradeHealth := func(topic int) {
 		for index, subscript := range subscriptionIds {
 			if subscript.Topic == topic {
@@ -64,7 +64,6 @@ func (s *SubscribeService) Parser(message []byte) {
 	if err := json.Unmarshal(message, &j); err != nil {
 		return
 	}
-
 	switch j.Id {
 	case runtimeVersion:
 		r := j.ToRuntimeVersion()
@@ -114,6 +113,8 @@ func (s *SubscribeService) subscribeFetchBlock() {
 		BlockNum  int  `json:"block_num"`
 		Finalized bool `json:"finalized"`
 	}
+	var dealPanic = func(c interface{}) {}
+	options := ants.Options{PanicHandler: dealPanic}
 	p, _ := ants.NewPoolWithFunc(10, func(i interface{}) {
 		blockNum := i.(BlockFinalized)
 		func(bf BlockFinalized) {
@@ -124,8 +125,7 @@ func (s *SubscribeService) subscribeFetchBlock() {
 			}
 		}(blockNum)
 		wg.Done()
-	})
-
+	}, ants.WithOptions(options))
 	defer p.Release()
 	for {
 		select {
@@ -140,7 +140,7 @@ func (s *SubscribeService) subscribeFetchBlock() {
 
 			startBlock := alreadyBlock + 1
 			if alreadyBlock == 0 {
-				startBlock = 0
+				startBlock = alreadyBlock
 			}
 			for i := startBlock; i <= int(blockNum); i++ {
 				wg.Add(1)
@@ -156,7 +156,7 @@ func (s *SubscribeService) subscribeFetchBlock() {
 			alreadyBlock, _ := s.GetFillFinalizedBlockNum()
 			startBlock := alreadyBlock + 1
 			if alreadyBlock == 0 {
-				startBlock = 0
+				startBlock = alreadyBlock
 			}
 			for i := startBlock; i <= int(blockNum-FinalizedWaitingBlockCount); i++ {
 				wg.Add(1)
@@ -164,7 +164,7 @@ func (s *SubscribeService) subscribeFetchBlock() {
 			}
 			wg.Wait()
 		case <-s.done:
-			p.Release()
+			return
 		}
 	}
 }
@@ -177,7 +177,7 @@ const (
 )
 
 func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
-	block := s.dao.GetBlockByNum(context.TODO(), blockNum)
+	block := s.Dao.GetBlockByNum(context.TODO(), blockNum)
 	if block != nil && block.Finalized && !block.CodecError {
 		return nil
 	}
@@ -229,7 +229,7 @@ func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 
 	var setFinalized = func() {
 		if finalized {
-			_ = s.dao.SaveFillAlreadyFinalizedBlockNum(context.TODO(), blockNum)
+			_ = s.Dao.SaveFillAlreadyFinalizedBlockNum(context.TODO(), blockNum)
 		}
 	}
 
@@ -237,7 +237,7 @@ func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 	if block != nil {
 		// Confirm data, only set block Finalized
 		if block.Hash == blockHash && block.ExtrinsicsRoot == rpcBlock.Block.Header.ExtrinsicsRoot && block.Event == event && block.CodecError == false && finalized {
-			s.dao.SetBlockFinalized(block)
+			s.Dao.SetBlockFinalized(block)
 		} else {
 			// refresh all block data
 			block.ExtrinsicsRoot = rpcBlock.Block.Header.ExtrinsicsRoot

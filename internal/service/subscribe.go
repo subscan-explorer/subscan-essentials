@@ -49,7 +49,6 @@ func (s *Service) Subscribe() {
 
 	subscribeSrv := s.InitSubscribeService(done)
 	go func() {
-		defer close(done)
 		for {
 			if !SubscribeConn.IsConnected() {
 				continue
@@ -57,7 +56,7 @@ func (s *Service) Subscribe() {
 			_, message, err := SubscribeConn.ReadMessage()
 			if err != nil {
 				log.Error("read: %s", err)
-				return
+				continue
 			}
 			log.Info("recv: %s", message)
 			subscribeSrv.Parser(message)
@@ -97,17 +96,19 @@ func (s *Service) Subscribe() {
 
 	for {
 		select {
-		// case <-done:
-		// 	return
+		case <-done:
+			return
 		case <-ticker.C:
 			checkHealth()
 		case <-interrupt:
+			close(done)
 			log.Info("interrupt")
 			err = SubscribeConn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			if err != nil {
 				log.Error("write close: %s", err)
 				return
 			}
+
 			return
 		}
 	}

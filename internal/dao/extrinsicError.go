@@ -11,7 +11,7 @@ func (d *Dao) CreateExtrinsicError(hash string, moduleError *substrate.MetadataM
 	if moduleError == nil {
 		return nil
 	}
-	query := d.db.Create(&model.ExtrinsicError{
+	query := d.Db.Create(&model.ExtrinsicError{
 		ExtrinsicHash: util.AddHex(hash),
 		Module:        moduleError.Module,
 		Name:          moduleError.Name,
@@ -22,6 +22,6 @@ func (d *Dao) CreateExtrinsicError(hash string, moduleError *substrate.MetadataM
 
 func (d *Dao) ExtrinsicError(hash string) *model.ExtrinsicError {
 	var e model.ExtrinsicError
-	d.db.Where("extrinsic_hash = ?", hash).Find(&e)
+	d.Db.Where("extrinsic_hash = ?", hash).Find(&e)
 	return &e
 }

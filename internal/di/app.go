@@ -2,6 +2,9 @@ package di
 
 import (
 	"context"
+	"fmt"
+	"github.com/itering/subscan/internal/plugins"
+	"github.com/itering/subscan/internal/server/http"
 	"time"
 
 	"github.com/go-kratos/kratos/pkg/log"
@@ -9,13 +12,33 @@ import (
 	"github.com/itering/subscan/internal/service"
 )
 
-//go:generate kratos tool wire
 type App struct {
 	svc  *service.Service
 	http *bm.Engine
 }
 
-func NewApp(
+func InitApp() (*App, func(), error) {
+	serviceService := service.New()
+	engine := http.New(serviceService)
+	app, cleanup, err := newApp(serviceService, engine)
+
+	// load plugins
+	for _, plugin := range plugins.RegisteredPlugins {
+		p := plugin()
+		_ = p.Init(serviceService.Dao, engine)
+		_ = p.Http()
+		fmt.Println(p)
+	}
+
+	if err != nil {
+		return nil, nil, err
+	}
+	return app, func() {
+		cleanup()
+	}, nil
+}
+
+func newApp(
 	svc *service.Service, h *bm.Engine,
 ) (
 	app *App, closeFunc func(), err error,
@@ -25,15 +48,13 @@ func NewApp(
 		http: h,
 	}
 
-	go app.svc.Subscribe()
-
 	closeFunc = func() {
-		svc.Close()
 		ctx, cancel := context.WithTimeout(context.Background(), 35*time.Second)
 		if err := h.Shutdown(ctx); err != nil {
 			log.Error("httpSrv.Shutdown error(%v)", err)
 		}
 		cancel()
+		svc.Close()
 	}
 	return
 }

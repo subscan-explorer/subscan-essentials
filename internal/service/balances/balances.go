@@ -1,10 +1,8 @@
 package balances
 
 import (
-	"context"
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/internal/model"
-	"github.com/itering/subscan/internal/util"
 	"github.com/shopspring/decimal"
 )
 
@@ -47,25 +45,25 @@ func EmitEvent(s Balances, eventId string) {
 }
 
 func (s *balances) transfer() {
-	c := context.TODO()
+	// c := context.TODO()
 	if len(s.eventParams) < 3 {
 		return
 	}
 
-	to := util.TrimHex(util.InterfaceToString(s.eventParams[1].Value))
-	if account, err := s.dao.TouchAccount(c, to); err == nil {
-		_, _, _ = s.dao.UpdateAccountBalance(c, account, s.e.ModuleId)
-	}
+	// to := util.TrimHex(util.InterfaceToString(s.eventParams[1].Value))
+	// if account, err := s.dao.TouchAccount(c, to); err == nil {
+	// 	_, _, _ = s.dao.UpdateAccountBalance(c, account, s.e.ModuleId)
+	// }
 
 }
 
 func (s *balances) newAccount() {
-	c := context.TODO()
-	if account, err := s.dao.TouchAccount(c, util.TrimHex(util.InterfaceToString(s.eventParams[0].Value))); err == nil {
-		_, _, _ = s.dao.UpdateAccountBalance(c, account, s.e.ModuleId)
-	}
+	// c := context.TODO()
+	// if account, err := s.dao.TouchAccount(c, util.TrimHex(util.InterfaceToString(s.eventParams[0].Value))); err == nil {
+	// 	_, _, _ = s.dao.UpdateAccountBalance(c, account, s.e.ModuleId)
+	// }
 }
 
 func (s *balances) reapedAccount() {
-	s.dao.ResetAccountNonce(context.TODO(), util.TrimHex(util.InterfaceToString(s.eventParams[0].Value)))
+	// s.dao.ResetAccountNonce(context.TODO(), util.TrimHex(util.InterfaceToString(s.eventParams[0].Value)))
 }

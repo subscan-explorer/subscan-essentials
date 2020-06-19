@@ -143,18 +143,6 @@ func event(c *bm.Context) {
 	c.JSON(ss.EventByIndex(p.EventIndex), nil)
 }
 
-func search(c *bm.Context) {
-	p := new(struct {
-		Key  string `json:"key" validate:"required"`
-		Row  int    `json:"row" validate:"min=1,max=100"`
-		Page int    `json:"page" validate:"min=0"`
-	})
-	if err := c.BindWith(p, binding.JSON); err != nil {
-		return
-	}
-	c.JSON(ss.SearchByKey(p.Key, p.Page, p.Row), nil)
-}
-
 func logs(c *bm.Context) {
 	p := new(struct {
 		Row  int `json:"row" validate:"min=1,max=100"`
@@ -195,23 +183,6 @@ func checkSearchHash(c *bm.Context) {
 		return
 	}
 	c.JSON(nil, util.RecordNotFound)
-}
-
-func accounts(c *bm.Context) {
-	p := new(struct {
-		Row        int    `json:"row" validate:"min=1,max=100"`
-		Page       int    `json:"page" validate:"min=0"`
-		Order      string `json:"order" validate:"omitempty,oneof=desc asc"`
-		OrderField string `json:"order_field" validate:"omitempty"`
-	})
-	if err := c.BindWith(p, binding.JSON); err != nil {
-		return
-	}
-	var query []string
-	list, count := ss.GetAccountListJson(p.Page, p.Row, p.Order, p.OrderField, query...)
-	c.JSON(map[string]interface{}{
-		"list": list, "count": count,
-	}, nil)
 }
 
 func runtimeList(c *bm.Context) {

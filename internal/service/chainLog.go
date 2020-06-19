@@ -12,20 +12,20 @@ import (
 
 func (s *Service) GetLogList(page, row int) (*[]model.ChainLogJson, int) {
 	c := context.TODO()
-	return s.dao.GetLogList(c, page, row)
+	return s.Dao.GetLogList(c, page, row)
 }
 
 func (s *Service) GetLogByIndex(index string) *model.ChainLogJson {
 	c := context.TODO()
-	return s.dao.GetLogsByIndex(c, index)
+	return s.Dao.GetLogsByIndex(c, index)
 }
 
 func (s *Service) EmitLog(c context.Context, txn *dao.GormDB, blockNum int, l []storage.DecoderLog, validatorList []string, finalized bool) (validator string, err error) {
-	s.dao.DropLogsNotFinalizedData(blockNum, finalized)
+	s.Dao.DropLogsNotFinalizedData(blockNum, finalized)
 	for index, logData := range l {
 		dataStr := util.InterfaceToString(logData.Value)
 
-		if err = s.dao.CreateLog(c, txn, blockNum, index, &logData, []byte(dataStr), finalized); err != nil {
+		if err = s.Dao.CreateLog(c, txn, blockNum, index, &logData, []byte(dataStr), finalized); err != nil {
 			return "", err
 		}
 

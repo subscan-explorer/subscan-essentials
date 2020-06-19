@@ -135,7 +135,7 @@ func GetMetadataByHash(hash ...string) (string, error) {
 	return v.ToString()
 }
 
-func GetFreeBalance(c *recws.RecConn, module, accountId, hash string) (decimal.Decimal, decimal.Decimal, error) {
+func GetFreeBalance(c *recws.RecConn, accountId, hash string) (decimal.Decimal, decimal.Decimal, error) {
 	var accountValue storage.StateStorage
 	var err error
 	switch util.NetworkNode {

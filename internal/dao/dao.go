@@ -17,7 +17,7 @@ var (
 
 // Dao dao.
 type Dao struct {
-	db    *gorm.DB
+	Db    *gorm.DB
 	redis *redis.Pool
 	cache *fanout.Fanout
 }
@@ -39,7 +39,7 @@ func New() (dao *Dao) {
 	dc.mergeEnvironment()
 	rc.mergeEnvironment()
 	dao = &Dao{
-		db:    newDb(dc),
+		Db:    newDb(dc),
 		redis: redis.NewPool(rc.Config, redis.DialDatabase(rc.DbName)),
 		cache: fanout.New("scan", fanout.Worker(1), fanout.Buffer(1024)),
 	}
@@ -51,7 +51,7 @@ func (d *Dao) Close() {
 	if d.redis != nil {
 		_ = d.redis.Close()
 	}
-	_ = d.db.Close()
+	_ = d.Db.Close()
 }
 
 // Ping ping the resource.
