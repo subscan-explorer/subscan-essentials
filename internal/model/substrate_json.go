@@ -101,21 +101,6 @@ type TransferJson struct {
 	Fee            decimal.Decimal `json:"fee"`
 }
 
-type AccountJson struct {
-	*AccountSampleJson
-	Nonce        int    `json:"nonce"`
-	AccountIndex string `json:"account_index"`
-}
-
-type AccountSampleJson struct {
-	Address     string          `json:"address"`
-	Balance     decimal.Decimal `json:"balance"`
-	KtonBalance decimal.Decimal `json:"kton_balance"`
-	RingLock    decimal.Decimal `json:"ring_lock"`
-	KtonLock    decimal.Decimal `json:"kton_lock"`
-	Nickname    string          `json:"nickname"`
-}
-
 type ExtrinsicsJson struct {
 	FromHex            string          `json:"from_hex"`
 	BlockNum           int             `json:"block_num"`

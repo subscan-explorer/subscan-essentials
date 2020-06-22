@@ -2,7 +2,6 @@ package di
 
 import (
 	"context"
-	"fmt"
 	"github.com/itering/subscan/internal/plugins"
 	"github.com/itering/subscan/internal/server/http"
 	"time"
@@ -27,7 +26,6 @@ func InitApp() (*App, func(), error) {
 		p := plugin()
 		_ = p.Init(serviceService.Dao, engine)
 		_ = p.Http()
-		fmt.Println(p)
 	}
 
 	if err != nil {

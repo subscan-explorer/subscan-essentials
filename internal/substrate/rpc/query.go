@@ -165,40 +165,35 @@ func GetFreeBalance(c *recws.RecConn, accountId, hash string) (decimal.Decimal, 
 	return decimal.Zero, decimal.Zero, err
 }
 
-func GetAccountLock(c *recws.RecConn, address, currency string) (balance decimal.Decimal, err error) {
+func GetAccountLock(c *recws.RecConn, address string) (balance decimal.Decimal, err error) {
 	var sv storage.StateStorage
-	m := map[string]string{"ring": "Balances", "kton": "Kton", "": "Balances"}
-	if module, ok := m[currency]; ok {
-		sv, err = ReadStorage(c, module, "Locks", "", util.TrimHex(address))
-		if err == nil {
-			if locks := sv.ToBalanceLock(); len(locks) > 0 {
-				for _, lock := range locks {
-					switch util.NetworkNode {
+	sv, err = ReadStorage(c, "Balances", "Locks", "", util.TrimHex(address))
 
-					case util.Edgeware:
-						return lock.Amount, nil
-
-					case util.CrabNetwork:
-						if lock.LockFor != nil {
-							if lock.LockFor.StakingLock != nil {
-								for _, unbonding := range lock.LockFor.StakingLock.Unbondings {
-									balance = balance.Add(unbonding.Amount)
-								}
-								balance = balance.Add(lock.LockFor.StakingLock.StakingAmount).Add(balance)
+	if err == nil {
+		if locks := sv.ToBalanceLock(); len(locks) > 0 {
+			for _, lock := range locks {
+				switch util.NetworkNode {
+				case util.Edgeware:
+					return lock.Amount, nil
+				case util.CrabNetwork:
+					if lock.LockFor != nil {
+						if lock.LockFor.StakingLock != nil {
+							for _, unbonding := range lock.LockFor.StakingLock.Unbondings {
+								balance = balance.Add(unbonding.Amount)
 							}
-							if lock.LockFor.Common != nil {
-								balance = balance.Add(lock.LockFor.Common.Amount)
-							}
+							balance = balance.Add(lock.LockFor.StakingLock.StakingAmount).Add(balance)
 						}
-
-					default: // kusama or other
-						if lock.Amount.GreaterThanOrEqual(balance) {
-							balance = lock.Amount
+						if lock.LockFor.Common != nil {
+							balance = balance.Add(lock.LockFor.Common.Amount)
 						}
 					}
+				default: // kusama or other
+					if lock.Amount.GreaterThanOrEqual(balance) {
+						balance = lock.Amount
+					}
 				}
-				return balance, nil
 			}
+			return balance, nil
 		}
 	}
 	return

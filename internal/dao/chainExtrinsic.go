@@ -39,9 +39,9 @@ func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.C
 	query := txn.Create(&ce)
 	if query.RowsAffected > 0 {
 		_ = d.IncrMetadata(c, "count_extrinsic", 1)
-	}
-	if err := d.CreateTransaction(c, txn, &ce, extrinsic.BlockTimestamp); err == nil {
-		_ = d.IncrMetadata(c, "count_signed_extrinsic", 1)
+		if ce.IsSigned {
+			_ = d.IncrMetadata(c, "count_signed_extrinsic", 1)
+		}
 	}
 	return d.checkDBError(query.Error)
 }
@@ -51,13 +51,9 @@ func (d *Dao) DropExtrinsicNotFinalizedData(c context.Context, blockNum int, fin
 	if finalized {
 		if query := d.Db.Where("block_num = ?", blockNum).Delete(model.ChainExtrinsic{BlockNum: blockNum}); query.RowsAffected > 0 {
 			_ = d.IncrMetadata(c, "count_extrinsic", -int(query.RowsAffected))
-		}
-
-		var es []model.ChainTransaction
-		if query := d.Db.Model(model.ChainTransaction{BlockNum: blockNum}).Where("block_num = ?", blockNum).
-			Scan(&es).Delete(model.ChainTransaction{BlockNum: blockNum}); query.RowsAffected > 0 && len(es) > 0 {
 			delExist = true
 		}
+
 	}
 	return delExist
 }

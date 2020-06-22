@@ -12,10 +12,6 @@ import (
 	"strings"
 )
 
-func (s *Service) GetTransactionList(page, row int, order string, where ...string) ([]model.ExtrinsicsJson, int) {
-	return s.Dao.GetTransactionList(context.TODO(), page, row, order, where...)
-}
-
 func (s *Service) createExtrinsic(c context.Context,
 	txn *dao.GormDB,
 	blockNum int,

@@ -100,33 +100,6 @@ func (c ChainExtrinsic) TableName() string {
 	return fmt.Sprintf("chain_extrinsics_%d", c.BlockNum/SplitTableBlockNum)
 }
 
-type ChainTransaction struct {
-	ID                 uint            `gorm:"primary_key"`
-	CreatedAt          time.Time       `json:"created_at"`
-	FromHex            string          `json:"from_hex" es:"type:keyword"`
-	Destination        string          `json:"destination" es:"type:keyword"`
-	ExtrinsicIndex     string          `sql:"default: null;size:100" json:"extrinsic_index" es:"type:keyword"`
-	Signature          string          `json:"signature"`
-	Success            bool            `json:"success"`
-	Hash               string          `sql:"default: null;size:100" json:"hash" es:"type:keyword"`
-	BlockNum           int             `json:"block_num" es:"type:keyword"`
-	BlockTimestamp     int             `json:"block_timestamp"`
-	CallCode           string          `json:"call_code"`
-	CallModuleFunction string          `json:"call_module_function" es:"type:keyword" sql:"size:100"`
-	CallModule         string          `json:"call_module" es:"type:keyword" sql:"size:100"`
-	Params             interface{}     `json:"params" sql:"type:MEDIUMTEXT;" es:"type:text"`
-	Amount             decimal.Decimal `json:"amount" sql:"type:decimal(30,15);"`
-	Fee                decimal.Decimal `json:"fee" sql:"type:decimal(30,0);"`
-	Finalized          bool            `json:"finalized"`
-}
-
-func (c ChainTransaction) TableName() string {
-	if c.BlockNum/SplitTableBlockNum == 0 {
-		return "chain_transactions"
-	}
-	return fmt.Sprintf("chain_transactions_%d", c.BlockNum/SplitTableBlockNum)
-}
-
 type ExtrinsicParam struct {
 	Name     string      `json:"name"`
 	Type     string      `json:"type"`

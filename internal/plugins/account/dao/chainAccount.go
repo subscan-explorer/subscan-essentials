@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/go-kratos/kratos/pkg/log"
 	"github.com/itering/subscan/internal/plugins/account/model"
-	"github.com/itering/subscan/internal/substrate"
 	"github.com/itering/subscan/internal/substrate/rpc"
 	"github.com/itering/subscan/internal/util"
 	"github.com/jinzhu/gorm"
@@ -28,17 +27,17 @@ func updateBalance(db *gorm.DB, account *model.ChainAccount, balance decimal.Dec
 	return nil
 }
 
-func GetBalanceFromNetwork(db *gorm.DB, address string) (decimal.Decimal, error) {
+func GetBalanceFromNetwork(address string) (decimal.Decimal, error) {
 	balance, _, err := rpc.GetFreeBalance(nil, address, "")
 	if err != nil {
 		log.Error("GetBalanceFromNetwork error %v", err)
 		return decimal.Zero, err
 	}
-	return balance.Div(decimal.New(1, int32(substrate.BalanceAccuracy))), nil
+	return balance, nil
 }
 
 func UpdateAccountBalance(db *gorm.DB, account *model.ChainAccount) (decimal.Decimal, error) {
-	balance, err := GetBalanceFromNetwork(db, account.Address)
+	balance, err := GetBalanceFromNetwork(account.Address)
 	if err == nil {
 		_ = updateBalance(db, account, balance)
 	}
@@ -53,8 +52,8 @@ func ResetAccountNonce(db *gorm.DB, address string) {
 	_ = db.Model(account).Update(model.ChainAccount{Nonce: 0})
 }
 
-func UpdateAccountLock(db *gorm.DB, address, currency string) error {
-	balance, err := rpc.GetAccountLock(nil, address, currency)
+func UpdateAccountLock(db *gorm.DB, address string) error {
+	balance, err := rpc.GetAccountLock(nil, address)
 	if err != nil {
 		log.Error("UpdateAccountLock err %v", err)
 		return err

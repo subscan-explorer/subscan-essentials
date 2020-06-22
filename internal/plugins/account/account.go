@@ -12,16 +12,6 @@ type Account struct {
 	e *bm.Engine
 }
 
-// Init(d *dao.Dao) error
-//
-// 	Http(e *bm.Engine) error
-//
-// 	ListModel() ([]interface{}, error)
-//
-// 	ProcessExtrinsic() error
-//
-// 	ProcessEvent() error
-
 func New() *Account {
 	return &Account{}
 }
