@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/internal/model"
+	"github.com/itering/subscan/internal/plugins"
 	"github.com/itering/subscan/internal/service/transaction"
 	"github.com/itering/subscan/internal/util"
 	"github.com/shopspring/decimal"
@@ -38,7 +39,7 @@ func (s *Service) createExtrinsic(c context.Context,
 
 		if extrinsic.CallModule == "timestamp" {
 
-			blockTimestamp = s.getTimestamp(c, extrinsic.Params)
+			blockTimestamp = s.getTimestamp(extrinsic.Params)
 		}
 
 		extrinsic.BlockNum = blockNum
@@ -59,20 +60,19 @@ func (s *Service) createExtrinsic(c context.Context,
 		extrinsicList = append(extrinsicList, extrinsic)
 	}
 
-	s.Dao.DropExtrinsicNotFinalizedData(c, blockNum, finalized)
+	s.dao.DropExtrinsicNotFinalizedData(c, blockNum, finalized)
 
 	for _, extrinsic := range extrinsicList {
-
-		extrinsicValue := extrinsic
-		err = s.Dao.CreateExtrinsic(c, txn, &extrinsicValue)
-		if err != nil {
+		if err = s.dao.CreateExtrinsic(c, txn, &extrinsic); err == nil {
+			go s.afterExtrinsic(spec, &extrinsic, eventMap[extrinsic.ExtrinsicIndex])
+		} else {
 			return 0, 0, nil, nil, err
 		}
 	}
 	return len(e), blockTimestamp, hash, extrinsicFee, err
 }
 
-func (s *Service) getTimestamp(c context.Context, param interface{}) (timestamp int) {
+func (s *Service) getTimestamp(param interface{}) (timestamp int) {
 	var paramsInstant []model.ExtrinsicParam
 	util.UnmarshalToAnything(&paramsInstant, param)
 	for _, p := range paramsInstant {
@@ -90,4 +90,11 @@ func (s *Service) getExtrinsicSuccess(e []model.ChainEvent) bool {
 		}
 	}
 	return true
+}
+
+func (s *Service) afterExtrinsic(spec int, extrinsic *model.ChainExtrinsic, events []model.ChainEvent) {
+	for _, plugin := range plugins.RegisteredPlugins {
+		p := plugin()
+		_ = p.ProcessExtrinsic(spec, extrinsic, events)
+	}
 }

@@ -16,22 +16,22 @@ import (
 
 func (s *Service) GetAlreadyBlockNum() (int, error) {
 	c := context.TODO()
-	return s.Dao.GetFillAlreadyBlockNum(c)
+	return s.dao.GetFillAlreadyBlockNum(c)
 }
 
 func (s *Service) GetFillFinalizedBlockNum() (int, error) {
 	c := context.TODO()
-	return s.Dao.GetFillFinalizedBlockNum(c)
+	return s.dao.GetFillFinalizedBlockNum(c)
 }
 
 func (s *Service) SetAlreadyBlockNum(num int) error {
 	c := context.TODO()
-	return s.Dao.SaveFillAlreadyBlockNum(c, num)
+	return s.dao.SaveFillAlreadyBlockNum(c, num)
 }
 
 func (s *Service) GetBlockByHash(hash string) *model.ChainBlock {
 	c := context.TODO()
-	block := s.Dao.BlockByHash(c, hash)
+	block := s.dao.BlockByHash(c, hash)
 	if block == nil {
 		return nil
 	}
@@ -40,11 +40,11 @@ func (s *Service) GetBlockByHash(hash string) *model.ChainBlock {
 
 func (s *Service) GetBlockByNum(num int) *model.ChainBlockJson {
 	c := context.TODO()
-	block := s.Dao.Block(c, num)
+	block := s.dao.Block(c, num)
 	if block == nil {
 		return nil
 	}
-	return s.Dao.BlockAsJson(c, block)
+	return s.dao.BlockAsJson(c, block)
 }
 
 func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, spec int, finalized bool) (err error) {
@@ -89,7 +89,7 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 	extrinsicFee := make(map[string]decimal.Decimal)
 
 	validatorList, _ := rpc.GetValidatorFromSub(nil, hash)
-	txn := s.Dao.DbBegin()
+	txn := s.dao.DbBegin()
 	defer txn.DbRollback()
 
 	var e []model.ChainEvent
@@ -110,7 +110,7 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 
 	codecError := validator == ""
 
-	if err = s.Dao.CreateBlock(c, txn, hash, block, event, util.InterfaceToString(block.Header.Digest.Logs), validator, eventCount, extrinsicsCount, blockTimestamp, codecError, spec, finalized); err == nil {
+	if err = s.dao.CreateBlock(c, txn, hash, block, event, util.InterfaceToString(block.Header.Digest.Logs), validator, eventCount, extrinsicsCount, blockTimestamp, codecError, spec, finalized); err == nil {
 		txn.DbCommit()
 	}
 	return err
@@ -161,7 +161,7 @@ func (s *Service) UpdateBlockData(block *model.ChainBlock, finalized bool) (err 
 
 	validatorList, _ := rpc.GetValidatorFromSub(nil, block.Hash)
 
-	txn := s.Dao.DbBegin()
+	txn := s.dao.DbBegin()
 	defer txn.DbRollback()
 
 	extrinsicsCount, blockTimestamp, extrinsicHash, extrinsicFee, err := s.createExtrinsic(c, txn, block.BlockNum, encodeExtrinsics, decodeExtrinsics, eventMap, finalized, spec)
@@ -179,7 +179,7 @@ func (s *Service) UpdateBlockData(block *model.ChainBlock, finalized bool) (err 
 		return err
 	}
 
-	if err = s.Dao.UpdateEventAndExtrinsic(c, txn, block, eventCount, extrinsicsCount, blockTimestamp, validator, validator == "", finalized); err != nil {
+	if err = s.dao.UpdateEventAndExtrinsic(c, txn, block, eventCount, extrinsicsCount, blockTimestamp, validator, validator == "", finalized); err != nil {
 		return
 	}
 
@@ -200,7 +200,7 @@ func (s *Service) GetCurrentRuntimeSpecVersion(blockNum int) int {
 	if substrate.CurrentRuntimeSpecVersion != 0 {
 		return substrate.CurrentRuntimeSpecVersion
 	}
-	if block := s.Dao.GetNearBlock(c, blockNum); block != nil {
+	if block := s.dao.GetNearBlock(c, blockNum); block != nil {
 		return block.SpecVersion
 	}
 	return 0
@@ -209,7 +209,7 @@ func (s *Service) GetCurrentRuntimeSpecVersion(blockNum int) int {
 func (s *Service) getMetadataInstant(spec int) *metadata.MetadataType {
 	metadataInstant, ok := metadata.RuntimeMetadata[spec]
 	if !ok {
-		metadataInstant = metadata.Init(s.Dao.RuntimeVersionRaws(spec), spec)
+		metadataInstant = metadata.Init(s.dao.RuntimeVersionRaws(spec), spec)
 	}
 	return metadataInstant
 }

@@ -5,20 +5,18 @@ import (
 	"fmt"
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/internal/model"
-	"github.com/itering/subscan/internal/service/balances"
-	"github.com/itering/subscan/internal/service/system"
-	"github.com/itering/subscan/internal/util"
+	"github.com/itering/subscan/internal/plugins"
 	"github.com/shopspring/decimal"
 	"strings"
 )
 
 func (s *Service) GetEventList(page, row int, order string, where ...string) ([]model.ChainEvent, int) {
 	c := context.TODO()
-	return s.Dao.GetEventList(c, page, row, order, where...)
+	return s.dao.GetEventList(c, page, row, order, where...)
 }
 
 func (s *Service) GetEventByIndex(index string) []model.ChainEvent {
-	return s.Dao.GetEventsByIndex(index)
+	return s.dao.GetEventsByIndex(index)
 }
 
 func (s *Service) AddEvent(
@@ -32,40 +30,29 @@ func (s *Service) AddEvent(
 	spec int,
 	feeMap map[string]decimal.Decimal,
 ) (eventCount int, err error) {
-
-	s.Dao.DropEventNotFinalizedData(blockNum, finalized)
+	s.dao.DropEventNotFinalizedData(blockNum, finalized)
 
 	for _, event := range e {
-
 		event.ModuleId = strings.ToLower(event.ModuleId)
 		event.ExtrinsicHash = hashMap[fmt.Sprintf("%d-%d", blockNum, event.ExtrinsicIdx)]
 		event.EventIndex = fmt.Sprintf("%d-%d", blockNum, event.ExtrinsicIdx)
 		event.Finalized = finalized
 		event.BlockNum = blockNum
 
-		if err = s.Dao.CreateEvent(c, txn, &event); err == nil && finalized {
-			go s.AnalysisEvent(blockHash, blockTimestamp, event, spec, feeMap[event.EventIndex])
+		if err = s.dao.CreateEvent(c, txn, &event); err == nil && finalized {
+			go s.afterEvent(spec, blockTimestamp, blockHash, &event, feeMap[event.EventIndex])
 		} else {
 			return 0, err
 		}
-		if !util.StringInSlice(event.EventId, []string{"ExtrinsicSuccess", "ExtrinsicFailed"}) {
-			eventCount++
-		}
-
+		eventCount++
 	}
 	return eventCount, err
 }
 
-func (s *Service) AnalysisEvent(blockHash string, blockTimestamp int, event model.ChainEvent, spec int, fee decimal.Decimal) {
-	var paramEvent []model.EventParam
-	util.UnmarshalToAnything(&paramEvent, event.Params)
-
-	switch event.ModuleId {
-	case "system":
-		system.EmitEvent(system.NewEvent(s.Dao, &event, paramEvent, blockHash, blockTimestamp, spec), event.EventId)
-
-	case "balances", "kton": // ring
-		balances.EmitEvent(balances.New(s.Dao, &event, paramEvent, blockTimestamp, fee), event.EventId)
+func (s *Service) afterEvent(spec, blockTimestamp int, blockHash string, event *model.ChainEvent, fee decimal.Decimal) {
+	for _, plugin := range plugins.RegisteredPlugins {
+		p := plugin()
+		_ = p.ProcessEvent(spec, blockTimestamp, blockHash, event, fee)
 	}
 
 }

@@ -124,27 +124,6 @@ func (c ChainLog) TableName() string {
 	return fmt.Sprintf("chain_logs_%d", c.BlockNum/SplitTableBlockNum)
 }
 
-type ExtrinsicError struct {
-	ID            uint   `gorm:"primary_key" json:"-"`
-	ExtrinsicHash string `json:"-" sql:"size:100;"`
-	Module        string `json:"module"`
-	Name          string `json:"name"`
-	Doc           string `json:"doc"`
-}
-
-type DispatchError struct {
-	Other        *string     `json:"Other,omitempty"`
-	CannotLookup *string     `json:"CannotLookup,omitempty"`
-	BadOrigin    *string     `json:"BadOrigin,omitempty"`
-	Module       interface{} `json:"Module,omitempty"`
-	Error        *int        `json:"error,omitempty"`
-}
-
-type DispatchErrorModule struct {
-	Index int `json:"index"`
-	Error int `json:"error"`
-}
-
 type ExtrinsicParam struct {
 	Name     string      `json:"name"`
 	Type     string      `json:"type"`

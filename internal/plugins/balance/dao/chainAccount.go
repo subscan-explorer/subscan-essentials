@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-kratos/kratos/pkg/log"
-	"github.com/itering/subscan/internal/plugins/account/model"
+	"github.com/itering/subscan/internal/plugins/balance/model"
 	"github.com/itering/subscan/internal/substrate/rpc"
 	"github.com/itering/subscan/internal/util"
 	"github.com/jinzhu/gorm"

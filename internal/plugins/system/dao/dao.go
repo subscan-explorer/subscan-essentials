@@ -1,17 +1,18 @@
 package dao
 
 import (
-	"github.com/itering/subscan/internal/model"
+	"github.com/itering/subscan/internal/plugins/system/model"
 	"github.com/itering/subscan/internal/substrate"
 	"github.com/itering/subscan/internal/util"
+	"github.com/jinzhu/gorm"
 	"strings"
 )
 
-func (d *Dao) CreateExtrinsicError(hash string, moduleError *substrate.MetadataModuleError) error {
+func CreateExtrinsicError(db *gorm.DB, hash string, moduleError *substrate.MetadataModuleError) error {
 	if moduleError == nil {
 		return nil
 	}
-	query := d.Db.Create(&model.ExtrinsicError{
+	query := db.Create(&model.ExtrinsicError{
 		ExtrinsicHash: util.AddHex(hash),
 		Module:        moduleError.Module,
 		Name:          moduleError.Name,
@@ -20,8 +21,8 @@ func (d *Dao) CreateExtrinsicError(hash string, moduleError *substrate.MetadataM
 	return query.Error
 }
 
-func (d *Dao) ExtrinsicError(hash string) *model.ExtrinsicError {
+func ExtrinsicError(db *gorm.DB, hash string) *model.ExtrinsicError {
 	var e model.ExtrinsicError
-	d.Db.Where("extrinsic_hash = ?", hash).Find(&e)
+	db.Where("extrinsic_hash = ?", hash).Find(&e)
 	return &e
 }

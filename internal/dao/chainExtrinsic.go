@@ -166,10 +166,6 @@ func (d *Dao) extrinsicsAsDetail(c context.Context, e *model.ChainExtrinsic) *mo
 
 	detail.Event = &events
 
-	if !detail.Success {
-		detail.Error = d.ExtrinsicError(detail.ExtrinsicHash)
-	}
-
 	return &detail
 }
 

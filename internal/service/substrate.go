@@ -177,7 +177,7 @@ const (
 )
 
 func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
-	block := s.Dao.GetBlockByNum(context.TODO(), blockNum)
+	block := s.dao.GetBlockByNum(context.TODO(), blockNum)
 	if block != nil && block.Finalized && !block.CodecError {
 		return nil
 	}
@@ -229,7 +229,7 @@ func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 
 	var setFinalized = func() {
 		if finalized {
-			_ = s.Dao.SaveFillAlreadyFinalizedBlockNum(context.TODO(), blockNum)
+			_ = s.dao.SaveFillAlreadyFinalizedBlockNum(context.TODO(), blockNum)
 		}
 	}
 
@@ -237,7 +237,7 @@ func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 	if block != nil {
 		// Confirm data, only set block Finalized
 		if block.Hash == blockHash && block.ExtrinsicsRoot == rpcBlock.Block.Header.ExtrinsicsRoot && block.Event == event && block.CodecError == false && finalized {
-			s.Dao.SetBlockFinalized(block)
+			s.dao.SetBlockFinalized(block)
 		} else {
 			// refresh all block data
 			block.ExtrinsicsRoot = rpcBlock.Block.Header.ExtrinsicsRoot

@@ -2,8 +2,8 @@ package service
 
 import (
 	"github.com/itering/subscan/internal/dao"
-	account "github.com/itering/subscan/internal/plugins/account/dao"
-	"github.com/itering/subscan/internal/plugins/account/model"
+	balance "github.com/itering/subscan/internal/plugins/balance/dao"
+	"github.com/itering/subscan/internal/plugins/balance/model"
 )
 
 type Service struct {
@@ -11,7 +11,7 @@ type Service struct {
 }
 
 func (s *Service) GetAccountListJson(page, row int, order, field string, queryWhere ...string) ([]*model.ChainAccount, int) {
-	return account.GetAccountList(s.d.Db, page, row, order, field, queryWhere...)
+	return balance.GetAccountList(s.d.Db, page, row, order, field, queryWhere...)
 }
 
 func New(d *dao.Dao) *Service {

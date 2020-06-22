@@ -10,7 +10,7 @@ import (
 
 // Ping ping the resource.
 func (s *Service) Ping(ctx context.Context, e *empty.Empty) (*empty.Empty, error) {
-	return &empty.Empty{}, s.Dao.Ping(ctx)
+	return &empty.Empty{}, s.dao.Ping(ctx)
 }
 
 // SayHello grpc demo func.

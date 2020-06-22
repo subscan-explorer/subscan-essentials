@@ -27,6 +27,7 @@ require (
 	github.com/sevlyar/go-daemon v0.1.5
 	github.com/shopspring/decimal v1.2.0
 	github.com/stretchr/testify v1.4.0
+	github.com/urfave/cli v1.20.0
 	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
 	golang.org/x/sys v0.0.0-20200523222454-059865788121 // indirect
 	google.golang.org/genproto v0.0.0-20200402124713-8ff61da6d932

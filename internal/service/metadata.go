@@ -6,14 +6,14 @@ import (
 
 func (s *Service) UpdateChainMetadata(metadata map[string]interface{}) (err error) {
 	c := context.TODO()
-	err = s.Dao.SetMetadata(c, metadata)
+	err = s.dao.SetMetadata(c, metadata)
 	return
 }
 
 func (s *Service) GetCurrentBlockNum(c context.Context) (uint64, error) {
-	return s.Dao.GetCurrentBlockNum(c)
+	return s.dao.GetCurrentBlockNum(c)
 }
 
 func (s *Service) GetFinalizedBlockNum(c context.Context) (uint64, error) {
-	return s.Dao.GetFinalizedBlockNum(c)
+	return s.dao.GetFinalizedBlockNum(c)
 }

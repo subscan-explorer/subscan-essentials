@@ -13,7 +13,7 @@ var (
 	DaemonAction = []string{"substrate"}
 )
 
-// Dao dao.
+// dao dao.
 type Dao struct {
 	Db    *gorm.DB
 	redis *redis.Pool

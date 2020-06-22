@@ -63,7 +63,6 @@ type ExtrinsicDetail struct {
 	Params             *[]ExtrinsicParam `json:"params"`
 	Event              *[]ChainEvent     `json:"event"`
 	Fee                decimal.Decimal   `json:"fee"`
-	Error              *ExtrinsicError   `json:"error"`
 	Finalized          bool              `json:"finalized"`
 }
 

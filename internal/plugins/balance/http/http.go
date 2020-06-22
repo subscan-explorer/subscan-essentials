@@ -3,7 +3,7 @@ package http
 import (
 	bm "github.com/go-kratos/kratos/pkg/net/http/blademaster"
 	"github.com/go-kratos/kratos/pkg/net/http/blademaster/binding"
-	"github.com/itering/subscan/internal/plugins/account/service"
+	"github.com/itering/subscan/internal/plugins/balance/service"
 )
 
 var (

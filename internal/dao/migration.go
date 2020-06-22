@@ -9,15 +9,10 @@ func (d *Dao) Migration() {
 	db := d.Db
 	d.splitTableMigrate()
 	db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
-		// &model.ChainAccount{},
 		&model.RuntimeVersion{},
-		&model.ExtrinsicError{},
 	)
-	// db.Model(model.ChainAccount{}).AddUniqueIndex("address", "address")
 	db.Model(model.RuntimeVersion{}).AddUniqueIndex("spec_version", "spec_version")
 	db.Model(model.RuntimeVersion{}).ModifyColumn("modules", "text")
-
-	db.Model(model.ExtrinsicError{}).AddUniqueIndex("extrinsic_hash", "extrinsic_hash")
 }
 
 func (d *Dao) splitTableMigrate() {

@@ -10,9 +10,6 @@ import (
 )
 
 func (d *Dao) CreateEvent(c context.Context, txn *GormDB, event *model.ChainEvent) error {
-	if event.EventId == "ExtrinsicSuccess" || event.EventId == "ExtrinsicFailed" { // not save to Db
-		return nil
-	}
 	var incrCount int
 	params, _ := json.Marshal(event.Params)
 	extrinsicHash := event.ExtrinsicHash

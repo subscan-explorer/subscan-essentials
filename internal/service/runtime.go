@@ -7,7 +7,7 @@ import (
 )
 
 func (s *Service) regRuntimeVersion(name string, spec int) error {
-	if affected := s.Dao.CreateRuntimeVersion(name, spec); affected > 0 {
+	if affected := s.dao.CreateRuntimeVersion(name, spec); affected > 0 {
 		if coded := s.regCodecMetadata(); coded != "" {
 			runtime := metadata.RegNewMetadataType(spec, coded)
 			s.setRuntimeData(spec, runtime, coded)
@@ -32,5 +32,5 @@ func (s *Service) setRuntimeData(spec int, runtime *metadata.MetadataType, rawDa
 	for _, value := range runtime.Metadata.Modules {
 		modules = append(modules, value.Name)
 	}
-	s.Dao.SetRuntimeData(spec, strings.Join(modules, "|"), rawData)
+	s.dao.SetRuntimeData(spec, strings.Join(modules, "|"), rawData)
 }

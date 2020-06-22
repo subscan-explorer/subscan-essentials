@@ -16,11 +16,7 @@ import (
 type Query interface {
 	GetCurrentEra() (int, error)
 	GetActiveEra() (int, error)
-	StakingStakers(string, int) *storage.Exposures
-	PowerOf(string) decimal.Decimal
-	RewardPayee(string) (string, error)
 }
-
 type query struct {
 	c    *recws.RecConn
 	hash string
@@ -48,26 +44,6 @@ func (r *query) GetActiveEra() (int, error) {
 		return era.Index, nil
 	}
 	return 0, fmt.Errorf("decode ActiveEra error")
-}
-
-func (r *query) PowerOf(stash string) (power decimal.Decimal) {
-	return
-}
-
-func (r *query) StakingStakers(stash string, currentEra int) *storage.Exposures {
-	exposure, err := ReadStorage(r.c, "Staking", "ErasStakers", "", util.U32Encode(currentEra), stash)
-	if err != nil {
-		return nil
-	}
-	return exposure.ToExposures()
-}
-
-func (r *query) RewardPayee(address string) (string, error) {
-	value, err := ReadStorage(r.c, "Staking", "Payee", r.hash, address)
-	if err != nil {
-		return "", err
-	}
-	return value.ToString(), nil
 }
 
 // Read substrate storage

@@ -1,6 +1,9 @@
 package plugins
 
-import "github.com/itering/subscan/internal/plugins/account"
+import (
+	"github.com/itering/subscan/internal/plugins/balance"
+	"github.com/itering/subscan/internal/plugins/system"
+)
 
 type PluginFactory func() Plugin
 
@@ -20,7 +23,8 @@ func Register(name string, f PluginFactory) {
 }
 
 func init() {
-	Register("account", func() Plugin { return account.New() })
+	Register("account", func() Plugin { return balance.New() })
+	Register("system", func() Plugin { return system.New() })
 }
 
 func List() []string {

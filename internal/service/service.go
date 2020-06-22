@@ -5,6 +5,7 @@ import (
 	"github.com/itering/scale.go/source"
 	"github.com/itering/scale.go/types"
 	"github.com/itering/subscan/internal/dao"
+	"github.com/itering/subscan/internal/plugins"
 	"github.com/itering/subscan/internal/service/scan"
 	"github.com/itering/subscan/internal/substrate/metadata"
 	"github.com/itering/subscan/internal/util"
@@ -14,31 +15,36 @@ import (
 
 // Service service.
 type Service struct {
-	Dao *dao.Dao
+	dao *dao.Dao
 }
 
 // New new a service and return.
 func New() (s *Service) {
 	s = &Service{
-		Dao: dao.New(),
+		dao: dao.New(),
 	}
 
 	s.Migration()
 	s.initSubRuntimeLatest()
+	// load plugins
+	for _, plugin := range plugins.RegisteredPlugins {
+		p := plugin()
+		p.InitDao(s.dao)
+	}
 	return s
 }
 
 func (s *Service) NewScan() *scan.Service {
-	return scan.New(s.Dao)
+	return scan.New(s.dao)
 }
 
 // Close close the resource.
 func (s *Service) Close() {
-	s.Dao.Close()
+	s.dao.Close()
 }
 
 func (s *Service) Migration() {
-	s.Dao.Migration()
+	s.dao.Migration()
 }
 
 func (s *Service) initSubRuntimeLatest() {
@@ -53,7 +59,7 @@ func (s *Service) initSubRuntimeLatest() {
 	}()
 
 	// find db
-	if recent := s.Dao.RuntimeVersionRecent(); recent != nil && strings.HasPrefix(recent.RawData, "0x") {
+	if recent := s.dao.RuntimeVersionRecent(); recent != nil && strings.HasPrefix(recent.RawData, "0x") {
 		metadata.Latest(&metadata.RuntimeRaw{Spec: recent.SpecVersion, Raw: recent.RawData})
 		return
 	}

@@ -24,7 +24,7 @@ func InitApp() (*App, func(), error) {
 	// load plugins
 	for _, plugin := range plugins.RegisteredPlugins {
 		p := plugin()
-		_ = p.Init(serviceService.Dao, engine)
+		p.InitHttp(engine)
 		_ = p.Http()
 	}
 

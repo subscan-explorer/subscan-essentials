@@ -13,7 +13,6 @@ const (
 var (
 	WSEndPoint  = GetEnv("CHAIN_WS_ENDPOINT", "wss://crab.darwinia.network")
 	NetworkNode = GetEnv("NETWORK_NODE", CrabNetwork)
-	IsDarwinia  = StringInSlice(NetworkNode, []string{CrabNetwork})
 )
 
 func GetEnv(key, defaultValue string) string {
