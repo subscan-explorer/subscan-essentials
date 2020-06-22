@@ -24,7 +24,7 @@ def main():
     if len(sys.argv) == 1:
         os.system('./subscan -conf ../configs')
     elif sys.argv[1] == "substrate":
-        op = ["substrate", "worker", "cronWorker"]
+        op = ["substrate"]
     map(system_do, op)  # run,run,run
     print("start to listen daemon status :",
           time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
@@ -33,7 +33,7 @@ def main():
         for i in range(len(op)):
             try:
                 if not j["data"][op[i]]:
-                    s = './subscan -conf ../configs stop {daemon} && ./subscan -conf ../configs start {daemon}'
+                    s = './subscan stop {daemon} && ./subscan start {daemon}'
                     os.system(s.format(daemon=op[i]))
             except KeyError:
                 pass

@@ -14,11 +14,11 @@ import (
 
 func (s *Service) GetEventList(page, row int, order string, where ...string) ([]model.ChainEvent, int) {
 	c := context.TODO()
-	return s.dao.GetEventList(c, page, row, order, where...)
+	return s.Dao.GetEventList(c, page, row, order, where...)
 }
 
 func (s *Service) GetEventByIndex(index string) []model.ChainEvent {
-	return s.dao.GetEventsByIndex(index)
+	return s.Dao.GetEventsByIndex(index)
 }
 
 func (s *Service) AddEvent(
@@ -33,7 +33,7 @@ func (s *Service) AddEvent(
 	feeMap map[string]decimal.Decimal,
 ) (eventCount int, err error) {
 
-	s.dao.DropEventNotFinalizedData(blockNum, finalized)
+	s.Dao.DropEventNotFinalizedData(blockNum, finalized)
 
 	for _, event := range e {
 
@@ -43,7 +43,7 @@ func (s *Service) AddEvent(
 		event.Finalized = finalized
 		event.BlockNum = blockNum
 
-		if err = s.dao.CreateEvent(c, txn, &event); err == nil && finalized {
+		if err = s.Dao.CreateEvent(c, txn, &event); err == nil && finalized {
 			go s.AnalysisEvent(blockHash, blockTimestamp, event, spec, feeMap[event.EventIndex])
 		} else {
 			return 0, err
@@ -57,16 +57,15 @@ func (s *Service) AddEvent(
 }
 
 func (s *Service) AnalysisEvent(blockHash string, blockTimestamp int, event model.ChainEvent, spec int, fee decimal.Decimal) {
-	paramEvent, err := model.ParsingEventParam(event.Params)
-	if err != nil {
-		return
-	}
+	var paramEvent []model.EventParam
+	util.UnmarshalToAnything(&paramEvent, event.Params)
+
 	switch event.ModuleId {
 	case "system":
-		system.EmitEvent(system.NewEvent(s.dao, &event, paramEvent, blockHash, blockTimestamp, spec), event.EventId)
+		system.EmitEvent(system.NewEvent(s.Dao, &event, paramEvent, blockHash, blockTimestamp, spec), event.EventId)
 
 	case "balances", "kton": // ring
-		balances.EmitEvent(balances.New(s.dao, &event, paramEvent, blockTimestamp, fee), event.EventId)
+		balances.EmitEvent(balances.New(s.Dao, &event, paramEvent, blockTimestamp, fee), event.EventId)
 	}
 
 }

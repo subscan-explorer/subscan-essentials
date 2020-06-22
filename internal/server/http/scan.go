@@ -8,7 +8,6 @@ import (
 	"github.com/itering/subscan/internal/substrate"
 	"github.com/itering/subscan/internal/util"
 	"github.com/itering/subscan/internal/util/ss58"
-	"regexp"
 )
 
 func metadata(c *bm.Context) {
@@ -67,9 +66,7 @@ func extrinsics(c *bm.Context) {
 	}
 
 	if p.Signed == "signed" {
-		extrinsics, count := svc.GetTransactionList(p.Page, p.Row, "desc", query...)
-		c.JSON(map[string]interface{}{"extrinsics": extrinsics, "count": count}, nil)
-		return
+		query = append(query, fmt.Sprintf("is_signed = 1"))
 	}
 	if p.Address != "" {
 		account := ss58.Decode(p.Address, substrate.AddressType)
@@ -128,57 +125,6 @@ func events(c *bm.Context) {
 	}, nil)
 }
 
-func event(c *bm.Context) {
-	p := new(struct {
-		EventIndex string `json:"event_index" validate:"required"`
-	})
-	if err := c.BindWith(p, binding.JSON); err != nil {
-		return
-	}
-	reg := regexp.MustCompile(`^\d+-\d+$`)
-	if !reg.MatchString(p.EventIndex) {
-		c.JSON(nil, util.ParamsError)
-		return
-	}
-	c.JSON(ss.EventByIndex(p.EventIndex), nil)
-}
-
-func search(c *bm.Context) {
-	p := new(struct {
-		Key  string `json:"key" validate:"required"`
-		Row  int    `json:"row" validate:"min=1,max=100"`
-		Page int    `json:"page" validate:"min=0"`
-	})
-	if err := c.BindWith(p, binding.JSON); err != nil {
-		return
-	}
-	c.JSON(ss.SearchByKey(p.Key, p.Page, p.Row), nil)
-}
-
-func logs(c *bm.Context) {
-	p := new(struct {
-		Row  int `json:"row" validate:"min=1,max=100"`
-		Page int `json:"page" validate:"min=0"`
-	})
-	if err := c.BindWith(p, binding.JSON); err != nil {
-		return
-	}
-	logs, count := svc.GetLogList(p.Page, p.Row)
-	c.JSON(map[string]interface{}{
-		"logs": logs, "count": count,
-	}, nil)
-}
-
-func logInfo(c *bm.Context) {
-	p := new(struct {
-		LogIndex string `json:"log_index" validate:"required"`
-	})
-	if err := c.BindWith(p, binding.JSON); err != nil {
-		return
-	}
-	c.JSON(svc.GetLogByIndex(p.LogIndex), nil)
-}
-
 func checkSearchHash(c *bm.Context) {
 	p := new(struct {
 		Hash string `json:"hash" validate:"len=66"`
@@ -195,23 +141,6 @@ func checkSearchHash(c *bm.Context) {
 		return
 	}
 	c.JSON(nil, util.RecordNotFound)
-}
-
-func accounts(c *bm.Context) {
-	p := new(struct {
-		Row        int    `json:"row" validate:"min=1,max=100"`
-		Page       int    `json:"page" validate:"min=0"`
-		Order      string `json:"order" validate:"omitempty,oneof=desc asc"`
-		OrderField string `json:"order_field" validate:"omitempty"`
-	})
-	if err := c.BindWith(p, binding.JSON); err != nil {
-		return
-	}
-	var query []string
-	list, count := ss.GetAccountListJson(p.Page, p.Row, p.Order, p.OrderField, query...)
-	c.JSON(map[string]interface{}{
-		"list": list, "count": count,
-	}, nil)
 }
 
 func runtimeList(c *bm.Context) {

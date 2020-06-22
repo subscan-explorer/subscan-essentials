@@ -21,7 +21,7 @@ func (l ormLog) Print(v ...interface{}) {
 	log.Info(strings.Repeat("%v ", len(v)), v...)
 }
 
-// db
+// Db
 type GormDB struct {
 	*gorm.DB
 	gdbDone bool
@@ -51,7 +51,7 @@ func (c *GormDB) DbRollback() {
 
 // dao funcs
 func (d *Dao) DbBegin() *GormDB {
-	txn := d.db.Begin()
+	txn := d.Db.Begin()
 	if txn.Error != nil {
 		panic(txn.Error)
 	}

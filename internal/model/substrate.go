@@ -9,13 +9,6 @@ import (
 // SplitTableBlockNum
 var SplitTableBlockNum = 1000000
 
-type ChainMetadata struct {
-	Version int    `json:"version"`
-	Type    string `json:"type"` // storage/call/event/constant/error
-	Name    string `json:"name"`
-	Prefix  string `json:"prefix"`
-}
-
 type ChainBlock struct {
 	ID              uint      `gorm:"primary_key" json:"id"`
 	BlockNum        int       `json:"block_num" es:"type:keyword"`
@@ -100,61 +93,6 @@ func (c ChainExtrinsic) TableName() string {
 	return fmt.Sprintf("chain_extrinsics_%d", c.BlockNum/SplitTableBlockNum)
 }
 
-type ChainTransaction struct {
-	ID                 uint            `gorm:"primary_key"`
-	CreatedAt          time.Time       `json:"created_at"`
-	FromHex            string          `json:"from_hex" es:"type:keyword"`
-	Destination        string          `json:"destination" es:"type:keyword"`
-	ExtrinsicIndex     string          `sql:"default: null;size:100" json:"extrinsic_index" es:"type:keyword"`
-	Signature          string          `json:"signature"`
-	Success            bool            `json:"success"`
-	Hash               string          `sql:"default: null;size:100" json:"hash" es:"type:keyword"`
-	BlockNum           int             `json:"block_num" es:"type:keyword"`
-	BlockTimestamp     int             `json:"block_timestamp"`
-	CallCode           string          `json:"call_code"`
-	CallModuleFunction string          `json:"call_module_function" es:"type:keyword" sql:"size:100"`
-	CallModule         string          `json:"call_module" es:"type:keyword" sql:"size:100"`
-	Params             interface{}     `json:"params" sql:"type:MEDIUMTEXT;" es:"type:text"`
-	Amount             decimal.Decimal `json:"amount" sql:"type:decimal(30,15);"`
-	Fee                decimal.Decimal `json:"fee" sql:"type:decimal(30,0);"`
-	Finalized          bool            `json:"finalized"`
-}
-
-func (c ChainTransaction) TableName() string {
-	if c.BlockNum/SplitTableBlockNum == 0 {
-		return "chain_transactions"
-	}
-	return fmt.Sprintf("chain_transactions_%d", c.BlockNum/SplitTableBlockNum)
-}
-
-type ChainAccount struct {
-	ID               uint            `gorm:"primary_key"`
-	CreatedAt        time.Time       `json:"created_at"`
-	Address          string          `sql:"default: null;size:100" json:"address"`
-	Nickname         string          `sql:"default: null;size:100" json:"nickname"`
-	AccountIndex     int             `json:"account_index"`
-	Nonce            int             `json:"nonce"`
-	Balance          decimal.Decimal `json:"balance" sql:"type:decimal(30,15);"`
-	KtonBalance      decimal.Decimal `json:"kton_balance" sql:"type:decimal(30,15);"`
-	CountExtrinsic   int             `json:"count_extrinsic"`
-	RingLock         decimal.Decimal `json:"ring_lock" sql:"type:decimal(30,0);"`
-	KtonLock         decimal.Decimal `json:"kton_lock" sql:"type:decimal(30,0);"`
-	OutputBlockCount int             `json:"output_block_count" sql:"default: 0"`
-}
-
-type ExtrinsicParam struct {
-	Name     string      `json:"name"`
-	Type     string      `json:"type"`
-	Value    interface{} `json:"value"`
-	ValueRaw string      `json:"valueRaw"`
-}
-
-type EventParam struct {
-	Type     string      `json:"type"`
-	Value    interface{} `json:"value"`
-	ValueRaw string      `json:"valueRaw"`
-}
-
 type RuntimeVersion struct {
 	Id                    int    `json:"-"`
 	Name                  string `json:"-"`
@@ -205,4 +143,17 @@ type DispatchError struct {
 type DispatchErrorModule struct {
 	Index int `json:"index"`
 	Error int `json:"error"`
+}
+
+type ExtrinsicParam struct {
+	Name     string      `json:"name"`
+	Type     string      `json:"type"`
+	Value    interface{} `json:"value"`
+	ValueRaw string      `json:"valueRaw"`
+}
+
+type EventParam struct {
+	Type     string      `json:"type"`
+	Value    interface{} `json:"value"`
+	ValueRaw string      `json:"valueRaw"`
 }

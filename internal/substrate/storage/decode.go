@@ -117,21 +117,6 @@ func (s *StateStorage) ToBalanceLock() (r []BalanceLock) {
 	return
 }
 
-func (s *StateStorage) ToValidatorPrefsLinkage() (r *ValidatorPrefsLinkage) {
-	_ = json.Unmarshal(s.bytes(), &r)
-	return
-}
-
-func (s *StateStorage) ToDarwiniaStakingLedgers() (r *DarwiniaStakingLedgers) {
-	_ = json.Unmarshal(s.bytes(), &r)
-	return
-}
-
-func (s *StateStorage) ToIceValidatorPrefs() (r *IceValidatorPrefs) {
-	_ = json.Unmarshal(s.bytes(), &r)
-	return
-}
-
 func (s *StateStorage) ToEraPoints() (r *EraPoints) {
 	_ = json.Unmarshal(s.bytes(), &r)
 	return

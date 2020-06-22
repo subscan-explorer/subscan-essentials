@@ -6,6 +6,7 @@ import (
 	"github.com/itering/subscan/internal/substrate/hasher"
 	"github.com/itering/subscan/internal/substrate/metadata"
 	"github.com/itering/subscan/internal/util"
+	"strings"
 )
 
 type StorageKey struct {
@@ -13,61 +14,83 @@ type StorageKey struct {
 	ScaleType string
 }
 
+type Storage struct {
+	Prefix string
+	Method string
+	Type   types.StorageType
+}
+
+var (
+	Sks           map[string]Storage
+	TotalIssuance StorageKey
+)
+
+// PrintRuntimeStorageKey
+func runtimeStorageKey() map[string]Storage {
+	if Sks == nil {
+		return Sks
+	}
+	runtime := metadata.Latest(nil)
+	keys := make(map[string]Storage)
+	for _, modules := range runtime.Metadata.Modules {
+		for _, storage := range modules.Storage {
+			prefix := modules.Prefix
+			method := storage.Name
+			keys[strings.ToLower(fmt.Sprintf("%s|%s", modules.Name, method))] = Storage{
+				Prefix: util.UpperCamel(prefix),
+				Method: util.UpperCamel(method),
+				Type:   storage.Type,
+			}
+		}
+	}
+	Sks = keys
+	return Sks
+}
+
+func SubscribeStorage() []string {
+	TotalIssuance = EncodeStorageKey("Balances", "TotalIssuance")
+	return []string{util.AddHex(TotalIssuance.EncodeKey)}
+
+}
+
 func EncodeStorageKey(section, method string, args ...string) (storageKey StorageKey) {
 	m := metadata.Latest(nil)
 	if m == nil {
 		return
 	}
+
 	method = util.UpperCamel(method)
 	prefix, storageType := m.GetModuleStorageMapType(section, method)
 	if storageType == nil {
 		return
 	}
+
 	mapType := checkoutHasherAndType(storageType, args...)
 	if mapType == nil {
 		return
 	}
+
 	storageKey.ScaleType = mapType.Value
+
 	var hash []byte
-	if m.MetadataVersion >= 9 {
-		method = dealLinkedMethod(method, mapType, args...)
-		sectionHash := hasher.HashByCryptoName([]byte(util.UpperCamel(prefix)), "Twox128")
-		methodHash := hasher.HashByCryptoName([]byte(method), "Twox128")
-		hash = append(sectionHash, methodHash[:]...)
-		if len(args) > 0 {
-			var param []byte
-			param = append(param, hasher.HashByCryptoName(util.HexToBytes(args[0]), mapType.Hasher)...)
-			if len(args) >= 2 {
-				param = append(param, hasher.HashByCryptoName(util.HexToBytes(args[1]), mapType.Hasher2)...)
-			}
-			hash = append(hash, param[:]...)
-			storageKey.EncodeKey = util.BytesToHex(hash)
-			return
+
+	method = dealLinkedMethod(method, mapType, args...)
+
+	sectionHash := hasher.HashByCryptoName([]byte(util.UpperCamel(prefix)), "Twox128")
+	methodHash := hasher.HashByCryptoName([]byte(method), "Twox128")
+
+	hash = append(sectionHash, methodHash[:]...)
+
+	if len(args) > 0 {
+		var param []byte
+		param = append(param, hasher.HashByCryptoName(util.HexToBytes(args[0]), mapType.Hasher)...)
+		if len(args) == 2 {
+			param = append(param, hasher.HashByCryptoName(util.HexToBytes(args[1]), mapType.Hasher2)...)
 		}
-	} else {
-		key := []byte(fmt.Sprintf("%s %s", []byte(util.UpperCamel(prefix)), method))
-		if mapType.IsLinked && len(args) == 0 {
-			key = append([]byte("head of "), key...)
-		}
-		if len(args) > 0 {
-			param := encodeParams(args)
-			key = append(key, param[:]...)
-		}
-		hash = hasher.HashByCryptoName(key, mapType.Hasher)
+		hash = append(hash, param[:]...)
 	}
 	storageKey.EncodeKey = util.BytesToHex(hash)
 	return
-}
-
-func encodeParams(args []string) []byte {
-	if len(args) < 1 {
-		return []byte{}
-	}
-	var data []byte
-	for _, arg := range args {
-		data = append(data, util.HexToBytes(arg)...)
-	}
-	return data
 }
 
 type storageOption struct {

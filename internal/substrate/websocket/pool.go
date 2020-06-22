@@ -3,6 +3,7 @@ package websocket
 import (
 	"errors"
 	"fmt"
+	"github.com/go-kratos/kratos/pkg/log"
 	"github.com/gorilla/websocket"
 	"github.com/itering/subscan/internal/pkg/recws"
 	"sync"
@@ -61,7 +62,7 @@ func (c *channelPool) Get() (*PoolConn, error) {
 	var err error
 	select {
 	case conn := <-conns:
-		if conn == nil || !conn.IsConnected() {
+		if conn == nil || conn.IsConnected() == false {
 			conn, err = factory()
 			if err != nil {
 				return nil, err
@@ -173,6 +174,7 @@ func SendWsRequest(c *recws.RecConn, v interface{}, action []byte) (err error) {
 		if p != nil {
 			p.MarkUnusable()
 		}
+		log.Error("websocket send error: %v, current pool connect %v", err, wsPool.Len())
 		return fmt.Errorf("websocket send error: %v", err)
 	}
 	if err = c.ReadJSON(v); err != nil {

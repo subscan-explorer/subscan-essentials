@@ -199,3 +199,54 @@ type Payee struct {
 type PayeeStaked struct {
 	PromiseMonth int `json:"promise_month"`
 }
+
+type LockFor struct {
+	StakingLock *StakingLock `json:"Staking"`
+	Common      *Common      `json:"Common"`
+}
+
+type StakingLock struct {
+	StakingAmount decimal.Decimal `json:"staking_amount"`
+	Unbondings    []Unbondings    `json:"unbondings"`
+}
+
+type Common struct {
+	Amount decimal.Decimal `json:"amount"`
+}
+
+type Unbondings struct {
+	Amount decimal.Decimal `json:"amount"`
+	Moment int             `json:"moment"`
+}
+
+type RawBabePreDigest struct {
+	Primary   *RawBabePreDigestPrimary      `json:"primary,omitempty"`
+	Secondary *RawBabePreDigestSecondary    `json:"secondary,omitempty"`
+	VRF       *RawBabePreDigestSecondaryVRF `json:"VRF,omitempty"`
+}
+
+type RawBabePreDigestPrimary struct {
+	AuthorityIndex uint   `json:"authorityIndex"`
+	SlotNumber     uint64 `json:"slotNumber"`
+	Weight         uint   `json:"weight"`
+	VrfOutput      string `json:"vrfOutput"`
+	VrfProof       string `json:"vrfProof"`
+}
+
+type RawBabePreDigestSecondary struct {
+	AuthorityIndex uint   `json:"authorityIndex"`
+	SlotNumber     uint64 `json:"slotNumber"`
+	Weight         uint   `json:"weight"`
+}
+
+type RawBabePreDigestSecondaryVRF struct {
+	AuthorityIndex uint   `json:"authorityIndex"`
+	SlotNumber     uint64 `json:"slotNumber"`
+	VrfOutput      string `json:"vrfOutput"`
+	VrfProof       string `json:"vrfProof"`
+}
+
+type EraPoints struct {
+	Total      decimal.Decimal   `json:"total"`
+	Individual []decimal.Decimal `json:"individual"`
+}

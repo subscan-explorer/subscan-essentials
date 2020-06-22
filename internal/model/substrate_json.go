@@ -61,7 +61,6 @@ type ExtrinsicDetail struct {
 	ExtrinsicHash      string            `json:"extrinsic_hash"`
 	Success            bool              `json:"success"`
 	Params             *[]ExtrinsicParam `json:"params"`
-	Transfer           *TransferJson     `json:"transfer"`
 	Event              *[]ChainEvent     `json:"event"`
 	Fee                decimal.Decimal   `json:"fee"`
 	Error              *ExtrinsicError   `json:"error"`
@@ -99,21 +98,6 @@ type TransferJson struct {
 	ExtrinsicIndex string          `json:"extrinsic_index"`
 	Success        bool            `json:"success"`
 	Fee            decimal.Decimal `json:"fee"`
-}
-
-type AccountJson struct {
-	*AccountSampleJson
-	Nonce        int    `json:"nonce"`
-	AccountIndex string `json:"account_index"`
-}
-
-type AccountSampleJson struct {
-	Address     string          `json:"address"`
-	Balance     decimal.Decimal `json:"balance"`
-	KtonBalance decimal.Decimal `json:"kton_balance"`
-	RingLock    decimal.Decimal `json:"ring_lock"`
-	KtonLock    decimal.Decimal `json:"kton_lock"`
-	Nickname    string          `json:"nickname"`
 }
 
 type ExtrinsicsJson struct {

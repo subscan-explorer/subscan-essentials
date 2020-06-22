@@ -1,7 +1,6 @@
 package system
 
 import (
-	"context"
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/internal/model"
 	"github.com/itering/subscan/internal/substrate"
@@ -66,7 +65,8 @@ func EmitEvent(s System, eventId string) {
 func (s *system) ExtrinsicFailed() {
 	for _, param := range s.eventParams {
 		if param.Type == "DispatchError" {
-			dr := model.ParsingExtrinsicErrorParam(param.Value)
+			var dr map[string]interface{}
+			util.UnmarshalToAnything(&dr, param.Value)
 			if _, ok := dr["Error"]; ok {
 				_ = s.dao.CreateExtrinsicError(s.event.ExtrinsicHash, s.dao.CheckExtrinsicError(s.spec, util.IntFromInterface(dr["Module"]), util.IntFromInterface(dr["Error"])))
 			} else if _, ok := dr["Module"]; ok {
@@ -86,14 +86,14 @@ func (s *system) ExtrinsicFailed() {
 
 }
 func (s *system) NewAccount() {
-	c := context.TODO()
-	if account, err := s.dao.TouchAccount(c, util.TrimHex(util.InterfaceToString(s.eventParams[0].Value))); err == nil {
-		_, _, _ = s.dao.UpdateAccountBalance(c, account, "balances")
-	}
+	// c := context.TODO()
+	// if account, err := s.dao.TouchAccount(c, util.TrimHex(util.InterfaceToString(s.eventParams[0].Value))); err == nil {
+	// 	_, _, _ = s.dao.UpdateAccountBalance(c, account, "balances")
+	// }
 }
 
 func (s *system) KilledAccount() {
-	s.dao.ResetAccountNonce(context.TODO(), util.TrimHex(util.InterfaceToString(s.eventParams[0].Value)))
+	// s.dao.ResetAccountNonce(context.TODO(), util.TrimHex(util.InterfaceToString(s.eventParams[0].Value)))
 }
 
 func (s *system) SetCode() {}

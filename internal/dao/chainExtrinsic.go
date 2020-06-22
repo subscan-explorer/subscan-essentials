@@ -7,11 +7,10 @@ import (
 	"github.com/itering/subscan/internal/substrate"
 	"github.com/itering/subscan/internal/util"
 	"github.com/itering/subscan/internal/util/ss58"
-	"github.com/shopspring/decimal"
 	"strings"
 )
 
-func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.ChainExtrinsic, nonce int) error {
+func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.ChainExtrinsic) error {
 	params, _ := json.Marshal(extrinsic.Params)
 	ce := model.ChainExtrinsic{
 		BlockTimestamp:     extrinsic.BlockTimestamp,
@@ -39,10 +38,9 @@ func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.C
 	query := txn.Create(&ce)
 	if query.RowsAffected > 0 {
 		_ = d.IncrMetadata(c, "count_extrinsic", 1)
-	}
-	if err := d.CreateTransaction(c, txn, &ce, extrinsic.BlockTimestamp); err == nil {
-		_ = d.IncrMetadata(c, "count_signed_extrinsic", 1)
-		d.UpdateAccountCountExtrinsic(c, extrinsic.AccountId, nonce)
+		if ce.IsSigned {
+			_ = d.IncrMetadata(c, "count_signed_extrinsic", 1)
+		}
 	}
 	return d.checkDBError(query.Error)
 }
@@ -50,22 +48,18 @@ func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.C
 func (d *Dao) DropExtrinsicNotFinalizedData(c context.Context, blockNum int, finalized bool) bool {
 	delExist := false
 	if finalized {
-		if query := d.db.Where("block_num = ?", blockNum).Delete(model.ChainExtrinsic{BlockNum: blockNum}); query.RowsAffected > 0 {
+		if query := d.Db.Where("block_num = ?", blockNum).Delete(model.ChainExtrinsic{BlockNum: blockNum}); query.RowsAffected > 0 {
 			_ = d.IncrMetadata(c, "count_extrinsic", -int(query.RowsAffected))
-		}
-
-		var es []model.ChainTransaction
-		if query := d.db.Model(model.ChainTransaction{BlockNum: blockNum}).Where("block_num = ?", blockNum).
-			Scan(&es).Delete(model.ChainTransaction{BlockNum: blockNum}); query.RowsAffected > 0 && len(es) > 0 {
 			delExist = true
 		}
+
 	}
 	return delExist
 }
 
 func (d *Dao) GetExtrinsicsByBlockNum(c context.Context, blockNum int) []*model.ChainExtrinsicJson {
 	var extrinsics []model.ChainExtrinsic
-	query := d.db.Model(model.ChainExtrinsic{BlockNum: blockNum}).
+	query := d.Db.Model(model.ChainExtrinsic{BlockNum: blockNum}).
 		Where("block_num = ?", blockNum).Order("id asc").Scan(&extrinsics)
 	if query == nil || query.RecordNotFound() {
 		return nil
@@ -85,7 +79,7 @@ func (d *Dao) GetExtrinsicList(c context.Context, page, row int, order string, q
 	for index := blockNum / model.SplitTableBlockNum; index >= 0; index-- {
 		var tableData []model.ChainExtrinsic
 		var tableCount int
-		queryOrigin := d.db.Model(model.ChainExtrinsic{BlockNum: index * model.SplitTableBlockNum})
+		queryOrigin := d.Db.Model(model.ChainExtrinsic{BlockNum: index * model.SplitTableBlockNum})
 		for _, w := range queryWhere {
 			queryOrigin = queryOrigin.Where(w)
 		}
@@ -119,7 +113,7 @@ func (d *Dao) GetExtrinsicsByHash(c context.Context, hash string) *model.ChainEx
 	var extrinsic model.ChainExtrinsic
 	blockNum, _ := d.GetFillAlreadyBlockNum(context.TODO())
 	for index := blockNum / (model.SplitTableBlockNum); index >= 0; index-- {
-		query := d.db.Model(model.ChainExtrinsic{BlockNum: index * model.SplitTableBlockNum}).Where("extrinsic_hash = ?", hash).First(&extrinsic)
+		query := d.Db.Model(model.ChainExtrinsic{BlockNum: index * model.SplitTableBlockNum}).Where("extrinsic_hash = ?", hash).First(&extrinsic)
 		if query != nil && !query.RecordNotFound() {
 			return &extrinsic
 		}
@@ -137,7 +131,7 @@ func (d *Dao) GetExtrinsicsDetailByHash(c context.Context, hash string) *model.E
 func (d *Dao) GetExtrinsicsDetailByIndex(c context.Context, index string) *model.ExtrinsicDetail {
 	var extrinsic model.ChainExtrinsic
 	indexArr := strings.Split(index, "-")
-	query := d.db.Model(model.ChainExtrinsic{BlockNum: util.StringToInt(indexArr[0])}).
+	query := d.Db.Model(model.ChainExtrinsic{BlockNum: util.StringToInt(indexArr[0])}).
 		Where("extrinsic_index = ?", index).Scan(&extrinsic)
 	if query == nil || query.RecordNotFound() {
 		return nil
@@ -159,9 +153,7 @@ func (d *Dao) extrinsicsAsDetail(c context.Context, e *model.ChainExtrinsic) *mo
 		Success:            e.Success,
 		Fee:                e.Fee,
 	}
-
-	params := model.ParsingExtrinsicParam(e.Params)
-	detail.Params = &params
+	util.UnmarshalToAnything(detail.Params, e.Params)
 
 	if block := d.Block(c, detail.BlockNum); block != nil {
 		detail.Finalized = block.Finalized
@@ -178,27 +170,6 @@ func (d *Dao) extrinsicsAsDetail(c context.Context, e *model.ChainExtrinsic) *mo
 		detail.Error = d.ExtrinsicError(detail.ExtrinsicHash)
 	}
 
-	if strings.ToLower(detail.CallModuleFunction) == TransferModule {
-		var dest string
-		var amount decimal.Decimal
-		for _, v := range params {
-			if v.Type == "Address" {
-				dest = v.Value.(string)
-			}
-			if v.Type == "Compact<Balance>" {
-				amount = util.DecimalFromInterface(v.Value).Div(decimal.New(1, int32(substrate.BalanceAccuracy)))
-			}
-		}
-		t := model.TransferJson{
-			From:    detail.AccountId,
-			To:      ss58.Encode(dest, substrate.AddressType),
-			Module:  detail.CallModule,
-			Hash:    detail.ExtrinsicHash,
-			Amount:  amount,
-			Success: detail.Success,
-		}
-		detail.Transfer = &t
-	}
 	return &detail
 }
 
