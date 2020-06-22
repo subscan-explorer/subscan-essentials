@@ -57,10 +57,9 @@ func (s *Service) AddEvent(
 }
 
 func (s *Service) AnalysisEvent(blockHash string, blockTimestamp int, event model.ChainEvent, spec int, fee decimal.Decimal) {
-	paramEvent, err := model.ParsingEventParam(event.Params)
-	if err != nil {
-		return
-	}
+	var paramEvent []model.EventParam
+	util.UnmarshalToAnything(&paramEvent, event.Params)
+
 	switch event.ModuleId {
 	case "system":
 		system.EmitEvent(system.NewEvent(s.Dao, &event, paramEvent, blockHash, blockTimestamp, spec), event.EventId)

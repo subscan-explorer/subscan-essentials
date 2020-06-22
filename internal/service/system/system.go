@@ -65,7 +65,8 @@ func EmitEvent(s System, eventId string) {
 func (s *system) ExtrinsicFailed() {
 	for _, param := range s.eventParams {
 		if param.Type == "DispatchError" {
-			dr := model.ParsingExtrinsicErrorParam(param.Value)
+			var dr map[string]interface{}
+			util.UnmarshalToAnything(&dr, param.Value)
 			if _, ok := dr["Error"]; ok {
 				_ = s.dao.CreateExtrinsicError(s.event.ExtrinsicHash, s.dao.CheckExtrinsicError(s.spec, util.IntFromInterface(dr["Module"]), util.IntFromInterface(dr["Error"])))
 			} else if _, ok := dr["Module"]; ok {

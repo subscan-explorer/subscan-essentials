@@ -62,8 +62,6 @@ func initRouter(e *bm.Engine) {
 			s.POST("events", events)
 
 			s.POST("check_hash", checkSearchHash)
-			// Log
-			s.POST("logs", logs)
 
 			s.POST("runtime/metadata", runtimeMetadata)
 			s.POST("runtime/list", runtimeList)

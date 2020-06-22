@@ -7,11 +7,10 @@ import (
 	"github.com/itering/subscan/internal/substrate"
 	"github.com/itering/subscan/internal/util"
 	"github.com/itering/subscan/internal/util/ss58"
-	"github.com/shopspring/decimal"
 	"strings"
 )
 
-func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.ChainExtrinsic, nonce int) error {
+func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.ChainExtrinsic) error {
 	params, _ := json.Marshal(extrinsic.Params)
 	ce := model.ChainExtrinsic{
 		BlockTimestamp:     extrinsic.BlockTimestamp,
@@ -154,9 +153,7 @@ func (d *Dao) extrinsicsAsDetail(c context.Context, e *model.ChainExtrinsic) *mo
 		Success:            e.Success,
 		Fee:                e.Fee,
 	}
-
-	params := model.ParsingExtrinsicParam(e.Params)
-	detail.Params = &params
+	util.UnmarshalToAnything(detail.Params, e.Params)
 
 	if block := d.Block(c, detail.BlockNum); block != nil {
 		detail.Finalized = block.Finalized
@@ -173,27 +170,6 @@ func (d *Dao) extrinsicsAsDetail(c context.Context, e *model.ChainExtrinsic) *mo
 		detail.Error = d.ExtrinsicError(detail.ExtrinsicHash)
 	}
 
-	if strings.ToLower(detail.CallModuleFunction) == TransferModule {
-		var dest string
-		var amount decimal.Decimal
-		for _, v := range params {
-			if v.Type == "Address" {
-				dest = v.Value.(string)
-			}
-			if v.Type == "Compact<Balance>" {
-				amount = util.DecimalFromInterface(v.Value).Div(decimal.New(1, int32(substrate.BalanceAccuracy)))
-			}
-		}
-		t := model.TransferJson{
-			From:    detail.AccountId,
-			To:      ss58.Encode(dest, substrate.AddressType),
-			Module:  detail.CallModule,
-			Hash:    detail.ExtrinsicHash,
-			Amount:  amount,
-			Success: detail.Success,
-		}
-		detail.Transfer = &t
-	}
 	return &detail
 }
 

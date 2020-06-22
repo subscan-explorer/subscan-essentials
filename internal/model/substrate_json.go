@@ -61,7 +61,6 @@ type ExtrinsicDetail struct {
 	ExtrinsicHash      string            `json:"extrinsic_hash"`
 	Success            bool              `json:"success"`
 	Params             *[]ExtrinsicParam `json:"params"`
-	Transfer           *TransferJson     `json:"transfer"`
 	Event              *[]ChainEvent     `json:"event"`
 	Fee                decimal.Decimal   `json:"fee"`
 	Error              *ExtrinsicError   `json:"error"`

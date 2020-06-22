@@ -10,11 +10,6 @@ import (
 	"strings"
 )
 
-func (s *Service) GetLogList(page, row int) (*[]model.ChainLogJson, int) {
-	c := context.TODO()
-	return s.Dao.GetLogList(c, page, row)
-}
-
 func (s *Service) GetLogByIndex(index string) *model.ChainLogJson {
 	c := context.TODO()
 	return s.Dao.GetLogsByIndex(c, index)

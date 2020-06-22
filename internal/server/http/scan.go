@@ -125,20 +125,6 @@ func events(c *bm.Context) {
 	}, nil)
 }
 
-func logs(c *bm.Context) {
-	p := new(struct {
-		Row  int `json:"row" validate:"min=1,max=100"`
-		Page int `json:"page" validate:"min=0"`
-	})
-	if err := c.BindWith(p, binding.JSON); err != nil {
-		return
-	}
-	logs, count := svc.GetLogList(p.Page, p.Row)
-	c.JSON(map[string]interface{}{
-		"logs": logs, "count": count,
-	}, nil)
-}
-
 func checkSearchHash(c *bm.Context) {
 	p := new(struct {
 		Hash string `json:"hash" validate:"len=66"`

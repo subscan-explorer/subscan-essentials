@@ -9,13 +9,6 @@ import (
 // SplitTableBlockNum
 var SplitTableBlockNum = 1000000
 
-type ChainMetadata struct {
-	Version int    `json:"version"`
-	Type    string `json:"type"` // storage/call/event/constant/error
-	Name    string `json:"name"`
-	Prefix  string `json:"prefix"`
-}
-
 type ChainBlock struct {
 	ID              uint      `gorm:"primary_key" json:"id"`
 	BlockNum        int       `json:"block_num" es:"type:keyword"`
@@ -100,19 +93,6 @@ func (c ChainExtrinsic) TableName() string {
 	return fmt.Sprintf("chain_extrinsics_%d", c.BlockNum/SplitTableBlockNum)
 }
 
-type ExtrinsicParam struct {
-	Name     string      `json:"name"`
-	Type     string      `json:"type"`
-	Value    interface{} `json:"value"`
-	ValueRaw string      `json:"valueRaw"`
-}
-
-type EventParam struct {
-	Type     string      `json:"type"`
-	Value    interface{} `json:"value"`
-	ValueRaw string      `json:"valueRaw"`
-}
-
 type RuntimeVersion struct {
 	Id                    int    `json:"-"`
 	Name                  string `json:"-"`
@@ -163,4 +143,17 @@ type DispatchError struct {
 type DispatchErrorModule struct {
 	Index int `json:"index"`
 	Error int `json:"error"`
+}
+
+type ExtrinsicParam struct {
+	Name     string      `json:"name"`
+	Type     string      `json:"type"`
+	Value    interface{} `json:"value"`
+	ValueRaw string      `json:"valueRaw"`
+}
+
+type EventParam struct {
+	Type     string      `json:"type"`
+	Value    interface{} `json:"value"`
+	ValueRaw string      `json:"valueRaw"`
 }

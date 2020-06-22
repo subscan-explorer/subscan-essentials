@@ -37,8 +37,8 @@ func (s *Service) createExtrinsic(c context.Context,
 		extrinsic.CallModule = strings.ToLower(extrinsic.CallModule)
 
 		if extrinsic.CallModule == "timestamp" {
-			var paramsInstant = model.ParsingExtrinsicParam(extrinsic.Params)
-			blockTimestamp = s.getTimestamp(c, paramsInstant)
+
+			blockTimestamp = s.getTimestamp(c, extrinsic.Params)
 		}
 
 		extrinsic.BlockNum = blockNum
@@ -62,10 +62,9 @@ func (s *Service) createExtrinsic(c context.Context,
 	s.Dao.DropExtrinsicNotFinalizedData(c, blockNum, finalized)
 
 	for _, extrinsic := range extrinsicList {
-		nonce := s.getAccountNewNonce(extrinsic.AccountId, extrinsic.Nonce, eventMap[extrinsic.ExtrinsicIndex]) // check ReapedAccount
 
 		extrinsicValue := extrinsic
-		err = s.Dao.CreateExtrinsic(c, txn, &extrinsicValue, nonce)
+		err = s.Dao.CreateExtrinsic(c, txn, &extrinsicValue)
 		if err != nil {
 			return 0, 0, nil, nil, err
 		}
@@ -73,8 +72,10 @@ func (s *Service) createExtrinsic(c context.Context,
 	return len(e), blockTimestamp, hash, extrinsicFee, err
 }
 
-func (s *Service) getTimestamp(c context.Context, params []model.ExtrinsicParam) (timestamp int) {
-	for _, p := range params {
+func (s *Service) getTimestamp(c context.Context, param interface{}) (timestamp int) {
+	var paramsInstant []model.ExtrinsicParam
+	util.UnmarshalToAnything(&paramsInstant, param)
+	for _, p := range paramsInstant {
 		if p.Name == "now" {
 			return util.IntFromInterface(p.Value)
 		}
@@ -89,17 +90,4 @@ func (s *Service) getExtrinsicSuccess(e []model.ChainEvent) bool {
 		}
 	}
 	return true
-}
-
-func (s *Service) getAccountNewNonce(accountID string, extrinsicNonce int, e []model.ChainEvent) int {
-	for _, event := range e {
-		if event.EventId == "ReapedAccount" {
-			if params, err := model.ParsingEventParam(event.Params); err == nil && len(params) == 2 {
-				if util.TrimHex(util.InterfaceToString(params[0].Value)) == accountID {
-					return 0
-				}
-			}
-		}
-	}
-	return extrinsicNonce + 1
 }
