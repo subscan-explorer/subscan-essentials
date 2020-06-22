@@ -216,10 +216,6 @@ func (d *Dao) SetBlockFinalized(block *model.ChainBlock) {
 	d.Db.Model(block).UpdateColumn(model.ChainBlock{Finalized: true})
 }
 
-func (d *Dao) SetBlockCodecError(blockNum int) {
-	d.Db.Model(model.ChainBlock{BlockNum: blockNum}).Where("block_num = ?", blockNum).UpdateColumn(model.ChainBlock{CodecError: true})
-}
-
 func (d *Dao) BlocksReverseByNum(c context.Context, blockNums []int) map[int]model.ChainBlock {
 	var blocks []model.ChainBlock
 	if len(blockNums) == 0 {

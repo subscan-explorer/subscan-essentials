@@ -6,13 +6,11 @@ import (
 	"github.com/go-kratos/kratos/pkg/cache/redis"
 	"github.com/go-kratos/kratos/pkg/conf/paladin"
 	"github.com/go-kratos/kratos/pkg/sync/pipeline/fanout"
-	"github.com/google/wire"
 	"github.com/jinzhu/gorm"
 )
 
 var (
-	DaemonAction = []string{"substrate", "worker", "cronWorker"}
-	Provider     = wire.NewSet(New)
+	DaemonAction = []string{"substrate"}
 )
 
 // Dao dao.
