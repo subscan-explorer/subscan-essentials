@@ -1,9 +1,6 @@
 package ss58
 
 import (
-	"bytes"
-	"encoding/binary"
-	"github.com/itering/scale.go/types"
 	"github.com/itering/subscan/internal/util"
 	"github.com/itering/subscan/internal/util/base58"
 	"golang.org/x/crypto/blake2b"
@@ -72,56 +69,4 @@ func Encode(address string, addressType int) string {
 	h := checksum.Sum(nil)
 	b := append(addressFormat[:], h[:checksumLength][:]...)
 	return base58.Encode(b)
-}
-
-func EncodeAccountIndex(accountIndex int64, addressType int) string {
-	if accountIndex == -1 {
-		return ""
-	}
-	buf := new(bytes.Buffer)
-	var err error
-	if accountIndex >= 0 && accountIndex <= 255 {
-		err = binary.Write(buf, binary.LittleEndian, byte(accountIndex))
-	} else if accountIndex >= 256 && accountIndex <= 65535 {
-		err = binary.Write(buf, binary.LittleEndian, uint16(accountIndex))
-	} else if accountIndex >= 65536 && accountIndex <= 4294967295 {
-		err = binary.Write(buf, binary.LittleEndian, uint32(accountIndex))
-	} else {
-		err = binary.Write(buf, binary.LittleEndian, uint64(accountIndex))
-	}
-	if err != nil {
-		return ""
-	}
-	return Encode(util.BytesToHex(buf.Bytes()), addressType)
-}
-
-func DecodeAccountIndex(accountIndex string, addressType int) int64 {
-	if accountIndex == "" {
-		return -1
-	}
-	index := Decode(accountIndex, addressType)
-	data := types.ScaleBytes{Data: util.HexToBytes(index)}
-	switch len(index) {
-	case 2:
-		byteInstant := types.U8{}
-		byteInstant.Init(data, nil)
-		byteInstant.Process()
-		return int64(byteInstant.Value.(int))
-	case 4:
-		byteInstant := types.U16{}
-		byteInstant.Init(data, nil)
-		byteInstant.Process()
-		return int64(byteInstant.Value.(uint16))
-	case 8:
-		byteInstant := types.U32{}
-		byteInstant.Init(data, nil)
-		byteInstant.Process()
-		return int64(byteInstant.Value.(uint32))
-	case 16:
-		byteInstant := types.U64{}
-		byteInstant.Init(data, nil)
-		byteInstant.Process()
-		return int64(byteInstant.Value.(uint64))
-	}
-	return -1
 }

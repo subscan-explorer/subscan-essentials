@@ -23,7 +23,7 @@ func HashByCryptoName(p []byte, hasher string) []byte {
 		h := twox.NewXXHash128(p)
 		p = h[:]
 	case "Twox64Concat":
-		h := twox.TwoX64Concat(p)
+		h := twox.To64Concat(p)
 		p = h[:]
 	case "Identity":
 		p = p[:]
@@ -33,7 +33,7 @@ func HashByCryptoName(p []byte, hasher string) []byte {
 		h := checksum.Sum(nil)
 		p = append(h, p...)
 	default:
-		h := twox.TwoX64Concat(p)
+		h := twox.To64Concat(p)
 		p = h[:]
 	}
 	return p

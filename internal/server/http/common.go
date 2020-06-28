@@ -3,8 +3,6 @@ package http
 import (
 	"github.com/go-kratos/kratos/pkg/log"
 	bm "github.com/go-kratos/kratos/pkg/net/http/blademaster"
-	"github.com/itering/subscan/internal/substrate"
-	"github.com/itering/subscan/internal/util/ss58"
 	"net/http"
 	"time"
 )
@@ -21,17 +19,6 @@ func now(c *bm.Context) {
 }
 
 func systemStatus(c *bm.Context) {
-	status := svc.GetSystemHeartBeat(c)
+	status := svc.DaemonHealth(c)
 	c.JSON(status, nil)
-}
-
-func codecAddress(c *bm.Context) {
-	address, _ := c.Params.Get("p")
-	codec, _ := c.Params.Get("t")
-	if codec == "encode" {
-		address = ss58.Encode(address, substrate.AddressType)
-	} else {
-		address = ss58.Decode(address, substrate.AddressType)
-	}
-	c.JSON(address, nil)
 }

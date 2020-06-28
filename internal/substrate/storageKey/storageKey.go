@@ -6,7 +6,6 @@ import (
 	"github.com/itering/subscan/internal/substrate/hasher"
 	"github.com/itering/subscan/internal/substrate/metadata"
 	"github.com/itering/subscan/internal/util"
-	"strings"
 )
 
 type StorageKey struct {
@@ -26,26 +25,26 @@ var (
 )
 
 // PrintRuntimeStorageKey
-func runtimeStorageKey() map[string]Storage {
-	if Sks == nil {
-		return Sks
-	}
-	runtime := metadata.Latest(nil)
-	keys := make(map[string]Storage)
-	for _, modules := range runtime.Metadata.Modules {
-		for _, storage := range modules.Storage {
-			prefix := modules.Prefix
-			method := storage.Name
-			keys[strings.ToLower(fmt.Sprintf("%s|%s", modules.Name, method))] = Storage{
-				Prefix: util.UpperCamel(prefix),
-				Method: util.UpperCamel(method),
-				Type:   storage.Type,
-			}
-		}
-	}
-	Sks = keys
-	return Sks
-}
+// func runtimeStorageKey() map[string]Storage {
+// 	if Sks == nil {
+// 		return Sks
+// 	}
+// 	runtime := metadata.Latest(nil)
+// 	keys := make(map[string]Storage)
+// 	for _, modules := range runtime.Metadata.Modules {
+// 		for _, storage := range modules.Storage {
+// 			prefix := modules.Prefix
+// 			method := storage.Name
+// 			keys[strings.ToLower(fmt.Sprintf("%s|%s", modules.Name, method))] = Storage{
+// 				Prefix: util.UpperCamel(prefix),
+// 				Method: util.UpperCamel(method),
+// 				Type:   storage.Type,
+// 			}
+// 		}
+// 	}
+// 	Sks = keys
+// 	return Sks
+// }
 
 func SubscribeStorage() []string {
 	TotalIssuance = EncodeStorageKey("Balances", "TotalIssuance")

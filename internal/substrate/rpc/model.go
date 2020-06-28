@@ -260,13 +260,3 @@ func (p *JsonRpcResult) checkErr() error {
 	}
 	return nil
 }
-
-func (p *JsonRpcParams) checkErr() error {
-	if p.Error != nil {
-		return errors.New(p.Error.Message)
-	}
-	if p.Params == nil {
-		return nilErr
-	}
-	return nil
-}

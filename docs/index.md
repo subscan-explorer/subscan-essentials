@@ -6,7 +6,6 @@
 1.  [extrinsics](#extrinsics)
 1.  [extrinsic](#extrinsic)
 1.  [events](#events)
-1.  [search](#search)
 1.  [check_hash](#check-hash)
 
 

@@ -5,11 +5,6 @@ import (
 	"math"
 )
 
-// NewXXHash
-func NewXXHash(data []byte, bitLength int64) []byte {
-	return newXXHash(data, uint(bitLength))
-}
-
 // NewXXHash64
 func NewXXHash64(data []byte) [8]byte {
 	var hash [8]byte
@@ -47,7 +42,7 @@ func newXXHash(data []byte, bitLength uint) []byte {
 }
 
 // TwoX64Concat
-func TwoX64Concat(data []byte) (hashData []byte) {
+func To64Concat(data []byte) (hashData []byte) {
 	var hash [8]byte
 	digest := xxHash64.New(uint64(0))
 	_, _ = digest.Write(data)

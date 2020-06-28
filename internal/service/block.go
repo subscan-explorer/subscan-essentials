@@ -11,7 +11,6 @@ import (
 	"github.com/itering/subscan/internal/substrate/rpc"
 	"github.com/itering/subscan/internal/substrate/storage"
 	"github.com/itering/subscan/internal/util"
-	"github.com/shopspring/decimal"
 )
 
 func (s *Service) GetAlreadyBlockNum() (int, error) {
@@ -52,6 +51,7 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 		decodeExtrinsics []map[string]interface{}
 		decodeEvent      interface{}
 		logs             []storage.DecoderLog
+		validator        string
 	)
 	c := context.TODO()
 
@@ -81,13 +81,6 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 		}
 	}
 
-	var (
-		eventCount, extrinsicsCount, blockTimestamp int
-		validator                                   string
-	)
-	extrinsicHash := make(map[string]string)
-	extrinsicFee := make(map[string]decimal.Decimal)
-
 	validatorList, _ := rpc.GetValidatorFromSub(nil, hash)
 	txn := s.dao.DbBegin()
 	defer txn.DbRollback()
@@ -97,13 +90,16 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 
 	eventMap := s.checkoutExtrinsicEvents(e, blockNum)
 
-	if extrinsicsCount, blockTimestamp, extrinsicHash, extrinsicFee, err = s.createExtrinsic(c, txn, blockNum, block.Extrinsics, decodeExtrinsics, eventMap, finalized, spec); err != nil {
+	extrinsicsCount, blockTimestamp, extrinsicHash, extrinsicFee, err := s.createExtrinsic(c, txn, blockNum, block.Extrinsics, decodeExtrinsics, eventMap, finalized, spec)
+	if err != nil {
 		return err
 	}
 
-	if eventCount, err = s.AddEvent(c, txn, blockNum, blockTimestamp, hash, e, extrinsicHash, finalized, spec, extrinsicFee); err != nil {
+	eventCount, err := s.AddEvent(c, txn, blockNum, blockTimestamp, hash, e, extrinsicHash, finalized, spec, extrinsicFee)
+	if err != nil {
 		return err
 	}
+
 	if validator, err = s.EmitLog(c, txn, blockNum, logs, validatorList, finalized); err != nil {
 		return err
 	}

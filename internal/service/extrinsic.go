@@ -38,7 +38,6 @@ func (s *Service) createExtrinsic(c context.Context,
 		extrinsic.CallModule = strings.ToLower(extrinsic.CallModule)
 
 		if extrinsic.CallModule == "timestamp" {
-
 			blockTimestamp = s.getTimestamp(extrinsic.Params)
 		}
 

@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	SubscribeConn *recws.RecConn
+	subscribeConn *recws.RecConn
 )
 
 const (
@@ -33,27 +33,27 @@ func (s *Service) Subscribe() {
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
 
-	SubscribeConn = &recws.RecConn{KeepAliveTimeout: 10 * time.Second}
-	SubscribeConn.Dial(util.WSEndPoint, nil)
+	subscribeConn = &recws.RecConn{KeepAliveTimeout: 10 * time.Second}
+	subscribeConn.Dial(util.WSEndPoint, nil)
 
 	for {
-		if SubscribeConn.IsConnected() {
+		if subscribeConn.IsConnected() {
 			break
 		}
-		time.Sleep(SubscribeConn.RecIntvlMin)
+		time.Sleep(subscribeConn.RecIntvlMin)
 	}
 
-	defer SubscribeConn.Close()
+	defer subscribeConn.Close()
 
 	done := make(chan struct{})
 
 	subscribeSrv := s.InitSubscribeService(done)
 	go func() {
 		for {
-			if !SubscribeConn.IsConnected() {
+			if !subscribeConn.IsConnected() {
 				continue
 			}
-			_, message, err := SubscribeConn.ReadMessage()
+			_, message, err := subscribeConn.ReadMessage()
 			if err != nil {
 				log.Error("read: %s", err)
 				continue
@@ -63,7 +63,7 @@ func (s *Service) Subscribe() {
 		}
 	}()
 
-	if err = SubscribeConn.WriteMessage(websocket.TextMessage, rpc.ChainGetRuntimeVersion(runtimeVersion)); err != nil {
+	if err = subscribeConn.WriteMessage(websocket.TextMessage, rpc.ChainGetRuntimeVersion(runtimeVersion)); err != nil {
 		log.Info("write: %s", err)
 	}
 
@@ -77,16 +77,16 @@ func (s *Service) Subscribe() {
 				switch subscript.Topic {
 
 				case newHeader:
-					if err = SubscribeConn.WriteMessage(websocket.TextMessage, rpc.ChainSubscribeNewHead(newHeader)); err != nil {
+					if err = subscribeConn.WriteMessage(websocket.TextMessage, rpc.ChainSubscribeNewHead(newHeader)); err != nil {
 						log.Info("write: %s", err)
 					}
 				case finalizeHeader:
-					if err = SubscribeConn.WriteMessage(websocket.TextMessage, rpc.ChainSubscribeFinalizedHeads(finalizeHeader)); err != nil {
+					if err = subscribeConn.WriteMessage(websocket.TextMessage, rpc.ChainSubscribeFinalizedHeads(finalizeHeader)); err != nil {
 						log.Info("write: %s", err)
 					}
 
 				case stateChange:
-					if err = SubscribeConn.WriteMessage(websocket.TextMessage, rpc.StateSubscribeStorage(stateChange, subscribeStorageList)); err != nil {
+					if err = subscribeConn.WriteMessage(websocket.TextMessage, rpc.StateSubscribeStorage(stateChange, subscribeStorageList)); err != nil {
 						log.Info("write: %s", err)
 					}
 				}
@@ -103,7 +103,7 @@ func (s *Service) Subscribe() {
 		case <-interrupt:
 			close(done)
 			log.Info("interrupt")
-			err = SubscribeConn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+			err = subscribeConn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			if err != nil {
 				log.Error("write close: %s", err)
 				return

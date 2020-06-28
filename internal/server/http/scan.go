@@ -66,7 +66,7 @@ func extrinsics(c *bm.Context) {
 	}
 
 	if p.Signed == "signed" {
-		query = append(query, fmt.Sprintf("is_signed = 1"))
+		query = append(query, "is_signed = 1")
 	}
 	if p.Address != "" {
 		account := ss58.Decode(p.Address, substrate.AddressType)

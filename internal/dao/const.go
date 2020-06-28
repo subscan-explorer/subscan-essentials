@@ -1,9 +1,5 @@
 package dao
 
-const (
-	TransferModule = "transfer"
-)
-
 var (
 	RedisMetadataKey           = redisKeyPrefix() + "metadata"
 	blockCacheKey              = redisKeyPrefix() + "block:%d"

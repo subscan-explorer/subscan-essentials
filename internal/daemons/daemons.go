@@ -2,6 +2,7 @@ package daemons
 
 import (
 	"fmt"
+	"github.com/itering/subscan/internal/dao"
 	"log"
 	"os"
 	"syscall"
@@ -18,13 +19,19 @@ var (
 
 func Run(dt, signal string) {
 	daemon.AddCommand(daemon.StringFlag(&signal, "stop"), syscall.SIGQUIT, termHandler)
-	daemon.AddCommand(daemon.StringFlag(&signal, "status"), syscall.SIGSEGV, statusHandler)
-	doAction(dt, signal)
+	doAction(dt)
 }
 
-func doAction(dt, signal string) {
-	pid := fmt.Sprintf("../log/%s_pid", dt)
-	logName := fmt.Sprintf("../log/%s_log", dt)
+func doAction(dt string) {
+	if !util.StringInSlice(dt, dao.DaemonAction) {
+		log.Println("no such daemon")
+		return
+	}
+
+	logDir := util.GetEnv("LOG_DIR", "")
+	pid := fmt.Sprintf("%s%s_pid", logDir, dt)
+	logName := fmt.Sprintf("%s%s_log", logDir, dt)
+
 	dc := &daemon.Context{
 		PidFileName: pid,
 		PidFilePerm: 0644,
@@ -40,9 +47,6 @@ func doAction(dt, signal string) {
 		if err != nil {
 			log.Println(dt, "not running")
 		} else {
-			if signal == "status" {
-				log.Println(dt, "running", "pid", d.Pid)
-			}
 			_ = daemon.SendCommands(d)
 		}
 		return
@@ -109,18 +113,9 @@ func termHandler(sig os.Signal) error {
 	return daemon.ErrStop
 }
 
-func statusHandler(sig os.Signal) error {
-	log.Println("configuration status", sig)
-	return nil
-}
-
 func heartBeat(dt string) {
 	for {
-		setHeartBeat(dt)
-		time.Sleep(time.Duration(10) * time.Second)
+		srv.SetHeartBeat(fmt.Sprintf("%s:heartBeat:%s", util.NetworkNode, dt))
+		time.Sleep(10 * time.Second)
 	}
-}
-
-func setHeartBeat(dt string) {
-	srv.SetHeartBeat(fmt.Sprintf("%s:heartBeat:%s", util.NetworkNode, dt))
 }

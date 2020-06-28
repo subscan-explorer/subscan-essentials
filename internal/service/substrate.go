@@ -210,20 +210,21 @@ func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 	if err = websocket.SendWsRequest(nil, v, rpc.ChainGetRuntimeVersion(wsSpec, blockHash)); err != nil {
 		return fmt.Errorf("websocket send error: %v", err)
 	}
-	var runtimeVersion = -1
+
+	specVersion := -1
 
 	if r := v.ToRuntimeVersion(); r == nil {
-		runtimeVersion = s.GetCurrentRuntimeSpecVersion(blockNum)
+		specVersion = s.GetCurrentRuntimeSpecVersion(blockNum)
 	} else {
-		runtimeVersion = r.SpecVersion
-		_ = s.regRuntimeVersion(r.ImplName, runtimeVersion)
+		specVersion = r.SpecVersion
+		_ = s.regRuntimeVersion(r.ImplName, specVersion)
 	}
 
-	if runtimeVersion > substrate.CurrentRuntimeSpecVersion {
-		substrate.CurrentRuntimeSpecVersion = runtimeVersion
+	if specVersion > substrate.CurrentRuntimeSpecVersion {
+		substrate.CurrentRuntimeSpecVersion = specVersion
 	}
 
-	if rpcBlock == nil || runtimeVersion == -1 {
+	if rpcBlock == nil || specVersion == -1 {
 		return errors.New("nil block data")
 	}
 
@@ -236,7 +237,7 @@ func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 	// refresh finalized info for update
 	if block != nil {
 		// Confirm data, only set block Finalized
-		if block.Hash == blockHash && block.ExtrinsicsRoot == rpcBlock.Block.Header.ExtrinsicsRoot && block.Event == event && block.CodecError == false && finalized {
+		if block.Hash == blockHash && block.ExtrinsicsRoot == rpcBlock.Block.Header.ExtrinsicsRoot && block.Event == event && !block.CodecError && finalized {
 			s.dao.SetBlockFinalized(block)
 		} else {
 			// refresh all block data
@@ -256,7 +257,7 @@ func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 	}
 
 	// for Create
-	if err = s.CreateChainBlock(blockHash, &rpcBlock.Block, event, runtimeVersion, finalized); err == nil {
+	if err = s.CreateChainBlock(blockHash, &rpcBlock.Block, event, specVersion, finalized); err == nil {
 		_ = s.SetAlreadyBlockNum(blockNum)
 		setFinalized()
 	}

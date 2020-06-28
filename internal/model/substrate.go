@@ -11,19 +11,19 @@ var SplitTableBlockNum = 1000000
 
 type ChainBlock struct {
 	ID              uint      `gorm:"primary_key" json:"id"`
-	BlockNum        int       `json:"block_num" es:"type:keyword"`
+	BlockNum        int       `json:"block_num"`
 	BlockTimestamp  int       `json:"block_timestamp"`
-	CreatedAt       time.Time `json:"created_at" es:"type:date"`
-	Hash            string    `sql:"default: null;size:100" json:"hash" es:"type:keyword"`
-	ParentHash      string    `sql:"default: null;size:100" json:"parent_hash" es:"type:keyword"`
-	StateRoot       string    `sql:"default: null;size:100" json:"state_root" es:"type:keyword"`
-	ExtrinsicsRoot  string    `sql:"default: null;size:100" json:"extrinsics_root" es:"type:keyword"`
+	CreatedAt       time.Time `json:"created_at"`
+	Hash            string    `sql:"default: null;size:100" json:"hash"`
+	ParentHash      string    `sql:"default: null;size:100" json:"parent_hash"`
+	StateRoot       string    `sql:"default: null;size:100" json:"state_root"`
+	ExtrinsicsRoot  string    `sql:"default: null;size:100" json:"extrinsics_root"`
 	Logs            string    `json:"logs" sql:"type:text;"`
 	Extrinsics      string    `json:"extrinsics" sql:"type:MEDIUMTEXT;"`
 	EventCount      int       `json:"event_count"`
 	ExtrinsicsCount int       `json:"extrinsics_count"`
 	Event           string    `json:"event" sql:"type:text;"`
-	SpecVersion     int       `json:"spec_version"  es:"type:text"`
+	SpecVersion     int       `json:"spec_version"`
 	Validator       string    `json:"validator"`
 	CodecError      bool      `json:"codec_error"`
 	Finalized       bool      `json:"finalized"`
@@ -38,16 +38,16 @@ func (c ChainBlock) TableName() string {
 
 type ChainEvent struct {
 	ID            uint        `gorm:"primary_key" json:"-"`
-	CreatedAt     time.Time   `json:"-" es:"type:date"`
-	EventIndex    string      `sql:"default: null;size:100;" json:"event_index" es:"type:keyword"`
-	BlockNum      int         `json:"block_num" es:"type:keyword"`
+	CreatedAt     time.Time   `json:"-" `
+	EventIndex    string      `sql:"default: null;size:100;" json:"event_index"`
+	BlockNum      int         `json:"block_num" `
 	Phase         int         `json:"-"`
 	ExtrinsicIdx  int         `json:"extrinsic_idx"`
 	Type          string      `json:"-"`
-	ModuleId      string      `json:"module_id" es:"type:keyword"`
-	EventId       string      `json:"event_id" es:"type:keyword"`
-	Params        interface{} `json:"params" sql:"type:text;" es:"type:text"`
-	ExtrinsicHash string      `json:"extrinsic_hash" sql:"default: null" es:"type:keyword"`
+	ModuleId      string      `json:"module_id" `
+	EventId       string      `json:"event_id" `
+	Params        interface{} `json:"params" sql:"type:text;" `
+	ExtrinsicHash string      `json:"extrinsic_hash" sql:"default: null" `
 	EventIdx      int         `json:"event_idx"`
 	Finalized     bool        `json:"finalized"`
 }
@@ -62,23 +62,23 @@ func (c ChainEvent) TableName() string {
 type ChainExtrinsic struct {
 	ID                 uint            `gorm:"primary_key"`
 	CreatedAt          time.Time       `json:"created_at"`
-	ExtrinsicIndex     string          `json:"extrinsic_index" sql:"default: null;size:100" es:"type:keyword"`
-	BlockNum           int             `json:"block_num" es:"type:keyword"`
+	ExtrinsicIndex     string          `json:"extrinsic_index" sql:"default: null;size:100"`
+	BlockNum           int             `json:"block_num" `
 	BlockTimestamp     int             `json:"block_timestamp"`
 	ValueRaw           string          `json:"value_raw"`
 	ExtrinsicLength    string          `json:"extrinsic_length"`
 	VersionInfo        string          `json:"version_info"`
 	CallCode           string          `json:"call_code"`
-	CallModuleFunction string          `json:"call_module_function" es:"type:keyword" sql:"size:100"`
-	CallModule         string          `json:"call_module" es:"type:keyword" sql:"size:100"`
-	Params             interface{}     `json:"params" sql:"type:MEDIUMTEXT;" es:"type:text"`
+	CallModuleFunction string          `json:"call_module_function"  sql:"size:100"`
+	CallModule         string          `json:"call_module"  sql:"size:100"`
+	Params             interface{}     `json:"params" sql:"type:MEDIUMTEXT;" `
 	AccountLength      string          `json:"account_length"`
 	AccountId          string          `json:"account_id"`
 	AccountIndex       string          `json:"account_index"`
 	Signature          string          `json:"signature"`
 	Nonce              int             `json:"nonce"`
 	Era                string          `json:"era"`
-	ExtrinsicHash      string          `json:"extrinsic_hash" sql:"default: null" es:"type:keyword"`
+	ExtrinsicHash      string          `json:"extrinsic_hash" sql:"default: null" `
 	IsSigned           bool            `json:"is_signed"`
 	Success            bool            `json:"success"`
 	Fee                decimal.Decimal `json:"fee" sql:"type:decimal(30,0);"`
@@ -94,24 +94,19 @@ func (c ChainExtrinsic) TableName() string {
 }
 
 type RuntimeVersion struct {
-	Id                    int    `json:"-"`
-	Name                  string `json:"-"`
-	SpecVersion           int    `json:"spec_version"`
-	CountCallFunctions    int    `json:"-"`
-	CountEvents           int    `json:"-"`
-	CountStorageFunctions int    `json:"-"`
-	CountConstants        int    `json:"-"`
-	CountErrorType        int    `json:"-"`
-	Modules               string `json:"modules"`
-	RawData               string `json:"-" sql:"type:MEDIUMTEXT;"`
+	Id          int    `json:"-"`
+	Name        string `json:"-"`
+	SpecVersion int    `json:"spec_version"`
+	Modules     string `json:"modules"`
+	RawData     string `json:"-" sql:"type:MEDIUMTEXT;"`
 }
 
 type ChainLog struct {
 	ID         uint      `gorm:"primary_key"`
 	CreatedAt  time.Time `json:"created_at"`
-	BlockNum   int       `json:"block_num" es:"type:keyword"`
-	LogIndex   string    `json:"log_index" sql:"default: null;size:100" es:"type:keyword"`
-	LogType    string    `json:"log_type" es:"type:keyword"`
+	BlockNum   int       `json:"block_num" `
+	LogIndex   string    `json:"log_index" sql:"default: null;size:100"`
+	LogType    string    `json:"log_type" `
 	OriginType string    `json:"origin_type"`
 	Data       string    `json:"data" sql:"type:text;"`
 	Finalized  bool      `json:"finalized"`

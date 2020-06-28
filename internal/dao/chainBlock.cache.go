@@ -93,5 +93,5 @@ func (d *Dao) addCacheBlockByHash(c context.Context, b *model.ChainBlock) {
 }
 
 func (d *Dao) delCacheBlock(c context.Context, b *model.ChainBlock) {
-	_ = d.delCache(c, fmt.Sprintf(blockByHashCacheKey, b.Hash), fmt.Sprintf(blockCacheKey, b.BlockNum))
+	_ = d.DelCache(c, fmt.Sprintf(blockByHashCacheKey, b.Hash), fmt.Sprintf(blockCacheKey, b.BlockNum))
 }

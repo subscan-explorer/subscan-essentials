@@ -19,13 +19,11 @@ func (d *Dao) pingRedis(ctx context.Context) (err error) {
 	return
 }
 
-func (d *Dao) SetHeartBeatNow(c context.Context, action string) {
-	conn := d.redis.Get(c)
-	defer conn.Close()
-	_, _ = conn.Do("SET", action, time.Now().Unix())
+func (d *Dao) SetHeartBeatNow(c context.Context, action string) error {
+	return d.SetCache(c, action, time.Now().Unix(), 300)
 }
 
-func (d *Dao) GetHeartBeatNow(c context.Context) map[string]bool {
+func (d *Dao) DaemonHeath(c context.Context) map[string]bool {
 	conn := d.redis.Get(c)
 	defer conn.Close()
 	status := map[string]bool{}
