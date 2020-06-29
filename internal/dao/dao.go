@@ -13,6 +13,11 @@ var (
 	DaemonAction = []string{"substrate"}
 )
 
+type IDao interface {
+	Close()
+	Ping(context.Context) error
+}
+
 // dao
 type Dao struct {
 	Db    *gorm.DB
