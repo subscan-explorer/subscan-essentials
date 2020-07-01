@@ -25,7 +25,7 @@ func (d *Dao) CreateLog(c context.Context, txn *GormDB, blockNum, index int, log
 func (d *Dao) DropLogsNotFinalizedData(blockNum int, finalized bool) bool {
 	var delExist bool
 	if finalized {
-		query := d.Db.Where("block_num = ?", blockNum).
+		query := d.db.Where("block_num = ?", blockNum).
 			Delete(model.ChainLog{BlockNum: blockNum})
 		delExist = query.RowsAffected > 0
 	}
@@ -35,7 +35,7 @@ func (d *Dao) DropLogsNotFinalizedData(blockNum int, finalized bool) bool {
 func (d *Dao) GetLogsByIndex(c context.Context, index string) *model.ChainLogJson {
 	var Log model.ChainLogJson
 	indexArr := strings.Split(index, "-")
-	query := d.Db.Model(model.ChainLog{BlockNum: util.StringToInt(indexArr[0])}).Where("log_index = ?", index).Scan(&Log)
+	query := d.db.Model(model.ChainLog{BlockNum: util.StringToInt(indexArr[0])}).Where("log_index = ?", index).Scan(&Log)
 	if query == nil || query.RecordNotFound() {
 		return nil
 	}
@@ -44,7 +44,7 @@ func (d *Dao) GetLogsByIndex(c context.Context, index string) *model.ChainLogJso
 
 func (d *Dao) GetLogByBlockNum(c context.Context, blockNum int) *[]model.ChainLogJson {
 	var logs []model.ChainLogJson
-	query := d.Db.Model(&model.ChainLog{BlockNum: blockNum}).
+	query := d.db.Model(&model.ChainLog{BlockNum: blockNum}).
 		Where("block_num =?", blockNum).Order("id asc").Scan(&logs)
 	if query == nil || query.Error != nil || query.RecordNotFound() {
 		return nil

@@ -6,7 +6,7 @@ import (
 )
 
 func (d *Dao) Migration() {
-	db := d.Db
+	db := d.db
 	d.splitTableMigrate()
 	db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
 		&model.RuntimeVersion{},
@@ -31,7 +31,7 @@ func (d *Dao) blockMigrate(blockNum int) {
 	extrinsicModel := model.ChainExtrinsic{BlockNum: blockNum}
 	logModel := model.ChainLog{BlockNum: blockNum}
 
-	db := d.Db
+	db := d.db
 	db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
 		blockModel,
 		&eventModel,

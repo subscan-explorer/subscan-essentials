@@ -205,7 +205,7 @@ func (s *Service) GetCurrentRuntimeSpecVersion(blockNum int) int {
 func (s *Service) getMetadataInstant(spec int) *metadata.MetadataType {
 	metadataInstant, ok := metadata.RuntimeMetadata[spec]
 	if !ok {
-		metadataInstant = metadata.Init(s.dao.RuntimeVersionRaws(spec), spec)
+		metadataInstant = metadata.Process(s.dao.RuntimeVersionRaw(spec))
 	}
 	return metadataInstant
 }

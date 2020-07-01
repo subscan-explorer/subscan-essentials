@@ -13,16 +13,19 @@ var (
 	DaemonAction = []string{"substrate"}
 )
 
-type IDao interface {
-	Close()
-	Ping(context.Context) error
-}
-
 // dao
 type Dao struct {
-	Db    *gorm.DB
+	db    *gorm.DB
 	redis *redis.Pool
 	cache *fanout.Fanout
+}
+
+func (d *Dao) DB() *gorm.DB {
+	return d.db
+}
+
+func (d *Dao) Redis() *redis.Pool {
+	return d.redis
 }
 
 func checkErr(err error) {
@@ -42,7 +45,7 @@ func New() (dao *Dao) {
 	dc.mergeEnvironment()
 	rc.mergeEnvironment()
 	dao = &Dao{
-		Db:    newDb(dc),
+		db:    newDb(dc),
 		redis: redis.NewPool(rc.Config, redis.DialDatabase(rc.DbName)),
 		cache: fanout.New("scan", fanout.Worker(1), fanout.Buffer(1024)),
 	}
@@ -54,7 +57,7 @@ func (d *Dao) Close() {
 	if d.redis != nil {
 		_ = d.redis.Close()
 	}
-	_ = d.Db.Close()
+	_ = d.db.Close()
 }
 
 // Ping ping the resource.

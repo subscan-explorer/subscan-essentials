@@ -16,7 +16,6 @@ type RuntimeRaw struct {
 
 var (
 	latestSpec      = -1
-	isInit          bool
 	RuntimeMetadata = make(map[int]*MetadataType)
 	Decoder         *scalecodec.MetadataDecoder
 )
@@ -32,61 +31,42 @@ func Latest(runtime *RuntimeRaw) *MetadataType {
 	m := scalecodec.MetadataDecoder{}
 	m.Init(util.HexToBytes(runtime.Raw))
 	_ = m.Process()
+
 	Decoder = &m
 	latestSpec = runtime.Spec
+
 	instant := MetadataType(m.Metadata)
 	RuntimeMetadata[latestSpec] = &instant
-	d := RuntimeMetadata[latestSpec]
-	return d
+	return RuntimeMetadata[latestSpec]
 }
 
-func Init(runtime *[]RuntimeRaw, spec ...int) *MetadataType {
-	if isInit && len(spec) == 0 {
-		d := RuntimeMetadata[latestSpec]
+func Process(runtime *RuntimeRaw) *MetadataType {
+	if runtime == nil {
+		return nil
+	}
+	if d, ok := RuntimeMetadata[runtime.Spec]; ok {
 		return d
 	}
 
-	var processMetadata = func(specVersionInt int, value string) {
-		if _, ok := RuntimeMetadata[specVersionInt]; ok {
-			return
-		}
-		m := scalecodec.MetadataDecoder{}
-		m.Init(util.HexToBytes(value))
-		_ = m.Process()
-		instant := MetadataType(m.Metadata)
-		RuntimeMetadata[specVersionInt] = &instant
-	}
+	m := scalecodec.MetadataDecoder{}
+	m.Init(util.HexToBytes(runtime.Raw))
+	_ = m.Process()
 
-	for _, value := range *runtime {
-		specVersionInt := value.Spec
+	instant := MetadataType(m.Metadata)
+	RuntimeMetadata[runtime.Spec] = &instant
 
-		if len(spec) > 0 {
-			if spec[0] == specVersionInt {
-				processMetadata(specVersionInt, value.Raw)
-				d := RuntimeMetadata[specVersionInt]
-				return d
-			}
-			continue
-		}
-
-		processMetadata(specVersionInt, value.Raw)
-
-		if specVersionInt > latestSpec {
-			latestSpec = specVersionInt
-		}
-	}
-	isInit = true
-	d := RuntimeMetadata[latestSpec]
-	return d
+	return RuntimeMetadata[runtime.Spec]
 }
 
 func RegNewMetadataType(spec int, coded string) *MetadataType {
 	m := scalecodec.MetadataDecoder{}
 	m.Init(util.HexToBytes(coded))
 	_ = m.Process()
+
 	instant := MetadataType(m.Metadata)
 	RuntimeMetadata[spec] = &instant
-	if latestSpec == -1 {
+
+	if spec > latestSpec {
 		latestSpec = spec
 	}
 	return RuntimeMetadata[spec]

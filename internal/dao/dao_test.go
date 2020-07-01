@@ -29,7 +29,7 @@ func init() {
 	const testRedisDb = 1
 
 	TestDao = &Dao{
-		Db:    db,
+		db:    db,
 		redis: redis.NewPool(rc.Config, redis.DialDatabase(testRedisDb)),
 	}
 	var tables []string

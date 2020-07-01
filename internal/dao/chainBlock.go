@@ -33,7 +33,7 @@ func (d *Dao) CreateBlock(c context.Context, txn *GormDB, hash string, block *rp
 		Finalized:       finalized,
 	}
 	query := txn.Create(&cb)
-	if !d.Db.HasTable(model.ChainBlock{BlockNum: cb.BlockNum + model.SplitTableBlockNum}) {
+	if !d.db.HasTable(model.ChainBlock{BlockNum: cb.BlockNum + model.SplitTableBlockNum}) {
 		go d.blockMigrate(cb.BlockNum + model.SplitTableBlockNum)
 	}
 	return d.checkDBError(query.Error)
@@ -90,7 +90,7 @@ func (d *Dao) GetRepairBlockBlockNum(c context.Context) (num int, err error) {
 
 func (d *Dao) GetBlockNumArr(c context.Context, start, end int) []int {
 	var blockNums []int
-	d.Db.Model(&model.ChainBlock{BlockNum: end}).Where("block_num BETWEEN ? AND ?", start, end).Order("block_num asc").Pluck("block_num", &blockNums)
+	d.db.Model(&model.ChainBlock{BlockNum: end}).Where("block_num BETWEEN ? AND ?", start, end).Order("block_num asc").Pluck("block_num", &blockNums)
 	return blockNums
 }
 
@@ -106,7 +106,7 @@ func (d *Dao) GetBlockList(page, row int) []model.ChainBlock {
 		end = 0
 	}
 
-	d.Db.Model(model.ChainBlock{BlockNum: head}).
+	d.db.Model(model.ChainBlock{BlockNum: head}).
 		Joins(fmt.Sprintf("JOIN (SELECT id,block_num from %s where block_num BETWEEN %d and %d order by block_num desc ) as t on %s.id=t.id",
 			model.ChainBlock{BlockNum: head}.TableName(),
 			end, head,
@@ -116,7 +116,7 @@ func (d *Dao) GetBlockList(page, row int) []model.ChainBlock {
 
 	if head/model.SplitTableBlockNum != end/model.SplitTableBlockNum {
 		var endBlocks []model.ChainBlock
-		d.Db.Model(model.ChainBlock{BlockNum: blockNum - model.SplitTableBlockNum}).
+		d.db.Model(model.ChainBlock{BlockNum: blockNum - model.SplitTableBlockNum}).
 			Joins(fmt.Sprintf("JOIN (SELECT id,block_num from %s order by block_num desc limit %d) as t on %s.id=t.id",
 				model.ChainBlock{BlockNum: blockNum - model.SplitTableBlockNum}.TableName(),
 				row-(head%model.SplitTableBlockNum+1),
@@ -133,7 +133,7 @@ func (d *Dao) GetBlockByHash(c context.Context, hash string) *model.ChainBlock {
 	var block model.ChainBlock
 	blockNum, _ := d.GetCurrentBlockNum(context.TODO())
 	for index := int(blockNum / uint64(model.SplitTableBlockNum)); index >= 0; index-- {
-		query := d.Db.Model(&model.ChainBlock{BlockNum: index * model.SplitTableBlockNum}).Where("hash = ?", hash).Scan(&block)
+		query := d.db.Model(&model.ChainBlock{BlockNum: index * model.SplitTableBlockNum}).Where("hash = ?", hash).Scan(&block)
 		if query != nil && !query.RecordNotFound() {
 			return &block
 		}
@@ -143,7 +143,7 @@ func (d *Dao) GetBlockByHash(c context.Context, hash string) *model.ChainBlock {
 
 func (d *Dao) GetBlockByNum(c context.Context, blockNum int) *model.ChainBlock {
 	var block model.ChainBlock
-	query := d.Db.Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num = ?", blockNum).Scan(&block)
+	query := d.db.Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num = ?", blockNum).Scan(&block)
 	if query == nil || query.Error != nil || query.RecordNotFound() {
 		return nil
 	}
@@ -204,7 +204,7 @@ func (d *Dao) BlockAsSampleJson(c context.Context, block *model.ChainBlock) *mod
 
 func (d *Dao) GetNearBlock(c context.Context, blockNum int) *model.ChainBlock {
 	var block model.ChainBlock
-	query := d.Db.Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num > ?", blockNum).Order("block_num desc").First(&block)
+	query := d.db.Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num > ?", blockNum).Order("block_num desc").First(&block)
 	if query == nil || query.Error != nil || query.RecordNotFound() {
 		return nil
 	}
@@ -213,7 +213,7 @@ func (d *Dao) GetNearBlock(c context.Context, blockNum int) *model.ChainBlock {
 
 func (d *Dao) SetBlockFinalized(block *model.ChainBlock) {
 	d.delCacheBlock(context.TODO(), block)
-	d.Db.Model(block).UpdateColumn(model.ChainBlock{Finalized: true})
+	d.db.Model(block).UpdateColumn(model.ChainBlock{Finalized: true})
 }
 
 func (d *Dao) BlocksReverseByNum(c context.Context, blockNums []int) map[int]model.ChainBlock {
@@ -225,7 +225,7 @@ func (d *Dao) BlocksReverseByNum(c context.Context, blockNums []int) map[int]mod
 	lastNum := blockNums[len(blockNums)-1]
 	for index := lastNum / model.SplitTableBlockNum; index >= 0; index-- {
 		var tableData []model.ChainBlock
-		query := d.Db.Model(model.ChainBlock{BlockNum: index * model.SplitTableBlockNum}).Where("block_num in (?)", blockNums).Scan(&tableData)
+		query := d.db.Model(model.ChainBlock{BlockNum: index * model.SplitTableBlockNum}).Where("block_num in (?)", blockNums).Scan(&tableData)
 		if query == nil || query.Error != nil || query.RecordNotFound() {
 			continue
 		}

@@ -11,14 +11,14 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func TouchAccount(db *gorm.DB, address string) (*model.ChainAccount, error) {
-	var account model.ChainAccount
+func TouchAccount(db *gorm.DB, address string) (*model.Account, error) {
+	var account model.Account
 	address = util.TrimHex(address)
-	query := db.FirstOrCreate(&account, &model.ChainAccount{Address: address})
+	query := db.FirstOrCreate(&account, &model.Account{Address: address})
 	return &account, query.Error
 }
 
-func updateBalance(db *gorm.DB, account *model.ChainAccount, balance decimal.Decimal) error {
+func updateBalance(db *gorm.DB, account *model.Account, balance decimal.Decimal) error {
 	u := map[string]interface{}{"balance": balance}
 	query := db.Model(account).Update(u)
 	if query == nil || query.Error != nil || query.RowsAffected == 0 {
@@ -36,7 +36,7 @@ func GetBalanceFromNetwork(address string) (decimal.Decimal, error) {
 	return balance, nil
 }
 
-func UpdateAccountBalance(db *gorm.DB, account *model.ChainAccount) (decimal.Decimal, error) {
+func UpdateAccountBalance(db *gorm.DB, account *model.Account) (decimal.Decimal, error) {
 	balance, err := GetBalanceFromNetwork(account.Address)
 	if err == nil {
 		_ = updateBalance(db, account, balance)
@@ -49,7 +49,7 @@ func ResetAccountNonce(db *gorm.DB, address string) {
 	if err != nil {
 		return
 	}
-	_ = db.Model(account).Update(model.ChainAccount{Nonce: 0})
+	_ = db.Model(account).Update(model.Account{Nonce: 0})
 }
 
 func UpdateAccountLock(db *gorm.DB, address string) error {
@@ -59,16 +59,16 @@ func UpdateAccountLock(db *gorm.DB, address string) error {
 		return err
 	}
 	u := map[string]interface{}{"lock": balance}
-	query := db.Model(model.ChainAccount{}).Where("address = ?", address).Update(u)
+	query := db.Model(model.Account{}).Where("address = ?", address).Update(u)
 	if query == nil || query.Error != nil || query.RowsAffected == 0 {
 		return errors.New("update balance lock error")
 	}
 	return nil
 }
 
-func GetAccountList(db *gorm.DB, page, row int, order, field string, queryWhere ...string) ([]*model.ChainAccount, int) {
-	var accounts []*model.ChainAccount
-	queryOrigin := db.Model(&model.ChainAccount{})
+func GetAccountList(db *gorm.DB, page, row int, order, field string, queryWhere ...string) ([]*model.Account, int) {
+	var accounts []*model.Account
+	queryOrigin := db.Model(&model.Account{})
 	if field == "" {
 		field = "id"
 	}

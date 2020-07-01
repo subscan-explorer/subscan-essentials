@@ -14,7 +14,7 @@ require (
 	github.com/google/wire v0.4.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/huandu/xstrings v1.3.1
-	github.com/itering/scale.go v0.0.6
+	github.com/itering/scale.go v0.1.1
 	github.com/jinzhu/gorm v1.9.12
 	github.com/jpillora/backoff v1.0.0
 	github.com/json-iterator/go v1.1.9

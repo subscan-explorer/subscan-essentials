@@ -2,18 +2,18 @@ package balance
 
 import (
 	bm "github.com/go-kratos/kratos/pkg/net/http/blademaster"
-	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/internal/model"
 	"github.com/itering/subscan/internal/plugins/balance/http"
 	balance "github.com/itering/subscan/internal/plugins/balance/model"
 	"github.com/itering/subscan/internal/plugins/balance/service"
+	"github.com/itering/subscan/internal/plugins/storage"
 	"github.com/shopspring/decimal"
 )
 
 var srv *service.Service
 
 type Account struct {
-	d *dao.Dao
+	d storage.Dao
 	e *bm.Engine
 }
 
@@ -21,7 +21,7 @@ func New() *Account {
 	return &Account{}
 }
 
-func (a *Account) InitDao(d *dao.Dao) {
+func (a *Account) InitDao(d storage.Dao) {
 	srv = service.New(a.d)
 	a.d = d
 	a.Migrate()
@@ -44,9 +44,9 @@ func (a *Account) ProcessEvent(spec, blockTimestamp int, blockHash string, event
 }
 
 func (a *Account) Migrate() {
-	db := a.d.Db
+	db := a.d.DB()
 	db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
-		&balance.ChainAccount{},
+		&balance.Account{},
 	)
-	db.Model(balance.ChainAccount{}).AddUniqueIndex("address", "address")
+	db.Model(balance.Account{}).AddUniqueIndex("address", "address")
 }

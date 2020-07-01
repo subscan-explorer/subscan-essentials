@@ -13,7 +13,7 @@ func (s *Service) SubstrateRuntimeInfo(spec int) *metadata.MetadataType {
 	if metadataInstant, ok := metadata.RuntimeMetadata[spec]; ok {
 		return metadataInstant
 	}
-	runtime := metadata.Init(s.dao.RuntimeVersionRaws(spec))
+	runtime := metadata.Process(s.dao.RuntimeVersionRaw(spec))
 	if runtime == nil {
 		return metadata.Latest(nil)
 	}

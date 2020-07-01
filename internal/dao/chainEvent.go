@@ -40,7 +40,7 @@ func (d *Dao) CreateEvent(c context.Context, txn *GormDB, event *model.ChainEven
 func (d *Dao) DropEventNotFinalizedData(blockNum int, finalized bool) bool {
 	var delExist bool
 	if finalized {
-		query := d.Db.Where("block_num = ?", blockNum).Delete(model.ChainEvent{BlockNum: blockNum})
+		query := d.db.Where("block_num = ?", blockNum).Delete(model.ChainEvent{BlockNum: blockNum})
 		delExist = query.RowsAffected > 0
 	}
 	return delExist
@@ -48,7 +48,7 @@ func (d *Dao) DropEventNotFinalizedData(blockNum int, finalized bool) bool {
 
 func (d *Dao) GetEventByBlockNum(c context.Context, blockNum int, where ...string) []model.ChainEventJson {
 	var events []model.ChainEventJson
-	queryOrigin := d.Db.Model(model.ChainEvent{BlockNum: blockNum}).Where("block_num = ?", blockNum)
+	queryOrigin := d.db.Model(model.ChainEvent{BlockNum: blockNum}).Where("block_num = ?", blockNum)
 	for _, w := range where {
 		queryOrigin = queryOrigin.Where(w)
 	}
@@ -68,7 +68,7 @@ func (d *Dao) GetEventList(c context.Context, page, row int, order string, where
 	for index := blockNum / model.SplitTableBlockNum; index >= 0; index-- {
 		var tableData []model.ChainEvent
 		var tableCount int
-		queryOrigin := d.Db.Model(model.ChainEvent{BlockNum: index * model.SplitTableBlockNum})
+		queryOrigin := d.db.Model(model.ChainEvent{BlockNum: index * model.SplitTableBlockNum})
 		for _, w := range where {
 			queryOrigin = queryOrigin.Where(w)
 		}
@@ -96,7 +96,7 @@ func (d *Dao) GetEventList(c context.Context, page, row int, order string, where
 func (d *Dao) GetEventsByIndex(extrinsicIndex string) []model.ChainEvent {
 	var Event []model.ChainEvent
 	indexArr := strings.Split(extrinsicIndex, "-")
-	query := d.Db.Model(model.ChainEvent{BlockNum: util.StringToInt(indexArr[0])}).
+	query := d.db.Model(model.ChainEvent{BlockNum: util.StringToInt(indexArr[0])}).
 		Where("event_index = ?", extrinsicIndex).Scan(&Event)
 	if query == nil || query.RecordNotFound() {
 		return nil
@@ -110,7 +110,7 @@ func (d *Dao) GetEventByIdx(index string) *model.ChainEvent {
 	if len(indexArr) < 2 {
 		return nil
 	}
-	query := d.Db.Model(model.ChainEvent{BlockNum: util.StringToInt(indexArr[0])}).
+	query := d.db.Model(model.ChainEvent{BlockNum: util.StringToInt(indexArr[0])}).
 		Where("block_num = ?", indexArr[0]).
 		Where("event_idx = ?", indexArr[1]).Scan(&Event)
 	if query == nil || query.RecordNotFound() {
