@@ -5,10 +5,10 @@ import (
 	"github.com/itering/scale.go/source"
 	"github.com/itering/scale.go/types"
 	"github.com/itering/subscan/internal/dao"
-	"github.com/itering/subscan/internal/plugins"
 	"github.com/itering/subscan/internal/service/scan"
-	"github.com/itering/subscan/internal/substrate/metadata"
-	"github.com/itering/subscan/internal/util"
+	"github.com/itering/subscan/lib/substrate/metadata"
+	"github.com/itering/subscan/plugins"
+	"github.com/itering/subscan/util"
 	"io/ioutil"
 	"strings"
 )

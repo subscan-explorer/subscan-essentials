@@ -9,9 +9,8 @@ require (
 	github.com/freehere107/go-workers v1.1.1
 	github.com/go-kratos/kratos v0.5.0
 	github.com/go-sql-driver/mysql v1.4.1
-	github.com/gogo/protobuf v1.3.1
+	github.com/gobuffalo/packr/v2 v2.7.1
 	github.com/golang/protobuf v1.3.5
-	github.com/google/wire v0.4.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/huandu/xstrings v1.3.1
 	github.com/itering/scale.go v0.1.1
@@ -28,8 +27,7 @@ require (
 	github.com/shopspring/decimal v1.2.0
 	github.com/stretchr/testify v1.4.0
 	github.com/urfave/cli v1.20.0
+	go.etcd.io/bbolt v1.3.4
 	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
 	golang.org/x/sys v0.0.0-20200523222454-059865788121 // indirect
-	google.golang.org/genproto v0.0.0-20200402124713-8ff61da6d932
-	google.golang.org/grpc v1.28.1
 )

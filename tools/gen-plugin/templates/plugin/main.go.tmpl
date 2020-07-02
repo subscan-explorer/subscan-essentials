@@ -1,0 +1,50 @@
+package {{.Name}}
+
+import (
+	bm "github.com/go-kratos/kratos/pkg/net/http/blademaster"
+	"github.com/itering/subscan/model"
+	"github.com/itering/subscan/plugins/storage"
+    "{{.ModPrefix}}{{.Name}}/http"
+    "{{.ModPrefix}}{{.Name}}/service"
+	"github.com/shopspring/decimal"
+)
+
+var srv *service.Service
+
+type {{.ModClass}} struct {
+	d storage.Dao
+	e *bm.Engine
+}
+
+func New() *{{.ModClass}} {
+	return &{{.ModClass}}{}
+}
+
+func (a *{{.ModClass}}) InitDao(d storage.Dao) {
+	srv = service.New(a.d)
+	a.d = d
+	a.Migrate()
+}
+func (a *{{.ModClass}}) InitHttp(e *bm.Engine) {
+	a.e = e
+}
+
+func (a *{{.ModClass}}) Http() error {
+	http.Router(srv, a.e)
+	return nil
+}
+
+func (a *{{.ModClass}}) ProcessExtrinsic(spec int, extrinsic *model.ChainExtrinsic, events []model.ChainEvent) error {
+	return nil
+}
+
+func (a *{{.ModClass}}) ProcessEvent(spec, blockTimestamp int, blockHash string, event *model.ChainEvent, fee decimal.Decimal) error {
+	return nil
+}
+
+func (a *{{.ModClass}}) Migrate() {
+	db := a.d.DB()
+	db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
+	)
+
+}

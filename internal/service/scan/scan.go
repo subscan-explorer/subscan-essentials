@@ -3,8 +3,8 @@ package scan
 import (
 	"context"
 	"github.com/itering/subscan/internal/dao"
-	"github.com/itering/subscan/internal/model"
-	"github.com/itering/subscan/internal/util"
+	"github.com/itering/subscan/model"
+	"github.com/itering/subscan/util"
 	"github.com/json-iterator/go"
 )
 

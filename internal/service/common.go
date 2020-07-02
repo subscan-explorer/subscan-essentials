@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/itering/subscan/internal/substrate"
-	"github.com/itering/subscan/internal/util"
+	"github.com/itering/subscan/lib/substrate"
+	"github.com/itering/subscan/util"
 )
 
 // Ping ping the resource.

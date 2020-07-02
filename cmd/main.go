@@ -7,7 +7,7 @@ import (
 	"github.com/itering/subscan/internal/daemons"
 	"github.com/itering/subscan/internal/di"
 	"github.com/itering/subscan/internal/jobs"
-	"github.com/itering/subscan/internal/substrate/websocket"
+	"github.com/itering/subscan/lib/substrate/websocket"
 	"github.com/urfave/cli"
 	"os"
 	"os/signal"

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-kratos/kratos/pkg/cache/redis"
-	"github.com/itering/subscan/internal/model"
+	"github.com/itering/subscan/model"
 )
 
 func (d *Dao) Block(c context.Context, blockNum int) (b *model.ChainBlock) {

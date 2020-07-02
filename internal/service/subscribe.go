@@ -1,9 +1,9 @@
 package service
 
 import (
-	"github.com/itering/subscan/internal/pkg/recws"
-	"github.com/itering/subscan/internal/substrate/rpc"
-	"github.com/itering/subscan/internal/substrate/storageKey"
+	"github.com/itering/subscan/lib/substrate/rpc"
+	"github.com/itering/subscan/lib/substrate/storageKey"
+	"github.com/itering/subscan/pkg/recws"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,7 +11,7 @@ import (
 
 	"github.com/go-kratos/kratos/pkg/log"
 	"github.com/gorilla/websocket"
-	"github.com/itering/subscan/internal/util"
+	"github.com/itering/subscan/util"
 )
 
 var (

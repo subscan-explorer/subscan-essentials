@@ -3,10 +3,10 @@ package service
 import (
 	"context"
 	"github.com/itering/subscan/internal/dao"
-	"github.com/itering/subscan/internal/model"
-	"github.com/itering/subscan/internal/substrate"
-	"github.com/itering/subscan/internal/substrate/storage"
-	"github.com/itering/subscan/internal/util"
+	"github.com/itering/subscan/lib/substrate"
+	"github.com/itering/subscan/lib/substrate/storage"
+	"github.com/itering/subscan/model"
+	"github.com/itering/subscan/util"
 	"strings"
 )
 

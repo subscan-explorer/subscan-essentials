@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/itering/subscan/internal/substrate"
-	"github.com/itering/subscan/internal/substrate/rpc"
+	"github.com/itering/subscan/lib/substrate"
+	"github.com/itering/subscan/lib/substrate/rpc"
 	"sync"
 )
 

@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-kratos/kratos/pkg/cache/redis"
 	"github.com/go-kratos/kratos/pkg/log"
-	"github.com/itering/subscan/internal/util"
+	"github.com/itering/subscan/util"
 )
 
 func (d *Dao) pingRedis(ctx context.Context) (err error) {

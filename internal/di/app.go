@@ -2,8 +2,8 @@ package di
 
 import (
 	"context"
-	"github.com/itering/subscan/internal/plugins"
 	"github.com/itering/subscan/internal/server/http"
+	"github.com/itering/subscan/plugins"
 	"time"
 
 	"github.com/go-kratos/kratos/pkg/log"

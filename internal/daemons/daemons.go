@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/itering/subscan/internal/service"
-	"github.com/itering/subscan/internal/util"
+	"github.com/itering/subscan/util"
 	"github.com/sevlyar/go-daemon"
 )
 
