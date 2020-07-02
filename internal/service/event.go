@@ -4,10 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/itering/subscan/internal/dao"
-	"github.com/itering/subscan/internal/model"
-	"github.com/itering/subscan/internal/service/balances"
-	"github.com/itering/subscan/internal/service/system"
-	"github.com/itering/subscan/internal/util"
+	"github.com/itering/subscan/model"
+	"github.com/itering/subscan/plugins"
 	"github.com/shopspring/decimal"
 	"strings"
 )
@@ -32,11 +30,9 @@ func (s *Service) AddEvent(
 	spec int,
 	feeMap map[string]decimal.Decimal,
 ) (eventCount int, err error) {
-
 	s.dao.DropEventNotFinalizedData(blockNum, finalized)
 
 	for _, event := range e {
-
 		event.ModuleId = strings.ToLower(event.ModuleId)
 		event.ExtrinsicHash = hashMap[fmt.Sprintf("%d-%d", blockNum, event.ExtrinsicIdx)]
 		event.EventIndex = fmt.Sprintf("%d-%d", blockNum, event.ExtrinsicIdx)
@@ -44,29 +40,19 @@ func (s *Service) AddEvent(
 		event.BlockNum = blockNum
 
 		if err = s.dao.CreateEvent(c, txn, &event); err == nil && finalized {
-			go s.AnalysisEvent(blockHash, blockTimestamp, event, spec, feeMap[event.EventIndex])
+			go s.afterEvent(spec, blockTimestamp, blockHash, &event, feeMap[event.EventIndex])
 		} else {
 			return 0, err
 		}
-		if !util.StringInSlice(event.EventId, []string{"ExtrinsicSuccess", "ExtrinsicFailed"}) {
-			eventCount++
-		}
-
+		eventCount++
 	}
 	return eventCount, err
 }
 
-func (s *Service) AnalysisEvent(blockHash string, blockTimestamp int, event model.ChainEvent, spec int, fee decimal.Decimal) {
-	paramEvent, err := model.ParsingEventParam(event.Params)
-	if err != nil {
-		return
-	}
-	switch event.ModuleId {
-	case "system":
-		system.EmitEvent(system.NewEvent(s.dao, &event, paramEvent, blockHash, blockTimestamp, spec), event.EventId)
-
-	case "balances", "kton": // ring
-		balances.EmitEvent(balances.New(s.dao, &event, paramEvent, blockTimestamp, fee), event.EventId)
+func (s *Service) afterEvent(spec, blockTimestamp int, blockHash string, event *model.ChainEvent, fee decimal.Decimal) {
+	for _, plugin := range plugins.RegisteredPlugins {
+		p := plugin()
+		_ = p.ProcessEvent(spec, blockTimestamp, blockHash, event, fee)
 	}
 
 }

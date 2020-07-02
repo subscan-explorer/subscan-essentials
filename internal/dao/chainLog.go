@@ -3,9 +3,9 @@ package dao
 import (
 	"context"
 	"fmt"
-	"github.com/itering/subscan/internal/model"
-	"github.com/itering/subscan/internal/substrate/storage"
-	"github.com/itering/subscan/internal/util"
+	"github.com/itering/subscan/lib/substrate/storage"
+	"github.com/itering/subscan/model"
+	"github.com/itering/subscan/util"
 	"strings"
 )
 
@@ -30,18 +30,6 @@ func (d *Dao) DropLogsNotFinalizedData(blockNum int, finalized bool) bool {
 		delExist = query.RowsAffected > 0
 	}
 	return delExist
-}
-
-// TODO
-func (d *Dao) GetLogList(c context.Context, page, row int) (*[]model.ChainLogJson, int) {
-	var Logs []model.ChainLogJson
-	query := d.db.Model(&model.ChainLog{}).Offset(page * row).Limit(row).Order("block_num desc").Scan(&Logs)
-	if query == nil || query.Error != nil || query.RecordNotFound() {
-		return &Logs, 0
-	}
-	var count int
-	d.db.Model(&model.ChainLog{}).Count(&count)
-	return &Logs, count
 }
 
 func (d *Dao) GetLogsByIndex(c context.Context, index string) *model.ChainLogJson {

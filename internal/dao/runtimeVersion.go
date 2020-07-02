@@ -1,8 +1,8 @@
 package dao
 
 import (
-	"github.com/itering/subscan/internal/model"
-	"github.com/itering/subscan/internal/substrate/metadata"
+	"github.com/itering/subscan/lib/substrate/metadata"
+	"github.com/itering/subscan/model"
 )
 
 func (d *Dao) CreateRuntimeVersion(name string, specVersion int) int64 {
@@ -36,8 +36,8 @@ func (d *Dao) RuntimeVersionRecent() *model.RuntimeVersion {
 	return &list
 }
 
-func (d *Dao) RuntimeVersionRaws(spec int) *[]metadata.RuntimeRaw {
-	var list []metadata.RuntimeRaw
+func (d *Dao) RuntimeVersionRaw(spec int) *metadata.RuntimeRaw {
+	var list metadata.RuntimeRaw
 	d.db.Model(model.RuntimeVersion{}).
 		Select("spec_version as spec ,raw_data as raw").
 		Where("spec_version = ?", spec).

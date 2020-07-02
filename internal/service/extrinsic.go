@@ -5,22 +5,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/itering/subscan/internal/dao"
-	"github.com/itering/subscan/internal/model"
 	"github.com/itering/subscan/internal/service/transaction"
-	"github.com/itering/subscan/internal/util"
+	"github.com/itering/subscan/model"
+	"github.com/itering/subscan/plugins"
+	"github.com/itering/subscan/util"
 	"github.com/shopspring/decimal"
 	"strings"
 )
-
-func (s *Service) GetTransactionList(page, row int, order string, where ...string) ([]model.ExtrinsicsJson, int) {
-	return s.dao.GetTransactionList(context.TODO(), page, row, order, where...)
-}
 
 func (s *Service) createExtrinsic(c context.Context,
 	txn *dao.GormDB,
 	blockNum int,
 	encodeExtrinsics []string,
-	decodeExtrinsics []interface{},
+	decodeExtrinsics []map[string]interface{},
 	eventMap map[string][]model.ChainEvent,
 	finalized bool,
 	spec int,
@@ -41,8 +38,7 @@ func (s *Service) createExtrinsic(c context.Context,
 		extrinsic.CallModule = strings.ToLower(extrinsic.CallModule)
 
 		if extrinsic.CallModule == "timestamp" {
-			var paramsInstant = model.ParsingExtrinsicParam(extrinsic.Params)
-			blockTimestamp = s.getTimestamp(c, paramsInstant)
+			blockTimestamp = s.getTimestamp(extrinsic.Params)
 		}
 
 		extrinsic.BlockNum = blockNum
@@ -66,19 +62,19 @@ func (s *Service) createExtrinsic(c context.Context,
 	s.dao.DropExtrinsicNotFinalizedData(c, blockNum, finalized)
 
 	for _, extrinsic := range extrinsicList {
-		nonce := s.getAccountNewNonce(extrinsic.AccountId, extrinsic.Nonce, eventMap[extrinsic.ExtrinsicIndex]) // check ReapedAccount
-
-		extrinsicValue := extrinsic
-		err = s.dao.CreateExtrinsic(c, txn, &extrinsicValue, nonce)
-		if err != nil {
+		if err = s.dao.CreateExtrinsic(c, txn, &extrinsic); err == nil {
+			go s.afterExtrinsic(spec, &extrinsic, eventMap[extrinsic.ExtrinsicIndex])
+		} else {
 			return 0, 0, nil, nil, err
 		}
 	}
 	return len(e), blockTimestamp, hash, extrinsicFee, err
 }
 
-func (s *Service) getTimestamp(c context.Context, params []model.ExtrinsicParam) (timestamp int) {
-	for _, p := range params {
+func (s *Service) getTimestamp(param interface{}) (timestamp int) {
+	var paramsInstant []model.ExtrinsicParam
+	util.UnmarshalToAnything(&paramsInstant, param)
+	for _, p := range paramsInstant {
 		if p.Name == "now" {
 			return util.IntFromInterface(p.Value)
 		}
@@ -95,15 +91,9 @@ func (s *Service) getExtrinsicSuccess(e []model.ChainEvent) bool {
 	return true
 }
 
-func (s *Service) getAccountNewNonce(accountID string, extrinsicNonce int, e []model.ChainEvent) int {
-	for _, event := range e {
-		if event.EventId == "ReapedAccount" {
-			if params, err := model.ParsingEventParam(event.Params); err == nil && len(params) == 2 {
-				if util.TrimHex(util.InterfaceToString(params[0].Value)) == accountID {
-					return 0
-				}
-			}
-		}
+func (s *Service) afterExtrinsic(spec int, extrinsic *model.ChainExtrinsic, events []model.ChainEvent) {
+	for _, plugin := range plugins.RegisteredPlugins {
+		p := plugin()
+		_ = p.ProcessExtrinsic(spec, extrinsic, events)
 	}
-	return extrinsicNonce + 1
 }

@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-kratos/kratos/pkg/cache/redis"
-	"github.com/itering/subscan/internal/model"
-	"github.com/itering/subscan/internal/substrate"
-	"github.com/itering/subscan/internal/substrate/rpc"
-	"github.com/itering/subscan/internal/util"
-	"github.com/itering/subscan/internal/util/ss58"
+	"github.com/itering/subscan/lib/substrate"
+	"github.com/itering/subscan/lib/substrate/rpc"
+	"github.com/itering/subscan/model"
+	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/util/ss58"
 	"sort"
 )
 
@@ -166,29 +166,7 @@ func (d *Dao) BlockAsJson(c context.Context, block *model.ChainBlock) *model.Cha
 		Validator:       substrate.SS58Address(block.Validator),
 		Finalized:       block.Finalized,
 	}
-	if account, _ := d.FindByAddress(block.Validator); account != nil {
-		bj.ValidatorName = account.Nickname
-		bj.ValidatorIndexIds = ss58.EncodeAccountIndex(int64(account.AccountIndex), substrate.AddressType)
-	}
 	return &bj
-}
-
-func (d *Dao) GetAllBlocksNeedFix(query ...string) []int {
-	var mergeId []int
-	blockNum, _ := d.GetCurrentBlockNum(context.TODO())
-	whereQuery := "codec_error=1"
-	if len(query) > 0 {
-		whereQuery = query[0]
-	}
-	for index := int(blockNum / uint64(model.SplitTableBlockNum)); index >= 0; index-- {
-		var ids []int
-		query := d.db.Model(&model.ChainBlock{BlockNum: index * model.SplitTableBlockNum}).Where(whereQuery).Order("id desc").Pluck("block_num", &ids)
-		if query == nil || query.Error != nil || query.RecordNotFound() {
-			continue
-		}
-		mergeId = append(mergeId, ids...)
-	}
-	return mergeId
 }
 
 func (d *Dao) UpdateEventAndExtrinsic(c context.Context, txn *GormDB, block *model.ChainBlock, eventCount, extrinsicsCount, blockTimestamp int, validator string, codecError bool, finalized bool) error {
@@ -236,10 +214,6 @@ func (d *Dao) GetNearBlock(c context.Context, blockNum int) *model.ChainBlock {
 func (d *Dao) SetBlockFinalized(block *model.ChainBlock) {
 	d.delCacheBlock(context.TODO(), block)
 	d.db.Model(block).UpdateColumn(model.ChainBlock{Finalized: true})
-}
-
-func (d *Dao) SetBlockCodecError(blockNum int) {
-	d.db.Model(model.ChainBlock{BlockNum: blockNum}).Where("block_num = ?", blockNum).UpdateColumn(model.ChainBlock{CodecError: true})
 }
 
 func (d *Dao) BlocksReverseByNum(c context.Context, blockNums []int) map[int]model.ChainBlock {

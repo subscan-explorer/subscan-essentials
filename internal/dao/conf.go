@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/go-kratos/kratos/pkg/cache/redis"
 	"github.com/go-kratos/kratos/pkg/database/sql"
-	"github.com/itering/subscan/internal/util"
+	"github.com/itering/subscan/util"
 )
 
 type (

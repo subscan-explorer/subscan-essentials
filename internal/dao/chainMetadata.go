@@ -3,7 +3,7 @@ package dao
 import (
 	"context"
 	"github.com/go-kratos/kratos/pkg/cache/redis"
-	"github.com/itering/subscan/internal/util"
+	"github.com/itering/subscan/util"
 	"github.com/pkg/errors"
 	"reflect"
 )

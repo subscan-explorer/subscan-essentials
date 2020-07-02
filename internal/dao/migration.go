@@ -2,23 +2,17 @@ package dao
 
 import (
 	"context"
-	"github.com/itering/subscan/internal/model"
+	"github.com/itering/subscan/model"
 )
 
 func (d *Dao) Migration() {
 	db := d.db
 	d.splitTableMigrate()
 	db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
-		&model.ChainAccount{},
 		&model.RuntimeVersion{},
-		&model.ExtrinsicError{},
 	)
-	db.Model(model.ChainAccount{}).AddUniqueIndex("address", "address")
-	db.Model(model.ChainAccount{}).AddIndex("account_index", "account_index")
 	db.Model(model.RuntimeVersion{}).AddUniqueIndex("spec_version", "spec_version")
 	db.Model(model.RuntimeVersion{}).ModifyColumn("modules", "text")
-
-	db.Model(model.ExtrinsicError{}).AddUniqueIndex("extrinsic_hash", "extrinsic_hash")
 }
 
 func (d *Dao) splitTableMigrate() {
@@ -35,7 +29,6 @@ func (d *Dao) blockMigrate(blockNum int) {
 	blockModel := model.ChainBlock{BlockNum: blockNum}
 	eventModel := model.ChainEvent{BlockNum: blockNum}
 	extrinsicModel := model.ChainExtrinsic{BlockNum: blockNum}
-	transactionModel := model.ChainTransaction{BlockNum: blockNum}
 	logModel := model.ChainLog{BlockNum: blockNum}
 
 	db := d.db
@@ -43,7 +36,7 @@ func (d *Dao) blockMigrate(blockNum int) {
 		blockModel,
 		&eventModel,
 		&extrinsicModel,
-		&transactionModel,
+
 		&logModel,
 	)
 
@@ -51,12 +44,6 @@ func (d *Dao) blockMigrate(blockNum int) {
 	db.Model(blockModel).AddUniqueIndex("block_num", "block_num")
 	db.Model(blockModel).AddIndex("codec_error", "codec_error")
 
-	db.Model(transactionModel).AddIndex("from_hex", "from_hex")
-	db.Model(transactionModel).AddIndex("destination", "destination")
-	db.Model(transactionModel).AddIndex("call_module_function", "call_module_function")
-	db.Model(transactionModel).AddIndex("block_num", "block_num")
-	db.Model(transactionModel).AddUniqueIndex("hash", "hash")
-	db.Model(transactionModel).AddUniqueIndex("extrinsic_index", "extrinsic_index")
 	db.Model(extrinsicModel).AddIndex("extrinsic_hash", "extrinsic_hash")
 	db.Model(extrinsicModel).AddUniqueIndex("extrinsic_index", "extrinsic_index")
 	db.Model(extrinsicModel).AddIndex("block_num", "block_num")
@@ -71,7 +58,6 @@ func (d *Dao) blockMigrate(blockNum int) {
 	db.Model(logModel).AddUniqueIndex("log_index", "log_index")
 	db.Model(logModel).AddIndex("block_num", "block_num")
 
-	db.Model(transactionModel).AddIndex("call_module", "call_module")
 	db.Model(extrinsicModel).AddIndex("call_module", "call_module")
 	db.Model(extrinsicModel).AddIndex("call_module_function", "call_module_function")
 }

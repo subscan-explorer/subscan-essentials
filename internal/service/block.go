@@ -4,15 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
 	"github.com/go-kratos/kratos/pkg/log"
-	"github.com/itering/subscan/internal/model"
-	"github.com/itering/subscan/internal/substrate"
-	"github.com/itering/subscan/internal/substrate/metadata"
-	"github.com/itering/subscan/internal/substrate/rpc"
-	"github.com/itering/subscan/internal/substrate/storage"
-	"github.com/itering/subscan/internal/util"
-	"github.com/shopspring/decimal"
+	"github.com/itering/subscan/lib/substrate"
+	"github.com/itering/subscan/lib/substrate/metadata"
+	"github.com/itering/subscan/lib/substrate/rpc"
+	"github.com/itering/subscan/lib/substrate/storage"
+	"github.com/itering/subscan/model"
+	"github.com/itering/subscan/util"
 )
 
 func (s *Service) GetAlreadyBlockNum() (int, error) {
@@ -48,19 +46,19 @@ func (s *Service) GetBlockByNum(num int) *model.ChainBlockJson {
 	return s.dao.BlockAsJson(c, block)
 }
 
-func (s *Service) GetBlockFixDataList(option ...string) []int {
-	return s.dao.GetAllBlocksNeedFix(option...)
-}
-
 func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, spec int, finalized bool) (err error) {
-	var decodeExtrinsics []interface{}
-	var decodeEvent interface{}
-	var logs []storage.DecoderLog
+	var (
+		decodeExtrinsics []map[string]interface{}
+		decodeEvent      interface{}
+		logs             []storage.DecoderLog
+		validator        string
+	)
 	c := context.TODO()
 
 	blockNum := util.StringToInt(util.HexToNumStr(block.Header.Number))
 
 	metadataInstant := s.getMetadataInstant(spec)
+
 	// Extrinsic
 	decodeExtrinsics, err = substrate.DecodeExtrinsic(block.Extrinsics, metadataInstant, spec)
 	if err != nil {
@@ -83,13 +81,6 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 		}
 	}
 
-	var (
-		eventCount, extrinsicsCount, blockTimestamp int
-		validator                                   string
-		extrinsicHash                               map[string]string
-		extrinsicFee                                map[string]decimal.Decimal
-	)
-
 	validatorList, _ := rpc.GetValidatorFromSub(nil, hash)
 	txn := s.dao.DbBegin()
 	defer txn.DbRollback()
@@ -99,13 +90,16 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 
 	eventMap := s.checkoutExtrinsicEvents(e, blockNum)
 
-	if extrinsicsCount, blockTimestamp, extrinsicHash, extrinsicFee, err = s.createExtrinsic(c, txn, blockNum, block.Extrinsics, decodeExtrinsics, eventMap, finalized, spec); err != nil {
+	extrinsicsCount, blockTimestamp, extrinsicHash, extrinsicFee, err := s.createExtrinsic(c, txn, blockNum, block.Extrinsics, decodeExtrinsics, eventMap, finalized, spec)
+	if err != nil {
 		return err
 	}
 
-	if eventCount, err = s.AddEvent(c, txn, blockNum, blockTimestamp, hash, e, extrinsicHash, finalized, spec, extrinsicFee); err != nil {
+	eventCount, err := s.AddEvent(c, txn, blockNum, blockTimestamp, hash, e, extrinsicHash, finalized, spec, extrinsicFee)
+	if err != nil {
 		return err
 	}
+
 	if validator, err = s.EmitLog(c, txn, blockNum, logs, validatorList, finalized); err != nil {
 		return err
 	}
@@ -124,7 +118,7 @@ func (s *Service) UpdateBlockData(block *model.ChainBlock, finalized bool) (err 
 	var (
 		decodeEvent      interface{}
 		encodeExtrinsics []string
-		decodeExtrinsics []interface{}
+		decodeExtrinsics []map[string]interface{}
 	)
 
 	_ = json.Unmarshal([]byte(block.Extrinsics), &encodeExtrinsics)
@@ -188,7 +182,6 @@ func (s *Service) UpdateBlockData(block *model.ChainBlock, finalized bool) (err 
 	txn.DbCommit()
 	return
 }
-
 func (s *Service) checkoutExtrinsicEvents(e []model.ChainEvent, blockNumInt int) map[string][]model.ChainEvent {
 	eventMap := make(map[string][]model.ChainEvent)
 	for _, event := range e {
@@ -212,7 +205,7 @@ func (s *Service) GetCurrentRuntimeSpecVersion(blockNum int) int {
 func (s *Service) getMetadataInstant(spec int) *metadata.MetadataType {
 	metadataInstant, ok := metadata.RuntimeMetadata[spec]
 	if !ok {
-		metadataInstant = metadata.Init(s.dao.RuntimeVersionRaws(spec), spec)
+		metadataInstant = metadata.Process(s.dao.RuntimeVersionRaw(spec))
 	}
 	return metadataInstant
 }

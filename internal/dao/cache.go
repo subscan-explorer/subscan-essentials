@@ -59,17 +59,7 @@ func (d *Dao) GetCacheInt64(c context.Context, key string) int64 {
 	return 0
 }
 
-func (d *Dao) GetCacheStringSlice(c context.Context, key string) (list []string) {
-	conn := d.redis.Get(c)
-	defer conn.Close()
-	if cache, err := redis.Bytes(conn.Do("get", key)); err == nil {
-		_ = json.Unmarshal(cache, &list)
-		return list
-	}
-	return nil
-}
-
-func (d *Dao) delCache(c context.Context, key ...string) error {
+func (d *Dao) DelCache(c context.Context, key ...string) error {
 	if len(key) == 0 {
 		return nil
 	}

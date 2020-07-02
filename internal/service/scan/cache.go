@@ -3,7 +3,7 @@ package scan
 import (
 	"context"
 	"fmt"
-	"github.com/itering/subscan/internal/util"
+	"github.com/itering/subscan/util"
 )
 
 func (s *Service) CacheFunc(call func() interface{}, refresh bool) []byte {

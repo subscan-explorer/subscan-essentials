@@ -1,17 +1,11 @@
 # API Document
 
-1.  [socket](#socket)
-1.  [subscribe](#subscribe)
-1.  [now](#now)
 1.  [metadata](#metadata)
 1.  [blocks](#blocks)
+1.  [block](#block)
 1.  [extrinsics](#extrinsics)
 1.  [extrinsic](#extrinsic)
 1.  [events](#events)
-1.  [event](#event)
-1.  [search](#search)
-1.  [dailyStat](#daily)
-1.  [transfers](#transfers)
 1.  [check_hash](#check-hash)
 
 
@@ -31,68 +25,6 @@
 |row| int | min=1,max=100     |
 |page| int | min=0     |
 
-
-
-## socket
-
-### URL Request
-
-`ws /socket`
-
-### Example Response
-
-topic
-> metadata_update: metadata更新
- 
-> block_new:新的block
-  
-    {"content":{"count_event":115},"time":1563775286,"topic":"metadata_update"}
- 
-    {"content":{"block_num":181272,"created_at":"2019-07-22T14:01:19.418808+08:00","decode_event":"[{\"phase\": 0, \"extrinsic_idx\": 0, \"type\": \"0000\", \"module_id\": \"system\", \"event_id\": \"ExtrinsicSuccess\", \"params\": [], \"event_idx\": 0}]","decode_extrinsics":"[{\"valueRaw\": \"010100\", \"extrinsic_length\": 8, \"version_info\": \"01\", \"call_code\": \"0100\", \"call_module_function\": \"set\", \"call_module\": \"timestamp\", \"params\": [{\"name\": \"now\", \"type\": \"Compact\u003cMoment\u003e\", \"value\": \"2019-07-22T06:01:18\", \"valueRaw\": \"032e51355d\"}]}]","decode_logs":"[{\"index\": \"PreRuntime\", \"type\": \"(u32, Bytes)\", \"value\": {\"engine\": 1634891105, \"data\": \"dde2880f00000000\"}}, {\"index\": \"Seal\", \"type\": \"(u32, Bytes)\", \"value\": {\"engine\": 1634891105, \"data\": \"4a434cfd9da1e22d212c81831f2ac90db639a51d86cf510ce569c8e1bcb5925fda63537688d7065263b175cc2e2e9f1d63b812668cd2540e38d30deb46600204\"}}]","event":"0x040000000000000000","extrinsics":"[\"0x20010100032e51355d\"]","extrinsics_root":"0x83730e3c02f630a7a4ef81a2dba09d339954f261d94c70b64df9d4c89b992a96","hash":"0xfc8b26a440993737da41ddb673fc065482966790d060a24fda48f3e97ba4aa3a","id":2791,"logs":"[\"0x066175726120dde2880f00000000\",\"0x056175726101014a434cfd9da1e22d212c81831f2ac90db639a51d86cf510ce569c8e1bcb5925fda63537688d7065263b175cc2e2e9f1d63b812668cd2540e38d30deb46600204\"]","parent_hash":"0xdd929487fa95da203823d7652644c925ac2c8d42c6e4f4e0f1b5ec27e885911b","spec_version":78,"state_root":"0x43e5376c3eb78e5cd01158e351c8fcddf2293c6f8143b2a6208dc0e863388c63"},"time":1563775279,"topic":"block_new"}
-
-
-
-## subscribe
-     
-### URL Request
-
-`POST /api/subscribe`
-
-## FormData :
-
-| Name          | Type   | Desc |
-| ------------- | ------ | ------- |
-|email| string |      |
-
-### Example Response
-
-`200 OK` and
-
- {
-     "code": 0,
-     "message": "success",
-     "ttl": 1
- }
-
------
-
-
-## now
-
-### URL Request
-
-`POST /api/now`
-
-### Example Response
-
-`200 OK` and
-
-    {
-        "code": 0,
-        "message": "success",
-        "ttl": 1,
-        "data": 1559545576
-    }
 
 -----
 
@@ -392,144 +324,6 @@ topic
     }
 -----
 
-
-## event
-
-### URL Request
-
-`POST /api/scan/event`
-
-### payload
-
-| Name          | Type   | Require |
-| ------------- | ------ | ------- |
-| event_index | string | no     |
-
-### Example Response
-
-`200 OK` and
-    
-    {
-        "code": 0,
-        "message": "Success",
-        "ttl": 1,
-        "data": {
-            "count": 40084,
-            "events": [
-                {
-                    "event_index": "1825126-2",
-                    "phase": 1,
-                    "extrinsic_idx": 0,
-                    "type": "0300",
-                    "module_id": "session",
-                    "event_id": "NewSession",
-                    "params": "[{\"type\":\"BlockNumber\",\"value\":45356,\"valueRaw\":\"2cb1000000000000\"}]",
-                    "event_idx": 2
-                }
-            ]
-        }
-    }
------
-
-## search
-
-### URL Request
-
-`POST /api/scan/search`
-
-### payload
-
-| Name          | Type   | Require |
-| ------------- | ------ | ------- |
-| key | string | yes     |
-| row | int | yes     |
-| page | int | yes     |
-
-
------
-
-## daily
-
-### URL Request
-
-`POST /api/scan/daily`
-
-### payload
-
-| Name          | Type   | Require |
-| ------------- | ------ | ------- |
-| start | Date(2019-07-04) | yes     |
-| end | Date(2019-07-04) | yes     |
-
-
-### Example Response
-
-`200 OK` and
-    
-    {
-        "code": 0,
-        "message": "Success",
-        "ttl": 1,
-        "data": {
-            "list": [
-                {
-                    "ID": 1,
-                    "time_utc": "2019-07-02T00:00:00+08:00",
-                    "transfer_count": 109
-                },
-                {
-                    "ID": 42,
-                    "time_utc": "2019-07-03T00:00:00+08:00",
-                    "transfer_count": 69
-                },
-                {
-                    "ID": 68,
-                    "time_utc": "2019-07-04T00:00:00+08:00",
-                    "transfer_count": 44
-                }
-            ]
-        }
-    }
------
-
-
-## transfers
-
-### URL Request
-
-`POST /api/scan/transfers`
-
-### payload
-
-| Name          | Type   | Require |
-| ------------- | ------ | ------- |
-| row | int | yes     |
-| page| int | yes     |
-| address| string | no     |
-
-### Example Response
-
-`200 OK` and
-
-    {
-        "code": 0,
-        "message": "Success",
-        "ttl": 1,
-        "data": {
-            "count": 0,
-            "extrinsics": [
-                {
-                    "from": "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY",
-                    "to": "5CXciU5Pamk9z67KFiqG1r8HZKqGLYKJLCdXLQjVfcPU42KM",
-                    "module": "balances",
-                    "amount": "0.0001",
-                    "hash": "0x8d2ad11ee3cbd0f58286a2d67739db4b7d10210d394bb8ca7a1168006fcb41ca"
-                },
-            ]
-        }
-    }
-
------
 
 ## check-hash
 

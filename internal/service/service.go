@@ -2,20 +2,16 @@ package service
 
 import (
 	"fmt"
-	"io/ioutil"
-	"strings"
-
-	"github.com/google/wire"
 	"github.com/itering/scale.go/source"
 	"github.com/itering/scale.go/types"
-	pb "github.com/itering/subscan/api"
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/internal/service/scan"
-	"github.com/itering/subscan/internal/substrate/metadata"
-	"github.com/itering/subscan/internal/util"
+	"github.com/itering/subscan/lib/substrate/metadata"
+	"github.com/itering/subscan/plugins"
+	"github.com/itering/subscan/util"
+	"io/ioutil"
+	"strings"
 )
-
-var Provider = wire.NewSet(New, wire.Bind(new(pb.SubscanServer), new(*Service)))
 
 // Service service.
 type Service struct {
@@ -30,6 +26,11 @@ func New() (s *Service) {
 
 	s.Migration()
 	s.initSubRuntimeLatest()
+	// load plugins
+	for _, plugin := range plugins.RegisteredPlugins {
+		p := plugin()
+		p.InitDao(s.dao)
+	}
 	return s
 }
 
@@ -49,11 +50,12 @@ func (s *Service) Migration() {
 func (s *Service) initSubRuntimeLatest() {
 	// reg network custom type
 	defer func() {
+		go s.UnknownToken()
 		c, err := ioutil.ReadFile(fmt.Sprintf("../configs/source/%s.json", util.NetworkNode))
-		if err != nil {
-			panic(err)
+		if err == nil {
+			types.RegCustomTypes(source.LoadTypeRegistry(c))
 		}
-		types.RegCustomTypes(source.LoadTypeRegistry(c))
+
 	}()
 
 	// find db

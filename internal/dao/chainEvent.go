@@ -4,15 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/itering/subscan/internal/model"
-	"github.com/itering/subscan/internal/util"
+	"github.com/itering/subscan/model"
+	"github.com/itering/subscan/util"
 	"strings"
 )
 
 func (d *Dao) CreateEvent(c context.Context, txn *GormDB, event *model.ChainEvent) error {
-	if event.EventId == "ExtrinsicSuccess" || event.EventId == "ExtrinsicFailed" { // not save to db
-		return nil
-	}
 	var incrCount int
 	params, _ := json.Marshal(event.Params)
 	extrinsicHash := event.ExtrinsicHash
