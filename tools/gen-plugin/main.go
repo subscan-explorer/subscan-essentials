@@ -10,7 +10,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"text/template"
 )
@@ -34,7 +33,6 @@ func main() {
 		return
 	}
 	p.Name = os.Args[1]
-	p.ModClass = upperCamel(os.Args[1])
 	app.Action = runNew
 	args := append([]string{os.Args[0]}, os.Args[2:]...)
 	err := app.Run(args)
@@ -62,44 +60,17 @@ func runNew(_ *cli.Context) (err error) {
 		pwd, _ := os.Getwd()
 		p.path = filepath.Join(pwd, p.Name)
 	}
-	p.ModPrefix = modPath(p.path)
+	p.ModPrefix = p.Name
+	pathSlice := strings.Split(p.Name, "/")
+
+	p.Name = pathSlice[len(pathSlice)-1]
+	p.ModClass = upperCamel(p.Name)
 	if err := create(); err != nil {
 		return err
 	}
 	fmt.Printf("Plugin: %s\n", p.Name)
 	fmt.Printf("Directory: %s\n\n", p.path)
 	return nil
-}
-
-func modPath(p string) string {
-	dir := filepath.Dir(p)
-	for {
-		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
-			content, _ := ioutil.ReadFile(filepath.Join(dir, "go.mod"))
-			mod := regexpReplace(`module\s+(?P<name>[\S]+)`, string(content), "$name")
-			name := strings.TrimPrefix(filepath.Dir(p), dir)
-			name = strings.TrimPrefix(name, string(os.PathSeparator))
-			if name == "" {
-				return fmt.Sprintf("%s/", mod)
-			}
-			return fmt.Sprintf("%s/%s/", mod, name)
-		}
-		parent := filepath.Dir(dir)
-		if dir == parent {
-			return ""
-		}
-		dir = parent
-	}
-}
-
-// regexpReplace replace regexp
-func regexpReplace(reg, src, temp string) string {
-	var result []byte
-	pattern := regexp.MustCompile(reg)
-	for _, submatch := range pattern.FindAllStringSubmatchIndex(src, -1) {
-		result = pattern.ExpandString(result, temp, src, submatch)
-	}
-	return string(result)
 }
 
 //go:generate packr2
@@ -140,7 +111,7 @@ func generate(path string) error {
 	cmd.Dir = p.path
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	return cmd.Run()
+	return nil
 }
 
 func write(path, tpl string) (err error) {
