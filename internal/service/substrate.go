@@ -211,7 +211,7 @@ func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 		return fmt.Errorf("websocket send error: %v", err)
 	}
 
-	specVersion := -1
+	var specVersion int
 
 	if r := v.ToRuntimeVersion(); r == nil {
 		specVersion = s.GetCurrentRuntimeSpecVersion(blockNum)

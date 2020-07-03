@@ -49,8 +49,8 @@ func TestDao_GetCacheString(t *testing.T) {
 
 func TestDao_DelCache(t *testing.T) {
 	ctx := context.TODO()
-	err := TestDao.SetCache(ctx, "test1", 2>>100, 10)
-	err = TestDao.SetCache(ctx, "test2", "2000", 10)
+	_ = TestDao.SetCache(ctx, "test1", 2>>100, 10)
+	err := TestDao.SetCache(ctx, "test2", "2000", 10)
 	assert.NoError(t, err)
 	err = TestDao.DelCache(ctx, "test1", "test2")
 	assert.NoError(t, err)

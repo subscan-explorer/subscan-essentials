@@ -199,7 +199,7 @@ func (s *Service) GetCurrentRuntimeSpecVersion(blockNum int) int {
 	if block := s.dao.GetNearBlock(c, blockNum); block != nil {
 		return block.SpecVersion
 	}
-	return 0
+	return -1
 }
 
 func (s *Service) getMetadataInstant(spec int) *metadata.MetadataType {
