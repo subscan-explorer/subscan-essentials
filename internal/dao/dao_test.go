@@ -42,7 +42,3 @@ func init() {
 	// }
 	TestDao.Migration()
 }
-
-func NewTestDao() {
-
-}
