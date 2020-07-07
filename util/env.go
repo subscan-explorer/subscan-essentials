@@ -5,9 +5,8 @@ import (
 )
 
 const (
-	CrabNetwork   = "crab"
-	KusamaNetwork = "kusama"
-	Edgeware      = "edgeware"
+	CrabNetwork = "crab"
+	Edgeware    = "edgeware"
 )
 
 var (
