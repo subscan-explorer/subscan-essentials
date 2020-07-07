@@ -5,32 +5,33 @@
 ![subscan](https://github.com/itering/subscan/workflows/subscan/badge.svg)
 
 
-SUBSCAN is a high-precision blockchain browser that aggregates the Substrate ecological network and provides you with a perfect browsing experience.
+SUBSCAN是一个高精度的区块链浏览器，聚合Substrate生态网络并为您提供完美的浏览体验。
 
-This project is an open source version of [subscan](https://subscan.io)
+此项目是[subscan](https://subscan.io)的开源版本
 
 
 ## API doc
 
-The default API can be found here [DOC](/docs/index.md)
+默认的API可以在这边找到 [DOC](/docs/index.md)
 
 
-### Feature
+### 功能
 
-1. Separation of API Server and background listener
-2. Support Substrate network custom type registration [Type](/custom_type.md)
-3. Support index block, Extrinsic, Event, log
-4. More data can be indexed by custom plugins [Plugins](/plugins)
-5. [gen](/tools/gen-plugin) tool can automatically generate plug-in templates
-6. Built-in default HTTP API [DOC](/docs/index.md)
+1. API Server 与后台监听程序分离
+2. 支持substrate 网络自定义type 注册 [Type](/custom_type.md)
+3. 支持索引block, Extrinsic, Event, log
+4. 可自定义插件索引更多的数据[Plugins](/plugins)
+5. [gen](/tools/gen-plugin)工具可自动生成插件模版
+6. 内置默认的HTTP API [DOC](/docs/index.md)
 
-### Install
+
+### 安装
 
 ```bash
 make &&  ./cmd/subscan --conf configs install
 ```
 
-### RUN
+### 运行
 
 > API 
 
@@ -48,7 +49,7 @@ make &&  ./cmd/subscan --conf configs install
 ```
 
 
-### Docker
+### docker
 
 ```bash
 
@@ -63,7 +64,7 @@ docker-composer up -d
 GPL-3.0
 
 
-## Resource
+## resource
  
 [ITERING] https://github.com/itering
 

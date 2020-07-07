@@ -7,6 +7,7 @@ import (
 	"github.com/itering/subscan/internal/daemons"
 	"github.com/itering/subscan/internal/di"
 	"github.com/itering/subscan/internal/jobs"
+	"github.com/itering/subscan/internal/script"
 	"github.com/itering/subscan/lib/substrate/websocket"
 	"github.com/urfave/cli"
 	"os"
@@ -58,6 +59,13 @@ func setupApp() *cli.App {
 			Name: "stop",
 			Action: func(c *cli.Context) error {
 				daemons.Run(c.Args().Get(0), "stop")
+				return nil
+			},
+		},
+		{
+			Name: "install",
+			Action: func(c *cli.Context) error {
+				script.Install(c.Parent().String("conf"))
 				return nil
 			},
 		},
