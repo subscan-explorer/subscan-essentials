@@ -1,4 +1,4 @@
-# SUBSCAN Essentials
+# Subscan Essentials
 
 ![License: GPL](https://img.shields.io/badge/license-GPL-blue.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/itering/subscan)](https://goreportcard.com/report/github.com/itering/subscan)
