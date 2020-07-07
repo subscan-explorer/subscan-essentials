@@ -1,14 +1,10 @@
-# SUBSCAN
+# SUBSCAN Essentials
 
 ![License: GPL](https://img.shields.io/badge/license-GPL-blue.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/itering/subscan)](https://goreportcard.com/report/github.com/itering/subscan)
 ![subscan](https://github.com/itering/subscan/workflows/subscan/badge.svg)
 
-
-SUBSCAN is a high-precision blockchain browser that aggregates the Substrate ecological network and provides you with a perfect browsing experience.
-
-This project is an open source version of [subscan](https://subscan.io)
-
+Subscan Essentials is a high-precision blockchain explorer scaffold project, supports substrate-based blockchain networks with developer-friendly interface and custom module parsing capabilities.  It's developed by the Subscan team and used in subscan.io.  Developers are free to use the codebase to extend functionalities and develop unique user experiences for their audiences.
 
 ## API doc
 
