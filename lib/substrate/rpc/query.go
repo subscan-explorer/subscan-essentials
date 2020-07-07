@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"fmt"
-	"github.com/itering/subscan/lib/substrate"
 	"github.com/itering/subscan/lib/substrate/storage"
 	"github.com/itering/subscan/lib/substrate/storageKey"
 	"github.com/itering/subscan/lib/substrate/websocket"
@@ -173,29 +172,6 @@ func GetAccountLock(c *recws.RecConn, address string) (balance decimal.Decimal, 
 		}
 	}
 	return
-}
-
-func GetAccountNonce(c *recws.RecConn, address string) (int, error) {
-	if util.StringInSlice(util.NetworkNode, []string{util.KusamaNetwork, util.CrabNetwork}) {
-		v := &JsonRpcResult{}
-		if err := websocket.SendWsRequest(c, v, AccountNonce(rand.Intn(10000), substrate.SS58Address(address))); err != nil {
-			return 0, err
-		}
-		return util.IntFromInterface(v.Result), nil
-	}
-	nonce, err := ReadStorage(c, "System", "AccountNonce", "", util.TrimHex(address))
-	if err != nil {
-		return 0, err
-	}
-	return nonce.ToInt(), nil
-}
-
-func TotalIssuance(c *recws.RecConn, module string) (decimal.Decimal, error) {
-	balanceValue, err := ReadStorage(c, module, "TotalIssuance", "")
-	if err != nil {
-		return decimal.Zero, err
-	}
-	return balanceValue.ToDecimal(), nil
 }
 
 func GetValidatorFromSub(c *recws.RecConn, hash string) ([]string, error) {
