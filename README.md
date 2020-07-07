@@ -18,7 +18,7 @@ The default API can be found here [DOC](/docs/index.md)
 ### Feature
 
 1. Separation of API Server and background listener
-2. Support Substrate network custom type registration
+2. Support Substrate network custom type registration [Type](/custom_type.md)
 3. Support index block, Extrinsic, Event, log
 4. More data can be indexed by custom plugins [Plugins](/plugins)
 5. [gen](/tools/gen-plugin) tool can automatically generate plug-in templates

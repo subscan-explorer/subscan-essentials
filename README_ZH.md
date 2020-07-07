@@ -18,7 +18,7 @@ SUBSCAN是一个高精度的区块链浏览器，聚合Substrate生态网络并�
 ### 功能
 
 1. API Server 与后台监听程序分离
-2. 支持substrate 网络自定义type 注册
+2. 支持substrate 网络自定义type 注册 [Type](/custom_type.md)
 3. 支持索引block, Extrinsic, Event, log
 4. 可自定义插件索引更多的数据[Plugins](/plugins)
 5. [gen](/tools/gen-plugin)工具可自动生成插件模版
