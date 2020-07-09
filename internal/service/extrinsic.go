@@ -84,8 +84,8 @@ func (s *Service) getTimestamp(param interface{}) (timestamp int) {
 
 func (s *Service) getExtrinsicSuccess(e []model.ChainEvent) bool {
 	for _, event := range e {
-		if strings.ToLower(event.ModuleId) == "system" {
-			return strings.ToLower(event.EventId) != "extrinsicfailed"
+		if strings.EqualFold(event.ModuleId, "system") {
+			return strings.EqualFold(event.EventId, "ExtrinsicFailed")
 		}
 	}
 	return true
@@ -93,7 +93,6 @@ func (s *Service) getExtrinsicSuccess(e []model.ChainEvent) bool {
 
 func (s *Service) afterExtrinsic(spec int, extrinsic *model.ChainExtrinsic, events []model.ChainEvent) {
 	for _, plugin := range plugins.RegisteredPlugins {
-		p := plugin()
-		_ = p.ProcessExtrinsic(spec, extrinsic, events)
+		_ = plugin.ProcessExtrinsic(spec, extrinsic, events)
 	}
 }

@@ -1,6 +1,6 @@
 module github.com/itering/subscan
 
-go 1.14
+go 1.12
 
 require (
 	github.com/bitly/go-simplejson v0.5.0 // indirect

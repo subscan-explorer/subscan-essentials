@@ -6,6 +6,7 @@ import (
 	"net/http"
 )
 
+// Http post
 func PostWithJson(data []byte, url string) ([]byte, error) {
 	client := &http.Client{}
 	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(data))
@@ -22,6 +23,7 @@ func PostWithJson(data []byte, url string) ([]byte, error) {
 	return body, nil
 }
 
+// Http get
 func HttpGet(url string) ([]byte, error) {
 	client := &http.Client{}
 	req, _ := http.NewRequest("Get", url, nil)

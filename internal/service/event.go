@@ -10,15 +10,6 @@ import (
 	"strings"
 )
 
-func (s *Service) GetEventList(page, row int, order string, where ...string) ([]model.ChainEvent, int) {
-	c := context.TODO()
-	return s.dao.GetEventList(c, page, row, order, where...)
-}
-
-func (s *Service) GetEventByIndex(index string) []model.ChainEvent {
-	return s.dao.GetEventsByIndex(index)
-}
-
 func (s *Service) AddEvent(
 	c context.Context,
 	txn *dao.GormDB,
@@ -39,7 +30,7 @@ func (s *Service) AddEvent(
 		event.Finalized = finalized
 		event.BlockNum = blockNum
 
-		if err = s.dao.CreateEvent(c, txn, &event); err == nil && finalized {
+		if err = s.dao.CreateEvent(c, txn, &event); err == nil {
 			go s.afterEvent(spec, blockTimestamp, blockHash, &event, feeMap[event.EventIndex])
 		} else {
 			return 0, err
@@ -51,8 +42,7 @@ func (s *Service) AddEvent(
 
 func (s *Service) afterEvent(spec, blockTimestamp int, blockHash string, event *model.ChainEvent, fee decimal.Decimal) {
 	for _, plugin := range plugins.RegisteredPlugins {
-		p := plugin()
-		_ = p.ProcessEvent(spec, blockTimestamp, blockHash, event, fee)
+		_ = plugin.ProcessEvent(spec, blockTimestamp, blockHash, event, fee)
 	}
 
 }
