@@ -23,9 +23,7 @@ func InitApp() (*App, func(), error) {
 
 	// load plugins
 	for _, plugin := range plugins.RegisteredPlugins {
-		p := plugin()
-		p.InitHttp(engine)
-		_ = p.Http()
+		plugin.InitHttp(engine)
 	}
 
 	if err != nil {

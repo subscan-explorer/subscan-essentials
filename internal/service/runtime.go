@@ -23,10 +23,6 @@ func (s *Service) regCodecMetadata() string {
 	return ""
 }
 
-func (s *Service) MigrateRuntimeVersion(spec int, runtime *metadata.MetadataType, rawData string) {
-	s.setRuntimeData(spec, runtime, rawData)
-}
-
 func (s *Service) setRuntimeData(spec int, runtime *metadata.MetadataType, rawData string) {
 	var modules []string
 	for _, value := range runtime.Metadata.Modules {

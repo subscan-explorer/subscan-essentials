@@ -1,4 +1,4 @@
-package system
+package main
 
 import (
 	bm "github.com/go-kratos/kratos/pkg/net/http/blademaster"
@@ -22,16 +22,12 @@ func New() *System {
 }
 
 func (a *System) InitDao(d storage.Dao) {
-	srv = service.New(a.d)
+	srv = service.New(d)
 	a.d = d
 	a.Migrate()
 }
 func (a *System) InitHttp(e *bm.Engine) {
 	a.e = e
-}
-
-func (a *System) Http() error {
-	return nil
 }
 
 func (a *System) ProcessExtrinsic(spec int, extrinsic *model.ChainExtrinsic, events []model.ChainEvent) error {

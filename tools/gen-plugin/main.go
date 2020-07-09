@@ -94,7 +94,6 @@ func create() (err error) {
 		if strings.HasSuffix(name, ".tmpl") {
 			name = strings.TrimSuffix(name, ".tmpl")
 		}
-		fmt.Println(filepath.Join(p.path, name))
 		if err = write(filepath.Join(p.path, name), tmpl); err != nil {
 			return
 		}

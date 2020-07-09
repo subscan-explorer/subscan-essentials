@@ -9,7 +9,7 @@ import (
 var onceToken sync.Once
 
 // Unknown token reg
-func (s *Service) UnknownToken() {
+func (s *Service) unknownToken() {
 	onceToken.Do(func() {
 		if p, _ := rpc.GetSystemProperties(); p != nil {
 			substrate.AddressType = p.Ss58Format

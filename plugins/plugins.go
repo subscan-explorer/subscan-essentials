@@ -12,8 +12,6 @@ type Plugin interface {
 
 	InitHttp(e *bm.Engine)
 
-	Http() error
-
 	ProcessExtrinsic(int, *model.ChainExtrinsic, []model.ChainEvent) error
 
 	ProcessEvent(spec, blockTimestamp int, blockHash string, event *model.ChainEvent, fee decimal.Decimal) error

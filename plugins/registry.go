@@ -1,15 +1,17 @@
 package plugins
 
 import (
-	"github.com/itering/subscan/plugins/balance"
-	"github.com/itering/subscan/plugins/system"
+	"fmt"
+	"io/ioutil"
+	"plugin"
+	"reflect"
 )
 
-type PluginFactory func() Plugin
+type PluginFactory Plugin
 
 var RegisteredPlugins = make(map[string]PluginFactory)
 
-func Register(name string, f PluginFactory) {
+func Register(name string, f interface{}) {
 	if f == nil {
 		return
 	}
@@ -18,13 +20,8 @@ func Register(name string, f PluginFactory) {
 		return
 	}
 
-	RegisteredPlugins[name] = f
+	RegisteredPlugins[name] = f.(PluginFactory)
 
-}
-
-func init() {
-	Register("account", func() Plugin { return balance.New() })
-	Register("system", func() Plugin { return system.New() })
 }
 
 func List() []string {
@@ -33,4 +30,24 @@ func List() []string {
 		plugins = append(plugins, name)
 	}
 	return plugins
+}
+
+func init() {
+	pluginsDir := "../configs/plugins"
+	files, err := ioutil.ReadDir(pluginsDir)
+	if err != nil {
+		panic(err)
+	}
+
+	for _, f := range files {
+		p, err := plugin.Open(fmt.Sprintf("%s/%s", pluginsDir, f.Name()))
+		if err != nil {
+			panic(err)
+		}
+		f, err := p.Lookup("New")
+		if err != nil {
+			panic(err)
+		}
+		Register("account", reflect.ValueOf(f).Call(nil)[0].Interface())
+	}
 }

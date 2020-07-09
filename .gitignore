@@ -8,3 +8,4 @@ configs/redis.toml
 log/*
 node_modules
 target
+*.so

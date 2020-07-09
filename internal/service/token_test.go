@@ -6,8 +6,8 @@ import (
 )
 
 func TestService_UnknownToken(t *testing.T) {
-	testSrv.UnknownToken()
+	testSrv.unknownToken()
 	onceToken.Do(func() {
-		assert.Fail(t, "call twice UnknownToken")
+		assert.Fail(t, "call twice unknownToken")
 	})
 }

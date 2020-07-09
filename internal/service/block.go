@@ -182,6 +182,7 @@ func (s *Service) UpdateBlockData(block *model.ChainBlock, finalized bool) (err 
 	txn.DbCommit()
 	return
 }
+
 func (s *Service) checkoutExtrinsicEvents(e []model.ChainEvent, blockNumInt int) map[string][]model.ChainEvent {
 	eventMap := make(map[string][]model.ChainEvent)
 	for _, event := range e {

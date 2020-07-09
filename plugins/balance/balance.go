@@ -1,4 +1,4 @@
-package balance
+package main
 
 import (
 	bm "github.com/go-kratos/kratos/pkg/net/http/blademaster"
@@ -22,17 +22,14 @@ func New() *Account {
 }
 
 func (a *Account) InitDao(d storage.Dao) {
-	srv = service.New(a.d)
+	srv = service.New(d)
 	a.d = d
 	a.Migrate()
 }
+
 func (a *Account) InitHttp(e *bm.Engine) {
 	a.e = e
-}
-
-func (a *Account) Http() error {
 	http.Router(srv, a.e)
-	return nil
 }
 
 func (a *Account) ProcessExtrinsic(spec int, extrinsic *model.ChainExtrinsic, events []model.ChainEvent) error {
