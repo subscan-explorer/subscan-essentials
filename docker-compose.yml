@@ -8,9 +8,8 @@ services:
     environment:
       MYSQL_HOST: mysql-subscan
       MYSQL_PASS: 'helloload'
-      MYSQL_DB: 'darwinia-canary'
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
+      MYSQL_DB: 'subscan'
+      REDIS_ADDR: redis:6379
       CHAIN_WS_ENDPOINT: 'wss://crab.darwinia.network'
       NETWORK_NODE: 'crab'
       WEB_HOST: 'http://subscan-api:4399'
