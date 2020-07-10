@@ -21,9 +21,8 @@ import (
 const FinalizedWaitingBlockCount = 5
 
 type subscription struct {
-	Id     float64 `json:"id"`
-	Topic  int     `json:"topic"`
-	Latest int64   `json:"latest"`
+	Topic  int   `json:"topic"`
+	Latest int64 `json:"latest"`
 }
 
 var (
@@ -72,7 +71,6 @@ func (s *SubscribeService) Parser(message []byte) {
 		substrate.CurrentRuntimeSpecVersion = r.SpecVersion
 	case newHeader, finalizeHeader, stateChange:
 		subscriptionIds = append(subscriptionIds, subscription{
-			Id:     j.ToFloat64(),
 			Topic:  j.Id,
 			Latest: time.Now().Unix(),
 		})
