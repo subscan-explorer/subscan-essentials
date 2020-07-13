@@ -24,7 +24,7 @@ The default API Doc can be found here [DOC](/docs/index.md)
 ### Install
 
 ```bash
-make &&  ./cmd/subscan --conf configs install
+./build.sh build &&  ./cmd/subscan --conf configs install
 ```
 
 ### RUN

@@ -26,7 +26,7 @@ Subscan Essentials是一个高精度的区块链浏览器脚手架项目，它�
 ### 安装
 
 ```bash
-make &&  ./cmd/subscan --conf configs install
+./build.sh build &&  ./cmd/subscan --conf configs install
 ```
 
 ### 使用
