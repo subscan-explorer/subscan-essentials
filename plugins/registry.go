@@ -1,6 +1,16 @@
 package plugins
 
-type PluginFactory Plugin
+import (
+	"flag"
+	"fmt"
+	"github.com/itering/subscan-plugin"
+	"io/ioutil"
+	"plugin"
+	"reflect"
+	"strings"
+)
+
+type PluginFactory subscan_plugin.Plugin
 
 var RegisteredPlugins = make(map[string]PluginFactory)
 
@@ -25,22 +35,27 @@ func List() []string {
 	return plugins
 }
 
-// func init() {
-// 	pluginsDir := "../configs/plugins"
-// 	files, err := ioutil.ReadDir(pluginsDir)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-//
-// 	for _, f := range files {
-// 		p, err := plugin.Open(fmt.Sprintf("%s/%s", pluginsDir, f.Name()))
-// 		if err != nil {
-// 			panic(err)
-// 		}
-// 		f, err := p.Lookup("New")
-// 		if err != nil {
-// 			panic(err)
-// 		}
-// 		Register("account", reflect.ValueOf(f).Call(nil)[0].Interface())
-// 	}
-// }
+func init() {
+	flag.Parse()
+	pluginsDir := fmt.Sprintf("%s/plugins", flag.Lookup("conf").Value)
+	files, err := ioutil.ReadDir(pluginsDir)
+	if err != nil {
+		panic(err)
+	}
+
+	for _, file := range files {
+		p, err := plugin.Open(fmt.Sprintf("%s/%s", pluginsDir, file.Name()))
+		if err != nil {
+			panic(err)
+		}
+		if file.IsDir() {
+			return
+		}
+		pluginName := strings.Split(file.Name(), ".")[0]
+		f, err := p.Lookup("New")
+		if err != nil {
+			panic(err)
+		}
+		Register(pluginName, reflect.ValueOf(f).Call(nil)[0].Interface())
+	}
+}

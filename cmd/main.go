@@ -8,7 +8,8 @@ import (
 	"github.com/itering/subscan/internal/di"
 	"github.com/itering/subscan/internal/jobs"
 	"github.com/itering/subscan/internal/script"
-	"github.com/itering/subscan/lib/substrate/websocket"
+	"github.com/itering/subscan/util"
+	"github.com/itering/substrate-api-rpc/websocket"
 	"github.com/urfave/cli"
 	"os"
 	"os/signal"
@@ -45,6 +46,7 @@ func setupApp() *cli.App {
 		jobs.Init()
 		log.Init(nil)
 		runtime.GOMAXPROCS(runtime.NumCPU())
+		websocket.RegWSEndPoint(util.WSEndPoint)
 		return nil
 	}
 	app.Commands = []cli.Command{

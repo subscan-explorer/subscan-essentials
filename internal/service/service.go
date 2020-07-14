@@ -7,9 +7,9 @@ import (
 	"github.com/itering/scale.go/types"
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/internal/service/scan"
-	"github.com/itering/subscan/lib/substrate/metadata"
 	"github.com/itering/subscan/plugins"
 	"github.com/itering/subscan/util"
+	"github.com/itering/substrate-api-rpc/metadata"
 	"io/ioutil"
 	"strings"
 )

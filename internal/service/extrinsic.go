@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/internal/service/transaction"
 	"github.com/itering/subscan/model"
@@ -15,7 +16,7 @@ import (
 
 func (s *Service) createExtrinsic(c context.Context,
 	txn *dao.GormDB,
-	blockNum int,
+	block *model.ChainBlock,
 	encodeExtrinsics []string,
 	decodeExtrinsics []map[string]interface{},
 	eventMap map[string][]model.ChainEvent,
@@ -26,44 +27,34 @@ func (s *Service) createExtrinsic(c context.Context,
 	var (
 		blockTimestamp int
 		e              []model.ChainExtrinsic
-		extrinsicList  []model.ChainExtrinsic
 		err            error
 	)
 	extrinsicFee := make(map[string]decimal.Decimal)
+
 	eb, _ := json.Marshal(decodeExtrinsics)
 	_ = json.Unmarshal(eb, &e)
+
 	hash := make(map[string]string)
+
+	s.dao.DropExtrinsicNotFinalizedData(c, block.BlockNum, finalized)
 
 	for index, extrinsic := range e {
 		extrinsic.CallModule = strings.ToLower(extrinsic.CallModule)
-
-		if extrinsic.CallModule == "timestamp" {
-			blockTimestamp = s.getTimestamp(extrinsic.Params)
-		}
-
-		extrinsic.BlockNum = blockNum
+		extrinsic.BlockNum = block.BlockNum
 		extrinsic.ExtrinsicIndex = fmt.Sprintf("%d-%d", extrinsic.BlockNum, index)
-
 		extrinsic.Success = s.getExtrinsicSuccess(eventMap[extrinsic.ExtrinsicIndex])
-
 		extrinsic.Finalized = finalized
 
-		hash[extrinsic.ExtrinsicIndex] = extrinsic.ExtrinsicHash
-		extrinsic.BlockTimestamp = blockTimestamp
+		s.getTimestamp(&extrinsic)
 
 		if extrinsic.ExtrinsicHash != "" {
 			extrinsic.Fee = transaction.GetExtrinsicFee(encodeExtrinsics[index])
 			extrinsicFee[extrinsic.ExtrinsicIndex] = extrinsic.Fee
+			hash[extrinsic.ExtrinsicIndex] = extrinsic.ExtrinsicHash
 		}
 
-		extrinsicList = append(extrinsicList, extrinsic)
-	}
-
-	s.dao.DropExtrinsicNotFinalizedData(c, blockNum, finalized)
-
-	for _, extrinsic := range extrinsicList {
 		if err = s.dao.CreateExtrinsic(c, txn, &extrinsic); err == nil {
-			go s.afterExtrinsic(spec, &extrinsic, eventMap[extrinsic.ExtrinsicIndex])
+			go s.afterExtrinsic(block, &extrinsic, eventMap[extrinsic.ExtrinsicIndex])
 		} else {
 			return 0, 0, nil, nil, err
 		}
@@ -71,15 +62,19 @@ func (s *Service) createExtrinsic(c context.Context,
 	return len(e), blockTimestamp, hash, extrinsicFee, err
 }
 
-func (s *Service) getTimestamp(param interface{}) (timestamp int) {
+func (s *Service) getTimestamp(extrinsic *model.ChainExtrinsic) {
+	if extrinsic.CallModule != "timestamp" {
+		return
+	}
+
 	var paramsInstant []model.ExtrinsicParam
-	util.UnmarshalToAnything(&paramsInstant, param)
+	util.UnmarshalToAnything(&paramsInstant, extrinsic.Params)
+
 	for _, p := range paramsInstant {
 		if p.Name == "now" {
-			return util.IntFromInterface(p.Value)
+			extrinsic.BlockTimestamp = util.IntFromInterface(p.Value)
 		}
 	}
-	return
 }
 
 func (s *Service) getExtrinsicSuccess(e []model.ChainEvent) bool {
@@ -91,8 +86,17 @@ func (s *Service) getExtrinsicSuccess(e []model.ChainEvent) bool {
 	return true
 }
 
-func (s *Service) afterExtrinsic(spec int, extrinsic *model.ChainExtrinsic, events []model.ChainEvent) {
+func (s *Service) afterExtrinsic(block *model.ChainBlock, extrinsic *model.ChainExtrinsic, events []model.ChainEvent) {
+	block.BlockTimestamp = extrinsic.BlockTimestamp
+	pBlock := block.AsPluginBlock()
+	pExtrinsic := extrinsic.AsPluginExtrinsic()
+
+	var pEvents []storage.Event
+	for _, event := range events {
+		pEvents = append(pEvents, *event.AsPluginEvent())
+	}
+
 	for _, plugin := range plugins.RegisteredPlugins {
-		_ = plugin.ProcessExtrinsic(spec, extrinsic, events)
+		_ = plugin.ProcessExtrinsic(pBlock, pExtrinsic, pEvents)
 	}
 }

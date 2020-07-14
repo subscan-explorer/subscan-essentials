@@ -18,7 +18,7 @@ The default API Doc can be found here [DOC](/docs/index.md)
 2. Support Substrate network custom type registration [Custom](/custom_type.md)
 3. Support index block, Extrinsic, Event, log
 4. More data can be indexed by custom plugins [Plugins](/plugins)
-5. [Gen](/tools/gen-plugin) tool can automatically generate plugin templates
+5. [Gen](https://github.com/itering/subscan-plugin/tree/master/tools) tool can automatically generate plugin templates
 6. Built-in default HTTP API [DOC](/docs/index.md)
 
 ### Install

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	bm "github.com/go-kratos/kratos/pkg/net/http/blademaster"
 	"github.com/go-kratos/kratos/pkg/net/http/blademaster/binding"
-	"github.com/itering/subscan/lib/substrate"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/ss58"
 )
@@ -69,7 +68,7 @@ func extrinsics(c *bm.Context) {
 		query = append(query, "is_signed = 1")
 	}
 	if p.Address != "" {
-		account := ss58.Decode(p.Address, substrate.AddressType)
+		account := ss58.Decode(p.Address, util.StringToInt(util.AddressType))
 		if account == "" {
 			c.JSON(nil, util.InvalidAccountAddress)
 			return

@@ -3,10 +3,9 @@ package dao
 import (
 	"context"
 	"encoding/json"
-	"github.com/itering/subscan/lib/substrate"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
-	"github.com/itering/subscan/util/ss58"
+	"github.com/itering/subscan/util/address"
 	"strings"
 )
 
@@ -146,7 +145,7 @@ func (d *Dao) extrinsicsAsDetail(c context.Context, e *model.ChainExtrinsic) *mo
 		BlockNum:           e.BlockNum,
 		CallModule:         e.CallModule,
 		CallModuleFunction: e.CallModuleFunction,
-		AccountId:          ss58.Encode(e.AccountId, substrate.AddressType),
+		AccountId:          address.SS58Address(e.AccountId),
 		Signature:          e.Signature,
 		Nonce:              e.Nonce,
 		ExtrinsicHash:      e.ExtrinsicHash,
@@ -183,7 +182,7 @@ func (d *Dao) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsicJso
 		CallModule:         e.CallModule,
 		CallModuleFunction: e.CallModuleFunction,
 		Params:             params,
-		AccountId:          substrate.SS58Address(e.AccountId),
+		AccountId:          address.SS58Address(e.AccountId),
 		Signature:          e.Signature,
 		Nonce:              e.Nonce,
 		AccountIndex:       e.AccountIndex,
@@ -193,7 +192,7 @@ func (d *Dao) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsicJso
 	if err := json.Unmarshal([]byte(ej.Params), &paramsInstant); err != nil {
 		for pi, param := range paramsInstant {
 			if paramsInstant[pi].Type == "Address" {
-				paramsInstant[pi].Value = ss58.Encode(param.Value.(string), substrate.AddressType)
+				paramsInstant[pi].Value = address.SS58Address(param.Value.(string))
 			}
 		}
 		bp, _ := json.Marshal(paramsInstant)
