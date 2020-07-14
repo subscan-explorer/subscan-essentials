@@ -1,7 +1,7 @@
 package transaction
 
 import (
-	"github.com/itering/subscan/lib/substrate/rpc"
+	"github.com/itering/substrate-api-rpc/rpc"
 	"github.com/shopspring/decimal"
 )
 

@@ -19,7 +19,7 @@ Subscan Essentials是一个高精度的区块链浏览器脚手架项目，它�
 2. 支持substrate 网络自定义type 注册 [Custom](/custom_type.md)
 3. 支持索引block, Extrinsic, Event, log
 4. 可自定义插件索引更多的数据[Plugins](/plugins)
-5. [Gen](/tools/gen-plugin)工具可自动生成插件模版
+5. [Gen](https://github.com/itering/subscan-plugin/tree/master/tool)工具可自动生成插件模版
 6. 内置默认的HTTP API [DOC](/docs/index.md)
 
 

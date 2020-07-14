@@ -1,9 +1,9 @@
 package service
 
 import (
-	"github.com/itering/subscan/lib/substrate/rpc"
-	"github.com/itering/subscan/lib/substrate/storageKey"
 	"github.com/itering/subscan/pkg/recws"
+	"github.com/itering/substrate-api-rpc/rpc"
+	"github.com/itering/substrate-api-rpc/storageKey"
 	"os"
 	"os/signal"
 	"syscall"
@@ -16,6 +16,7 @@ import (
 
 var (
 	subscribeConn *recws.RecConn
+	TotalIssuance storageKey.StorageKey
 )
 
 const (
@@ -26,6 +27,11 @@ const (
 	finalizeHeader
 	stateChange
 )
+
+func SubscribeStorage() []string {
+	TotalIssuance = storageKey.EncodeStorageKey("Balances", "TotalIssuance")
+	return []string{util.AddHex(TotalIssuance.EncodeKey)}
+}
 
 func (s *Service) Subscribe() {
 	var err error
@@ -70,7 +76,7 @@ func (s *Service) Subscribe() {
 	ticker := time.NewTicker(time.Second * 3)
 	defer ticker.Stop()
 
-	subscribeStorageList := storageKey.SubscribeStorage()
+	subscribeStorageList := SubscribeStorage()
 	checkHealth := func() {
 		for _, subscript := range subscriptionIds {
 			if time.Now().Unix()-subscript.Latest > subscribeTimeoutInterval {

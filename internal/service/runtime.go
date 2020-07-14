@@ -1,8 +1,9 @@
 package service
 
 import (
-	"github.com/itering/subscan/lib/substrate/metadata"
-	"github.com/itering/subscan/lib/substrate/rpc"
+	"github.com/itering/scale.go/types"
+	"github.com/itering/substrate-api-rpc/metadata"
+	"github.com/itering/substrate-api-rpc/rpc"
 	"strings"
 )
 
@@ -17,13 +18,13 @@ func (s *Service) regRuntimeVersion(name string, spec int) error {
 }
 
 func (s *Service) regCodecMetadata() string {
-	if coded, err := rpc.GetMetadataByHash(); err == nil {
+	if coded, err := rpc.GetMetadataByHash(nil); err == nil {
 		return coded
 	}
 	return ""
 }
 
-func (s *Service) setRuntimeData(spec int, runtime *metadata.MetadataType, rawData string) {
+func (s *Service) setRuntimeData(spec int, runtime *types.MetadataStruct, rawData string) {
 	var modules []string
 	for _, value := range runtime.Metadata.Modules {
 		modules = append(modules, value.Name)

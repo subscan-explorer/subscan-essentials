@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"github.com/golang/protobuf/ptypes/empty"
-	"github.com/itering/subscan/lib/substrate"
 	"github.com/itering/subscan/util"
 )
 
@@ -25,9 +24,8 @@ func (s *Service) Metadata() (map[string]string, error) {
 	c := context.TODO()
 	m, err := s.dao.GetMetadata(c)
 	m["networkNode"] = util.NetworkNode
-	m["blockTime"] = util.IntToString(substrate.BlockTime)
-	m["commissionAccuracy"] = util.IntToString(substrate.CommissionAccuracy)
-	m["balanceAccuracy"] = util.IntToString(substrate.BalanceAccuracy)
-	m["addressType"] = util.IntToString(substrate.AddressType)
+	m["commissionAccuracy"] = util.CommissionAccuracy
+	m["balanceAccuracy"] = util.BalanceAccuracy
+	m["addressType"] = util.AddressType
 	return m, err
 }

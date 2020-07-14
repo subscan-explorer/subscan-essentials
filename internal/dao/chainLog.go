@@ -3,9 +3,9 @@ package dao
 import (
 	"context"
 	"fmt"
-	"github.com/itering/subscan/lib/substrate/storage"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
+	"github.com/itering/substrate-api-rpc/storage"
 	"strings"
 )
 

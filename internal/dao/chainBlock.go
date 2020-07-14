@@ -2,36 +2,14 @@ package dao
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/go-kratos/kratos/pkg/cache/redis"
-	"github.com/itering/subscan/lib/substrate"
-	"github.com/itering/subscan/lib/substrate/rpc"
 	"github.com/itering/subscan/model"
-	"github.com/itering/subscan/util"
-	"github.com/itering/subscan/util/ss58"
+	"github.com/itering/subscan/util/address"
 	"sort"
 )
 
-func (d *Dao) CreateBlock(c context.Context, txn *GormDB, hash string, block *rpc.Block, event, log, validator string, eventCount, extrinsicsCount, blockTimestamp int, codecError bool, version int, finalized bool) (err error) {
-	extrinsicB, _ := json.Marshal(block.Extrinsics)
-	cb := model.ChainBlock{
-		Hash:            hash,
-		BlockNum:        util.StringToInt(util.HexToNumStr(block.Header.Number)),
-		BlockTimestamp:  blockTimestamp,
-		ParentHash:      block.Header.ParentHash,
-		StateRoot:       block.Header.StateRoot,
-		ExtrinsicsRoot:  block.Header.ExtrinsicsRoot,
-		Logs:            log,
-		Extrinsics:      string(extrinsicB),
-		Event:           event,
-		SpecVersion:     version,
-		ExtrinsicsCount: extrinsicsCount,
-		EventCount:      eventCount,
-		Validator:       validator,
-		CodecError:      codecError,
-		Finalized:       finalized,
-	}
+func (d *Dao) CreateBlock(c context.Context, txn *GormDB, cb *model.ChainBlock) (err error) {
 	query := txn.Create(&cb)
 	if !d.db.HasTable(model.ChainBlock{BlockNum: cb.BlockNum + model.SplitTableBlockNum}) {
 		go d.blockMigrate(cb.BlockNum + model.SplitTableBlockNum)
@@ -163,7 +141,7 @@ func (d *Dao) BlockAsJson(c context.Context, block *model.ChainBlock) *model.Cha
 		Extrinsics:      d.GetExtrinsicsByBlockNum(c, block.BlockNum),
 		Events:          d.GetEventByBlockNum(c, block.BlockNum),
 		Logs:            d.GetLogByBlockNum(c, block.BlockNum),
-		Validator:       substrate.SS58Address(block.Validator),
+		Validator:       address.SS58Address(block.Validator),
 		Finalized:       block.Finalized,
 	}
 	return &bj
@@ -196,7 +174,7 @@ func (d *Dao) BlockAsSampleJson(c context.Context, block *model.ChainBlock) *mod
 		Hash:            block.Hash,
 		EventCount:      block.EventCount,
 		ExtrinsicsCount: block.ExtrinsicsCount,
-		Validator:       ss58.Encode(block.Validator, substrate.AddressType),
+		Validator:       address.SS58Address(block.Validator),
 		Finalized:       block.Finalized,
 	}
 	return &b

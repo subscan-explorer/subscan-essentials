@@ -2,6 +2,7 @@ package dao
 
 import (
 	"context"
+	"github.com/itering/substrate-api-rpc/websocket"
 
 	"github.com/go-kratos/kratos/pkg/cache/redis"
 	"github.com/go-kratos/kratos/pkg/conf/paladin"
@@ -18,6 +19,18 @@ type Dao struct {
 	db    *gorm.DB
 	redis *redis.Pool
 	cache *fanout.Fanout
+}
+
+func (d *Dao) SpecialMetadata(spec int) string {
+	if metadata := d.RuntimeVersionRaw(spec); metadata != nil {
+		return metadata.Raw
+	}
+	return ""
+}
+
+func (d *Dao) RPCPool() *websocket.PoolConn {
+	conn, _ := websocket.Init()
+	return conn
 }
 
 func (d *Dao) DB() *gorm.DB {

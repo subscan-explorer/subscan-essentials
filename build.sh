@@ -6,8 +6,6 @@ app=${BASENAME}
 
 function build() {
     go build -o ./cmd/subscan -v ./cmd
-    go build -buildmode=plugin -o configs/plugins/balance.so -v ./plugins/balance
-	go build -buildmode=plugin -o configs/plugins/system.so  -v ./plugins/system
 	echo "build success"
 }
 

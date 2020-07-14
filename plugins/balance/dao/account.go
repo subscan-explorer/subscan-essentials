@@ -4,16 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-kratos/kratos/pkg/log"
-	"github.com/itering/subscan/lib/substrate/rpc"
 	"github.com/itering/subscan/plugins/balance/model"
-	"github.com/itering/subscan/util"
+	"github.com/itering/substrate-api-rpc/rpc"
 	"github.com/jinzhu/gorm"
 	"github.com/shopspring/decimal"
 )
 
 func TouchAccount(db *gorm.DB, address string) (*model.Account, error) {
 	var account model.Account
-	address = util.TrimHex(address)
 	query := db.FirstOrCreate(&account, &model.Account{Address: address})
 	return &account, query.Error
 }

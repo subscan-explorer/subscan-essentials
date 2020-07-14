@@ -6,10 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-kratos/kratos/pkg/log"
-	"github.com/itering/subscan/lib/substrate"
-	"github.com/itering/subscan/lib/substrate/rpc"
-	"github.com/itering/subscan/lib/substrate/websocket"
 	"github.com/itering/subscan/util"
+	"github.com/itering/substrate-api-rpc/rpc"
+	"github.com/itering/substrate-api-rpc/websocket"
 	"github.com/panjf2000/ants/v2"
 	"sync"
 	"time"
@@ -18,7 +17,13 @@ import (
 // FinalizedWaitingBlockCount
 // Because when receive chain_finalizedHead, get block still not finalized
 // so set Waiting block count to try avoid
-const FinalizedWaitingBlockCount = 5
+const (
+	FinalizedWaitingBlockCount = 5
+	ChainNewHead               = "chain_newHead"
+	ChainFinalizedHead         = "chain_finalizedHead"
+	StateStorage               = "state_storage"
+	BlockTime                  = 6
+)
 
 type subscription struct {
 	Topic  int   `json:"topic"`
@@ -68,7 +73,7 @@ func (s *SubscribeService) Parser(message []byte) {
 		r := j.ToRuntimeVersion()
 		_ = s.regRuntimeVersion(r.ImplName, r.SpecVersion)
 		_ = s.UpdateChainMetadata(map[string]interface{}{"implName": r.ImplName, "specVersion": r.SpecVersion})
-		substrate.CurrentRuntimeSpecVersion = r.SpecVersion
+		util.CurrentRuntimeSpecVersion = r.SpecVersion
 	case newHeader, finalizeHeader, stateChange:
 		subscriptionIds = append(subscriptionIds, subscription{
 			Topic:  j.Id,
@@ -77,7 +82,7 @@ func (s *SubscribeService) Parser(message []byte) {
 	}
 
 	switch j.Method {
-	case substrate.ChainNewHead:
+	case ChainNewHead:
 		r := j.ToNewHead()
 		_ = s.UpdateChainMetadata(map[string]interface{}{"blockNum": util.HexToNumStr(r.Number)})
 		upgradeHealth(newHeader)
@@ -87,7 +92,7 @@ func (s *SubscribeService) Parser(message []byte) {
 				go s.subscribeFetchBlock()
 			})
 		}()
-	case substrate.ChainFinalizedHead:
+	case ChainFinalizedHead:
 		r := j.ToNewHead()
 		_ = s.UpdateChainMetadata(map[string]interface{}{"finalized_blockNum": util.HexToNumStr(r.Number)})
 		upgradeHealth(finalizeHeader)
@@ -97,7 +102,7 @@ func (s *SubscribeService) Parser(message []byte) {
 				go s.subscribeFetchBlock()
 			})
 		}()
-	case substrate.StateStorage:
+	case StateStorage:
 		upgradeHealth(stateChange)
 	default:
 		return
@@ -130,7 +135,7 @@ func (s *SubscribeService) subscribeFetchBlock() {
 		case <-s.newHead:
 			blockNum, err := s.GetCurrentBlockNum(context.TODO())
 			if err != nil || blockNum == 0 {
-				time.Sleep(substrate.BlockTime * time.Second)
+				time.Sleep(BlockTime * time.Second)
 				return
 			}
 			alreadyBlock, _ := s.GetAlreadyBlockNum()
@@ -148,7 +153,7 @@ func (s *SubscribeService) subscribeFetchBlock() {
 		case <-s.newFinHead:
 			blockNum, err := s.GetFinalizedBlockNum(context.TODO())
 			if err != nil || blockNum == 0 {
-				time.Sleep(substrate.BlockTime * time.Second)
+				time.Sleep(BlockTime * time.Second)
 				return
 			}
 			alreadyBlock, _ := s.GetFillFinalizedBlockNum()
@@ -199,7 +204,7 @@ func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 	rpcBlock := v.ToBlock()
 
 	// event
-	if err = websocket.SendWsRequest(nil, v, rpc.StateGetStorage(wsEvent, substrate.EventStorageKey, blockHash)); err != nil {
+	if err = websocket.SendWsRequest(nil, v, rpc.StateGetStorage(wsEvent, util.EventStorageKey, blockHash)); err != nil {
 		return fmt.Errorf("websocket send error: %v", err)
 	}
 	event, _ := v.ToString()
@@ -218,8 +223,8 @@ func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 		_ = s.regRuntimeVersion(r.ImplName, specVersion)
 	}
 
-	if specVersion > substrate.CurrentRuntimeSpecVersion {
-		substrate.CurrentRuntimeSpecVersion = specVersion
+	if specVersion > util.CurrentRuntimeSpecVersion {
+		util.CurrentRuntimeSpecVersion = specVersion
 	}
 
 	if rpcBlock == nil || specVersion == -1 {
