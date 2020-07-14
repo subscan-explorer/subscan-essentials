@@ -13,7 +13,7 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/huandu/xstrings v1.3.2
 	github.com/itering/scale.go v0.1.4
-	github.com/itering/subscan-plugin v0.0.0-20200713085532-0c8921acefd0
+	github.com/itering/subscan-plugin v0.0.0-20200714071511-01de55c61ec6
 	github.com/itering/substrate-api-rpc v0.0.0-20200713071436-6b196a2cd1bd
 	github.com/jinzhu/gorm v1.9.14
 	github.com/jpillora/backoff v1.0.0
@@ -22,6 +22,7 @@ require (
 	github.com/kr/pretty v0.2.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-sqlite3 v2.0.1+incompatible // indirect
+	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/orfjackal/nanospec.go v0.0.0-20120727230329-de4694c1d701 // indirect
 	github.com/panjf2000/ants/v2 v2.4.0
 	github.com/pierrec/xxHash v0.1.5

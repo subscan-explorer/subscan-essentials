@@ -4,11 +4,17 @@ import (
 	"flag"
 	"fmt"
 	"github.com/itering/subscan-plugin"
+	"github.com/itering/subscan/plugins/balance"
 	"io/ioutil"
 	"plugin"
 	"reflect"
 	"strings"
 )
+
+func init() {
+	registerNative()
+	registerStatic()
+}
 
 type PluginFactory subscan_plugin.Plugin
 
@@ -35,14 +41,17 @@ func List() []string {
 	return plugins
 }
 
-func init() {
+func registerNative() {
+	Register("account", balance.New())
+}
+
+func registerStatic() {
 	flag.Parse()
 	pluginsDir := fmt.Sprintf("%s/plugins", flag.Lookup("conf").Value)
 	files, err := ioutil.ReadDir(pluginsDir)
 	if err != nil {
 		panic(err)
 	}
-
 	for _, file := range files {
 		p, err := plugin.Open(fmt.Sprintf("%s/%s", pluginsDir, file.Name()))
 		if err != nil {
