@@ -66,12 +66,6 @@ func (d *Dao) GetRepairBlockBlockNum(c context.Context) (num int, err error) {
 	return
 }
 
-func (d *Dao) GetBlockNumArr(c context.Context, start, end int) []int {
-	var blockNums []int
-	d.db.Model(&model.ChainBlock{BlockNum: end}).Where("block_num BETWEEN ? AND ?", start, end).Order("block_num asc").Pluck("block_num", &blockNums)
-	return blockNums
-}
-
 func (d *Dao) GetBlockList(page, row int) []model.ChainBlock {
 	var blocks []model.ChainBlock
 	blockNum, _ := d.GetFillAlreadyBlockNum(context.TODO())
@@ -163,7 +157,6 @@ func (d *Dao) UpdateEventAndExtrinsic(c context.Context, txn *GormDB, block *mod
 		"logs":             block.Logs,
 		"finalized":        finalized,
 	})
-	d.delCacheBlock(context.TODO(), block)
 	return query.Error
 }
 
@@ -190,7 +183,6 @@ func (d *Dao) GetNearBlock(c context.Context, blockNum int) *model.ChainBlock {
 }
 
 func (d *Dao) SetBlockFinalized(block *model.ChainBlock) {
-	d.delCacheBlock(context.TODO(), block)
 	d.db.Model(block).UpdateColumn(model.ChainBlock{Finalized: true})
 }
 

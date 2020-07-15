@@ -72,7 +72,7 @@ func (s *SubscribeService) Parser(message []byte) {
 	case runtimeVersion:
 		r := j.ToRuntimeVersion()
 		_ = s.regRuntimeVersion(r.ImplName, r.SpecVersion)
-		_ = s.UpdateChainMetadata(map[string]interface{}{"implName": r.ImplName, "specVersion": r.SpecVersion})
+		_ = s.updateChainMetadata(map[string]interface{}{"implName": r.ImplName, "specVersion": r.SpecVersion})
 		util.CurrentRuntimeSpecVersion = r.SpecVersion
 	case newHeader, finalizeHeader, stateChange:
 		subscriptionIds = append(subscriptionIds, subscription{
@@ -84,7 +84,7 @@ func (s *SubscribeService) Parser(message []byte) {
 	switch j.Method {
 	case ChainNewHead:
 		r := j.ToNewHead()
-		_ = s.UpdateChainMetadata(map[string]interface{}{"blockNum": util.HexToNumStr(r.Number)})
+		_ = s.updateChainMetadata(map[string]interface{}{"blockNum": util.HexToNumStr(r.Number)})
 		upgradeHealth(newHeader)
 		go func() {
 			s.newHead <- true
@@ -94,7 +94,7 @@ func (s *SubscribeService) Parser(message []byte) {
 		}()
 	case ChainFinalizedHead:
 		r := j.ToNewHead()
-		_ = s.UpdateChainMetadata(map[string]interface{}{"finalized_blockNum": util.HexToNumStr(r.Number)})
+		_ = s.updateChainMetadata(map[string]interface{}{"finalized_blockNum": util.HexToNumStr(r.Number)})
 		upgradeHealth(finalizeHeader)
 		go func() {
 			s.newFinHead <- true
@@ -111,7 +111,7 @@ func (s *SubscribeService) Parser(message []byte) {
 
 func (s *SubscribeService) subscribeFetchBlock() {
 	var wg sync.WaitGroup
-
+	ctx := context.TODO()
 	type BlockFinalized struct {
 		BlockNum  int  `json:"block_num"`
 		Finalized bool `json:"finalized"`
@@ -133,13 +133,13 @@ func (s *SubscribeService) subscribeFetchBlock() {
 	for {
 		select {
 		case <-s.newHead:
-			blockNum, err := s.GetCurrentBlockNum(context.TODO())
+			blockNum, err := s.dao.GetCurrentBlockNum(ctx)
 			if err != nil || blockNum == 0 {
 				time.Sleep(BlockTime * time.Second)
 				return
 			}
-			alreadyBlock, _ := s.GetAlreadyBlockNum()
-			finalizedBlock, _ := s.GetFinalizedBlockNum(context.TODO())
+			alreadyBlock, _ := s.dao.GetFillAlreadyBlockNum(ctx)
+			finalizedBlock, _ := s.dao.GetFinalizedBlockNum(ctx)
 
 			startBlock := alreadyBlock + 1
 			if alreadyBlock == 0 {
@@ -151,12 +151,12 @@ func (s *SubscribeService) subscribeFetchBlock() {
 			}
 			wg.Wait()
 		case <-s.newFinHead:
-			blockNum, err := s.GetFinalizedBlockNum(context.TODO())
+			blockNum, err := s.dao.GetFinalizedBlockNum(context.TODO())
 			if err != nil || blockNum == 0 {
 				time.Sleep(BlockTime * time.Second)
 				return
 			}
-			alreadyBlock, _ := s.GetFillFinalizedBlockNum()
+			alreadyBlock, _ := s.dao.GetFillFinalizedBlockNum(ctx)
 			startBlock := alreadyBlock + 1
 			if alreadyBlock == 0 {
 				startBlock = alreadyBlock
@@ -261,8 +261,18 @@ func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 
 	// for Create
 	if err = s.CreateChainBlock(blockHash, &rpcBlock.Block, event, specVersion, finalized); err == nil {
-		_ = s.SetAlreadyBlockNum(blockNum)
+		_ = s.dao.SaveFillAlreadyBlockNum(context.TODO(), blockNum)
 		setFinalized()
 	}
 	return
+}
+
+func (s *Service) updateChainMetadata(metadata map[string]interface{}) (err error) {
+	c := context.TODO()
+	err = s.dao.SetMetadata(c, metadata)
+	return
+}
+
+func (s *Service) GetCurrentBlockNum(c context.Context) (uint64, error) {
+	return s.dao.GetCurrentBlockNum(c)
 }

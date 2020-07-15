@@ -5,7 +5,7 @@ import time
 import urllib2
 
 
-def daemon_status():
+def observer_status():
     api_host = os.getenv('WEB_HOST', "http://localhost:4399")
     api = api_host + "/api/system/status"
     try:
@@ -26,15 +26,15 @@ def main():
     elif sys.argv[1] == "substrate":
         op = ["substrate"]
     map(system_do, op)  # run,run,run
-    print("start to listen daemon status :",
+    print("start to listen observer status :",
           time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
     while len(op) > 0:
-        j = daemon_status()
+        j = observer_status()
         for i in range(len(op)):
             try:
                 if not j["data"][op[i]]:
-                    s = './subscan stop {daemon} && ./subscan start {daemon}'
-                    os.system(s.format(daemon=op[i]))
+                    s = './subscan stop {observer} && ./subscan start {observer}'
+                    os.system(s.format(observer=op[i]))
             except KeyError:
                 pass
         time.sleep(60)

@@ -22,7 +22,6 @@ func (d *Dao) CreateEvent(c context.Context, txn *GormDB, event *model.ChainEven
 		Type:          event.Type,
 		ModuleId:      event.ModuleId,
 		Params:        string(params),
-		Phase:         event.Phase,
 		EventIdx:      event.EventIdx,
 		EventId:       event.EventId,
 		ExtrinsicIdx:  event.ExtrinsicIdx,

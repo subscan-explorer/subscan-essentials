@@ -15,16 +15,13 @@ func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.C
 		BlockTimestamp:     extrinsic.BlockTimestamp,
 		ExtrinsicIndex:     extrinsic.ExtrinsicIndex,
 		BlockNum:           extrinsic.BlockNum,
-		ValueRaw:           extrinsic.ValueRaw,
 		ExtrinsicLength:    extrinsic.ExtrinsicLength,
 		VersionInfo:        extrinsic.VersionInfo,
 		CallCode:           extrinsic.CallCode,
 		CallModuleFunction: extrinsic.CallModuleFunction,
 		CallModule:         extrinsic.CallModule,
 		Params:             string(params),
-		AccountLength:      extrinsic.AccountLength,
 		AccountId:          extrinsic.AccountId,
-		AccountIndex:       extrinsic.AccountIndex,
 		Signature:          extrinsic.Signature,
 		Era:                extrinsic.Era,
 		ExtrinsicHash:      util.AddHex(extrinsic.ExtrinsicHash),
@@ -154,7 +151,7 @@ func (d *Dao) extrinsicsAsDetail(c context.Context, e *model.ChainExtrinsic) *mo
 	}
 	util.UnmarshalToAnything(detail.Params, e.Params)
 
-	if block := d.Block(c, detail.BlockNum); block != nil {
+	if block := d.GetBlockByNum(c, detail.BlockNum); block != nil {
 		detail.Finalized = block.Finalized
 	}
 
@@ -185,7 +182,6 @@ func (d *Dao) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsicJso
 		AccountId:          address.SS58Address(e.AccountId),
 		Signature:          e.Signature,
 		Nonce:              e.Nonce,
-		AccountIndex:       e.AccountIndex,
 		Fee:                e.Fee,
 	}
 	var paramsInstant []model.ExtrinsicParam

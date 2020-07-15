@@ -14,39 +14,6 @@ import (
 	"github.com/itering/substrate-api-rpc/storage"
 )
 
-func (s *Service) GetAlreadyBlockNum() (int, error) {
-	c := context.TODO()
-	return s.dao.GetFillAlreadyBlockNum(c)
-}
-
-func (s *Service) GetFillFinalizedBlockNum() (int, error) {
-	c := context.TODO()
-	return s.dao.GetFillFinalizedBlockNum(c)
-}
-
-func (s *Service) SetAlreadyBlockNum(num int) error {
-	c := context.TODO()
-	return s.dao.SaveFillAlreadyBlockNum(c, num)
-}
-
-func (s *Service) GetBlockByHash(hash string) *model.ChainBlock {
-	c := context.TODO()
-	block := s.dao.BlockByHash(c, hash)
-	if block == nil {
-		return nil
-	}
-	return block
-}
-
-func (s *Service) GetBlockByNum(num int) *model.ChainBlockJson {
-	c := context.TODO()
-	block := s.dao.Block(c, num)
-	if block == nil {
-		return nil
-	}
-	return s.dao.BlockAsJson(c, block)
-}
-
 func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, spec int, finalized bool) (err error) {
 	var (
 		decodeExtrinsics []map[string]interface{}

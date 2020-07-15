@@ -38,7 +38,7 @@ func block(c *bm.Context) {
 		return
 	}
 	if p.BlockHash == "" {
-		c.JSON(svc.GetBlockByNum(p.BlockNum), nil)
+		c.JSON(ss.GetBlockByNum(p.BlockNum), nil)
 	} else {
 		c.JSON(ss.GetBlockByHashJson(p.BlockHash), nil)
 	}
@@ -131,7 +131,7 @@ func checkSearchHash(c *bm.Context) {
 	if err := c.BindWith(p, binding.JSON); err != nil {
 		return
 	}
-	if block := svc.GetBlockByHash(p.Hash); block != nil {
+	if block := ss.GetBlockByHash(p.Hash); block != nil {
 		c.JSON(map[string]string{"hash_type": "block"}, nil)
 		return
 	}

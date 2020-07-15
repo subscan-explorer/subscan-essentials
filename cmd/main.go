@@ -1,14 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/go-kratos/kratos/pkg/conf/paladin"
 	"github.com/go-kratos/kratos/pkg/log"
 	"github.com/itering/subscan/internal/daemons"
-	"github.com/itering/subscan/internal/di"
-	"github.com/itering/subscan/internal/jobs"
 	"github.com/itering/subscan/internal/script"
-	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/internal/server/http"
+	"github.com/itering/subscan/internal/service"
 	"github.com/itering/substrate-api-rpc/websocket"
 	"github.com/urfave/cli"
 	"os"
@@ -43,10 +43,8 @@ func setupApp() *cli.App {
 		} else {
 			paladin.DefaultClient = client
 		}
-		jobs.Init()
 		log.Init(nil)
 		runtime.GOMAXPROCS(runtime.NumCPU())
-		websocket.RegWSEndPoint(util.WSEndPoint)
 		return nil
 	}
 	app.Commands = []cli.Command{
@@ -76,10 +74,8 @@ func setupApp() *cli.App {
 }
 
 func run() {
-	_, closeFunc, err := di.InitApp()
-	if err != nil {
-		panic(err)
-	}
+	serviceService := service.New()
+	engine := http.New(serviceService)
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
 	for {
@@ -87,7 +83,12 @@ func run() {
 		log.Info("get a signal %s", s.String())
 		switch s {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
-			closeFunc()
+			ctx, cancel := context.WithTimeout(context.Background(), 35*time.Second)
+			if err := engine.Shutdown(ctx); err != nil {
+				log.Error("httpSrv.Shutdown error(%v)", err)
+			}
+			cancel()
+			serviceService.Close()
 			log.Info("SubScan End exit")
 			time.Sleep(time.Second)
 			return

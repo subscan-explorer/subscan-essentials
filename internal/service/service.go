@@ -10,6 +10,7 @@ import (
 	"github.com/itering/subscan/plugins"
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc/metadata"
+	"github.com/itering/substrate-api-rpc/websocket"
 	"io/ioutil"
 	"strings"
 )
@@ -26,6 +27,7 @@ func New() (s *Service) {
 	}
 
 	s.Migration()
+	websocket.RegWSEndPoint(util.WSEndPoint)
 	s.initSubRuntimeLatest()
 
 	for _, plugin := range plugins.RegisteredPlugins {

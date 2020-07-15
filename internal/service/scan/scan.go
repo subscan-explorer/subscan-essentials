@@ -37,18 +37,9 @@ func (s *Service) GetExtrinsicList(page, row int, order string, query ...string)
 func (s *Service) GetBlocksSampleByNums(page, row int) *[]model.SampleBlockJson {
 	c := context.TODO()
 	var blockJson []model.SampleBlockJson
-	// var validatorList []string
-
 	blocks := s.dao.GetBlockList(page, row)
-
-	// for _, block := range blocks {
-	// 	validatorList = append(validatorList, block.Validator)
-	// }
-
 	for _, block := range blocks {
-
 		bj := s.dao.BlockAsSampleJson(c, &block)
-
 		blockJson = append(blockJson, *bj)
 	}
 	return &blockJson
@@ -71,7 +62,7 @@ func (s *Service) GetExtrinsicByHash(hash string) *model.ChainExtrinsic {
 
 func (s *Service) GetBlockByHashJson(hash string) *model.ChainBlockJson {
 	c := context.TODO()
-	block := s.dao.BlockByHash(c, hash)
+	block := s.dao.GetBlockByHash(c, hash)
 	if block == nil {
 		return nil
 	}
@@ -114,9 +105,18 @@ func (s *Service) GetEventList(page, row int, order string, where ...string) ([]
 
 func (s *Service) GetBlockByNum(num int) *model.ChainBlockJson {
 	c := context.TODO()
-	block := s.dao.Block(c, num)
+	block := s.dao.GetBlockByNum(c, num)
 	if block == nil {
 		return nil
 	}
 	return s.dao.BlockAsJson(c, block)
+}
+
+func (s *Service) GetBlockByHash(hash string) *model.ChainBlock {
+	c := context.TODO()
+	block := s.dao.GetBlockByHash(c, hash)
+	if block == nil {
+		return nil
+	}
+	return block
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/itering/subscan/internal/middleware"
 	"github.com/itering/subscan/internal/service"
 	"github.com/itering/subscan/internal/service/scan"
+	"github.com/itering/subscan/plugins"
 )
 
 var (
@@ -33,6 +34,10 @@ func New(s *service.Service) (engine *bm.Engine) {
 
 	if err := engine.Start(); err != nil {
 		panic(err)
+	}
+	// load plugins
+	for _, plugin := range plugins.RegisteredPlugins {
+		plugin.InitHttp(engine)
 	}
 	return
 }

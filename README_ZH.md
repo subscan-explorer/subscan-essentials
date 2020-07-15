@@ -51,9 +51,9 @@ Subscan Essentials是一个高精度的区块链浏览器脚手架项目，它�
 
 ```bash
 
-docker-composer build
+docker-compose build
 
-docker-composer up -d
+docker-compose up -d
 
 ```
 
