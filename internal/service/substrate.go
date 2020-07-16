@@ -180,7 +180,7 @@ const (
 )
 
 func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
-	block := s.dao.GetBlockByNum(context.TODO(), blockNum)
+	block := s.dao.GetBlockByNum(blockNum)
 	if block != nil && block.Finalized && !block.CodecError {
 		return nil
 	}

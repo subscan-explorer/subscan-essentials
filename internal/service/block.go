@@ -89,7 +89,7 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 	cb.ExtrinsicsCount = extrinsicsCount
 	cb.EventCount = eventCount
 
-	if err = s.dao.CreateBlock(c, txn, &cb); err == nil {
+	if err = s.dao.CreateBlock(txn, &cb); err == nil {
 		txn.DbCommit()
 	}
 	return err
@@ -174,11 +174,10 @@ func (s *Service) checkoutExtrinsicEvents(e []model.ChainEvent, blockNumInt int)
 }
 
 func (s *Service) GetCurrentRuntimeSpecVersion(blockNum int) int {
-	c := context.TODO()
 	if util.CurrentRuntimeSpecVersion != 0 {
 		return util.CurrentRuntimeSpecVersion
 	}
-	if block := s.dao.GetNearBlock(c, blockNum); block != nil {
+	if block := s.dao.GetNearBlock(blockNum); block != nil {
 		return block.SpecVersion
 	}
 	return -1

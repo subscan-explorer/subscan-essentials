@@ -151,7 +151,7 @@ func (d *Dao) extrinsicsAsDetail(c context.Context, e *model.ChainExtrinsic) *mo
 	}
 	util.UnmarshalToAnything(detail.Params, e.Params)
 
-	if block := d.GetBlockByNum(c, detail.BlockNum); block != nil {
+	if block := d.GetBlockByNum(detail.BlockNum); block != nil {
 		detail.Finalized = block.Finalized
 	}
 

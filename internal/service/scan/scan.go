@@ -82,7 +82,7 @@ func (s *Service) GetEventList(page, row int, order string, where ...string) ([]
 	for _, event := range list {
 		blockNums = append(blockNums, event.BlockNum)
 	}
-	blockMap := s.dao.BlocksReverseByNum(c, blockNums)
+	blockMap := s.dao.BlocksReverseByNum(blockNums)
 
 	for _, event := range list {
 		ej := model.ChainEventJson{
@@ -105,7 +105,7 @@ func (s *Service) GetEventList(page, row int, order string, where ...string) ([]
 
 func (s *Service) GetBlockByNum(num int) *model.ChainBlockJson {
 	c := context.TODO()
-	block := s.dao.GetBlockByNum(c, num)
+	block := s.dao.GetBlockByNum(num)
 	if block == nil {
 		return nil
 	}

@@ -1,7 +1,7 @@
 package plugins_test
 
 import (
-	bm "github.com/go-kratos/kratos/pkg/net/http/blademaster"
+	"github.com/itering/subscan-plugin/router"
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/plugins"
 	"github.com/shopspring/decimal"
@@ -13,7 +13,7 @@ type TPlugin struct{}
 
 func (a *TPlugin) InitDao(d storage.Dao) {}
 
-func (a *TPlugin) InitHttp(e *bm.Engine) {}
+func (a *TPlugin) InitHttp() []router.Http { return nil }
 
 func (a *TPlugin) ProcessExtrinsic(block *storage.Block, extrinsic *storage.Extrinsic, events []storage.Event) error {
 	return nil
@@ -24,6 +24,8 @@ func (a *TPlugin) ProcessEvent(block *storage.Block, event *storage.Event, fee d
 }
 
 func (a *TPlugin) Migrate() {}
+
+func (a *TPlugin) Version() string { return "0.1" }
 
 func TestRegister(t *testing.T) {
 	plugins.Register("test", &TPlugin{})

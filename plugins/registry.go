@@ -42,13 +42,13 @@ func List() []string {
 }
 
 func registerNative() {
-	Register("account", balance.New())
+	Register("balance", balance.New())
 }
 
 func registerStatic() {
 	flag.Parse()
 
-	pluginsDir := fmt.Sprintf("../configs/plugins")
+	pluginsDir := "../configs/plugins"
 	if confFlag := flag.Lookup("conf"); confFlag != nil {
 		pluginsDir = fmt.Sprintf("%s/plugins", flag.Lookup("conf").Value)
 	}

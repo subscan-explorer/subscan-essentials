@@ -2,7 +2,6 @@ package dao
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
@@ -11,17 +10,13 @@ import (
 
 func (d *Dao) CreateEvent(c context.Context, txn *GormDB, event *model.ChainEvent) error {
 	var incrCount int
-	params, _ := json.Marshal(event.Params)
-	extrinsicHash := event.ExtrinsicHash
-	if extrinsicHash != "" {
-		extrinsicHash = util.AddHex(event.ExtrinsicHash)
-	}
+	extrinsicHash := util.AddHex(event.ExtrinsicHash)
 	e := model.ChainEvent{
 		EventIndex:    event.EventIndex,
 		BlockNum:      event.BlockNum,
 		Type:          event.Type,
 		ModuleId:      event.ModuleId,
-		Params:        string(params),
+		Params:        util.InterfaceToString(event.Params),
 		EventIdx:      event.EventIdx,
 		EventId:       event.EventId,
 		ExtrinsicIdx:  event.ExtrinsicIdx,
@@ -45,7 +40,7 @@ func (d *Dao) DropEventNotFinalizedData(blockNum int, finalized bool) bool {
 	return delExist
 }
 
-func (d *Dao) GetEventByBlockNum(c context.Context, blockNum int, where ...string) []model.ChainEventJson {
+func (d *Dao) GetEventByBlockNum(blockNum int, where ...string) []model.ChainEventJson {
 	var events []model.ChainEventJson
 	queryOrigin := d.db.Model(model.ChainEvent{BlockNum: blockNum}).Where("block_num = ?", blockNum)
 	for _, w := range where {
@@ -63,7 +58,7 @@ func (d *Dao) GetEventList(c context.Context, page, row int, order string, where
 
 	var count int
 
-	blockNum, _ := d.GetFillAlreadyBlockNum(context.TODO())
+	blockNum, _ := d.GetFillAlreadyBlockNum(c)
 	for index := blockNum / model.SplitTableBlockNum; index >= 0; index-- {
 		var tableData []model.ChainEvent
 		var tableCount int
