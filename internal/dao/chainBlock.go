@@ -122,7 +122,7 @@ func (d *Dao) BlockAsJson(c context.Context, block *model.ChainBlock) *model.Cha
 		ExtrinsicsRoot:  block.ExtrinsicsRoot,
 		Extrinsics:      d.GetExtrinsicsByBlockNum(block.BlockNum),
 		Events:          d.GetEventByBlockNum(block.BlockNum),
-		Logs:            d.GetLogByBlockNum(c, block.BlockNum),
+		Logs:            d.GetLogByBlockNum(block.BlockNum),
 		Validator:       address.SS58Address(block.Validator),
 		Finalized:       block.Finalized,
 	}

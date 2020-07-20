@@ -11,7 +11,7 @@ type ChainBlockJson struct {
 	ExtrinsicsRoot    string               `json:"extrinsics_root"`
 	Extrinsics        []ChainExtrinsicJson `json:"extrinsics"`
 	Events            []ChainEventJson     `json:"events"`
-	Logs              *[]ChainLogJson      `json:"logs"`
+	Logs              []ChainLogJson       `json:"logs"`
 	EventCount        int                  `json:"event_count"`
 	ExtrinsicsCount   int                  `json:"extrinsics_count"`
 	SpecVersion       int                  `json:"spec_version"`

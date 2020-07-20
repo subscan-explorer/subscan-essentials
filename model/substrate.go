@@ -5,30 +5,28 @@ import (
 	"fmt"
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/shopspring/decimal"
-	"time"
 )
 
 // SplitTableBlockNum
 var SplitTableBlockNum = 1000000
 
 type ChainBlock struct {
-	ID              uint      `gorm:"primary_key" json:"id"`
-	BlockNum        int       `json:"block_num"`
-	BlockTimestamp  int       `json:"block_timestamp"`
-	CreatedAt       time.Time `json:"created_at"`
-	Hash            string    `sql:"default: null;size:100" json:"hash"`
-	ParentHash      string    `sql:"default: null;size:100" json:"parent_hash"`
-	StateRoot       string    `sql:"default: null;size:100" json:"state_root"`
-	ExtrinsicsRoot  string    `sql:"default: null;size:100" json:"extrinsics_root"`
-	Logs            string    `json:"logs" sql:"type:text;"`
-	Extrinsics      string    `json:"extrinsics" sql:"type:MEDIUMTEXT;"`
-	EventCount      int       `json:"event_count"`
-	ExtrinsicsCount int       `json:"extrinsics_count"`
-	Event           string    `json:"event" sql:"type:text;"`
-	SpecVersion     int       `json:"spec_version"`
-	Validator       string    `json:"validator"`
-	CodecError      bool      `json:"codec_error"`
-	Finalized       bool      `json:"finalized"`
+	ID              uint   `gorm:"primary_key" json:"id"`
+	BlockNum        int    `json:"block_num"`
+	BlockTimestamp  int    `json:"block_timestamp"`
+	Hash            string `sql:"default: null;size:100" json:"hash"`
+	ParentHash      string `sql:"default: null;size:100" json:"parent_hash"`
+	StateRoot       string `sql:"default: null;size:100" json:"state_root"`
+	ExtrinsicsRoot  string `sql:"default: null;size:100" json:"extrinsics_root"`
+	Logs            string `json:"logs" sql:"type:text;"`
+	Extrinsics      string `json:"extrinsics" sql:"type:MEDIUMTEXT;"`
+	EventCount      int    `json:"event_count"`
+	ExtrinsicsCount int    `json:"extrinsics_count"`
+	Event           string `json:"event" sql:"type:text;"`
+	SpecVersion     int    `json:"spec_version"`
+	Validator       string `json:"validator"`
+	CodecError      bool   `json:"codec_error"`
+	Finalized       bool   `json:"finalized"`
 }
 
 func (c ChainBlock) TableName() string {
@@ -51,7 +49,6 @@ func (c *ChainBlock) AsPluginBlock() *storage.Block {
 
 type ChainEvent struct {
 	ID            uint        `gorm:"primary_key" json:"-"`
-	CreatedAt     time.Time   `json:"-" `
 	EventIndex    string      `sql:"default: null;size:100;" json:"event_index"`
 	BlockNum      int         `json:"block_num" `
 	ExtrinsicIdx  int         `json:"extrinsic_idx"`
@@ -140,14 +137,12 @@ type RuntimeVersion struct {
 }
 
 type ChainLog struct {
-	ID         uint      `gorm:"primary_key"`
-	CreatedAt  time.Time `json:"created_at"`
-	BlockNum   int       `json:"block_num" `
-	LogIndex   string    `json:"log_index" sql:"default: null;size:100"`
-	LogType    string    `json:"log_type" `
-	OriginType string    `json:"origin_type"`
-	Data       string    `json:"data" sql:"type:text;"`
-	Finalized  bool      `json:"finalized"`
+	ID        uint   `gorm:"primary_key"`
+	BlockNum  int    `json:"block_num" `
+	LogIndex  string `json:"log_index" sql:"default: null;size:100"`
+	LogType   string `json:"log_type" `
+	Data      string `json:"data" sql:"type:text;"`
+	Finalized bool   `json:"finalized"`
 }
 
 func (c ChainLog) TableName() string {
