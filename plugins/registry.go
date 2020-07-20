@@ -13,7 +13,7 @@ import (
 
 func init() {
 	registerNative()
-	registerStatic()
+	// registerStatic()
 }
 
 type PluginFactory subscan_plugin.Plugin
@@ -45,6 +45,7 @@ func registerNative() {
 	Register("balance", balance.New())
 }
 
+// Currently the go plugin solution is not stable yet
 func registerStatic() {
 	flag.Parse()
 

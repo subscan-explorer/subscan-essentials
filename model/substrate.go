@@ -86,7 +86,6 @@ func (c *ChainEvent) AsPluginEvent() *storage.Event {
 
 type ChainExtrinsic struct {
 	ID                 uint            `gorm:"primary_key"`
-	CreatedAt          time.Time       `json:"created_at"`
 	ExtrinsicIndex     string          `json:"extrinsic_index" sql:"default: null;size:100"`
 	BlockNum           int             `json:"block_num" `
 	BlockTimestamp     int             `json:"block_timestamp"`

@@ -38,15 +38,51 @@ var (
 	}
 
 	testExtrinsic = model.ChainExtrinsic{
+		ID:                 1,
 		ExtrinsicIndex:     "947687-0",
 		BlockNum:           947687,
 		BlockTimestamp:     1594791900,
 		VersionInfo:        "04",
 		CallModuleFunction: "set",
 		CallModule:         "timestamp",
-		Params:             `[{"name":"now","type":"Compact\u003cMoment\u003e","value":1594791900,"value_raw":"0b603301517301"}]`,
-		Success:            true,
-		Finalized:          true,
+		Params: model.ExtrinsicParam{
+			Name:     "now",
+			Type:     "Compact<Moment>",
+			Value:    1594791900,
+			ValueRaw: "0b603301517301",
+		},
+		Success:   true,
+		Finalized: true,
+	}
+
+	testSignedExtrinsic = model.ChainExtrinsic{
+		ID:                 2,
+		ExtrinsicIndex:     "947689-1",
+		BlockNum:           947689,
+		BlockTimestamp:     1594791900,
+		VersionInfo:        "04",
+		CallModuleFunction: "transfer",
+		CallModule:         "balances",
+		AccountId:          "242f0781faa44f34ddcbc9e731d0ddb51c97f5b58bb2202090a3a1c679fc4c63",
+		Params: []model.ExtrinsicParam{
+			{
+				Name:     "dest",
+				Type:     "Address",
+				Value:    "563d11af91b3a166d07110bb49e84094f38364ef39c43a26066ca123a8b9532b",
+				ValueRaw: "563d11af91b3a166d07110bb49e84094f38364ef39c43a26066ca123a8b9532b",
+			},
+			{
+				Name:     "value",
+				Type:     "Compact<Balance>",
+				Value:    "1000000000000000000",
+				ValueRaw: "13000064a7b3b6e00d",
+			},
+		},
+		Success:       true,
+		Finalized:     true,
+		ExtrinsicHash: "0x368f61800f8645f67d59baf0602b236ff47952097dcaef3aa026b50ddc8dcea0",
+		Signature:     "d46ec05eb03ef6904b36fd06fe7923d2a5bccf68ddb53573e821652dafd9644ae82e29c6dbe1519a5b7052c4647814f2987ad23b7c930ed7175726755e27898f",
+		IsSigned:      true,
 	}
 )
 
@@ -67,7 +103,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	db.LogMode(true)
+	db.LogMode(false)
 	const testRedisDb = 1
 
 	testDao = &Dao{
@@ -89,6 +125,7 @@ func init() {
 	_ = testDao.CreateBlock(txn, &testBlock)
 	_ = testDao.CreateEvent(ctx, txn, &testEvent)
 	_ = testDao.CreateExtrinsic(ctx, txn, &testExtrinsic)
+	_ = testDao.CreateExtrinsic(ctx, txn, &testSignedExtrinsic)
 	txn.Commit()
 
 	conn := testDao.redis.Get(ctx)

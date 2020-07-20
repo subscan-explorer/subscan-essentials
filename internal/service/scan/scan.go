@@ -34,6 +34,7 @@ func (s *Service) GetExtrinsicList(page, row int, order string, query ...string)
 	}
 	return ejs, count
 }
+
 func (s *Service) GetBlocksSampleByNums(page, row int) *[]model.SampleBlockJson {
 	c := context.TODO()
 	var blockJson []model.SampleBlockJson
