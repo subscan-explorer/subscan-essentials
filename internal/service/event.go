@@ -30,7 +30,7 @@ func (s *Service) AddEvent(
 		event.BlockNum = block.BlockNum
 
 		if err = s.dao.CreateEvent(c, txn, &event); err == nil {
-			go s.afterEvent(block, &event, feeMap[event.EventIndex])
+			go s.afterEvent(*block, event, feeMap[event.EventIndex])
 		} else {
 			return 0, err
 		}
@@ -39,7 +39,7 @@ func (s *Service) AddEvent(
 	return eventCount, err
 }
 
-func (s *Service) afterEvent(block *model.ChainBlock, event *model.ChainEvent, fee decimal.Decimal) {
+func (s *Service) afterEvent(block model.ChainBlock, event model.ChainEvent, fee decimal.Decimal) {
 	pBlock := block.AsPluginBlock()
 	pEvent := event.AsPluginEvent()
 	for _, plugin := range plugins.RegisteredPlugins {
