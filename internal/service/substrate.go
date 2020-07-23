@@ -46,7 +46,7 @@ type SubscribeService struct {
 	done       chan struct{}
 }
 
-func (s *Service) InitSubscribeService(done chan struct{}) *SubscribeService {
+func (s *Service) initSubscribeService(done chan struct{}) *SubscribeService {
 	return &SubscribeService{
 		Service:    s,
 		newHead:    make(chan bool, 1),
@@ -55,7 +55,7 @@ func (s *Service) InitSubscribeService(done chan struct{}) *SubscribeService {
 	}
 }
 
-func (s *SubscribeService) Parser(message []byte) {
+func (s *SubscribeService) parser(message []byte) {
 	upgradeHealth := func(topic int) {
 		for index, subscript := range subscriptionIds {
 			if subscript.Topic == topic {

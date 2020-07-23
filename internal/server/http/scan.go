@@ -23,7 +23,7 @@ func blocks(c *bm.Context) {
 		return
 	}
 	blockNum, err := svc.GetCurrentBlockNum(context.TODO())
-	blocks := ss.GetBlocksSampleByNums(p.Page, p.Row)
+	blocks := svc.GetBlocksSampleByNums(p.Page, p.Row)
 	c.JSON(map[string]interface{}{
 		"blocks": blocks, "count": blockNum,
 	}, err)
@@ -38,9 +38,9 @@ func block(c *bm.Context) {
 		return
 	}
 	if p.BlockHash == "" {
-		c.JSON(ss.GetBlockByNum(p.BlockNum), nil)
+		c.JSON(svc.GetBlockByNum(p.BlockNum), nil)
 	} else {
-		c.JSON(ss.GetBlockByHashJson(p.BlockHash), nil)
+		c.JSON(svc.GetBlockByHashJson(p.BlockHash), nil)
 	}
 }
 
@@ -75,7 +75,7 @@ func extrinsics(c *bm.Context) {
 		}
 		query = append(query, fmt.Sprintf("is_signed = 1 and account_id = '%s'", account))
 	}
-	extrinsics, count := ss.GetExtrinsicList(p.Page, p.Row, "desc", query...)
+	extrinsics, count := svc.GetExtrinsicList(p.Page, p.Row, "desc", query...)
 	c.JSON(map[string]interface{}{
 		"extrinsics": extrinsics, "count": count,
 	}, nil)
@@ -95,9 +95,9 @@ func extrinsic(c *bm.Context) {
 		return
 	}
 	if p.ExtrinsicIndex != "" {
-		c.JSON(ss.GetExtrinsicByIndex(p.ExtrinsicIndex), nil)
+		c.JSON(svc.GetExtrinsicByIndex(p.ExtrinsicIndex), nil)
 	} else {
-		c.JSON(ss.GetExtrinsicDetailByHash(p.Hash), nil)
+		c.JSON(svc.GetExtrinsicDetailByHash(p.Hash), nil)
 	}
 }
 
@@ -118,7 +118,7 @@ func events(c *bm.Context) {
 	if p.Call != "" {
 		query = append(query, fmt.Sprintf("event_id = '%s'", p.Call))
 	}
-	events, count := ss.GetEventList(p.Page, p.Row, "desc", query...)
+	events, count := svc.GetEventList(p.Page, p.Row, "desc", query...)
 	c.JSON(map[string]interface{}{
 		"events": events, "count": count,
 	}, nil)
@@ -131,11 +131,11 @@ func checkSearchHash(c *bm.Context) {
 	if err := c.BindWith(p, binding.JSON); err != nil {
 		return
 	}
-	if block := ss.GetBlockByHash(p.Hash); block != nil {
+	if block := svc.GetBlockByHash(p.Hash); block != nil {
 		c.JSON(map[string]string{"hash_type": "block"}, nil)
 		return
 	}
-	if extrinsic := ss.GetExtrinsicByHash(p.Hash); extrinsic != nil {
+	if extrinsic := svc.GetExtrinsicByHash(p.Hash); extrinsic != nil {
 		c.JSON(map[string]string{"hash_type": "extrinsic"}, nil)
 		return
 	}
@@ -144,7 +144,7 @@ func checkSearchHash(c *bm.Context) {
 
 func runtimeList(c *bm.Context) {
 	c.JSON(map[string]interface{}{
-		"list": ss.SubstrateRuntimeList(),
+		"list": svc.SubstrateRuntimeList(),
 	}, nil)
 }
 
@@ -155,7 +155,7 @@ func runtimeMetadata(c *bm.Context) {
 	if err := c.BindWith(p, binding.JSON); err != nil {
 		return
 	}
-	info := ss.SubstrateRuntimeInfo(p.Spec)
+	info := svc.SubstrateRuntimeInfo(p.Spec)
 	c.JSON(map[string]interface{}{
 		"info": info,
 	}, nil)

@@ -53,7 +53,7 @@ func (s *Service) Subscribe() {
 
 	done := make(chan struct{})
 
-	subscribeSrv := s.InitSubscribeService(done)
+	subscribeSrv := s.initSubscribeService(done)
 	go func() {
 		for {
 			if !subscribeConn.IsConnected() {
@@ -65,7 +65,7 @@ func (s *Service) Subscribe() {
 				continue
 			}
 			log.Info("recv: %s", message)
-			subscribeSrv.Parser(message)
+			subscribeSrv.parser(message)
 		}
 	}()
 

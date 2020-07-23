@@ -5,13 +5,11 @@ import (
 	bm "github.com/go-kratos/kratos/pkg/net/http/blademaster"
 	"github.com/itering/subscan/internal/middleware"
 	"github.com/itering/subscan/internal/service"
-	"github.com/itering/subscan/internal/service/scan"
 	"github.com/itering/subscan/plugins"
 )
 
 var (
 	svc *service.Service
-	ss  *scan.Service
 )
 
 func New(s *service.Service) (engine *bm.Engine) {
@@ -30,7 +28,6 @@ func New(s *service.Service) (engine *bm.Engine) {
 	engine.HandleMethodNotAllowed = false
 
 	initRouter(engine)
-	ss = svc.NewScan()
 
 	if err := engine.Start(); err != nil {
 		panic(err)

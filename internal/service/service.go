@@ -6,7 +6,6 @@ import (
 	"github.com/itering/scale.go/source"
 	"github.com/itering/scale.go/types"
 	"github.com/itering/subscan/internal/dao"
-	"github.com/itering/subscan/internal/service/scan"
 	"github.com/itering/subscan/plugins"
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc/metadata"
@@ -34,10 +33,6 @@ func New() (s *Service) {
 		plugin.InitDao(s.dao)
 	}
 	return s
-}
-
-func (s *Service) NewScan() *scan.Service {
-	return scan.New(s.dao)
 }
 
 // Close close the resource.
