@@ -14,23 +14,22 @@ import (
 	"strings"
 )
 
-// Service service.
+// Service
 type Service struct {
-	dao *dao.Dao
+	dao dao.IDao
 }
 
 // New new a service and return.
 func New() (s *Service) {
+	d := dao.New()
 	s = &Service{
-		dao: dao.New(),
+		dao: d,
 	}
-
-	s.Migration()
 	websocket.RegWSEndPoint(util.WSEndPoint)
 	s.initSubRuntimeLatest()
 
 	for _, plugin := range plugins.RegisteredPlugins {
-		plugin.InitDao(s.dao)
+		plugin.InitDao(d)
 	}
 	return s
 }
@@ -38,10 +37,6 @@ func New() (s *Service) {
 // Close close the resource.
 func (s *Service) Close() {
 	s.dao.Close()
-}
-
-func (s *Service) Migration() {
-	s.dao.Migration()
 }
 
 func (s *Service) initSubRuntimeLatest() {

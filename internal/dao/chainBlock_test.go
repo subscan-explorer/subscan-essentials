@@ -49,9 +49,8 @@ func TestDao_GetBlockList(t *testing.T) {
 }
 
 func TestDao_UpdateEventAndExtrinsic(t *testing.T) {
-	ctx := context.TODO()
 	txn := testDao.DbBegin()
-	err := testDao.UpdateEventAndExtrinsic(ctx, txn, &testBlock, 1, 2, 1594791900, "60e2feb892e672d5579ed10ecae0d162031fe5adc3692498ad262fb126a65732", false, true)
+	err := testDao.UpdateEventAndExtrinsic(txn, &testBlock, 1, 2, 1594791900, "60e2feb892e672d5579ed10ecae0d162031fe5adc3692498ad262fb126a65732", false, true)
 	assert.NoError(t, err)
 	txn.Commit()
 	block := testDao.GetBlockByNum(947687)
