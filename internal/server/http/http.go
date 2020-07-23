@@ -5,12 +5,11 @@ import (
 	bm "github.com/go-kratos/kratos/pkg/net/http/blademaster"
 	"github.com/itering/subscan/internal/middleware"
 	"github.com/itering/subscan/internal/service"
-	"github.com/itering/subscan/internal/service/scan"
+	"github.com/itering/subscan/plugins"
 )
 
 var (
 	svc *service.Service
-	ss  *scan.Service
 )
 
 func New(s *service.Service) (engine *bm.Engine) {
@@ -29,12 +28,11 @@ func New(s *service.Service) (engine *bm.Engine) {
 	engine.HandleMethodNotAllowed = false
 
 	initRouter(engine)
-	ss = svc.NewScan()
 
 	if err := engine.Start(); err != nil {
 		panic(err)
 	}
-	return
+	return engine
 }
 
 func initRouter(e *bm.Engine) {
@@ -64,7 +62,17 @@ func initRouter(e *bm.Engine) {
 
 			s.POST("runtime/metadata", runtimeMetadata)
 			s.POST("runtime/list", runtimeList)
+		}
+		pluginRouter(g)
+	}
+}
 
+func pluginRouter(g *bm.RouterGroup) {
+	for name, plugin := range plugins.RegisteredPlugins {
+		for _, r := range plugin.InitHttp() {
+			g.Group("plugin").Group(name).POST(r.Router, func(context *bm.Context) {
+				_ = r.Handle(context.Writer, context.Request)
+			})
 		}
 	}
 }

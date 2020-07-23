@@ -42,7 +42,7 @@ jobs:
 
     # Build packages
     - name: Build
-      run: make
+      run: ./build.sh build
     
     # Trigger api tests when merge
     - name: Tests

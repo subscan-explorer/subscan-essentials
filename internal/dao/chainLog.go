@@ -2,22 +2,12 @@ package dao
 
 import (
 	"context"
-	"fmt"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
-	"github.com/itering/substrate-api-rpc/storage"
 	"strings"
 )
 
-func (d *Dao) CreateLog(c context.Context, txn *GormDB, blockNum, index int, logData *storage.DecoderLog, data []byte, finalized bool) error {
-	ce := model.ChainLog{
-		LogIndex:   fmt.Sprintf("%d-%d", blockNum, index),
-		BlockNum:   blockNum,
-		LogType:    logData.Type,
-		OriginType: logData.Type,
-		Data:       string(data),
-		Finalized:  finalized,
-	}
+func (d *Dao) CreateLog(c context.Context, txn *GormDB, ce *model.ChainLog) error {
 	query := txn.Create(&ce)
 	return d.checkDBError(query.Error)
 }
@@ -32,7 +22,7 @@ func (d *Dao) DropLogsNotFinalizedData(blockNum int, finalized bool) bool {
 	return delExist
 }
 
-func (d *Dao) GetLogsByIndex(c context.Context, index string) *model.ChainLogJson {
+func (d *Dao) GetLogsByIndex(index string) *model.ChainLogJson {
 	var Log model.ChainLogJson
 	indexArr := strings.Split(index, "-")
 	query := d.db.Model(model.ChainLog{BlockNum: util.StringToInt(indexArr[0])}).Where("log_index = ?", index).Scan(&Log)
@@ -42,12 +32,12 @@ func (d *Dao) GetLogsByIndex(c context.Context, index string) *model.ChainLogJso
 	return &Log
 }
 
-func (d *Dao) GetLogByBlockNum(c context.Context, blockNum int) *[]model.ChainLogJson {
+func (d *Dao) GetLogByBlockNum(blockNum int) []model.ChainLogJson {
 	var logs []model.ChainLogJson
 	query := d.db.Model(&model.ChainLog{BlockNum: blockNum}).
 		Where("block_num =?", blockNum).Order("id asc").Scan(&logs)
 	if query == nil || query.Error != nil || query.RecordNotFound() {
 		return nil
 	}
-	return &logs
+	return logs
 }

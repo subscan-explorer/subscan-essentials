@@ -38,9 +38,12 @@ func (d *Dao) RuntimeVersionRecent() *model.RuntimeVersion {
 
 func (d *Dao) RuntimeVersionRaw(spec int) *metadata.RuntimeRaw {
 	var one metadata.RuntimeRaw
-	d.db.Model(model.RuntimeVersion{}).
+	query := d.db.Model(model.RuntimeVersion{}).
 		Select("spec_version as spec ,raw_data as raw").
 		Where("spec_version = ?", spec).
 		Scan(&one)
+	if query.RecordNotFound() {
+		return nil
+	}
 	return &one
 }

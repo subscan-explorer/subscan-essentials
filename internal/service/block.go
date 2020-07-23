@@ -14,39 +14,6 @@ import (
 	"github.com/itering/substrate-api-rpc/storage"
 )
 
-func (s *Service) GetAlreadyBlockNum() (int, error) {
-	c := context.TODO()
-	return s.dao.GetFillAlreadyBlockNum(c)
-}
-
-func (s *Service) GetFillFinalizedBlockNum() (int, error) {
-	c := context.TODO()
-	return s.dao.GetFillFinalizedBlockNum(c)
-}
-
-func (s *Service) SetAlreadyBlockNum(num int) error {
-	c := context.TODO()
-	return s.dao.SaveFillAlreadyBlockNum(c, num)
-}
-
-func (s *Service) GetBlockByHash(hash string) *model.ChainBlock {
-	c := context.TODO()
-	block := s.dao.BlockByHash(c, hash)
-	if block == nil {
-		return nil
-	}
-	return block
-}
-
-func (s *Service) GetBlockByNum(num int) *model.ChainBlockJson {
-	c := context.TODO()
-	block := s.dao.Block(c, num)
-	if block == nil {
-		return nil
-	}
-	return s.dao.BlockAsJson(c, block)
-}
-
 func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, spec int, finalized bool) (err error) {
 	var (
 		decodeExtrinsics []map[string]interface{}
@@ -122,7 +89,7 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 	cb.ExtrinsicsCount = extrinsicsCount
 	cb.EventCount = eventCount
 
-	if err = s.dao.CreateBlock(c, txn, &cb); err == nil {
+	if err = s.dao.CreateBlock(txn, &cb); err == nil {
 		txn.DbCommit()
 	}
 	return err
@@ -189,7 +156,7 @@ func (s *Service) UpdateBlockData(block *model.ChainBlock, finalized bool) (err 
 		return err
 	}
 
-	if err = s.dao.UpdateEventAndExtrinsic(c, txn, block, eventCount, extrinsicsCount, blockTimestamp, validator, validator == "", finalized); err != nil {
+	if err = s.dao.UpdateEventAndExtrinsic(txn, block, eventCount, extrinsicsCount, blockTimestamp, validator, validator == "", finalized); err != nil {
 		return
 	}
 
@@ -207,11 +174,10 @@ func (s *Service) checkoutExtrinsicEvents(e []model.ChainEvent, blockNumInt int)
 }
 
 func (s *Service) GetCurrentRuntimeSpecVersion(blockNum int) int {
-	c := context.TODO()
 	if util.CurrentRuntimeSpecVersion != 0 {
 		return util.CurrentRuntimeSpecVersion
 	}
-	if block := s.dao.GetNearBlock(c, blockNum); block != nil {
+	if block := s.dao.GetNearBlock(blockNum); block != nil {
 		return block.SpecVersion
 	}
 	return -1
@@ -223,4 +189,101 @@ func (s *Service) getMetadataInstant(spec int) *types.MetadataStruct {
 		metadataInstant = metadata.Process(s.dao.RuntimeVersionRaw(spec))
 	}
 	return metadataInstant
+}
+
+func (s *Service) GetExtrinsicList(page, row int, order string, query ...string) ([]*model.ChainExtrinsicJson, int) {
+	c := context.TODO()
+	list, count := s.dao.GetExtrinsicList(c, page, row, order, query...)
+	var ejs []*model.ChainExtrinsicJson
+	for _, extrinsic := range list {
+		ejs = append(ejs, s.dao.ExtrinsicsAsJson(&extrinsic))
+	}
+	return ejs, count
+}
+
+func (s *Service) GetBlocksSampleByNums(page, row int) *[]model.SampleBlockJson {
+	c := context.TODO()
+	var blockJson []model.SampleBlockJson
+	blocks := s.dao.GetBlockList(page, row)
+	for _, block := range blocks {
+		bj := s.dao.BlockAsSampleJson(c, &block)
+		blockJson = append(blockJson, *bj)
+	}
+	return &blockJson
+}
+
+func (s *Service) GetExtrinsicByIndex(index string) *model.ExtrinsicDetail {
+	c := context.TODO()
+	return s.dao.GetExtrinsicsDetailByIndex(c, index)
+}
+
+func (s *Service) GetExtrinsicDetailByHash(hash string) *model.ExtrinsicDetail {
+	c := context.TODO()
+	return s.dao.GetExtrinsicsDetailByHash(c, hash)
+}
+
+func (s *Service) GetExtrinsicByHash(hash string) *model.ChainExtrinsic {
+	c := context.TODO()
+	return s.dao.GetExtrinsicsByHash(c, hash)
+}
+
+func (s *Service) GetBlockByHashJson(hash string) *model.ChainBlockJson {
+	c := context.TODO()
+	block := s.dao.GetBlockByHash(c, hash)
+	if block == nil {
+		return nil
+	}
+	return s.dao.BlockAsJson(c, block)
+}
+
+func (s *Service) EventByIndex(index string) *model.ChainEvent {
+	return s.dao.GetEventByIdx(index)
+}
+
+func (s *Service) GetEventList(page, row int, order string, where ...string) ([]model.ChainEventJson, int) {
+	c := context.TODO()
+	var result []model.ChainEventJson
+	var blockNums []int
+
+	list, count := s.dao.GetEventList(c, page, row, order, where...)
+	for _, event := range list {
+		blockNums = append(blockNums, event.BlockNum)
+	}
+	blockMap := s.dao.BlocksReverseByNum(blockNums)
+
+	for _, event := range list {
+		ej := model.ChainEventJson{
+			ExtrinsicIdx:  event.ExtrinsicIdx,
+			EventIndex:    event.EventIndex,
+			BlockNum:      event.BlockNum,
+			ModuleId:      event.ModuleId,
+			EventId:       event.EventId,
+			Params:        util.InterfaceToString(event.Params),
+			EventIdx:      event.EventIdx,
+			ExtrinsicHash: event.ExtrinsicHash,
+		}
+		if block, ok := blockMap[event.BlockNum]; ok {
+			ej.BlockTimestamp = block.BlockTimestamp
+		}
+		result = append(result, ej)
+	}
+	return result, count
+}
+
+func (s *Service) GetBlockByNum(num int) *model.ChainBlockJson {
+	c := context.TODO()
+	block := s.dao.GetBlockByNum(num)
+	if block == nil {
+		return nil
+	}
+	return s.dao.BlockAsJson(c, block)
+}
+
+func (s *Service) GetBlockByHash(hash string) *model.ChainBlock {
+	c := context.TODO()
+	block := s.dao.GetBlockByHash(c, hash)
+	if block == nil {
+		return nil
+	}
+	return block
 }

@@ -77,7 +77,9 @@ func newDb(dc mysqlConf) (db *gorm.DB) {
 	if util.IsProduction() {
 		db.SetLogger(ormLog{})
 	}
-	db.LogMode(true)
+	if os.Getenv("TEST_MOD") != "true" {
+		db.LogMode(true)
+	}
 	return db
 }
 
