@@ -137,6 +137,9 @@ func init() {
 	_ = testDao.CreateLog(ctx, txn, &testLog)
 	txn.Commit()
 
+	testDao.CreateRuntimeVersion("polkadot", 1)
+	testDao.SetRuntimeData(1, "system|staking", "0x0")
+
 	conn := testDao.redis.Get(ctx)
 	_, _ = conn.Do("FLUSHALL")
 	defer conn.Close()

@@ -3,6 +3,7 @@ module github.com/itering/subscan
 go 1.12
 
 require (
+	github.com/garyburd/redigo v1.6.0
 	github.com/go-kratos/kratos v0.5.0
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/protobuf v1.3.5
