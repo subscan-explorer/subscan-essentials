@@ -6,6 +6,7 @@ import (
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/plugins"
+	"github.com/itering/subscan/util"
 	"github.com/shopspring/decimal"
 	"strings"
 )
@@ -37,6 +38,36 @@ func (s *Service) AddEvent(
 		eventCount++
 	}
 	return eventCount, err
+}
+
+func (s *Service) GetEventList(page, row int, order string, where ...string) ([]model.ChainEventJson, int) {
+	c := context.TODO()
+	var result []model.ChainEventJson
+	var blockNums []int
+
+	list, count := s.dao.GetEventList(c, page, row, order, where...)
+	for _, event := range list {
+		blockNums = append(blockNums, event.BlockNum)
+	}
+	blockMap := s.dao.BlocksReverseByNum(blockNums)
+
+	for _, event := range list {
+		ej := model.ChainEventJson{
+			ExtrinsicIdx:  event.ExtrinsicIdx,
+			EventIndex:    event.EventIndex,
+			BlockNum:      event.BlockNum,
+			ModuleId:      event.ModuleId,
+			EventId:       event.EventId,
+			Params:        util.InterfaceToString(event.Params),
+			EventIdx:      event.EventIdx,
+			ExtrinsicHash: event.ExtrinsicHash,
+		}
+		if block, ok := blockMap[event.BlockNum]; ok {
+			ej.BlockTimestamp = block.BlockTimestamp
+		}
+		result = append(result, ej)
+	}
+	return result, count
 }
 
 func (s *Service) afterEvent(block *model.ChainBlock, event *model.ChainEvent, fee decimal.Decimal) {

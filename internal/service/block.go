@@ -8,6 +8,7 @@ import (
 	"github.com/itering/scale.go/types"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/util/address"
 	"github.com/itering/substrate-api-rpc"
 	"github.com/itering/substrate-api-rpc/metadata"
 	"github.com/itering/substrate-api-rpc/rpc"
@@ -50,7 +51,7 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 	}
 
 	txn := s.dao.DbBegin()
-	defer txn.DbRollback()
+	defer s.dao.DbRollback(txn)
 
 	var e []model.ChainEvent
 	util.UnmarshalToAnything(&e, decodeEvent)
@@ -90,7 +91,7 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 	cb.EventCount = eventCount
 
 	if err = s.dao.CreateBlock(txn, &cb); err == nil {
-		txn.DbCommit()
+		s.dao.DbCommit(txn)
 	}
 	return err
 }
@@ -138,7 +139,7 @@ func (s *Service) UpdateBlockData(block *model.ChainBlock, finalized bool) (err 
 	eventMap := s.checkoutExtrinsicEvents(e, block.BlockNum)
 
 	txn := s.dao.DbBegin()
-	defer txn.DbRollback()
+	defer s.dao.DbRollback(txn)
 
 	extrinsicsCount, blockTimestamp, extrinsicHash, extrinsicFee, err := s.createExtrinsic(c, txn, block, encodeExtrinsics, decodeExtrinsics, eventMap, finalized, spec)
 	if err != nil {
@@ -160,7 +161,7 @@ func (s *Service) UpdateBlockData(block *model.ChainBlock, finalized bool) (err 
 		return
 	}
 
-	txn.DbCommit()
+	s.dao.DbCommit(txn)
 	return
 }
 
@@ -201,15 +202,15 @@ func (s *Service) GetExtrinsicList(page, row int, order string, query ...string)
 	return ejs, count
 }
 
-func (s *Service) GetBlocksSampleByNums(page, row int) *[]model.SampleBlockJson {
+func (s *Service) GetBlocksSampleByNums(page, row int) []model.SampleBlockJson {
 	c := context.TODO()
 	var blockJson []model.SampleBlockJson
 	blocks := s.dao.GetBlockList(page, row)
 	for _, block := range blocks {
-		bj := s.dao.BlockAsSampleJson(c, &block)
+		bj := s.BlockAsSampleJson(c, &block)
 		blockJson = append(blockJson, *bj)
 	}
-	return &blockJson
+	return blockJson
 }
 
 func (s *Service) GetExtrinsicByIndex(index string) *model.ExtrinsicDetail {
@@ -240,36 +241,6 @@ func (s *Service) EventByIndex(index string) *model.ChainEvent {
 	return s.dao.GetEventByIdx(index)
 }
 
-func (s *Service) GetEventList(page, row int, order string, where ...string) ([]model.ChainEventJson, int) {
-	c := context.TODO()
-	var result []model.ChainEventJson
-	var blockNums []int
-
-	list, count := s.dao.GetEventList(c, page, row, order, where...)
-	for _, event := range list {
-		blockNums = append(blockNums, event.BlockNum)
-	}
-	blockMap := s.dao.BlocksReverseByNum(blockNums)
-
-	for _, event := range list {
-		ej := model.ChainEventJson{
-			ExtrinsicIdx:  event.ExtrinsicIdx,
-			EventIndex:    event.EventIndex,
-			BlockNum:      event.BlockNum,
-			ModuleId:      event.ModuleId,
-			EventId:       event.EventId,
-			Params:        util.InterfaceToString(event.Params),
-			EventIdx:      event.EventIdx,
-			ExtrinsicHash: event.ExtrinsicHash,
-		}
-		if block, ok := blockMap[event.BlockNum]; ok {
-			ej.BlockTimestamp = block.BlockTimestamp
-		}
-		result = append(result, ej)
-	}
-	return result, count
-}
-
 func (s *Service) GetBlockByNum(num int) *model.ChainBlockJson {
 	c := context.TODO()
 	block := s.dao.GetBlockByNum(num)
@@ -286,4 +257,17 @@ func (s *Service) GetBlockByHash(hash string) *model.ChainBlock {
 		return nil
 	}
 	return block
+}
+
+func (s *Service) BlockAsSampleJson(c context.Context, block *model.ChainBlock) *model.SampleBlockJson {
+	b := model.SampleBlockJson{
+		BlockNum:        block.BlockNum,
+		BlockTimestamp:  block.BlockTimestamp,
+		Hash:            block.Hash,
+		EventCount:      block.EventCount,
+		ExtrinsicsCount: block.ExtrinsicsCount,
+		Validator:       address.SS58Address(block.Validator),
+		Finalized:       block.Finalized,
+	}
+	return &b
 }

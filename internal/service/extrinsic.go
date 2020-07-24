@@ -10,6 +10,7 @@ import (
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/plugins"
 	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/util/address"
 	"github.com/shopspring/decimal"
 	"strings"
 )
@@ -48,8 +49,9 @@ func (s *Service) createExtrinsic(c context.Context,
 		s.getTimestamp(&extrinsic)
 
 		if extrinsic.ExtrinsicHash != "" {
-			extrinsic.Fee = transaction.GetExtrinsicFee(encodeExtrinsics[index])
-			extrinsicFee[extrinsic.ExtrinsicIndex] = extrinsic.Fee
+			fee, _ := transaction.GetExtrinsicFee(encodeExtrinsics[index])
+			extrinsic.Fee = fee
+			extrinsicFee[extrinsic.ExtrinsicIndex] = fee
 			hash[extrinsic.ExtrinsicIndex] = extrinsic.ExtrinsicHash
 		}
 
@@ -60,6 +62,34 @@ func (s *Service) createExtrinsic(c context.Context,
 		}
 	}
 	return len(e), blockTimestamp, hash, extrinsicFee, err
+}
+
+func (s *Service) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsicJson {
+	ej := &model.ChainExtrinsicJson{
+		BlockNum:           e.BlockNum,
+		BlockTimestamp:     e.BlockTimestamp,
+		ExtrinsicIndex:     e.ExtrinsicIndex,
+		ExtrinsicHash:      e.ExtrinsicHash,
+		Success:            e.Success,
+		CallModule:         e.CallModule,
+		CallModuleFunction: e.CallModuleFunction,
+		Params:             util.InterfaceToString(e.Params),
+		AccountId:          address.SS58Address(e.AccountId),
+		Signature:          e.Signature,
+		Nonce:              e.Nonce,
+		Fee:                e.Fee,
+	}
+	var paramsInstant []model.ExtrinsicParam
+	if err := json.Unmarshal([]byte(ej.Params), &paramsInstant); err != nil {
+		for pi, param := range paramsInstant {
+			if paramsInstant[pi].Type == "Address" {
+				paramsInstant[pi].Value = address.SS58Address(param.Value.(string))
+			}
+		}
+		bp, _ := json.Marshal(paramsInstant)
+		ej.Params = string(bp)
+	}
+	return ej
 }
 
 func (s *Service) getTimestamp(extrinsic *model.ChainExtrinsic) {

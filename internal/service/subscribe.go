@@ -28,7 +28,7 @@ const (
 	stateChange
 )
 
-func SubscribeStorage() []string {
+func subscribeStorage() []string {
 	TotalIssuance = storageKey.EncodeStorageKey("Balances", "TotalIssuance")
 	return []string{util.AddHex(TotalIssuance.EncodeKey)}
 }
@@ -76,7 +76,7 @@ func (s *Service) Subscribe() {
 	ticker := time.NewTicker(time.Second * 3)
 	defer ticker.Stop()
 
-	subscribeStorageList := SubscribeStorage()
+	subscribeStorageList := subscribeStorage()
 	checkHealth := func() {
 		for _, subscript := range subscriptionIds {
 			if time.Now().Unix()-subscript.Latest > subscribeTimeoutInterval {

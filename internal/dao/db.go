@@ -27,7 +27,7 @@ type GormDB struct {
 	gdbDone bool
 }
 
-func (c *GormDB) DbCommit() {
+func (d *Dao) DbCommit(c *GormDB) {
 	if c.gdbDone {
 		return
 	}
@@ -38,7 +38,7 @@ func (c *GormDB) DbCommit() {
 	}
 }
 
-func (c *GormDB) DbRollback() {
+func (d *Dao) DbRollback(c *GormDB) {
 	if c.gdbDone {
 		return
 	}

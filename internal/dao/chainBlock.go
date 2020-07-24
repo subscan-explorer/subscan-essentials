@@ -148,19 +148,6 @@ func (d *Dao) UpdateEventAndExtrinsic(txn *GormDB, block *model.ChainBlock, even
 	return query.Error
 }
 
-func (d *Dao) BlockAsSampleJson(c context.Context, block *model.ChainBlock) *model.SampleBlockJson {
-	b := model.SampleBlockJson{
-		BlockNum:        block.BlockNum,
-		BlockTimestamp:  block.BlockTimestamp,
-		Hash:            block.Hash,
-		EventCount:      block.EventCount,
-		ExtrinsicsCount: block.ExtrinsicsCount,
-		Validator:       address.SS58Address(block.Validator),
-		Finalized:       block.Finalized,
-	}
-	return &b
-}
-
 func (d *Dao) GetNearBlock(blockNum int) *model.ChainBlock {
 	var block model.ChainBlock
 	query := d.db.Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num > ?", blockNum).Order("block_num desc").First(&block)

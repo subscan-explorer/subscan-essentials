@@ -12,6 +12,8 @@ type IDao interface {
 	SetHeartBeatNow(context.Context, string) error
 	DaemonHeath(context.Context) map[string]bool
 	DbBegin() *GormDB
+	DbCommit(*GormDB)
+	DbRollback(*GormDB)
 	CreateBlock(*GormDB, *model.ChainBlock) (err error)
 	UpdateEventAndExtrinsic(*GormDB, *model.ChainBlock, int, int, int, string, bool, bool) error
 	GetNearBlock(int) *model.ChainBlock
@@ -25,7 +27,6 @@ type IDao interface {
 	GetFillFinalizedBlockNum(c context.Context) (num int, err error)
 	GetBlockList(page, row int) []model.ChainBlock
 	BlockAsJson(c context.Context, block *model.ChainBlock) *model.ChainBlockJson
-	BlockAsSampleJson(c context.Context, block *model.ChainBlock) *model.SampleBlockJson
 	CreateEvent(c context.Context, txn *GormDB, event *model.ChainEvent) error
 	DropEventNotFinalizedData(blockNum int, finalized bool) bool
 	GetEventByBlockNum(blockNum int, where ...string) []model.ChainEventJson
