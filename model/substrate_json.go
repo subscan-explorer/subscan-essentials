@@ -3,22 +3,22 @@ package model
 import "github.com/shopspring/decimal"
 
 type ChainBlockJson struct {
-	BlockNum          int                   `json:"block_num"`
-	BlockTimestamp    int                   `json:"block_timestamp"`
-	Hash              string                `json:"hash"`
-	ParentHash        string                `json:"parent_hash"`
-	StateRoot         string                `json:"state_root"`
-	ExtrinsicsRoot    string                `json:"extrinsics_root"`
-	Extrinsics        []*ChainExtrinsicJson `json:"extrinsics"`
-	Events            []ChainEventJson      `json:"events"`
-	Logs              *[]ChainLogJson       `json:"logs"`
-	EventCount        int                   `json:"event_count"`
-	ExtrinsicsCount   int                   `json:"extrinsics_count"`
-	SpecVersion       int                   `json:"spec_version"`
-	Validator         string                `json:"validator"`
-	ValidatorName     string                `json:"validator_name"`
-	ValidatorIndexIds string                `json:"validator_index_ids"`
-	Finalized         bool                  `json:"finalized"`
+	BlockNum          int                  `json:"block_num"`
+	BlockTimestamp    int                  `json:"block_timestamp"`
+	Hash              string               `json:"hash"`
+	ParentHash        string               `json:"parent_hash"`
+	StateRoot         string               `json:"state_root"`
+	ExtrinsicsRoot    string               `json:"extrinsics_root"`
+	Extrinsics        []ChainExtrinsicJson `json:"extrinsics"`
+	Events            []ChainEventJson     `json:"events"`
+	Logs              []ChainLogJson       `json:"logs"`
+	EventCount        int                  `json:"event_count"`
+	ExtrinsicsCount   int                  `json:"extrinsics_count"`
+	SpecVersion       int                  `json:"spec_version"`
+	Validator         string               `json:"validator"`
+	ValidatorName     string               `json:"validator_name"`
+	ValidatorIndexIds string               `json:"validator_index_ids"`
+	Finalized         bool                 `json:"finalized"`
 }
 
 type SampleBlockJson struct {
@@ -50,20 +50,20 @@ type ChainExtrinsicJson struct {
 }
 
 type ExtrinsicDetail struct {
-	BlockTimestamp     int               `json:"block_timestamp"`
-	BlockNum           int               `json:"block_num"`
-	ExtrinsicIndex     string            `json:"extrinsic_index"`
-	CallModuleFunction string            `json:"call_module_function"`
-	CallModule         string            `json:"call_module"`
-	AccountId          string            `json:"account_id"`
-	Signature          string            `json:"signature"`
-	Nonce              int               `json:"nonce"`
-	ExtrinsicHash      string            `json:"extrinsic_hash"`
-	Success            bool              `json:"success"`
-	Params             *[]ExtrinsicParam `json:"params"`
-	Event              *[]ChainEvent     `json:"event"`
-	Fee                decimal.Decimal   `json:"fee"`
-	Finalized          bool              `json:"finalized"`
+	BlockTimestamp     int              `json:"block_timestamp"`
+	BlockNum           int              `json:"block_num"`
+	ExtrinsicIndex     string           `json:"extrinsic_index"`
+	CallModuleFunction string           `json:"call_module_function"`
+	CallModule         string           `json:"call_module"`
+	AccountId          string           `json:"account_id"`
+	Signature          string           `json:"signature"`
+	Nonce              int              `json:"nonce"`
+	ExtrinsicHash      string           `json:"extrinsic_hash"`
+	Success            bool             `json:"success"`
+	Params             []ExtrinsicParam `json:"params"`
+	Event              *[]ChainEvent    `json:"event"`
+	Fee                decimal.Decimal  `json:"fee"`
+	Finalized          bool             `json:"finalized"`
 }
 
 type ChainEventJson struct {

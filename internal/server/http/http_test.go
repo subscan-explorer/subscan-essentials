@@ -22,7 +22,6 @@ func init() {
 		paladin.DefaultClient = client
 	}
 	svc = service.New()
-	ss = svc.NewScan()
 }
 
 func testRequest(w *httptest.ResponseRecorder, req *http.Request) {

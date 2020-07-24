@@ -13,7 +13,7 @@ import (
 
 func init() {
 	registerNative()
-	registerStatic()
+	// registerStatic()
 }
 
 type PluginFactory subscan_plugin.Plugin
@@ -42,16 +42,19 @@ func List() []string {
 }
 
 func registerNative() {
-	Register("account", balance.New())
+	Register("balance", balance.New())
 }
 
+// Currently the go plugin solution is not stable yet
 func registerStatic() {
 	flag.Parse()
-	pluginsDir := fmt.Sprintf("%s/plugins", flag.Lookup("conf").Value)
-	files, err := ioutil.ReadDir(pluginsDir)
-	if err != nil {
-		panic(err)
+
+	pluginsDir := "../configs/plugins"
+	if confFlag := flag.Lookup("conf"); confFlag != nil {
+		pluginsDir = fmt.Sprintf("%s/plugins", flag.Lookup("conf").Value)
 	}
+
+	files, _ := ioutil.ReadDir(pluginsDir)
 	for _, file := range files {
 		p, err := plugin.Open(fmt.Sprintf("%s/%s", pluginsDir, file.Name()))
 		if err != nil {

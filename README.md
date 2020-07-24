@@ -49,9 +49,9 @@ The default API Doc can be found here [DOC](/docs/index.md)
 
 ```bash
 
-docker-composer build
+docker-compose build
 
-docker-composer up -d
+docker-compose up -d
 
 ```
 

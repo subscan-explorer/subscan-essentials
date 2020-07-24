@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func (d *Dao) SetCache(c context.Context, key string, value interface{}, ttl int) (err error) {
+func (d *Dao) setCache(c context.Context, key string, value interface{}, ttl int) (err error) {
 	conn := d.redis.Get(c)
 	defer conn.Close()
 	var val string
@@ -32,7 +32,7 @@ func (d *Dao) SetCache(c context.Context, key string, value interface{}, ttl int
 	return
 }
 
-func (d *Dao) GetCacheBytes(c context.Context, key string) []byte {
+func (d *Dao) getCacheBytes(c context.Context, key string) []byte {
 	conn := d.redis.Get(c)
 	defer conn.Close()
 	if cache, err := redis.Bytes(conn.Do("get", key)); err == nil {
@@ -41,7 +41,7 @@ func (d *Dao) GetCacheBytes(c context.Context, key string) []byte {
 	return nil
 }
 
-func (d *Dao) GetCacheString(c context.Context, key string) string {
+func (d *Dao) getCacheString(c context.Context, key string) string {
 	conn := d.redis.Get(c)
 	defer conn.Close()
 	if cache, err := redis.String(conn.Do("get", key)); err == nil {
@@ -50,7 +50,7 @@ func (d *Dao) GetCacheString(c context.Context, key string) string {
 	return ""
 }
 
-func (d *Dao) GetCacheInt64(c context.Context, key string) int64 {
+func (d *Dao) getCacheInt64(c context.Context, key string) int64 {
 	conn := d.redis.Get(c)
 	defer conn.Close()
 	if cache, err := redis.Int64(conn.Do("get", key)); err == nil {
@@ -59,7 +59,7 @@ func (d *Dao) GetCacheInt64(c context.Context, key string) int64 {
 	return 0
 }
 
-func (d *Dao) DelCache(c context.Context, key ...string) error {
+func (d *Dao) delCache(c context.Context, key ...string) error {
 	if len(key) == 0 {
 		return nil
 	}

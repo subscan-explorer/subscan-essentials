@@ -22,8 +22,8 @@ type Dao struct {
 }
 
 func (d *Dao) SpecialMetadata(spec int) string {
-	if metadata := d.RuntimeVersionRaw(spec); metadata != nil {
-		return metadata.Raw
+	if runtimeRaw := d.RuntimeVersionRaw(spec); runtimeRaw != nil {
+		return runtimeRaw.Raw
 	}
 	return ""
 }
@@ -35,10 +35,6 @@ func (d *Dao) RPCPool() *websocket.PoolConn {
 
 func (d *Dao) DB() *gorm.DB {
 	return d.db
-}
-
-func (d *Dao) Redis() *redis.Pool {
-	return d.redis
 }
 
 func checkErr(err error) {
@@ -62,6 +58,7 @@ func New() (dao *Dao) {
 		redis: redis.NewPool(rc.Config, redis.DialDatabase(rc.DbName)),
 		cache: fanout.New("scan", fanout.Worker(1), fanout.Buffer(1024)),
 	}
+	dao.Migration()
 	return
 }
 

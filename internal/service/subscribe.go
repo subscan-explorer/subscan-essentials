@@ -28,7 +28,7 @@ const (
 	stateChange
 )
 
-func SubscribeStorage() []string {
+func subscribeStorage() []string {
 	TotalIssuance = storageKey.EncodeStorageKey("Balances", "TotalIssuance")
 	return []string{util.AddHex(TotalIssuance.EncodeKey)}
 }
@@ -53,7 +53,7 @@ func (s *Service) Subscribe() {
 
 	done := make(chan struct{})
 
-	subscribeSrv := s.InitSubscribeService(done)
+	subscribeSrv := s.initSubscribeService(done)
 	go func() {
 		for {
 			if !subscribeConn.IsConnected() {
@@ -65,7 +65,7 @@ func (s *Service) Subscribe() {
 				continue
 			}
 			log.Info("recv: %s", message)
-			subscribeSrv.Parser(message)
+			subscribeSrv.parser(message)
 		}
 	}()
 
@@ -76,7 +76,7 @@ func (s *Service) Subscribe() {
 	ticker := time.NewTicker(time.Second * 3)
 	defer ticker.Stop()
 
-	subscribeStorageList := SubscribeStorage()
+	subscribeStorageList := subscribeStorage()
 	checkHealth := func() {
 		for _, subscript := range subscriptionIds {
 			if time.Now().Unix()-subscript.Latest > subscribeTimeoutInterval {

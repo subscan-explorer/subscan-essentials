@@ -1,7 +1,7 @@
 package balance
 
 import (
-	bm "github.com/go-kratos/kratos/pkg/net/http/blademaster"
+	"github.com/itering/subscan-plugin/router"
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/plugins/balance/http"
 	"github.com/itering/subscan/plugins/balance/model"
@@ -13,7 +13,6 @@ var srv *service.Service
 
 type Account struct {
 	d storage.Dao
-	e *bm.Engine
 }
 
 func New() *Account {
@@ -26,9 +25,8 @@ func (a *Account) InitDao(d storage.Dao) {
 	a.Migrate()
 }
 
-func (a *Account) InitHttp(e *bm.Engine) {
-	a.e = e
-	http.Router(srv, a.e)
+func (a *Account) InitHttp() []router.Http {
+	return http.Router(srv)
 }
 
 func (a *Account) ProcessExtrinsic(block *storage.Block, extrinsic *storage.Extrinsic, events []storage.Event) error {
@@ -37,6 +35,10 @@ func (a *Account) ProcessExtrinsic(block *storage.Block, extrinsic *storage.Extr
 
 func (a *Account) ProcessEvent(block *storage.Block, event *storage.Event, fee decimal.Decimal) error {
 	return nil
+}
+
+func (a *Account) Version() string {
+	return "0.1"
 }
 
 func (a *Account) Migrate() {

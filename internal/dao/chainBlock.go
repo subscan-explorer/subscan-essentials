@@ -9,7 +9,9 @@ import (
 	"sort"
 )
 
-func (d *Dao) CreateBlock(c context.Context, txn *GormDB, cb *model.ChainBlock) (err error) {
+// CreateBlock, mysql db transaction
+// Check if you need to create a new table(block, extrinsic, event, log ) after created
+func (d *Dao) CreateBlock(txn *GormDB, cb *model.ChainBlock) (err error) {
 	query := txn.Create(&cb)
 	if !d.db.HasTable(model.ChainBlock{BlockNum: cb.BlockNum + model.SplitTableBlockNum}) {
 		go d.blockMigrate(cb.BlockNum + model.SplitTableBlockNum)
@@ -50,26 +52,6 @@ func (d *Dao) GetFillFinalizedBlockNum(c context.Context) (num int, err error) {
 	defer conn.Close()
 	num, err = redis.Int(conn.Do("GET", RedisFillFinalizedBlockNum))
 	return
-}
-
-func (d *Dao) SaveRepairBlockBlockNum(c context.Context, blockNum int) (err error) {
-	conn := d.redis.Get(c)
-	defer conn.Close()
-	_, err = conn.Do("SET", RedisRepairBlockKey, blockNum)
-	return
-}
-
-func (d *Dao) GetRepairBlockBlockNum(c context.Context) (num int, err error) {
-	conn := d.redis.Get(c)
-	defer conn.Close()
-	num, err = redis.Int(conn.Do("GET", RedisRepairBlockKey))
-	return
-}
-
-func (d *Dao) GetBlockNumArr(c context.Context, start, end int) []int {
-	var blockNums []int
-	d.db.Model(&model.ChainBlock{BlockNum: end}).Where("block_num BETWEEN ? AND ?", start, end).Order("block_num asc").Pluck("block_num", &blockNums)
-	return blockNums
 }
 
 func (d *Dao) GetBlockList(page, row int) []model.ChainBlock {
@@ -119,7 +101,7 @@ func (d *Dao) GetBlockByHash(c context.Context, hash string) *model.ChainBlock {
 	return nil
 }
 
-func (d *Dao) GetBlockByNum(c context.Context, blockNum int) *model.ChainBlock {
+func (d *Dao) GetBlockByNum(blockNum int) *model.ChainBlock {
 	var block model.ChainBlock
 	query := d.db.Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num = ?", blockNum).Scan(&block)
 	if query == nil || query.Error != nil || query.RecordNotFound() {
@@ -138,17 +120,17 @@ func (d *Dao) BlockAsJson(c context.Context, block *model.ChainBlock) *model.Cha
 		EventCount:      block.EventCount,
 		ExtrinsicsCount: block.ExtrinsicsCount,
 		ExtrinsicsRoot:  block.ExtrinsicsRoot,
-		Extrinsics:      d.GetExtrinsicsByBlockNum(c, block.BlockNum),
-		Events:          d.GetEventByBlockNum(c, block.BlockNum),
-		Logs:            d.GetLogByBlockNum(c, block.BlockNum),
+		Extrinsics:      d.GetExtrinsicsByBlockNum(block.BlockNum),
+		Events:          d.GetEventByBlockNum(block.BlockNum),
+		Logs:            d.GetLogByBlockNum(block.BlockNum),
 		Validator:       address.SS58Address(block.Validator),
 		Finalized:       block.Finalized,
 	}
 	return &bj
 }
 
-func (d *Dao) UpdateEventAndExtrinsic(c context.Context, txn *GormDB, block *model.ChainBlock, eventCount, extrinsicsCount, blockTimestamp int, validator string, codecError bool, finalized bool) error {
-	query := txn.Model(block).UpdateColumn(map[string]interface{}{
+func (d *Dao) UpdateEventAndExtrinsic(txn *GormDB, block *model.ChainBlock, eventCount, extrinsicsCount, blockTimestamp int, validator string, codecError bool, finalized bool) error {
+	query := txn.Where("block_num = ?", block.BlockNum).Model(block).UpdateColumn(map[string]interface{}{
 		"event_count":      eventCount,
 		"extrinsics_count": extrinsicsCount,
 		"block_timestamp":  blockTimestamp,
@@ -163,24 +145,10 @@ func (d *Dao) UpdateEventAndExtrinsic(c context.Context, txn *GormDB, block *mod
 		"logs":             block.Logs,
 		"finalized":        finalized,
 	})
-	d.delCacheBlock(context.TODO(), block)
 	return query.Error
 }
 
-func (d *Dao) BlockAsSampleJson(c context.Context, block *model.ChainBlock) *model.SampleBlockJson {
-	b := model.SampleBlockJson{
-		BlockNum:        block.BlockNum,
-		BlockTimestamp:  block.BlockTimestamp,
-		Hash:            block.Hash,
-		EventCount:      block.EventCount,
-		ExtrinsicsCount: block.ExtrinsicsCount,
-		Validator:       address.SS58Address(block.Validator),
-		Finalized:       block.Finalized,
-	}
-	return &b
-}
-
-func (d *Dao) GetNearBlock(c context.Context, blockNum int) *model.ChainBlock {
+func (d *Dao) GetNearBlock(blockNum int) *model.ChainBlock {
 	var block model.ChainBlock
 	query := d.db.Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num > ?", blockNum).Order("block_num desc").First(&block)
 	if query == nil || query.Error != nil || query.RecordNotFound() {
@@ -190,11 +158,10 @@ func (d *Dao) GetNearBlock(c context.Context, blockNum int) *model.ChainBlock {
 }
 
 func (d *Dao) SetBlockFinalized(block *model.ChainBlock) {
-	d.delCacheBlock(context.TODO(), block)
 	d.db.Model(block).UpdateColumn(model.ChainBlock{Finalized: true})
 }
 
-func (d *Dao) BlocksReverseByNum(c context.Context, blockNums []int) map[int]model.ChainBlock {
+func (d *Dao) BlocksReverseByNum(blockNums []int) map[int]model.ChainBlock {
 	var blocks []model.ChainBlock
 	if len(blockNums) == 0 {
 		return nil

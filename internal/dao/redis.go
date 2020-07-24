@@ -20,7 +20,7 @@ func (d *Dao) pingRedis(ctx context.Context) (err error) {
 }
 
 func (d *Dao) SetHeartBeatNow(c context.Context, action string) error {
-	return d.SetCache(c, action, time.Now().Unix(), 300)
+	return d.setCache(c, action, time.Now().Unix(), 300)
 }
 
 func (d *Dao) DaemonHeath(c context.Context) map[string]bool {
