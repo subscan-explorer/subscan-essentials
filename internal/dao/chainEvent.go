@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func (d *Dao) CreateEvent(c context.Context, txn *GormDB, event *model.ChainEvent) error {
+func (d *Dao) CreateEvent(txn *GormDB, event *model.ChainEvent) error {
 	var incrCount int
 	extrinsicHash := util.AddHex(event.ExtrinsicHash)
 	e := model.ChainEvent{
@@ -26,7 +26,7 @@ func (d *Dao) CreateEvent(c context.Context, txn *GormDB, event *model.ChainEven
 	query := txn.Create(&e)
 	if query.RowsAffected > 0 {
 		incrCount++
-		_ = d.IncrMetadata(c, "count_event", incrCount)
+		_ = d.IncrMetadata(context.TODO(), "count_event", incrCount)
 	}
 	return d.checkDBError(query.Error)
 }

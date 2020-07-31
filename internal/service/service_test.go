@@ -112,8 +112,8 @@ func (m *MockDao) SetBlockFinalized(*model.ChainBlock) {
 	return
 }
 
-func (m *MockDao) BlocksReverseByNum([]int) map[int]model.ChainBlock {
-	return nil
+func (m *MockDao) BlocksReverseByNum(blockNums []int) map[int]model.ChainBlock {
+	return map[int]model.ChainBlock{testBlock.BlockNum: testBlock}
 }
 
 func (m *MockDao) GetBlockByHash(context.Context, string) *model.ChainBlock {
@@ -153,7 +153,7 @@ func (m *MockDao) BlockAsSampleJson(c context.Context, block *model.ChainBlock) 
 	return &model.SampleBlockJson{}
 }
 
-func (m *MockDao) CreateEvent(c context.Context, txn *dao.GormDB, event *model.ChainEvent) error {
+func (m *MockDao) CreateEvent(txn *dao.GormDB, event *model.ChainEvent) error {
 	return nil
 }
 
@@ -167,7 +167,7 @@ func (m *MockDao) GetEventByBlockNum(blockNum int, where ...string) []model.Chai
 }
 
 func (m *MockDao) GetEventList(c context.Context, page, row int, order string, where ...string) ([]model.ChainEvent, int) {
-	return nil, 0
+	return []model.ChainEvent{testEvent}, 1
 }
 
 func (m *MockDao) GetEventsByIndex(extrinsicIndex string) []model.ChainEvent {
@@ -207,7 +207,7 @@ func (m *MockDao) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsi
 	return nil
 }
 
-func (m *MockDao) CreateLog(c context.Context, txn *dao.GormDB, ce *model.ChainLog) error {
+func (m *MockDao) CreateLog(txn *dao.GormDB, ce *model.ChainLog) error {
 	return nil
 }
 

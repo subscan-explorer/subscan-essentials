@@ -1,16 +1,14 @@
 package dao
 
 import (
-	"context"
 	"github.com/itering/subscan/model"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestDao_CreateLog(t *testing.T) {
-	ctx := context.TODO()
 	txn := testDao.DbBegin()
-	err := testDao.CreateLog(ctx, txn, &testLog)
+	err := testDao.CreateLog(txn, &testLog)
 	txn.Commit()
 	assert.NoError(t, err)
 
