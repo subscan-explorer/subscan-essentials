@@ -16,34 +16,41 @@ The default API Doc can be found here [DOC](/docs/index.md)
 
 ### Feature
 
-1. Separation of API Server and daemon
-2. Support Substrate network custom type registration [Custom](/custom_type.md)
-3. Support index block, Extrinsic, Event, log
-4. More data can be indexed by custom plugins [Plugins](/plugins)
-5. [Gen](https://github.com/itering/subscan-plugin/tree/master/tools) tool can automatically generate plugin templates
-6. Built-in default HTTP API [DOC](/docs/index.md)
+1. Support Substrate network custom type registration [Custom](/custom_type.md)
+2. Support index Block, Extrinsic, Event, log
+3. More data can be indexed by custom plugins [Plugins](/plugins)
+4. [Gen](https://github.com/itering/subscan-plugin/tree/master/tools) tool can automatically generate plugin templates
+5. Built-in default HTTP API [doc](/docs/index.md)
 
-### Install
 
-```bash
-./build.sh build &&  ./cmd/subscan --conf configs install
-```
+### Usage
 
-### RUN
-
-> API 
-
-```bash
-
-./cmd/subscan --conf configs
 
 ```
+NAME:
+   SubScan - SubScan Backend Service, use -h get help
 
-> Daemon
+USAGE:
+   main [global options] command [command options] [arguments...]
 
-```bash
-./cmd/subscan --conf configs start substrate
-./cmd/subscan --conf configs stop substrate
+VERSION:
+   1.0
+
+DESCRIPTION:
+   SubScan Backend Service, substrate blockchain explorer
+
+COMMANDS:
+     start    Start one worker, E.g substrate
+     stop     Stop one worker, E.g substrate
+     install  Create database and create default conf file
+     help, h  Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --conf value   (default: "../configs")
+   --help, -h     show help
+   --version, -v  print the version
+
+
 ```
 
 
