@@ -71,17 +71,17 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 		Finalized:      finalized,
 	}
 
-	extrinsicsCount, blockTimestamp, extrinsicHash, extrinsicFee, err := s.createExtrinsic(c, txn, &cb, block.Extrinsics, decodeExtrinsics, eventMap, finalized, spec)
+	extrinsicsCount, blockTimestamp, extrinsicHash, extrinsicFee, err := s.createExtrinsic(c, txn, &cb, block.Extrinsics, decodeExtrinsics, eventMap)
 	if err != nil {
 		return err
 	}
 	cb.BlockTimestamp = blockTimestamp
-	eventCount, err := s.AddEvent(c, txn, &cb, e, extrinsicHash, finalized, spec, extrinsicFee)
+	eventCount, err := s.AddEvent(c, txn, &cb, e, extrinsicHash, extrinsicFee)
 	if err != nil {
 		return err
 	}
-
-	if validator, err = s.EmitLog(c, txn, hash, blockNum, logs, finalized); err != nil {
+	validatorList, _ := rpc.GetValidatorFromSub(nil, cb.Hash)
+	if validator, err = s.EmitLog(txn, hash, blockNum, logs, finalized, validatorList); err != nil {
 		return err
 	}
 
@@ -141,18 +141,19 @@ func (s *Service) UpdateBlockData(block *model.ChainBlock, finalized bool) (err 
 	txn := s.dao.DbBegin()
 	defer s.dao.DbRollback(txn)
 
-	extrinsicsCount, blockTimestamp, extrinsicHash, extrinsicFee, err := s.createExtrinsic(c, txn, block, encodeExtrinsics, decodeExtrinsics, eventMap, finalized, spec)
+	extrinsicsCount, blockTimestamp, extrinsicHash, extrinsicFee, err := s.createExtrinsic(c, txn, block, encodeExtrinsics, decodeExtrinsics, eventMap)
 	if err != nil {
 		return err
 	}
 	block.BlockTimestamp = blockTimestamp
 
-	eventCount, err := s.AddEvent(c, txn, block, e, extrinsicHash, finalized, spec, extrinsicFee)
+	eventCount, err := s.AddEvent(c, txn, block, e, extrinsicHash, extrinsicFee)
 	if err != nil {
 		return err
 	}
 
-	validator, err := s.EmitLog(c, txn, block.Hash, block.BlockNum, logs, finalized)
+	validatorList, _ := rpc.GetValidatorFromSub(nil, block.Hash)
+	validator, err := s.EmitLog(txn, block.Hash, block.BlockNum, logs, finalized, validatorList)
 	if err != nil {
 		return err
 	}

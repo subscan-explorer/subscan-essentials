@@ -21,8 +21,6 @@ func (s *Service) createExtrinsic(c context.Context,
 	encodeExtrinsics []string,
 	decodeExtrinsics []map[string]interface{},
 	eventMap map[string][]model.ChainEvent,
-	finalized bool,
-	spec int,
 ) (int, int, map[string]string, map[string]decimal.Decimal, error) {
 
 	var (
@@ -37,20 +35,24 @@ func (s *Service) createExtrinsic(c context.Context,
 
 	hash := make(map[string]string)
 
-	s.dao.DropExtrinsicNotFinalizedData(c, block.BlockNum, finalized)
+	s.dao.DropExtrinsicNotFinalizedData(c, block.BlockNum, block.Finalized)
 
 	for index, extrinsic := range e {
 		extrinsic.CallModule = strings.ToLower(extrinsic.CallModule)
 		extrinsic.BlockNum = block.BlockNum
 		extrinsic.ExtrinsicIndex = fmt.Sprintf("%d-%d", extrinsic.BlockNum, index)
 		extrinsic.Success = s.getExtrinsicSuccess(eventMap[extrinsic.ExtrinsicIndex])
-		extrinsic.Finalized = finalized
+		extrinsic.Finalized = block.Finalized
 
-		s.getTimestamp(&extrinsic)
-
+		if tp := s.getTimestamp(&extrinsic); tp > 0 {
+			blockTimestamp = tp
+		}
+		extrinsic.BlockTimestamp = blockTimestamp
 		if extrinsic.ExtrinsicHash != "" {
+
 			fee, _ := transaction.GetExtrinsicFee(encodeExtrinsics[index])
 			extrinsic.Fee = fee
+
 			extrinsicFee[extrinsic.ExtrinsicIndex] = fee
 			hash[extrinsic.ExtrinsicIndex] = extrinsic.ExtrinsicHash
 		}
@@ -92,7 +94,7 @@ func (s *Service) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsi
 	return ej
 }
 
-func (s *Service) getTimestamp(extrinsic *model.ChainExtrinsic) {
+func (s *Service) getTimestamp(extrinsic *model.ChainExtrinsic) (blockTimestamp int) {
 	if extrinsic.CallModule != "timestamp" {
 		return
 	}
@@ -103,8 +105,10 @@ func (s *Service) getTimestamp(extrinsic *model.ChainExtrinsic) {
 	for _, p := range paramsInstant {
 		if p.Name == "now" {
 			extrinsic.BlockTimestamp = util.IntFromInterface(p.Value)
+			return extrinsic.BlockTimestamp
 		}
 	}
+	return
 }
 
 func (s *Service) getExtrinsicSuccess(e []model.ChainEvent) bool {

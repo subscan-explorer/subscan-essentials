@@ -1,13 +1,12 @@
 package dao
 
 import (
-	"context"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"strings"
 )
 
-func (d *Dao) CreateLog(c context.Context, txn *GormDB, ce *model.ChainLog) error {
+func (d *Dao) CreateLog(txn *GormDB, ce *model.ChainLog) error {
 	query := txn.Create(&ce)
 	return d.checkDBError(query.Error)
 }

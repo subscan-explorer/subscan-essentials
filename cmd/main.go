@@ -49,21 +49,24 @@ func setupApp() *cli.App {
 	}
 	app.Commands = []cli.Command{
 		{
-			Name: "start",
+			Name:  "start",
+			Usage: "Start one worker, E.g substrate",
 			Action: func(c *cli.Context) error {
 				daemons.Run(c.Args().Get(0), "start")
 				return nil
 			},
 		},
 		{
-			Name: "stop",
+			Name:  "stop",
+			Usage: "Stop one worker, E.g substrate",
 			Action: func(c *cli.Context) error {
 				daemons.Run(c.Args().Get(0), "stop")
 				return nil
 			},
 		},
 		{
-			Name: "install",
+			Name:  "install",
+			Usage: "Create database and create default conf file",
 			Action: func(c *cli.Context) error {
 				script.Install(c.Parent().String("conf"))
 				return nil

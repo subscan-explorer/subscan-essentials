@@ -27,7 +27,7 @@ type IDao interface {
 	GetFillFinalizedBlockNum(c context.Context) (num int, err error)
 	GetBlockList(page, row int) []model.ChainBlock
 	BlockAsJson(c context.Context, block *model.ChainBlock) *model.ChainBlockJson
-	CreateEvent(c context.Context, txn *GormDB, event *model.ChainEvent) error
+	CreateEvent(txn *GormDB, event *model.ChainEvent) error
 	DropEventNotFinalizedData(blockNum int, finalized bool) bool
 	GetEventByBlockNum(blockNum int, where ...string) []model.ChainEventJson
 	GetEventList(c context.Context, page, row int, order string, where ...string) ([]model.ChainEvent, int)
@@ -41,7 +41,7 @@ type IDao interface {
 	GetExtrinsicsDetailByHash(c context.Context, hash string) *model.ExtrinsicDetail
 	GetExtrinsicsDetailByIndex(c context.Context, index string) *model.ExtrinsicDetail
 	ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsicJson
-	CreateLog(c context.Context, txn *GormDB, ce *model.ChainLog) error
+	CreateLog(txn *GormDB, ce *model.ChainLog) error
 	DropLogsNotFinalizedData(blockNum int, finalized bool) bool
 	GetLogsByIndex(index string) *model.ChainLogJson
 	GetLogByBlockNum(blockNum int) []model.ChainLogJson

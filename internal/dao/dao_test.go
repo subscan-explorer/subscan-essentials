@@ -131,10 +131,10 @@ func init() {
 	ctx := context.TODO()
 	txn := testDao.DbBegin()
 	_ = testDao.CreateBlock(txn, &testBlock)
-	_ = testDao.CreateEvent(ctx, txn, &testEvent)
+	_ = testDao.CreateEvent(txn, &testEvent)
 	_ = testDao.CreateExtrinsic(ctx, txn, &testExtrinsic)
 	_ = testDao.CreateExtrinsic(ctx, txn, &testSignedExtrinsic)
-	_ = testDao.CreateLog(ctx, txn, &testLog)
+	_ = testDao.CreateLog(txn, &testLog)
 	txn.Commit()
 
 	testDao.CreateRuntimeVersion("polkadot", 1)
