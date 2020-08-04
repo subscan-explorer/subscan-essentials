@@ -14,7 +14,6 @@ require (
 	github.com/itering/substrate-api-rpc v0.0.1
 	github.com/jinzhu/gorm v1.9.14
 	github.com/jpillora/backoff v1.0.0
-	github.com/json-iterator/go v1.1.9
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-sqlite3 v2.0.1+incompatible // indirect

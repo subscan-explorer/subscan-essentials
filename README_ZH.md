@@ -4,46 +4,59 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/itering/subscan)](https://goreportcard.com/report/github.com/itering/subscan)
 ![subscan](https://github.com/itering/subscan/workflows/subscan/badge.svg)
 
-Subscan Essentials是一个高精度的区块链浏览器脚手架项目，它具有开发人员友好的界面和自定义模块解析功能，支持基于substrate的区块链网络。 它由Subscan团队开发，并在subscan.io中使用。
-开发人员可以自由使用代码库来扩展功能并为其受众开发独特的用户体验。
+Subscan Essentials是一个高精度的区块链浏览器脚手架项目，它具有开发人员友好的界面和自定义模块解析功能，支持基于substrate的区块链网络。
+它由Subscan团队开发，并在subscan.io中使用。开发人员可以自由使用代码库来扩展功能并为其受众开发独特的用户体验。
 
 
-## API doc
+### Feature
 
-默认的API文档可以在这边找到 [DOC](/docs/index.md)
+1. 支持substrate 网络[自定义](/custom_type.md)type注册 
+2. 支持索引block, Extrinsic, Event, log
+3. 可自定义[插件](/plugins)索引更多的数据
+4. [Gen](https://github.com/itering/subscan-plugin/tree/master/tool) 工具可自动生成插件模版
+5. 内置默认的HTTP API [DOC](/docs/index.md)
 
+### Requirement
 
-### 功能
+* Linux / Mac OSX
+* Golang 1.12.4+
+* Redis 3.0.4+
+* MySQL 5.6+
 
-1. API Server 与后台监听程序分离
-2. 支持substrate 网络自定义type 注册 [Custom](/custom_type.md)
-3. 支持索引block, Extrinsic, Event, log
-4. 可自定义插件索引更多的数据[Plugins](/plugins)
-5. [Gen](https://github.com/itering/subscan-plugin/tree/master/tool)工具可自动生成插件模版
-6. 内置默认的HTTP API [DOC](/docs/index.md)
-
-
-### 安装
+### Install
 
 ```bash
-./build.sh build &&  ./cmd/subscan --conf configs install
+./build.sh install
 ```
 
-### 使用
 
-> API 
-
-```bash
-
-./cmd/subscan --conf configs
+### Usage
 
 ```
+NAME:
+   SubScan - SubScan Backend Service, use -h get help
 
-> Daemon
+USAGE:
+   main [global options] command [command options] [arguments...]
 
-```bash
-./cmd/subscan --conf configs start substrate
-./cmd/subscan --conf configs stop substrate
+VERSION:
+   1.0
+
+DESCRIPTION:
+   SubScan Backend Service, substrate blockchain explorer
+
+COMMANDS:
+     start    Start one worker, E.g substrate
+     stop     Stop one worker, E.g substrate
+     install  Create database and create default conf file
+     help, h  Shows a list of commands or help for one command
+
+GLOBAL OPTIONS:
+   --conf value   (default: "../configs")
+   --help, -h     show help
+   --version, -v  print the version
+
+
 ```
 
 
@@ -69,5 +82,3 @@ GPL-3.0
 [SUBSCAN] https://subscan.io/
 
 [Darwinia] https://github.com/darwinia-network/darwinia
-
-[freehere107] https://github.com/freehere107

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-kratos/kratos/pkg/cache/redis"
 	"github.com/go-kratos/kratos/pkg/conf/paladin"
+	"github.com/itering/subscan/configs"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"github.com/jinzhu/gorm"
@@ -31,7 +32,7 @@ var (
 		BlockNum:     947687,
 		ModuleId:     "imonline",
 		EventId:      "AllGood",
-		Params:       util.InterfaceToString([]interface{}{}),
+		Params:       util.ToString([]interface{}{}),
 		ExtrinsicIdx: 0,
 		EventIndex:   "947687-0",
 		Finalized:    true,
@@ -101,11 +102,11 @@ func init() {
 		paladin.DefaultClient = client
 	}
 	var (
-		dc mysqlConf
-		rc redisConf
+		dc configs.MysqlConf
+		rc configs.RedisConf
 	)
-	checkErr(paladin.Get("mysql.toml").UnmarshalTOML(&dc))
-	checkErr(paladin.Get("redis.toml").UnmarshalTOML(&rc))
+	dc.MergeConf()
+	rc.MergeConf()
 
 	db, err := gorm.Open("mysql", dc.Test.DSN)
 	if err != nil {

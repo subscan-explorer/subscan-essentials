@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/go-kratos/kratos/pkg/conf/paladin"
 	"github.com/go-kratos/kratos/pkg/log"
-	"github.com/itering/subscan/internal/daemons"
+	"github.com/itering/subscan/internal/observer"
 	"github.com/itering/subscan/internal/script"
 	"github.com/itering/subscan/internal/server/http"
 	"github.com/itering/subscan/internal/service"
@@ -52,7 +52,7 @@ func setupApp() *cli.App {
 			Name:  "start",
 			Usage: "Start one worker, E.g substrate",
 			Action: func(c *cli.Context) error {
-				daemons.Run(c.Args().Get(0), "start")
+				observer.Run(c.Args().Get(0), "start")
 				return nil
 			},
 		},
@@ -60,7 +60,7 @@ func setupApp() *cli.App {
 			Name:  "stop",
 			Usage: "Stop one worker, E.g substrate",
 			Action: func(c *cli.Context) error {
-				daemons.Run(c.Args().Get(0), "stop")
+				observer.Run(c.Args().Get(0), "stop")
 				return nil
 			},
 		},

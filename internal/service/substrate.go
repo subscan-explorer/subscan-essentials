@@ -220,7 +220,7 @@ func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 		specVersion = s.GetCurrentRuntimeSpecVersion(blockNum)
 	} else {
 		specVersion = r.SpecVersion
-		_ = s.regRuntimeVersion(r.ImplName, specVersion)
+		_ = s.regRuntimeVersion(r.ImplName, specVersion, blockHash)
 	}
 
 	if specVersion > util.CurrentRuntimeSpecVersion {
@@ -249,8 +249,8 @@ func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 			block.ParentHash = rpcBlock.Block.Header.ParentHash
 			block.StateRoot = rpcBlock.Block.Header.StateRoot
 
-			block.Extrinsics = util.InterfaceToString(rpcBlock.Block.Extrinsics)
-			block.Logs = util.InterfaceToString(rpcBlock.Block.Header.Digest.Logs)
+			block.Extrinsics = util.ToString(rpcBlock.Block.Extrinsics)
+			block.Logs = util.ToString(rpcBlock.Block.Header.Digest.Logs)
 			block.Event = event
 
 			_ = s.UpdateBlockData(block, finalized)

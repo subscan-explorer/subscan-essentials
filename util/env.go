@@ -12,6 +12,7 @@ var (
 	CommissionAccuracy        = GetEnv("COMMISSION_ACCURACY", "9")
 	WSEndPoint                = GetEnv("CHAIN_WS_ENDPOINT", "wss://crab.darwinia.network")
 	NetworkNode               = GetEnv("NETWORK_NODE", "")
+	IsProduction              = os.Getenv("DEPLOY_ENV") == "prod"
 )
 
 func GetEnv(key, defaultValue string) string {
@@ -20,8 +21,4 @@ func GetEnv(key, defaultValue string) string {
 		value = defaultValue
 	}
 	return value
-}
-
-func IsProduction() bool {
-	return os.Getenv("DEPLOY_ENV") == "prod"
 }

@@ -13,7 +13,7 @@ import (
 func (s *Service) EmitLog(txn *dao.GormDB, blockHash string, blockNum int, l []storage.DecoderLog, finalized bool, validatorList []string) (validator string, err error) {
 	s.dao.DropLogsNotFinalizedData(blockNum, finalized)
 	for index, logData := range l {
-		dataStr := util.InterfaceToString(logData.Value)
+		dataStr := util.ToString(logData.Value)
 
 		ce := model.ChainLog{
 			LogIndex:  fmt.Sprintf("%d-%d", blockNum, index),

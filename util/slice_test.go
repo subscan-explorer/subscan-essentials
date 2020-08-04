@@ -1,6 +1,7 @@
 package util
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -13,8 +14,6 @@ var (
 		"subscan1": true,
 		"subscan2": true,
 	}
-	ns  = []int{0, 1, 2, 3, 4, 5, 6}
-	nsd = []int{6, 5, 4, 3, 2, 1, 0}
 )
 
 func TestLookup(t *testing.T) {
@@ -35,31 +34,13 @@ func TestLookup(t *testing.T) {
 	}
 }
 
-func TestContinuous(t *testing.T) {
-	rns := ContinuousSlice(0, 7, "desc")
-	rnsd := ContinuousSlice(0, 7, "sced")
+func TestContinuousNums(t *testing.T) {
+	rns := ContinuousNums(6, 7, "desc")
+	rnsd := ContinuousNums(0, 7, "asc")
+	assert.Nil(t, ContinuousNums(7, 0, "asc"))
+	assert.Equal(t, []int{6, 5, 4, 3, 2, 1, 0}, rns)
+	assert.Equal(t, []int{0, 1, 2, 3, 4, 5, 6}, rnsd)
 
-	for i := range rns {
-		if rns[i] != ns[i] {
-			t.Errorf(
-				"Generate Continuous int arr failed #%d, got %v, want %v",
-				i,
-				rns[i],
-				ns[i],
-			)
-		}
-	}
-
-	for i := range rnsd {
-		if rnsd[i] != nsd[i] {
-			t.Errorf(
-				"Generate Continuous int arr failed #%d, got %v, want %v",
-				i,
-				rnsd[i],
-				nsd[i],
-			)
-		}
-	}
 }
 
 func TestMap(t *testing.T) {

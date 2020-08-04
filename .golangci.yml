@@ -1,4 +1,3 @@
 run:
   skip-dirs:
     - plugins/balance
-    - plugins/system

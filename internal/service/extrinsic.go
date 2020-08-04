@@ -75,7 +75,7 @@ func (s *Service) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsi
 		Success:            e.Success,
 		CallModule:         e.CallModule,
 		CallModuleFunction: e.CallModuleFunction,
-		Params:             util.InterfaceToString(e.Params),
+		Params:             util.ToString(e.Params),
 		AccountId:          address.SS58Address(e.AccountId),
 		Signature:          e.Signature,
 		Nonce:              e.Nonce,
@@ -100,7 +100,7 @@ func (s *Service) getTimestamp(extrinsic *model.ChainExtrinsic) (blockTimestamp 
 	}
 
 	var paramsInstant []model.ExtrinsicParam
-	util.UnmarshalToAnything(&paramsInstant, extrinsic.Params)
+	util.UnmarshalAny(&paramsInstant, extrinsic.Params)
 
 	for _, p := range paramsInstant {
 		if p.Name == "now" {

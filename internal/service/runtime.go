@@ -23,9 +23,9 @@ func (s *Service) SubstrateRuntimeInfo(spec int) *types.MetadataStruct {
 	return runtime
 }
 
-func (s *Service) regRuntimeVersion(name string, spec int) error {
+func (s *Service) regRuntimeVersion(name string, spec int, hash ...string) error {
 	if affected := s.dao.CreateRuntimeVersion(name, spec); affected > 0 {
-		if coded := s.regCodecMetadata(); coded != "" {
+		if coded := s.regCodecMetadata(hash...); coded != "" {
 			runtime := metadata.RegNewMetadataType(spec, coded)
 			s.setRuntimeData(spec, runtime, coded)
 		}
@@ -33,8 +33,8 @@ func (s *Service) regRuntimeVersion(name string, spec int) error {
 	return nil
 }
 
-func (s *Service) regCodecMetadata() string {
-	if coded, err := rpc.GetMetadataByHash(nil); err == nil {
+func (s *Service) regCodecMetadata(hash ...string) string {
+	if coded, err := rpc.GetMetadataByHash(nil, hash...); err == nil {
 		return coded
 	}
 	return ""

@@ -54,7 +54,7 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 	defer s.dao.DbRollback(txn)
 
 	var e []model.ChainEvent
-	util.UnmarshalToAnything(&e, decodeEvent)
+	util.UnmarshalAny(&e, decodeEvent)
 
 	eventMap := s.checkoutExtrinsicEvents(e, blockNum)
 
@@ -64,8 +64,8 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 		ParentHash:     block.Header.ParentHash,
 		StateRoot:      block.Header.StateRoot,
 		ExtrinsicsRoot: block.Header.ExtrinsicsRoot,
-		Logs:           util.InterfaceToString(block.Header.Digest.Logs),
-		Extrinsics:     util.InterfaceToString(block.Extrinsics),
+		Logs:           util.ToString(block.Header.Digest.Logs),
+		Extrinsics:     util.ToString(block.Extrinsics),
 		Event:          event,
 		SpecVersion:    spec,
 		Finalized:      finalized,
@@ -86,7 +86,7 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 	}
 
 	cb.Validator = validator
-	cb.CodecError = validator == ""
+	cb.CodecError = validator == "" && blockNum != 0
 	cb.ExtrinsicsCount = extrinsicsCount
 	cb.EventCount = eventCount
 
@@ -135,7 +135,7 @@ func (s *Service) UpdateBlockData(block *model.ChainBlock, finalized bool) (err 
 	}
 
 	var e []model.ChainEvent
-	util.UnmarshalToAnything(&e, decodeEvent)
+	util.UnmarshalAny(&e, decodeEvent)
 	eventMap := s.checkoutExtrinsicEvents(e, block.BlockNum)
 
 	txn := s.dao.DbBegin()
@@ -158,7 +158,7 @@ func (s *Service) UpdateBlockData(block *model.ChainBlock, finalized bool) (err 
 		return err
 	}
 
-	if err = s.dao.UpdateEventAndExtrinsic(txn, block, eventCount, extrinsicsCount, blockTimestamp, validator, validator == "", finalized); err != nil {
+	if err = s.dao.UpdateEventAndExtrinsic(txn, block, eventCount, extrinsicsCount, blockTimestamp, validator, validator == "" && block.BlockNum != 0, finalized); err != nil {
 		return
 	}
 

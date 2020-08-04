@@ -56,7 +56,7 @@ func (s *Service) GetEventList(page, row int, order string, where ...string) ([]
 			BlockNum:      event.BlockNum,
 			ModuleId:      event.ModuleId,
 			EventId:       event.EventId,
-			Params:        util.InterfaceToString(event.Params),
+			Params:        util.ToString(event.Params),
 			EventIdx:      event.EventIdx,
 			ExtrinsicHash: event.ExtrinsicHash,
 		}

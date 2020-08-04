@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"github.com/itering/subscan/configs"
 	"os"
 	"strings"
 	"time"
@@ -59,7 +60,7 @@ func (d *Dao) DbBegin() *GormDB {
 }
 
 // private funcs
-func newDb(dc mysqlConf) (db *gorm.DB) {
+func newDb(dc configs.MysqlConf) (db *gorm.DB) {
 	var err error
 	if os.Getenv("TASK_MOD") == "true" {
 		db, err = gorm.Open("mysql", dc.Task.DSN)
@@ -74,7 +75,7 @@ func newDb(dc mysqlConf) (db *gorm.DB) {
 	db.DB().SetConnMaxLifetime(5 * time.Minute)
 	db.DB().SetMaxOpenConns(100)
 	db.DB().SetMaxIdleConns(10)
-	if util.IsProduction() {
+	if util.IsProduction {
 		db.SetLogger(ormLog{})
 	}
 	if os.Getenv("TEST_MOD") != "true" {

@@ -23,7 +23,7 @@ var (
 		CallModuleFunction: "transfer",
 		CallModule:         "balances",
 		AccountId:          "242f0781faa44f34ddcbc9e731d0ddb51c97f5b58bb2202090a3a1c679fc4c63",
-		Params: []model.ExtrinsicParam{
+		Params: util.ToString([]model.ExtrinsicParam{
 			{
 				Name:     "dest",
 				Type:     "Address",
@@ -36,7 +36,7 @@ var (
 				Value:    "1000000000000000000",
 				ValueRaw: "13000064a7b3b6e00d",
 			},
-		},
+		}),
 		Success:       true,
 		Finalized:     true,
 		ExtrinsicHash: "0x368f61800f8645f67d59baf0602b236ff47952097dcaef3aa026b50ddc8dcea0",
@@ -64,7 +64,7 @@ var (
 		BlockNum:     947687,
 		ModuleId:     "imonline",
 		EventId:      "AllGood",
-		Params:       util.InterfaceToString([]interface{}{}),
+		Params:       util.ToString([]interface{}{}),
 		ExtrinsicIdx: 0,
 		EventIndex:   "947687-0",
 		Finalized:    true,
@@ -90,10 +90,8 @@ func (m *MockDao) DbBegin() *dao.GormDB {
 	return &dao.GormDB{}
 }
 func (m *MockDao) DbCommit(*dao.GormDB) {
-	return
 }
 func (m *MockDao) DbRollback(*dao.GormDB) {
-	return
 }
 
 func (m *MockDao) CreateBlock(*dao.GormDB, *model.ChainBlock) (err error) {
@@ -109,7 +107,6 @@ func (m *MockDao) GetNearBlock(blockNum int) *model.ChainBlock {
 }
 
 func (m *MockDao) SetBlockFinalized(*model.ChainBlock) {
-	return
 }
 
 func (m *MockDao) BlocksReverseByNum(blockNums []int) map[int]model.ChainBlock {

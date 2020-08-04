@@ -1,6 +1,7 @@
 package util
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -42,6 +43,7 @@ func TestBool(t *testing.T) {
 	boolean := false
 	rt := "true"
 	rf := "false"
+	rint := 1
 
 	if BoolFromInterface(boolean) == !boolean {
 		t.Errorf(
@@ -60,6 +62,14 @@ func TestBool(t *testing.T) {
 	}
 
 	if BoolFromInterface(rf) == true {
+		t.Errorf(
+			"Parse bool failed, got %v, want %v",
+			rt,
+			rf,
+		)
+	}
+
+	if BoolFromInterface(rint) == true {
 		t.Errorf(
 			"Parse bool failed, got %v, want %v",
 			rt,
@@ -87,4 +97,44 @@ func TestFieldName(t *testing.T) {
 			"b",
 		)
 	}
+}
+
+func TestToString(t *testing.T) {
+	testCase := []struct {
+		i interface{}
+		r string
+	}{
+		{"abc", "abc"},
+		{[]byte{97, 98, 99}, "abc"},
+		{map[string]string{"a": "b"}, `{"a":"b"}`},
+	}
+	for _, test := range testCase {
+		assert.Equal(t, test.r, ToString(test.i))
+	}
+}
+
+func TestUnmarshalAny(t *testing.T) {
+	p := new(struct {
+		One int
+		Two int
+	})
+	mapTest := map[string]int{"one": 1, "two": 2}
+	UnmarshalAny(&p, mapTest)
+	assert.Equal(t, &struct {
+		One int
+		Two int
+	}{1, 2}, p)
+
+	UnmarshalAny(&p, `{"one":21,"two":22}`)
+	assert.Equal(t, &struct {
+		One int
+		Two int
+	}{21, 22}, p)
+
+	UnmarshalAny(&p, []byte(`{"one":31,"two":32}`))
+	assert.Equal(t, &struct {
+		One int
+		Two int
+	}{31, 32}, p)
+
 }

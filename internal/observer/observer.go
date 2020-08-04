@@ -1,4 +1,4 @@
-package daemons
+package observer
 
 import (
 	"fmt"

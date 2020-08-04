@@ -16,7 +16,7 @@ func (d *Dao) CreateEvent(txn *GormDB, event *model.ChainEvent) error {
 		BlockNum:      event.BlockNum,
 		Type:          event.Type,
 		ModuleId:      event.ModuleId,
-		Params:        util.InterfaceToString(event.Params),
+		Params:        util.ToString(event.Params),
 		EventIdx:      event.EventIdx,
 		EventId:       event.EventId,
 		ExtrinsicIdx:  event.ExtrinsicIdx,

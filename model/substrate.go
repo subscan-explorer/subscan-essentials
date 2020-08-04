@@ -1,9 +1,9 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/itering/subscan-plugin/storage"
+	"github.com/itering/subscan/util"
 	"github.com/shopspring/decimal"
 )
 
@@ -69,13 +69,12 @@ func (c ChainEvent) TableName() string {
 }
 
 func (c *ChainEvent) AsPluginEvent() *storage.Event {
-	paramBytes, _ := json.Marshal(c.Params)
 	return &storage.Event{
 		BlockNum:      c.BlockNum,
 		ExtrinsicIdx:  c.ExtrinsicIdx,
 		ModuleId:      c.ModuleId,
 		EventId:       c.EventId,
-		Params:        paramBytes,
+		Params:        []byte(util.ToString(c.Params)),
 		ExtrinsicHash: c.ExtrinsicHash,
 		EventIdx:      c.EventIdx,
 	}
@@ -112,12 +111,11 @@ func (c ChainExtrinsic) TableName() string {
 }
 
 func (c *ChainExtrinsic) AsPluginExtrinsic() *storage.Extrinsic {
-	paramBytes, _ := json.Marshal(c.Params)
 	return &storage.Extrinsic{
 		ExtrinsicIndex:     c.ExtrinsicIndex,
 		CallModule:         c.CallModule,
 		CallModuleFunction: c.CallModuleFunction,
-		Params:             paramBytes,
+		Params:             []byte(util.ToString(c.Params)),
 		AccountId:          c.AccountId,
 		Signature:          c.Signature,
 		Nonce:              c.Nonce,

@@ -1,6 +1,7 @@
 package util
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -15,9 +16,10 @@ var (
 )
 
 func TestCamel(t *testing.T) {
-	// TODO
-	//
-	// This is not as expected
+	emptyStr := ""
+	assert.Equal(t, "", CamelString(emptyStr))
+	assert.Equal(t, "", UpperCamel(emptyStr))
+
 	ucamel := CamelString(notCamel)
 	if ucamel != camel {
 		t.Errorf(

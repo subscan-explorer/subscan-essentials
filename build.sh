@@ -6,7 +6,7 @@ app=${BASENAME}
 
 function build() {
     go build -o ./cmd/subscan -v ./cmd
-	echo "build success"
+	echo "Build Success"
 }
 
 function install() {
@@ -23,7 +23,7 @@ function install() {
     if [[ $? -ne 0 ]]; then
         exit $?
     fi
-    echo "build" ${DIR}/configs/plugins "Success"
+    echo "Build" ${DIR}/configs/plugins "Success"
     rm -rf ${DIR}/tmp
 }
 

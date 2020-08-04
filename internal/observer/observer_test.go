@@ -1,13 +1,13 @@
-package daemons_test
+package observer_test
 
 import (
-	"github.com/itering/subscan/internal/daemons"
+	"github.com/itering/subscan/internal/observer"
 	"github.com/sevlyar/go-daemon"
 	"testing"
 )
 
 func TestRun(t *testing.T) {
-	daemons.Run("demo", "start")
+	observer.Run("demo", "start")
 	if len(daemon.Flags()) != 1 {
 		t.Errorf("Run Daemon failed")
 	}

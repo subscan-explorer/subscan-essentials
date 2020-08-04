@@ -15,12 +15,9 @@ func Validate(data interface{}, model interface{}) (err error) {
 	case []byte:
 		b = v
 	case io.ReadCloser:
-		b, err = ioutil.ReadAll(v)
+		b, _ = ioutil.ReadAll(v)
 	default:
 		b, _ = json.Marshal(data)
-	}
-	if err != nil {
-		return
 	}
 	if err = json.Unmarshal(b, model); err != nil {
 		return err

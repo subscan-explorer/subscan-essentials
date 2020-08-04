@@ -32,7 +32,7 @@ func BoolFromInterface(i interface{}) bool {
 	return false
 }
 
-func InterfaceToString(i interface{}) string {
+func ToString(i interface{}) string {
 	var val string
 	switch i := i.(type) {
 	case string:
@@ -75,7 +75,7 @@ func GetStringValueByFieldName(n interface{}, fieldName string) (string, bool) {
 	}
 }
 
-func UnmarshalToAnything(r interface{}, raw interface{}) {
+func UnmarshalAny(r interface{}, raw interface{}) {
 	switch raw := raw.(type) {
 	case string:
 		_ = json.Unmarshal([]byte(raw), &r)

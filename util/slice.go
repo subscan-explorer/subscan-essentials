@@ -17,8 +17,8 @@ func MapStringToSlice(m map[string]bool) []string {
 	return l
 }
 
-func ContinuousSlice(start, count int, order string) (r []int) {
-	if count <= 0 || start <= 0 {
+func ContinuousNums(start, count int, order string) (r []int) {
+	if count <= 0 {
 		return
 	}
 	for i := 0; i < count; i++ {

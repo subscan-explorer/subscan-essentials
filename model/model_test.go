@@ -13,8 +13,11 @@ var testCases = []struct {
 	{instant: model.ChainBlock{}, tableName: "chain_blocks"},
 	{instant: model.ChainBlock{BlockNum: 1000000}, tableName: "chain_blocks_1"},
 	{instant: model.ChainEvent{BlockNum: 1000000}, tableName: "chain_events_1"},
+	{instant: model.ChainEvent{BlockNum: 99}, tableName: "chain_events"},
 	{instant: model.ChainExtrinsic{BlockNum: 10000000}, tableName: "chain_extrinsics_10"},
+	{instant: model.ChainExtrinsic{BlockNum: 10000}, tableName: "chain_extrinsics"},
 	{instant: model.ChainLog{BlockNum: 999999}, tableName: "chain_logs"},
+	{instant: model.ChainLog{BlockNum: 1999999}, tableName: "chain_logs_1"},
 }
 
 func TestSplitTableName(t *testing.T) {

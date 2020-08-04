@@ -152,13 +152,8 @@ github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANyt
 github.com/influxdata/influxdb1-client v0.0.0-20190809212627-fc22c7df067e/go.mod h1:qj24IKcXYK6Iy9ceXlo3Tc+vtHo9lIhSX5JddghvEPo=
 github.com/itering/scale.go v0.1.4 h1:LxvOuSEBdAxxvwk83qzB0cRsAkG2gghd7+5mEL7c1ng=
 github.com/itering/scale.go v0.1.4/go.mod h1:ufrA/8oz/qi4mtK8TXz4LFZzfJ4ZUQ+4z+cUNpY9jts=
-github.com/itering/subscan-plugin v0.0.0-20200714071511-01de55c61ec6 h1:jx87FiqHkujIfVwwGb0xdBLP7pZ76QncDr81ODcgTsM=
-github.com/itering/subscan-plugin v0.0.0-20200714071511-01de55c61ec6/go.mod h1:8TznG+EKuD17+cyet3ZYPc+LmgVNYeF0eXRkFmfRBlQ=
 github.com/itering/subscan-plugin v0.0.1 h1:YsbOrv9aZ3vzrUgnnsdtrxwdrh09USdRv7fgBLN7zvY=
 github.com/itering/subscan-plugin v0.0.1/go.mod h1:sfvj/gCCneyEQhQV5BIWnHHx0PcwiTvrgoz/DMETjzI=
-github.com/itering/substrate-api-rpc v0.0.0-20200713032927-999ff40016b3/go.mod h1:haC3JURKHdyfjzSVJsT3gr5Eyk76zohiJR7zXNUGrww=
-github.com/itering/substrate-api-rpc v0.0.0-20200713071436-6b196a2cd1bd h1:zLYE62Lhth4/yg7hLCF+lecTBwrC2T5rBxR3t6TQkGE=
-github.com/itering/substrate-api-rpc v0.0.0-20200713071436-6b196a2cd1bd/go.mod h1:ZKxBwv7/sTG9ljne/SmkYTvHaCHkegIuMVjf4AF+w6w=
 github.com/itering/substrate-api-rpc v0.0.1 h1:S3T2Zkzro4F5K4xeDxgUAgkSCwRjVUUKfY66VtENe2s=
 github.com/itering/substrate-api-rpc v0.0.1/go.mod h1:ZKxBwv7/sTG9ljne/SmkYTvHaCHkegIuMVjf4AF+w6w=
 github.com/jcmturner/gofork v0.0.0-20190328161633-dc7c13fece03/go.mod h1:MK8+TM0La+2rjBD4jE12Kj1pCCxK7d2LK/UM3ncEo0o=
