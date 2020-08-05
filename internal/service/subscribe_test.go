@@ -10,7 +10,6 @@ import (
 
 type TestConn struct {
 	*websocket.Conn
-	interrupt chan os.Signal
 	Connected bool
 }
 
