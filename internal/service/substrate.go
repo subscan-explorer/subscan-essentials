@@ -26,17 +26,13 @@ const (
 )
 
 type subscription struct {
-	Topic  int   `json:"topic"`
-	Latest int64 `json:"latest"`
+	Topic  string `json:"topic"`
+	Latest int64  `json:"latest"`
 }
 
 var (
 	onceNewHead, onceFinHead sync.Once
-	subscriptionIds          = []subscription{
-		{Topic: newHeader},
-		{Topic: finalizeHeader},
-		{Topic: stateChange},
-	}
+	subscriptionIds          = []subscription{{Topic: ChainNewHead}, {Topic: ChainFinalizedHead}, {Topic: StateStorage}}
 )
 
 type SubscribeService struct {
@@ -55,8 +51,8 @@ func (s *Service) initSubscribeService(done chan struct{}) *SubscribeService {
 	}
 }
 
-func (s *SubscribeService) parser(message []byte) {
-	upgradeHealth := func(topic int) {
+func (s *SubscribeService) parser(message []byte) (err error) {
+	upgradeHealth := func(topic string) {
 		for index, subscript := range subscriptionIds {
 			if subscript.Topic == topic {
 				subscriptionIds[index].Latest = time.Now().Unix()
@@ -65,27 +61,23 @@ func (s *SubscribeService) parser(message []byte) {
 	}
 
 	var j rpc.JsonRpcResult
-	if err := json.Unmarshal(message, &j); err != nil {
-		return
+	if err = json.Unmarshal(message, &j); err != nil {
+		return err
 	}
+
 	switch j.Id {
 	case runtimeVersion:
 		r := j.ToRuntimeVersion()
 		_ = s.regRuntimeVersion(r.ImplName, r.SpecVersion)
 		_ = s.updateChainMetadata(map[string]interface{}{"implName": r.ImplName, "specVersion": r.SpecVersion})
 		util.CurrentRuntimeSpecVersion = r.SpecVersion
-	case newHeader, finalizeHeader, stateChange:
-		subscriptionIds = append(subscriptionIds, subscription{
-			Topic:  j.Id,
-			Latest: time.Now().Unix(),
-		})
 	}
 
 	switch j.Method {
 	case ChainNewHead:
 		r := j.ToNewHead()
 		_ = s.updateChainMetadata(map[string]interface{}{"blockNum": util.HexToNumStr(r.Number)})
-		upgradeHealth(newHeader)
+		upgradeHealth(j.Method)
 		go func() {
 			s.newHead <- true
 			onceNewHead.Do(func() {
@@ -95,7 +87,7 @@ func (s *SubscribeService) parser(message []byte) {
 	case ChainFinalizedHead:
 		r := j.ToNewHead()
 		_ = s.updateChainMetadata(map[string]interface{}{"finalized_blockNum": util.HexToNumStr(r.Number)})
-		upgradeHealth(finalizeHeader)
+		upgradeHealth(j.Method)
 		go func() {
 			s.newFinHead <- true
 			onceFinHead.Do(func() {
@@ -103,10 +95,11 @@ func (s *SubscribeService) parser(message []byte) {
 			})
 		}()
 	case StateStorage:
-		upgradeHealth(stateChange)
+		upgradeHealth(j.Method)
 	default:
 		return
 	}
+	return
 }
 
 func (s *SubscribeService) subscribeFetchBlock() {
@@ -181,6 +174,7 @@ const (
 
 func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 	block := s.dao.GetBlockByNum(blockNum)
+	fmt.Println(util.WSEndPoint)
 	if block != nil && block.Finalized && !block.CodecError {
 		return nil
 	}
@@ -271,8 +265,4 @@ func (s *Service) updateChainMetadata(metadata map[string]interface{}) (err erro
 	c := context.TODO()
 	err = s.dao.SetMetadata(c, metadata)
 	return
-}
-
-func (s *Service) GetCurrentBlockNum(c context.Context) (uint64, error) {
-	return s.dao.GetCurrentBlockNum(c)
 }

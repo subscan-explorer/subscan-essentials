@@ -272,3 +272,7 @@ func (s *Service) BlockAsSampleJson(c context.Context, block *model.ChainBlock) 
 	}
 	return &b
 }
+
+func (s *Service) GetCurrentBlockNum(c context.Context) (uint64, error) {
+	return s.dao.GetCurrentBlockNum(c)
+}

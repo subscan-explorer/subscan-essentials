@@ -1,9 +1,9 @@
 package service
 
 import (
-	"github.com/itering/subscan/pkg/recws"
 	"github.com/itering/substrate-api-rpc/rpc"
 	"github.com/itering/substrate-api-rpc/storageKey"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,14 +15,13 @@ import (
 )
 
 var (
-	subscribeConn *recws.RecConn
 	TotalIssuance storageKey.StorageKey
 )
 
 const (
 	subscribeTimeoutInterval = 30
 
-	runtimeVersion = iota + 1
+	runtimeVersion = iota
 	newHeader
 	finalizeHeader
 	stateChange
@@ -33,43 +32,42 @@ func subscribeStorage() []string {
 	return []string{util.AddHex(TotalIssuance.EncodeKey)}
 }
 
-func (s *Service) Subscribe() {
+type WsConn interface {
+	Dial(urlStr string, reqHeader http.Header)
+	IsConnected() bool
+	Close()
+	WriteMessage(messageType int, data []byte) error
+	ReadMessage() (messageType int, message []byte, err error)
+}
+
+func (s *Service) Subscribe(conn WsConn, interrupt chan os.Signal) {
 	var err error
 
-	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
 
-	subscribeConn = &recws.RecConn{KeepAliveTimeout: 10 * time.Second}
-	subscribeConn.Dial(util.WSEndPoint, nil)
+	conn.Dial(util.WSEndPoint, nil)
 
-	for {
-		if subscribeConn.IsConnected() {
-			break
-		}
-		time.Sleep(subscribeConn.RecIntvlMin)
-	}
-
-	defer subscribeConn.Close()
+	defer conn.Close()
 
 	done := make(chan struct{})
 
 	subscribeSrv := s.initSubscribeService(done)
 	go func() {
+		defer close(done)
 		for {
-			if !subscribeConn.IsConnected() {
+			if !conn.IsConnected() {
 				continue
 			}
-			_, message, err := subscribeConn.ReadMessage()
+			_, message, err := conn.ReadMessage()
 			if err != nil {
 				log.Error("read: %s", err)
 				continue
 			}
-			log.Info("recv: %s", message)
-			subscribeSrv.parser(message)
+			_ = subscribeSrv.parser(message)
 		}
 	}()
 
-	if err = subscribeConn.WriteMessage(websocket.TextMessage, rpc.ChainGetRuntimeVersion(runtimeVersion)); err != nil {
+	if err = conn.WriteMessage(websocket.TextMessage, rpc.ChainGetRuntimeVersion(runtimeVersion)); err != nil {
 		log.Info("write: %s", err)
 	}
 
@@ -82,17 +80,17 @@ func (s *Service) Subscribe() {
 			if time.Now().Unix()-subscript.Latest > subscribeTimeoutInterval {
 				switch subscript.Topic {
 
-				case newHeader:
-					if err = subscribeConn.WriteMessage(websocket.TextMessage, rpc.ChainSubscribeNewHead(newHeader)); err != nil {
+				case ChainNewHead:
+					if err = conn.WriteMessage(websocket.TextMessage, rpc.ChainSubscribeNewHead(newHeader)); err != nil {
 						log.Info("write: %s", err)
 					}
-				case finalizeHeader:
-					if err = subscribeConn.WriteMessage(websocket.TextMessage, rpc.ChainSubscribeFinalizedHeads(finalizeHeader)); err != nil {
+				case ChainFinalizedHead:
+					if err = conn.WriteMessage(websocket.TextMessage, rpc.ChainSubscribeFinalizedHeads(finalizeHeader)); err != nil {
 						log.Info("write: %s", err)
 					}
 
-				case stateChange:
-					if err = subscribeConn.WriteMessage(websocket.TextMessage, rpc.StateSubscribeStorage(stateChange, subscribeStorageList)); err != nil {
+				case StateStorage:
+					if err = conn.WriteMessage(websocket.TextMessage, rpc.StateSubscribeStorage(stateChange, subscribeStorageList)); err != nil {
 						log.Info("write: %s", err)
 					}
 				}
@@ -109,7 +107,7 @@ func (s *Service) Subscribe() {
 		case <-interrupt:
 			close(done)
 			log.Info("interrupt")
-			err = subscribeConn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+			err = conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			if err != nil {
 				log.Error("write close: %s", err)
 				return

@@ -7,6 +7,7 @@ import (
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc/metadata"
 	"github.com/itering/substrate-api-rpc/websocket"
+	"github.com/stretchr/testify/mock"
 )
 
 var testSrv Service
@@ -72,6 +73,7 @@ var (
 )
 
 type MockDao struct {
+	mock.Mock
 }
 
 func (m *MockDao) Close() {}
@@ -117,8 +119,12 @@ func (m *MockDao) GetBlockByHash(context.Context, string) *model.ChainBlock {
 	return nil
 }
 
-func (m *MockDao) GetBlockByNum(int) *model.ChainBlock {
-	return nil
+func (m *MockDao) GetBlockByNum(blockNum int) *model.ChainBlock {
+	args := m.Called(blockNum)
+	if args.Get(0) == nil {
+		return nil
+	}
+	return args.Get(0).(*model.ChainBlock)
 }
 
 func (m *MockDao) SaveFillAlreadyBlockNum(context.Context, int) error {
@@ -130,12 +136,13 @@ func (m *MockDao) SaveFillAlreadyFinalizedBlockNum(c context.Context, blockNum i
 }
 
 func (m *MockDao) GetFillAlreadyBlockNum(c context.Context) (num int, err error) {
-	return 0, nil
+	args := m.Called(c)
+	return args.Int(0), args.Error(1)
 }
 
 func (m *MockDao) GetFillFinalizedBlockNum(c context.Context) (num int, err error) {
-
-	return
+	args := m.Called(c)
+	return args.Int(0), args.Error(1)
 }
 
 func (m *MockDao) GetBlockList(page, row int) []model.ChainBlock {
@@ -144,10 +151,6 @@ func (m *MockDao) GetBlockList(page, row int) []model.ChainBlock {
 
 func (m *MockDao) BlockAsJson(c context.Context, block *model.ChainBlock) *model.ChainBlockJson {
 	return &model.ChainBlockJson{}
-}
-
-func (m *MockDao) BlockAsSampleJson(c context.Context, block *model.ChainBlock) *model.SampleBlockJson {
-	return &model.SampleBlockJson{}
 }
 
 func (m *MockDao) CreateEvent(txn *dao.GormDB, event *model.ChainEvent) error {
@@ -233,11 +236,13 @@ func (m *MockDao) GetMetadata(c context.Context) (ms map[string]string, err erro
 }
 
 func (m *MockDao) GetCurrentBlockNum(c context.Context) (uint64, error) {
-	return 0, nil
+	args := m.Called(c)
+	return args.Get(0).(uint64), args.Error(1)
 }
 
 func (m *MockDao) GetFinalizedBlockNum(c context.Context) (uint64, error) {
-	return 0, nil
+	args := m.Called(c)
+	return args.Get(0).(uint64), args.Error(1)
 }
 
 func (m *MockDao) CreateRuntimeVersion(name string, specVersion int) int64 {

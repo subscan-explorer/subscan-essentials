@@ -152,6 +152,8 @@ github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANyt
 github.com/influxdata/influxdb1-client v0.0.0-20190809212627-fc22c7df067e/go.mod h1:qj24IKcXYK6Iy9ceXlo3Tc+vtHo9lIhSX5JddghvEPo=
 github.com/itering/scale.go v0.1.4 h1:LxvOuSEBdAxxvwk83qzB0cRsAkG2gghd7+5mEL7c1ng=
 github.com/itering/scale.go v0.1.4/go.mod h1:ufrA/8oz/qi4mtK8TXz4LFZzfJ4ZUQ+4z+cUNpY9jts=
+github.com/itering/scale.go v0.2.4 h1:WxFfVDdy737RtVcGaC0+5KfBhkFOXFUq6T/hRznzTwg=
+github.com/itering/scale.go v0.2.4/go.mod h1:ufrA/8oz/qi4mtK8TXz4LFZzfJ4ZUQ+4z+cUNpY9jts=
 github.com/itering/subscan-plugin v0.0.1 h1:YsbOrv9aZ3vzrUgnnsdtrxwdrh09USdRv7fgBLN7zvY=
 github.com/itering/subscan-plugin v0.0.1/go.mod h1:sfvj/gCCneyEQhQV5BIWnHHx0PcwiTvrgoz/DMETjzI=
 github.com/itering/substrate-api-rpc v0.0.1 h1:S3T2Zkzro4F5K4xeDxgUAgkSCwRjVUUKfY66VtENe2s=

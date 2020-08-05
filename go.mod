@@ -9,7 +9,7 @@ require (
 	github.com/golang/protobuf v1.3.5
 	github.com/gorilla/websocket v1.4.2
 	github.com/huandu/xstrings v1.3.2
-	github.com/itering/scale.go v0.1.4
+	github.com/itering/scale.go v0.2.4
 	github.com/itering/subscan-plugin v0.0.1
 	github.com/itering/substrate-api-rpc v0.0.1
 	github.com/jinzhu/gorm v1.9.14

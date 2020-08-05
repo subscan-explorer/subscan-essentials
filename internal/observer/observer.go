@@ -3,6 +3,7 @@ package observer
 import (
 	"fmt"
 	"github.com/itering/subscan/internal/dao"
+	"github.com/itering/subscan/pkg/recws"
 	"log"
 	"os"
 	"syscall"
@@ -89,7 +90,10 @@ func doRun(dt string) {
 LOOP:
 	for {
 		if dt == "substrate" {
-			srv.Subscribe()
+			interrupt := make(chan os.Signal, 1)
+			subscribeConn := &recws.RecConn{KeepAliveTimeout: 10 * time.Second}
+			subscribeConn.Dial(util.WSEndPoint, nil)
+			srv.Subscribe(subscribeConn, interrupt)
 		} else {
 			go heartBeat(dt)
 			switch dt {
