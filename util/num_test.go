@@ -1,7 +1,6 @@
 package util
 
 import (
-	"fmt"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -103,7 +102,6 @@ func Test_DecimalFromInterface(t *testing.T) {
 		{[]byte{}, decimal.Zero},
 	}
 	for _, test := range testCase {
-		fmt.Println(test.r, DecimalFromInterface(test.i))
 		assert.Equal(t, test.r, DecimalFromInterface(test.i))
 	}
 }

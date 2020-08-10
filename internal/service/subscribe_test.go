@@ -34,9 +34,12 @@ func (t *TestConn) Close() {
 }
 
 func (t *TestConn) ReadMessage() (messageType int, message []byte, err error) {
-	_, message, _ = t.Conn.ReadMessage()
 	_ = syscall.Kill(syscall.Getpid(), syscall.SIGINT)
 	return
+}
+
+func (t *TestConn) WriteMessage(messageType int, data []byte) error {
+	return nil
 }
 
 func TestService_Subscribe(t *testing.T) {

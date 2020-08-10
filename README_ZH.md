@@ -8,6 +8,19 @@ Subscan Essentials是一个高精度的区块链浏览器脚手架项目，它�
 它由Subscan团队开发，并在subscan.io中使用。开发人员可以自由使用代码库来扩展功能并为其受众开发独特的用户体验。
 
 
+## Contents
+
+- [Subscan Essentials](#Subscan-Essentials)
+  - [Contents](#contents)
+  - [Feature](#Feature)
+  - [Requirement](#Requirement)
+  - [Installation](#Install)
+  - [Usage](#Usage)
+  - [Docker](#Docker)
+  - [LICENSE](#LICENSE)
+  - [Resource](#Resource)
+
+
 ### Feature
 
 1. 支持substrate 网络[自定义](/custom_type.md)type注册 
@@ -62,12 +75,17 @@ GLOBAL OPTIONS:
 
 ### Docker
 
+> db 
+
 ```bash
+docker-compose -f docker-compose.db.yml up  -d
+```
 
+> subscan
+
+```bash
 docker-compose build
-
 docker-compose up -d
-
 ```
 
 ## LICENSE
@@ -77,8 +95,5 @@ GPL-3.0
 
 ## Resource
  
-[ITERING] https://github.com/itering
-
-[SUBSCAN] https://subscan.io/
-
-[Darwinia] https://github.com/darwinia-network/darwinia
+- [ITERING] https://github.com/itering
+- [Darwinia] https://github.com/darwinia-network/darwinia
