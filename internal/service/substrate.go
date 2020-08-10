@@ -18,7 +18,7 @@ import (
 // Because when receive chain_finalizedHead, get block still not finalized
 // so set Waiting block count to try avoid
 const (
-	FinalizedWaitingBlockCount = 5
+	FinalizedWaitingBlockCount = 3
 	ChainNewHead               = "chain_newHead"
 	ChainFinalizedHead         = "chain_finalizedHead"
 	StateStorage               = "state_storage"
@@ -126,35 +126,41 @@ func (s *SubscribeService) subscribeFetchBlock() {
 	for {
 		select {
 		case <-s.newHead:
-			blockNum, err := s.dao.GetCurrentBlockNum(ctx)
-			if err != nil || blockNum == 0 {
+			best, err := s.dao.GetBestBlockNum(ctx)
+			if err != nil || best == 0 {
 				time.Sleep(BlockTime * time.Second)
 				return
 			}
-			alreadyBlock, _ := s.dao.GetFillAlreadyBlockNum(ctx)
+			lastNum, _ := s.dao.GetFillBestBlockNum(ctx)
 			finalizedBlock, _ := s.dao.GetFinalizedBlockNum(ctx)
 
-			startBlock := alreadyBlock + 1
-			if alreadyBlock == 0 {
-				startBlock = alreadyBlock
+			startBlock := lastNum + 1
+			if lastNum == 0 {
+				startBlock = lastNum
 			}
-			for i := startBlock; i <= int(blockNum); i++ {
+
+			for i := startBlock; i <= int(best); i++ {
 				wg.Add(1)
-				_ = p.Invoke(BlockFinalized{BlockNum: i, Finalized: finalizedBlock >= FinalizedWaitingBlockCount && uint64(i) <= finalizedBlock-FinalizedWaitingBlockCount})
+				_ = p.Invoke(BlockFinalized{
+					BlockNum:  i,
+					Finalized: finalizedBlock >= FinalizedWaitingBlockCount && uint64(i) <= finalizedBlock-FinalizedWaitingBlockCount,
+				})
 			}
 			wg.Wait()
 		case <-s.newFinHead:
-			blockNum, err := s.dao.GetFinalizedBlockNum(context.TODO())
-			if err != nil || blockNum == 0 {
+			final, err := s.dao.GetFinalizedBlockNum(context.TODO())
+			if err != nil || final == 0 {
 				time.Sleep(BlockTime * time.Second)
 				return
 			}
-			alreadyBlock, _ := s.dao.GetFillFinalizedBlockNum(ctx)
-			startBlock := alreadyBlock + 1
-			if alreadyBlock == 0 {
-				startBlock = alreadyBlock
+
+			lastNum, _ := s.dao.GetFillFinalizedBlockNum(ctx)
+			startBlock := lastNum + 1
+			if lastNum == 0 {
+				startBlock = lastNum
 			}
-			for i := startBlock; i <= int(blockNum-FinalizedWaitingBlockCount); i++ {
+
+			for i := startBlock; i <= int(final-FinalizedWaitingBlockCount); i++ {
 				wg.Add(1)
 				_ = p.Invoke(BlockFinalized{BlockNum: i, Finalized: true})
 			}

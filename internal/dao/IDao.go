@@ -23,7 +23,7 @@ type IDao interface {
 	GetBlockByNum(int) *model.ChainBlock
 	SaveFillAlreadyBlockNum(context.Context, int) error
 	SaveFillAlreadyFinalizedBlockNum(c context.Context, blockNum int) (err error)
-	GetFillAlreadyBlockNum(c context.Context) (num int, err error)
+	GetFillBestBlockNum(c context.Context) (num int, err error)
 	GetFillFinalizedBlockNum(c context.Context) (num int, err error)
 	GetBlockList(page, row int) []model.ChainBlock
 	BlockAsJson(c context.Context, block *model.ChainBlock) *model.ChainBlockJson
@@ -48,7 +48,7 @@ type IDao interface {
 	SetMetadata(c context.Context, metadata map[string]interface{}) (err error)
 	IncrMetadata(c context.Context, filed string, incrNum int) (err error)
 	GetMetadata(c context.Context) (ms map[string]string, err error)
-	GetCurrentBlockNum(c context.Context) (uint64, error)
+	GetBestBlockNum(c context.Context) (uint64, error)
 	GetFinalizedBlockNum(c context.Context) (uint64, error)
 	CreateRuntimeVersion(name string, specVersion int) int64
 	SetRuntimeData(specVersion int, modules string, rawData string) int64

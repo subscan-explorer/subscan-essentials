@@ -28,7 +28,6 @@ func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.C
 		Success:            extrinsic.Success,
 		IsSigned:           extrinsic.Signature != "",
 		Fee:                extrinsic.Fee,
-		Finalized:          extrinsic.Finalized,
 	}
 	query := txn.Create(&ce)
 	if query.RowsAffected > 0 {
@@ -70,7 +69,7 @@ func (d *Dao) GetExtrinsicList(c context.Context, page, row int, order string, q
 	var extrinsics []model.ChainExtrinsic
 	var count int
 
-	blockNum, _ := d.GetFillAlreadyBlockNum(context.TODO())
+	blockNum, _ := d.GetFillBestBlockNum(context.TODO())
 	for index := blockNum / model.SplitTableBlockNum; index >= 0; index-- {
 		var tableData []model.ChainExtrinsic
 		var tableCount int
@@ -106,7 +105,7 @@ func (d *Dao) GetExtrinsicList(c context.Context, page, row int, order string, q
 
 func (d *Dao) GetExtrinsicsByHash(c context.Context, hash string) *model.ChainExtrinsic {
 	var extrinsic model.ChainExtrinsic
-	blockNum, _ := d.GetFillAlreadyBlockNum(c)
+	blockNum, _ := d.GetFillBestBlockNum(c)
 	for index := blockNum / (model.SplitTableBlockNum); index >= 0; index-- {
 		query := d.db.Model(model.ChainExtrinsic{BlockNum: index * model.SplitTableBlockNum}).Where("extrinsic_hash = ?", hash).First(&extrinsic)
 		if query != nil && !query.RecordNotFound() {

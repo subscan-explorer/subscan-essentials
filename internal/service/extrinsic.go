@@ -42,7 +42,6 @@ func (s *Service) createExtrinsic(c context.Context,
 		extrinsic.BlockNum = block.BlockNum
 		extrinsic.ExtrinsicIndex = fmt.Sprintf("%d-%d", extrinsic.BlockNum, index)
 		extrinsic.Success = s.getExtrinsicSuccess(eventMap[extrinsic.ExtrinsicIndex])
-		extrinsic.Finalized = block.Finalized
 
 		if tp := s.getTimestamp(&extrinsic); tp > 0 {
 			blockTimestamp = tp

@@ -37,7 +37,6 @@ var (
 			},
 		}),
 		Success:       true,
-		Finalized:     true,
 		ExtrinsicHash: "0x368f61800f8645f67d59baf0602b236ff47952097dcaef3aa026b50ddc8dcea0",
 		Signature:     "d46ec05eb03ef6904b36fd06fe7923d2a5bccf68ddb53573e821652dafd9644ae82e29c6dbe1519a5b7052c4647814f2987ad23b7c930ed7175726755e27898f",
 		IsSigned:      true,
@@ -66,7 +65,6 @@ var (
 		Params:       util.ToString([]interface{}{}),
 		ExtrinsicIdx: 0,
 		EventIndex:   "947687-0",
-		Finalized:    true,
 	}
 )
 
@@ -133,7 +131,7 @@ func (m *MockDao) SaveFillAlreadyFinalizedBlockNum(c context.Context, blockNum i
 	return nil
 }
 
-func (m *MockDao) GetFillAlreadyBlockNum(c context.Context) (num int, err error) {
+func (m *MockDao) GetFillBestBlockNum(c context.Context) (num int, err error) {
 	args := m.Called(c)
 	return args.Int(0), args.Error(1)
 }
@@ -233,7 +231,7 @@ func (m *MockDao) GetMetadata(c context.Context) (ms map[string]string, err erro
 	return nil, nil
 }
 
-func (m *MockDao) GetCurrentBlockNum(c context.Context) (uint64, error) {
+func (m *MockDao) GetBestBlockNum(c context.Context) (uint64, error) {
 	args := m.Called(c)
 	return args.Get(0).(uint64), args.Error(1)
 }

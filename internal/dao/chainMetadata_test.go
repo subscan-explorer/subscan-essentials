@@ -51,7 +51,7 @@ func TestDao_GetCurrentBlockNum(t *testing.T) {
 	ctx := context.TODO()
 	testCase := map[string]interface{}{"blockNum": 999999}
 	_ = testDao.SetMetadata(ctx, testCase)
-	blockNum, err := testDao.GetCurrentBlockNum(ctx)
+	blockNum, err := testDao.GetBestBlockNum(ctx)
 	assert.NoError(t, err)
 	assert.Equal(t, uint64(999999), blockNum)
 }

@@ -35,7 +35,6 @@ var (
 		Params:       util.ToString([]interface{}{}),
 		ExtrinsicIdx: 0,
 		EventIndex:   "947687-0",
-		Finalized:    true,
 	}
 
 	testExtrinsic = model.ChainExtrinsic{
@@ -51,8 +50,7 @@ var (
 			Type:  "Compact<Moment>",
 			Value: 1594791900,
 		},
-		Success:   true,
-		Finalized: true,
+		Success: true,
 	}
 
 	testSignedExtrinsic = model.ChainExtrinsic{
@@ -77,18 +75,16 @@ var (
 			},
 		},
 		Success:       true,
-		Finalized:     true,
 		ExtrinsicHash: "0x368f61800f8645f67d59baf0602b236ff47952097dcaef3aa026b50ddc8dcea0",
 		Signature:     "d46ec05eb03ef6904b36fd06fe7923d2a5bccf68ddb53573e821652dafd9644ae82e29c6dbe1519a5b7052c4647814f2987ad23b7c930ed7175726755e27898f",
 		IsSigned:      true,
 	}
 
 	testLog = model.ChainLog{
-		BlockNum:  947687,
-		LogIndex:  "947687-0",
-		LogType:   "Seal",
-		Data:      `{"data":"0x0e4278b7e76436dc08ee4c47d83a0313ef5980dc9fc46b94ccf76318906a4c162e6d1a2b33a69184d4c662ce31176652f0fde8b87cd58e6d1347a28aa29fd58e","engine":1161969986}`,
-		Finalized: true,
+		BlockNum: 947687,
+		LogIndex: "947687-0",
+		LogType:  "Seal",
+		Data:     `{"data":"0x0e4278b7e76436dc08ee4c47d83a0313ef5980dc9fc46b94ccf76318906a4c162e6d1a2b33a69184d4c662ce31176652f0fde8b87cd58e6d1347a28aa29fd58e","engine":1161969986}`,
 	}
 )
 

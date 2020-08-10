@@ -26,7 +26,7 @@ func TestDao_DropExtrinsicNotFinalizedData(t *testing.T) {
 	txn.Commit()
 	assert.NoError(t, err)
 
-	testDao.DropExtrinsicNotFinalizedData(ctx, tempExtrinsic.BlockNum, tempExtrinsic.Finalized)
+	testDao.DropExtrinsicNotFinalizedData(ctx, tempExtrinsic.BlockNum, true)
 	assert.Equal(t, []model.ChainExtrinsicJson(nil), testDao.GetExtrinsicsByBlockNum(947688))
 }
 

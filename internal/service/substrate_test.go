@@ -17,8 +17,8 @@ func TestSubscribeParserMessage(t *testing.T) {
 	err := subscribeSrv.parser([]byte(``))
 	assert.Error(t, err)
 
-	testSrv.dao.(*MockDao).On("GetCurrentBlockNum", context.TODO()).Return(uint64(1245201), nil)
-	testSrv.dao.(*MockDao).On("GetFillAlreadyBlockNum", context.TODO()).Return(1245200, nil)
+	testSrv.dao.(*MockDao).On("GetBestBlockNum", context.TODO()).Return(uint64(1245201), nil)
+	testSrv.dao.(*MockDao).On("GetFillBestBlockNum", context.TODO()).Return(1245200, nil)
 	testSrv.dao.(*MockDao).On("GetFinalizedBlockNum", context.TODO()).Return(uint64(1245201), nil)
 	testSrv.dao.(*MockDao).On("GetFillFinalizedBlockNum", context.TODO()).Return(1245200, nil)
 

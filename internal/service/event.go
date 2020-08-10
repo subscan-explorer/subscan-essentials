@@ -25,7 +25,6 @@ func (s *Service) AddEvent(
 		event.ModuleId = strings.ToLower(event.ModuleId)
 		event.ExtrinsicHash = hashMap[fmt.Sprintf("%d-%d", block.BlockNum, event.ExtrinsicIdx)]
 		event.EventIndex = fmt.Sprintf("%d-%d", block.BlockNum, event.ExtrinsicIdx)
-		event.Finalized = block.Finalized
 		event.BlockNum = block.BlockNum
 
 		if err = s.dao.CreateEvent(txn, &event); err == nil {

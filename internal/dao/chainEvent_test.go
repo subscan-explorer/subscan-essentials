@@ -23,7 +23,7 @@ func TestDao_DropEventNotFinalizedData(t *testing.T) {
 	txn.Commit()
 	assert.NoError(t, err)
 
-	testDao.DropEventNotFinalizedData(tempEvent.BlockNum, tempEvent.Finalized)
+	testDao.DropEventNotFinalizedData(tempEvent.BlockNum, true)
 	assert.Equal(t, []model.ChainEventJson{}, testDao.GetEventByBlockNum(947688))
 
 }

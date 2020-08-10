@@ -11,7 +11,7 @@ var (
 	BalanceAccuracy           = GetEnv("SUBSTRATE_ACCURACY", "9")
 	CommissionAccuracy        = GetEnv("COMMISSION_ACCURACY", "9")
 	WSEndPoint                = GetEnv("CHAIN_WS_ENDPOINT", "wss://crab.darwinia.network")
-	NetworkNode               = GetEnv("NETWORK_NODE", "")
+	NetworkNode               = GetEnv("NETWORK_NODE", "crab")
 	IsProduction              = os.Getenv("DEPLOY_ENV") == "prod"
 )
 

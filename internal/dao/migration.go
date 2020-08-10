@@ -18,7 +18,7 @@ func (d *Dao) Migration() {
 func (d *Dao) splitTableMigrate() {
 	var blockNum = 0
 	if d.redis != nil {
-		blockNum, _ = d.GetFillAlreadyBlockNum(context.TODO())
+		blockNum, _ = d.GetFillBestBlockNum(context.TODO())
 	}
 	for i := 0; i <= blockNum/model.SplitTableBlockNum; i++ {
 		d.blockMigrate(i * model.SplitTableBlockNum)

@@ -21,7 +21,6 @@ func (d *Dao) CreateEvent(txn *GormDB, event *model.ChainEvent) error {
 		EventId:       event.EventId,
 		ExtrinsicIdx:  event.ExtrinsicIdx,
 		ExtrinsicHash: extrinsicHash,
-		Finalized:     event.Finalized,
 	}
 	query := txn.Create(&e)
 	if query.RowsAffected > 0 {
@@ -58,7 +57,7 @@ func (d *Dao) GetEventList(c context.Context, page, row int, order string, where
 
 	var count int
 
-	blockNum, _ := d.GetFillAlreadyBlockNum(c)
+	blockNum, _ := d.GetFillBestBlockNum(c)
 	for index := blockNum / model.SplitTableBlockNum; index >= 0; index-- {
 		var tableData []model.ChainEvent
 		var tableCount int

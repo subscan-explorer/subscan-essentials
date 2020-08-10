@@ -5,12 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-kratos/kratos/pkg/log"
-	"github.com/itering/scale.go/types"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/address"
 	"github.com/itering/substrate-api-rpc"
-	"github.com/itering/substrate-api-rpc/metadata"
 	"github.com/itering/substrate-api-rpc/rpc"
 	"github.com/itering/substrate-api-rpc/storage"
 )
@@ -26,7 +24,7 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 
 	blockNum := util.StringToInt(util.HexToNumStr(block.Header.Number))
 
-	metadataInstant := s.getMetadataInstant(spec)
+	metadataInstant := s.getMetadataInstant(spec, hash)
 
 	// Extrinsic
 	decodeExtrinsics, err = substrate.DecodeExtrinsic(block.Extrinsics, metadataInstant, spec)
@@ -109,7 +107,7 @@ func (s *Service) UpdateBlockData(block *model.ChainBlock, finalized bool) (err 
 
 	spec := block.SpecVersion
 
-	metadataInstant := s.getMetadataInstant(spec)
+	metadataInstant := s.getMetadataInstant(spec, block.Hash)
 
 	// Event
 	decodeEvent, err = substrate.DecodeEvent(block.Event, metadataInstant, spec)
@@ -183,14 +181,6 @@ func (s *Service) GetCurrentRuntimeSpecVersion(blockNum int) int {
 		return block.SpecVersion
 	}
 	return -1
-}
-
-func (s *Service) getMetadataInstant(spec int) *types.MetadataStruct {
-	metadataInstant, ok := metadata.RuntimeMetadata[spec]
-	if !ok {
-		metadataInstant = metadata.Process(s.dao.RuntimeVersionRaw(spec))
-	}
-	return metadataInstant
 }
 
 func (s *Service) GetExtrinsicList(page, row int, order string, query ...string) ([]*model.ChainExtrinsicJson, int) {
@@ -274,5 +264,5 @@ func (s *Service) BlockAsSampleJson(c context.Context, block *model.ChainBlock) 
 }
 
 func (s *Service) GetCurrentBlockNum(c context.Context) (uint64, error) {
-	return s.dao.GetCurrentBlockNum(c)
+	return s.dao.GetBestBlockNum(c)
 }

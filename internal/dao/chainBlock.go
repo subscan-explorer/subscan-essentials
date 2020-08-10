@@ -40,7 +40,7 @@ func (d *Dao) SaveFillAlreadyFinalizedBlockNum(c context.Context, blockNum int) 
 	return
 }
 
-func (d *Dao) GetFillAlreadyBlockNum(c context.Context) (num int, err error) {
+func (d *Dao) GetFillBestBlockNum(c context.Context) (num int, err error) {
 	conn := d.redis.Get(c)
 	defer conn.Close()
 	num, err = redis.Int(conn.Do("GET", RedisFillAlreadyBlockNum))
@@ -56,7 +56,7 @@ func (d *Dao) GetFillFinalizedBlockNum(c context.Context) (num int, err error) {
 
 func (d *Dao) GetBlockList(page, row int) []model.ChainBlock {
 	var blocks []model.ChainBlock
-	blockNum, _ := d.GetFillAlreadyBlockNum(context.TODO())
+	blockNum, _ := d.GetFillBestBlockNum(context.TODO())
 	head := blockNum - page*row
 	if head < 0 {
 		return nil
@@ -91,7 +91,7 @@ func (d *Dao) GetBlockList(page, row int) []model.ChainBlock {
 
 func (d *Dao) GetBlockByHash(c context.Context, hash string) *model.ChainBlock {
 	var block model.ChainBlock
-	blockNum, _ := d.GetCurrentBlockNum(context.TODO())
+	blockNum, _ := d.GetBestBlockNum(context.TODO())
 	for index := int(blockNum / uint64(model.SplitTableBlockNum)); index >= 0; index-- {
 		query := d.db.Model(&model.ChainBlock{BlockNum: index * model.SplitTableBlockNum}).Where("hash = ?", hash).Scan(&block)
 		if query != nil && !query.RecordNotFound() {
