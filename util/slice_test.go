@@ -35,11 +35,10 @@ func TestLookup(t *testing.T) {
 }
 
 func TestContinuousNums(t *testing.T) {
-	rns := ContinuousNums(6, 7, "desc")
-	rnsd := ContinuousNums(0, 7, "asc")
 	assert.Nil(t, ContinuousNums(7, 0, "asc"))
-	assert.Equal(t, []int{6, 5, 4, 3, 2, 1, 0}, rns)
-	assert.Equal(t, []int{0, 1, 2, 3, 4, 5, 6}, rnsd)
+	assert.Equal(t, []int{6, 5, 4, 3, 2, 1, 0}, ContinuousNums(6, 7, "desc"))
+	assert.Equal(t, []int{0, 1, 2, 3, 4, 5, 6}, ContinuousNums(0, 7, "asc"))
+	assert.Equal(t, []int{6, 5, 4, 3, 2, 1, 0}, ContinuousNums(6, 8, "desc"))
 
 }
 

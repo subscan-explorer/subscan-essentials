@@ -62,5 +62,5 @@ func TestDao_GetExtrinsicsDetailByIndex(t *testing.T) {
 func TestDao_ExtrinsicsAsJson(t *testing.T) {
 	ctx := context.TODO()
 	extrinsics := testDao.GetExtrinsicsByHash(ctx, "0x368f61800f8645f67d59baf0602b236ff47952097dcaef3aa026b50ddc8dcea0")
-	assert.Equal(t, `[{"name":"dest","type":"Address","value":"563d11af91b3a166d07110bb49e84094f38364ef39c43a26066ca123a8b9532b","valueRaw":"563d11af91b3a166d07110bb49e84094f38364ef39c43a26066ca123a8b9532b"},{"name":"value","type":"Compact\u003cBalance\u003e","value":"1000000000000000000","valueRaw":"13000064a7b3b6e00d"}]`, testDao.ExtrinsicsAsJson(extrinsics).Params)
+	assert.Equal(t, `[{"name":"dest","type":"Address","value":"563d11af91b3a166d07110bb49e84094f38364ef39c43a26066ca123a8b9532b","valueRaw":""},{"name":"value","type":"Compact\u003cBalance\u003e","value":"1000000000000000000","valueRaw":""}]`, testDao.ExtrinsicsAsJson(extrinsics).Params)
 }

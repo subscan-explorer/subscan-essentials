@@ -122,12 +122,12 @@ func (s *Service) getExtrinsicSuccess(e []model.ChainEvent) bool {
 
 func (s *Service) afterExtrinsic(block *model.ChainBlock, extrinsic *model.ChainExtrinsic, events []model.ChainEvent) {
 	block.BlockTimestamp = extrinsic.BlockTimestamp
-	pBlock := block.AsPluginBlock()
-	pExtrinsic := extrinsic.AsPluginExtrinsic()
+	pBlock := block.AsPlugin()
+	pExtrinsic := extrinsic.AsPlugin()
 
 	var pEvents []storage.Event
 	for _, event := range events {
-		pEvents = append(pEvents, *event.AsPluginEvent())
+		pEvents = append(pEvents, *event.AsPlugin())
 	}
 
 	for _, plugin := range plugins.RegisteredPlugins {

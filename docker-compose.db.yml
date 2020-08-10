@@ -1,7 +1,7 @@
 version: "2.4"
 
 services:
-  mysql-subscan:
+  mysql:
     image: mysql:5.7
     restart: always
     environment:

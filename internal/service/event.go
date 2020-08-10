@@ -69,8 +69,8 @@ func (s *Service) GetEventList(page, row int, order string, where ...string) ([]
 }
 
 func (s *Service) afterEvent(block *model.ChainBlock, event *model.ChainEvent, fee decimal.Decimal) {
-	pBlock := block.AsPluginBlock()
-	pEvent := event.AsPluginEvent()
+	pBlock := block.AsPlugin()
+	pEvent := event.AsPlugin()
 	for _, plugin := range plugins.RegisteredPlugins {
 		_ = plugin.ProcessEvent(pBlock, pEvent, fee)
 	}

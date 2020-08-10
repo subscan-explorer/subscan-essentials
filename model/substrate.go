@@ -36,7 +36,7 @@ func (c ChainBlock) TableName() string {
 	return fmt.Sprintf("chain_blocks_%d", c.BlockNum/SplitTableBlockNum)
 }
 
-func (c *ChainBlock) AsPluginBlock() *storage.Block {
+func (c *ChainBlock) AsPlugin() *storage.Block {
 	return &storage.Block{
 		BlockNum:       c.BlockNum,
 		BlockTimestamp: c.BlockTimestamp,
@@ -68,7 +68,7 @@ func (c ChainEvent) TableName() string {
 	return fmt.Sprintf("chain_events_%d", c.BlockNum/SplitTableBlockNum)
 }
 
-func (c *ChainEvent) AsPluginEvent() *storage.Event {
+func (c *ChainEvent) AsPlugin() *storage.Event {
 	return &storage.Event{
 		BlockNum:      c.BlockNum,
 		ExtrinsicIdx:  c.ExtrinsicIdx,
@@ -110,7 +110,7 @@ func (c ChainExtrinsic) TableName() string {
 	return fmt.Sprintf("chain_extrinsics_%d", c.BlockNum/SplitTableBlockNum)
 }
 
-func (c *ChainExtrinsic) AsPluginExtrinsic() *storage.Extrinsic {
+func (c *ChainExtrinsic) AsPlugin() *storage.Extrinsic {
 	return &storage.Extrinsic{
 		ExtrinsicIndex:     c.ExtrinsicIndex,
 		CallModule:         c.CallModule,
@@ -158,7 +158,6 @@ type ExtrinsicParam struct {
 }
 
 type EventParam struct {
-	Type     string      `json:"type"`
-	Value    interface{} `json:"value"`
-	ValueRaw string      `json:"valueRaw"`
+	Type  string      `json:"type"`
+	Value interface{} `json:"value"`
 }

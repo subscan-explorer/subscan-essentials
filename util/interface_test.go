@@ -5,16 +5,6 @@ import (
 	"testing"
 )
 
-var (
-	field = struct {
-		A string
-		B string
-	}{
-		"a",
-		"b",
-	}
-)
-
 func TestFunc(t *testing.T) {
 	callerNameRaw := "testing.tRunner"
 	funcNameRaw := "github.com/itering/subscan/util.TestFunc"
@@ -74,27 +64,6 @@ func TestBool(t *testing.T) {
 			"Parse bool failed, got %v, want %v",
 			rt,
 			rf,
-		)
-	}
-}
-
-func TestFieldName(t *testing.T) {
-	a, _ := GetStringValueByFieldName(field, "A")
-	b, _ := GetStringValueByFieldName(field, "B")
-
-	if a != "a" {
-		t.Errorf(
-			"Get struct field a failed, got %v, want %v",
-			a,
-			"a",
-		)
-	}
-
-	if b != "b" {
-		t.Errorf(
-			"Get struct field a failed, got %v, want %v",
-			b,
-			"b",
 		)
 	}
 }

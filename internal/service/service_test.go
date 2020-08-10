@@ -26,16 +26,14 @@ var (
 		AccountId:          "242f0781faa44f34ddcbc9e731d0ddb51c97f5b58bb2202090a3a1c679fc4c63",
 		Params: util.ToString([]model.ExtrinsicParam{
 			{
-				Name:     "dest",
-				Type:     "Address",
-				Value:    "563d11af91b3a166d07110bb49e84094f38364ef39c43a26066ca123a8b9532b",
-				ValueRaw: "563d11af91b3a166d07110bb49e84094f38364ef39c43a26066ca123a8b9532b",
+				Name:  "dest",
+				Type:  "Address",
+				Value: "563d11af91b3a166d07110bb49e84094f38364ef39c43a26066ca123a8b9532b",
 			},
 			{
-				Name:     "value",
-				Type:     "Compact<Balance>",
-				Value:    "1000000000000000000",
-				ValueRaw: "13000064a7b3b6e00d",
+				Name:  "value",
+				Type:  "Compact<Balance>",
+				Value: "1000000000000000000",
 			},
 		}),
 		Success:       true,

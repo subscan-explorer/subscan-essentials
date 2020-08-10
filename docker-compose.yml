@@ -6,7 +6,7 @@ services:
     init: true
     build: .
     environment:
-      MYSQL_HOST: mysql-subscan
+      MYSQL_HOST: mysql
       MYSQL_PASS: 'helloload'
       MYSQL_DB: 'subscan'
       REDIS_ADDR: redis:6379

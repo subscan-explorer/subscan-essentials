@@ -2,12 +2,8 @@ package util
 
 import (
 	"encoding/json"
-	"reflect"
 	"runtime"
-	"strconv"
 	"strings"
-
-	"github.com/shopspring/decimal"
 )
 
 // Func
@@ -44,35 +40,6 @@ func ToString(i interface{}) string {
 		val = string(b)
 	}
 	return val
-}
-
-func GetStringValueByFieldName(n interface{}, fieldName string) (string, bool) {
-	s := reflect.ValueOf(n)
-	if s.Kind() == reflect.Ptr {
-		s = s.Elem()
-	}
-	if s.Kind() != reflect.Struct {
-		return "", false
-	}
-	f := s.FieldByName(fieldName)
-	if !f.IsValid() {
-		return "", false
-	}
-	switch f.Kind() {
-	case reflect.String:
-		return f.Interface().(string), true
-	case reflect.Int:
-		return strconv.FormatInt(f.Int(), 10), true
-	case reflect.Uint:
-		return strconv.FormatUint(f.Uint(), 10), true
-	case reflect.Int64:
-		return strconv.FormatInt(f.Int(), 10), true
-	default:
-		if reflect.TypeOf(f.Interface()).Name() == "Decimal" {
-			return f.Interface().(decimal.Decimal).String(), true
-		}
-		return "", false
-	}
 }
 
 func UnmarshalAny(r interface{}, raw interface{}) {
