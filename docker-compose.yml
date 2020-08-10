@@ -1,11 +1,10 @@
 version: "2.4"
 
 services:
-  subscan-api: &app_base
-    image: scan/backend
-    init: true
+  subscan-api:
     build: .
-    environment:
+    image: subscan/api
+    environment: &app_base
       MYSQL_HOST: mysql
       MYSQL_PASS: 'helloload'
       MYSQL_DB: 'subscan'
@@ -18,10 +17,12 @@ services:
     networks:
       - app_net
   subscan-observer:
-    <<: *app_base
-    image: scan/backend
-    ports: []
+    environment:
+      <<: *app_base
+    image: subscan/api
     command: ["python","run.py","substrate"]
+    networks:
+      - app_net
 
 networks:
   app_net:
