@@ -23,11 +23,11 @@ type IDao interface {
 	GetBlockByNum(int) *model.ChainBlock
 	SaveFillAlreadyBlockNum(context.Context, int) error
 	SaveFillAlreadyFinalizedBlockNum(c context.Context, blockNum int) (err error)
-	GetFillAlreadyBlockNum(c context.Context) (num int, err error)
+	GetFillBestBlockNum(c context.Context) (num int, err error)
 	GetFillFinalizedBlockNum(c context.Context) (num int, err error)
 	GetBlockList(page, row int) []model.ChainBlock
 	BlockAsJson(c context.Context, block *model.ChainBlock) *model.ChainBlockJson
-	CreateEvent(c context.Context, txn *GormDB, event *model.ChainEvent) error
+	CreateEvent(txn *GormDB, event *model.ChainEvent) error
 	DropEventNotFinalizedData(blockNum int, finalized bool) bool
 	GetEventByBlockNum(blockNum int, where ...string) []model.ChainEventJson
 	GetEventList(c context.Context, page, row int, order string, where ...string) ([]model.ChainEvent, int)
@@ -41,14 +41,14 @@ type IDao interface {
 	GetExtrinsicsDetailByHash(c context.Context, hash string) *model.ExtrinsicDetail
 	GetExtrinsicsDetailByIndex(c context.Context, index string) *model.ExtrinsicDetail
 	ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsicJson
-	CreateLog(c context.Context, txn *GormDB, ce *model.ChainLog) error
+	CreateLog(txn *GormDB, ce *model.ChainLog) error
 	DropLogsNotFinalizedData(blockNum int, finalized bool) bool
 	GetLogsByIndex(index string) *model.ChainLogJson
 	GetLogByBlockNum(blockNum int) []model.ChainLogJson
 	SetMetadata(c context.Context, metadata map[string]interface{}) (err error)
 	IncrMetadata(c context.Context, filed string, incrNum int) (err error)
 	GetMetadata(c context.Context) (ms map[string]string, err error)
-	GetCurrentBlockNum(c context.Context) (uint64, error)
+	GetBestBlockNum(c context.Context) (uint64, error)
 	GetFinalizedBlockNum(c context.Context) (uint64, error)
 	CreateRuntimeVersion(name string, specVersion int) int64
 	SetRuntimeData(specVersion int, modules string, rawData string) int64

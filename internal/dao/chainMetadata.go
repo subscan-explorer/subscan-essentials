@@ -43,7 +43,7 @@ func (d *Dao) GetMetadata(c context.Context) (ms map[string]string, err error) {
 	return
 }
 
-func (d *Dao) GetCurrentBlockNum(c context.Context) (uint64, error) {
+func (d *Dao) GetBestBlockNum(c context.Context) (uint64, error) {
 	conn := d.redis.Get(c)
 	defer conn.Close()
 	return redis.Uint64(conn.Do("HGET", RedisMetadataKey, "blockNum"))

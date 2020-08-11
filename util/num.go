@@ -1,7 +1,6 @@
 package util
 
 import (
-	"encoding/binary"
 	"math/big"
 	"strconv"
 	"strings"
@@ -38,13 +37,6 @@ func IntInSlice(a int, list []int) bool {
 	return false
 }
 
-// Big Int
-func U32Encode(i int) string {
-	bs := make([]byte, 4)
-	binary.LittleEndian.PutUint32(bs, uint32(i))
-	return BytesToHex(bs)
-}
-
 func U256(v string) *big.Int {
 	v = strings.TrimPrefix(v, "0x")
 	bn := new(big.Int)
@@ -67,22 +59,6 @@ func IntFromInterface(i interface{}) int {
 		return StringToInt(i)
 	}
 	return 0
-}
-
-func BigIntFromInterface(i interface{}) *big.Int {
-	switch i := i.(type) {
-	case int:
-		return big.NewInt(int64(i))
-	case int64:
-		return big.NewInt(i)
-	case float64:
-		return big.NewInt(int64(i))
-	case string:
-		b := big.NewInt(0)
-		b.SetString(i, 10)
-		return b
-	}
-	return big.NewInt(0)
 }
 
 func Int64FromInterface(i interface{}) int64 {

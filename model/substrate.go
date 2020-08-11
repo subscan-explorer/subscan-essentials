@@ -1,9 +1,9 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/itering/subscan-plugin/storage"
+	"github.com/itering/subscan/util"
 	"github.com/shopspring/decimal"
 )
 
@@ -36,7 +36,7 @@ func (c ChainBlock) TableName() string {
 	return fmt.Sprintf("chain_blocks_%d", c.BlockNum/SplitTableBlockNum)
 }
 
-func (c *ChainBlock) AsPluginBlock() *storage.Block {
+func (c *ChainBlock) AsPlugin() *storage.Block {
 	return &storage.Block{
 		BlockNum:       c.BlockNum,
 		BlockTimestamp: c.BlockTimestamp,
@@ -58,7 +58,6 @@ type ChainEvent struct {
 	Params        interface{} `json:"params" sql:"type:text;" `
 	ExtrinsicHash string      `json:"extrinsic_hash" sql:"default: null" `
 	EventIdx      int         `json:"event_idx"`
-	Finalized     bool        `json:"finalized"`
 }
 
 func (c ChainEvent) TableName() string {
@@ -68,14 +67,13 @@ func (c ChainEvent) TableName() string {
 	return fmt.Sprintf("chain_events_%d", c.BlockNum/SplitTableBlockNum)
 }
 
-func (c *ChainEvent) AsPluginEvent() *storage.Event {
-	paramBytes, _ := json.Marshal(c.Params)
+func (c *ChainEvent) AsPlugin() *storage.Event {
 	return &storage.Event{
 		BlockNum:      c.BlockNum,
 		ExtrinsicIdx:  c.ExtrinsicIdx,
 		ModuleId:      c.ModuleId,
 		EventId:       c.EventId,
-		Params:        paramBytes,
+		Params:        []byte(util.ToString(c.Params)),
 		ExtrinsicHash: c.ExtrinsicHash,
 		EventIdx:      c.EventIdx,
 	}
@@ -100,7 +98,6 @@ type ChainExtrinsic struct {
 	IsSigned           bool            `json:"is_signed"`
 	Success            bool            `json:"success"`
 	Fee                decimal.Decimal `json:"fee" sql:"type:decimal(30,0);"`
-	Finalized          bool            `json:"finalized"`
 	BatchIndex         int             `json:"-" gorm:"-"`
 }
 
@@ -111,13 +108,12 @@ func (c ChainExtrinsic) TableName() string {
 	return fmt.Sprintf("chain_extrinsics_%d", c.BlockNum/SplitTableBlockNum)
 }
 
-func (c *ChainExtrinsic) AsPluginExtrinsic() *storage.Extrinsic {
-	paramBytes, _ := json.Marshal(c.Params)
+func (c *ChainExtrinsic) AsPlugin() *storage.Extrinsic {
 	return &storage.Extrinsic{
 		ExtrinsicIndex:     c.ExtrinsicIndex,
 		CallModule:         c.CallModule,
 		CallModuleFunction: c.CallModuleFunction,
-		Params:             paramBytes,
+		Params:             []byte(util.ToString(c.Params)),
 		AccountId:          c.AccountId,
 		Signature:          c.Signature,
 		Nonce:              c.Nonce,
@@ -160,7 +156,6 @@ type ExtrinsicParam struct {
 }
 
 type EventParam struct {
-	Type     string      `json:"type"`
-	Value    interface{} `json:"value"`
-	ValueRaw string      `json:"valueRaw"`
+	Type  string      `json:"type"`
+	Value interface{} `json:"value"`
 }

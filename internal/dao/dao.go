@@ -2,10 +2,10 @@ package dao
 
 import (
 	"context"
+	"github.com/itering/subscan/configs"
 	"github.com/itering/substrate-api-rpc/websocket"
 
 	"github.com/go-kratos/kratos/pkg/cache/redis"
-	"github.com/go-kratos/kratos/pkg/conf/paladin"
 	"github.com/go-kratos/kratos/pkg/sync/pipeline/fanout"
 	"github.com/jinzhu/gorm"
 )
@@ -37,22 +37,12 @@ func (d *Dao) DB() *gorm.DB {
 	return d.db
 }
 
-func checkErr(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
 // New new a dao and return.
 func New() (dao *Dao) {
-	var (
-		dc mysqlConf
-		rc redisConf
-	)
-	checkErr(paladin.Get("mysql.toml").UnmarshalTOML(&dc))
-	checkErr(paladin.Get("redis.toml").UnmarshalTOML(&rc))
-	dc.mergeEnvironment()
-	rc.mergeEnvironment()
+	var dc configs.MysqlConf
+	var rc configs.RedisConf
+	dc.MergeConf()
+	rc.MergeConf()
 	dao = &Dao{
 		db:    newDb(dc),
 		redis: redis.NewPool(rc.Config, redis.DialDatabase(rc.DbName)),

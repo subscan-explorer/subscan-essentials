@@ -10,6 +10,11 @@ import (
 
 func Install(conf string) {
 	// create database
+	// conf
+	_ = fileCopy(fmt.Sprintf("%s/http.toml.example", conf), fmt.Sprintf("%s/http.toml", conf))
+	_ = fileCopy(fmt.Sprintf("%s/mysql.toml.example", conf), fmt.Sprintf("%s/mysql.toml", conf))
+	_ = fileCopy(fmt.Sprintf("%s/redis.toml.example", conf), fmt.Sprintf("%s/redis.toml", conf))
+
 	func() {
 		dbHost := util.GetEnv("MYSQL_HOST", "127.0.0.1")
 		dbUser := util.GetEnv("MYSQL_USER", "root")
@@ -22,19 +27,13 @@ func Install(conf string) {
 		defer func() {
 			_ = db.Close()
 		}()
-		q := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s DEFAULT CHARACTER SET = `utf8mb4`", util.NetworkNode)
-		_, err = db.Exec(q)
+		_, err = db.Exec("CREATE DATABASE IF NOT EXISTS subscan DEFAULT CHARACTER SET = `utf8mb4`")
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println("Create database", util.NetworkNode, "Success!!!")
+		fmt.Println("Create database success!!!")
 
 	}()
-
-	// conf
-	_ = fileCopy(fmt.Sprintf("%s/http.toml.example", conf), fmt.Sprintf("%s/http.toml", conf))
-	_ = fileCopy(fmt.Sprintf("%s/mysql.toml.example", conf), fmt.Sprintf("%s/mysql.toml", conf))
-	_ = fileCopy(fmt.Sprintf("%s/redis.toml.example", conf), fmt.Sprintf("%s/redis.toml", conf))
 
 }
 

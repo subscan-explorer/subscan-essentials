@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func (d *Dao) CreateEvent(c context.Context, txn *GormDB, event *model.ChainEvent) error {
+func (d *Dao) CreateEvent(txn *GormDB, event *model.ChainEvent) error {
 	var incrCount int
 	extrinsicHash := util.AddHex(event.ExtrinsicHash)
 	e := model.ChainEvent{
@@ -16,17 +16,16 @@ func (d *Dao) CreateEvent(c context.Context, txn *GormDB, event *model.ChainEven
 		BlockNum:      event.BlockNum,
 		Type:          event.Type,
 		ModuleId:      event.ModuleId,
-		Params:        util.InterfaceToString(event.Params),
+		Params:        util.ToString(event.Params),
 		EventIdx:      event.EventIdx,
 		EventId:       event.EventId,
 		ExtrinsicIdx:  event.ExtrinsicIdx,
 		ExtrinsicHash: extrinsicHash,
-		Finalized:     event.Finalized,
 	}
 	query := txn.Create(&e)
 	if query.RowsAffected > 0 {
 		incrCount++
-		_ = d.IncrMetadata(c, "count_event", incrCount)
+		_ = d.IncrMetadata(context.TODO(), "count_event", incrCount)
 	}
 	return d.checkDBError(query.Error)
 }
@@ -58,7 +57,7 @@ func (d *Dao) GetEventList(c context.Context, page, row int, order string, where
 
 	var count int
 
-	blockNum, _ := d.GetFillAlreadyBlockNum(c)
+	blockNum, _ := d.GetFillBestBlockNum(c)
 	for index := blockNum / model.SplitTableBlockNum; index >= 0; index-- {
 		var tableData []model.ChainEvent
 		var tableCount int

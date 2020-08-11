@@ -1,8 +1,9 @@
-package daemons
+package observer
 
 import (
 	"fmt"
 	"github.com/itering/subscan/internal/dao"
+	"github.com/itering/subscan/pkg/recws"
 	"log"
 	"os"
 	"syscall"
@@ -28,7 +29,7 @@ func doAction(dt string) {
 		return
 	}
 
-	logDir := util.GetEnv("LOG_DIR", "")
+	logDir := util.GetEnv("LOG_DIR", "../log/")
 	pid := fmt.Sprintf("%s%s_pid", logDir, dt)
 	logName := fmt.Sprintf("%s%s_log", logDir, dt)
 
@@ -89,7 +90,10 @@ func doRun(dt string) {
 LOOP:
 	for {
 		if dt == "substrate" {
-			srv.Subscribe()
+			interrupt := make(chan os.Signal, 1)
+			subscribeConn := &recws.RecConn{KeepAliveTimeout: 10 * time.Second}
+			subscribeConn.Dial(util.WSEndPoint, nil)
+			srv.Subscribe(subscribeConn, interrupt)
 		} else {
 			go heartBeat(dt)
 			switch dt {

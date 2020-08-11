@@ -8,24 +8,22 @@ import (
 )
 
 func TestDao_CreateEvent(t *testing.T) {
-	ctx := context.TODO()
 	txn := testDao.DbBegin()
-	err := testDao.CreateEvent(ctx, txn, &testEvent)
+	err := testDao.CreateEvent(txn, &testEvent)
 	txn.Commit()
 	assert.NoError(t, err)
 }
 
 func TestDao_DropEventNotFinalizedData(t *testing.T) {
-	ctx := context.TODO()
 	txn := testDao.DbBegin()
 
 	tempEvent := testEvent
 	tempEvent.BlockNum = 947688
-	err := testDao.CreateEvent(ctx, txn, &tempEvent)
+	err := testDao.CreateEvent(txn, &tempEvent)
 	txn.Commit()
 	assert.NoError(t, err)
 
-	testDao.DropEventNotFinalizedData(tempEvent.BlockNum, tempEvent.Finalized)
+	testDao.DropEventNotFinalizedData(tempEvent.BlockNum, true)
 	assert.Equal(t, []model.ChainEventJson{}, testDao.GetEventByBlockNum(947688))
 
 }

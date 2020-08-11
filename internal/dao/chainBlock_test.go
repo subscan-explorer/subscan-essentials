@@ -18,7 +18,7 @@ func TestDao_FillAlreadyBlockNum(t *testing.T) {
 	ctx := context.TODO()
 	err := testDao.SaveFillAlreadyBlockNum(ctx, 900000)
 	assert.NoError(t, err)
-	num, err := testDao.GetFillAlreadyBlockNum(ctx)
+	num, err := testDao.GetFillBestBlockNum(ctx)
 	assert.NoError(t, err)
 	assert.Equal(t, 900000, num)
 }

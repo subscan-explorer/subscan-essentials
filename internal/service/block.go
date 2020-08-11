@@ -5,12 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-kratos/kratos/pkg/log"
-	"github.com/itering/scale.go/types"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/address"
 	"github.com/itering/substrate-api-rpc"
-	"github.com/itering/substrate-api-rpc/metadata"
 	"github.com/itering/substrate-api-rpc/rpc"
 	"github.com/itering/substrate-api-rpc/storage"
 )
@@ -26,7 +24,7 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 
 	blockNum := util.StringToInt(util.HexToNumStr(block.Header.Number))
 
-	metadataInstant := s.getMetadataInstant(spec)
+	metadataInstant := s.getMetadataInstant(spec, hash)
 
 	// Extrinsic
 	decodeExtrinsics, err = substrate.DecodeExtrinsic(block.Extrinsics, metadataInstant, spec)
@@ -54,7 +52,7 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 	defer s.dao.DbRollback(txn)
 
 	var e []model.ChainEvent
-	util.UnmarshalToAnything(&e, decodeEvent)
+	util.UnmarshalAny(&e, decodeEvent)
 
 	eventMap := s.checkoutExtrinsicEvents(e, blockNum)
 
@@ -64,29 +62,29 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 		ParentHash:     block.Header.ParentHash,
 		StateRoot:      block.Header.StateRoot,
 		ExtrinsicsRoot: block.Header.ExtrinsicsRoot,
-		Logs:           util.InterfaceToString(block.Header.Digest.Logs),
-		Extrinsics:     util.InterfaceToString(block.Extrinsics),
+		Logs:           util.ToString(block.Header.Digest.Logs),
+		Extrinsics:     util.ToString(block.Extrinsics),
 		Event:          event,
 		SpecVersion:    spec,
 		Finalized:      finalized,
 	}
 
-	extrinsicsCount, blockTimestamp, extrinsicHash, extrinsicFee, err := s.createExtrinsic(c, txn, &cb, block.Extrinsics, decodeExtrinsics, eventMap, finalized, spec)
+	extrinsicsCount, blockTimestamp, extrinsicHash, extrinsicFee, err := s.createExtrinsic(c, txn, &cb, block.Extrinsics, decodeExtrinsics, eventMap)
 	if err != nil {
 		return err
 	}
 	cb.BlockTimestamp = blockTimestamp
-	eventCount, err := s.AddEvent(c, txn, &cb, e, extrinsicHash, finalized, spec, extrinsicFee)
+	eventCount, err := s.AddEvent(c, txn, &cb, e, extrinsicHash, extrinsicFee)
 	if err != nil {
 		return err
 	}
-
-	if validator, err = s.EmitLog(c, txn, hash, blockNum, logs, finalized); err != nil {
+	validatorList, _ := rpc.GetValidatorFromSub(nil, cb.Hash)
+	if validator, err = s.EmitLog(txn, hash, blockNum, logs, finalized, validatorList); err != nil {
 		return err
 	}
 
 	cb.Validator = validator
-	cb.CodecError = validator == ""
+	cb.CodecError = validator == "" && blockNum != 0
 	cb.ExtrinsicsCount = extrinsicsCount
 	cb.EventCount = eventCount
 
@@ -109,7 +107,7 @@ func (s *Service) UpdateBlockData(block *model.ChainBlock, finalized bool) (err 
 
 	spec := block.SpecVersion
 
-	metadataInstant := s.getMetadataInstant(spec)
+	metadataInstant := s.getMetadataInstant(spec, block.Hash)
 
 	// Event
 	decodeEvent, err = substrate.DecodeEvent(block.Event, metadataInstant, spec)
@@ -135,29 +133,30 @@ func (s *Service) UpdateBlockData(block *model.ChainBlock, finalized bool) (err 
 	}
 
 	var e []model.ChainEvent
-	util.UnmarshalToAnything(&e, decodeEvent)
+	util.UnmarshalAny(&e, decodeEvent)
 	eventMap := s.checkoutExtrinsicEvents(e, block.BlockNum)
 
 	txn := s.dao.DbBegin()
 	defer s.dao.DbRollback(txn)
 
-	extrinsicsCount, blockTimestamp, extrinsicHash, extrinsicFee, err := s.createExtrinsic(c, txn, block, encodeExtrinsics, decodeExtrinsics, eventMap, finalized, spec)
+	extrinsicsCount, blockTimestamp, extrinsicHash, extrinsicFee, err := s.createExtrinsic(c, txn, block, encodeExtrinsics, decodeExtrinsics, eventMap)
 	if err != nil {
 		return err
 	}
 	block.BlockTimestamp = blockTimestamp
 
-	eventCount, err := s.AddEvent(c, txn, block, e, extrinsicHash, finalized, spec, extrinsicFee)
+	eventCount, err := s.AddEvent(c, txn, block, e, extrinsicHash, extrinsicFee)
 	if err != nil {
 		return err
 	}
 
-	validator, err := s.EmitLog(c, txn, block.Hash, block.BlockNum, logs, finalized)
+	validatorList, _ := rpc.GetValidatorFromSub(nil, block.Hash)
+	validator, err := s.EmitLog(txn, block.Hash, block.BlockNum, logs, finalized, validatorList)
 	if err != nil {
 		return err
 	}
 
-	if err = s.dao.UpdateEventAndExtrinsic(txn, block, eventCount, extrinsicsCount, blockTimestamp, validator, validator == "", finalized); err != nil {
+	if err = s.dao.UpdateEventAndExtrinsic(txn, block, eventCount, extrinsicsCount, blockTimestamp, validator, validator == "" && block.BlockNum != 0, finalized); err != nil {
 		return
 	}
 
@@ -182,14 +181,6 @@ func (s *Service) GetCurrentRuntimeSpecVersion(blockNum int) int {
 		return block.SpecVersion
 	}
 	return -1
-}
-
-func (s *Service) getMetadataInstant(spec int) *types.MetadataStruct {
-	metadataInstant, ok := metadata.RuntimeMetadata[spec]
-	if !ok {
-		metadataInstant = metadata.Process(s.dao.RuntimeVersionRaw(spec))
-	}
-	return metadataInstant
 }
 
 func (s *Service) GetExtrinsicList(page, row int, order string, query ...string) ([]*model.ChainExtrinsicJson, int) {
@@ -270,4 +261,8 @@ func (s *Service) BlockAsSampleJson(c context.Context, block *model.ChainBlock) 
 		Finalized:       block.Finalized,
 	}
 	return &b
+}
+
+func (s *Service) GetCurrentBlockNum(c context.Context) (uint64, error) {
+	return s.dao.GetBestBlockNum(c)
 }

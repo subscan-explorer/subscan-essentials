@@ -18,7 +18,7 @@ import (
 // Because when receive chain_finalizedHead, get block still not finalized
 // so set Waiting block count to try avoid
 const (
-	FinalizedWaitingBlockCount = 5
+	FinalizedWaitingBlockCount = 3
 	ChainNewHead               = "chain_newHead"
 	ChainFinalizedHead         = "chain_finalizedHead"
 	StateStorage               = "state_storage"
@@ -26,17 +26,13 @@ const (
 )
 
 type subscription struct {
-	Topic  int   `json:"topic"`
-	Latest int64 `json:"latest"`
+	Topic  string `json:"topic"`
+	Latest int64  `json:"latest"`
 }
 
 var (
 	onceNewHead, onceFinHead sync.Once
-	subscriptionIds          = []subscription{
-		{Topic: newHeader},
-		{Topic: finalizeHeader},
-		{Topic: stateChange},
-	}
+	subscriptionIds          = []subscription{{Topic: ChainNewHead}, {Topic: ChainFinalizedHead}, {Topic: StateStorage}}
 )
 
 type SubscribeService struct {
@@ -55,8 +51,8 @@ func (s *Service) initSubscribeService(done chan struct{}) *SubscribeService {
 	}
 }
 
-func (s *SubscribeService) parser(message []byte) {
-	upgradeHealth := func(topic int) {
+func (s *SubscribeService) parser(message []byte) (err error) {
+	upgradeHealth := func(topic string) {
 		for index, subscript := range subscriptionIds {
 			if subscript.Topic == topic {
 				subscriptionIds[index].Latest = time.Now().Unix()
@@ -65,27 +61,23 @@ func (s *SubscribeService) parser(message []byte) {
 	}
 
 	var j rpc.JsonRpcResult
-	if err := json.Unmarshal(message, &j); err != nil {
-		return
+	if err = json.Unmarshal(message, &j); err != nil {
+		return err
 	}
+
 	switch j.Id {
 	case runtimeVersion:
 		r := j.ToRuntimeVersion()
 		_ = s.regRuntimeVersion(r.ImplName, r.SpecVersion)
 		_ = s.updateChainMetadata(map[string]interface{}{"implName": r.ImplName, "specVersion": r.SpecVersion})
 		util.CurrentRuntimeSpecVersion = r.SpecVersion
-	case newHeader, finalizeHeader, stateChange:
-		subscriptionIds = append(subscriptionIds, subscription{
-			Topic:  j.Id,
-			Latest: time.Now().Unix(),
-		})
 	}
 
 	switch j.Method {
 	case ChainNewHead:
 		r := j.ToNewHead()
 		_ = s.updateChainMetadata(map[string]interface{}{"blockNum": util.HexToNumStr(r.Number)})
-		upgradeHealth(newHeader)
+		upgradeHealth(j.Method)
 		go func() {
 			s.newHead <- true
 			onceNewHead.Do(func() {
@@ -95,7 +87,7 @@ func (s *SubscribeService) parser(message []byte) {
 	case ChainFinalizedHead:
 		r := j.ToNewHead()
 		_ = s.updateChainMetadata(map[string]interface{}{"finalized_blockNum": util.HexToNumStr(r.Number)})
-		upgradeHealth(finalizeHeader)
+		upgradeHealth(j.Method)
 		go func() {
 			s.newFinHead <- true
 			onceFinHead.Do(func() {
@@ -103,10 +95,11 @@ func (s *SubscribeService) parser(message []byte) {
 			})
 		}()
 	case StateStorage:
-		upgradeHealth(stateChange)
+		upgradeHealth(j.Method)
 	default:
 		return
 	}
+	return
 }
 
 func (s *SubscribeService) subscribeFetchBlock() {
@@ -133,35 +126,41 @@ func (s *SubscribeService) subscribeFetchBlock() {
 	for {
 		select {
 		case <-s.newHead:
-			blockNum, err := s.dao.GetCurrentBlockNum(ctx)
-			if err != nil || blockNum == 0 {
+			best, err := s.dao.GetBestBlockNum(ctx)
+			if err != nil || best == 0 {
 				time.Sleep(BlockTime * time.Second)
 				return
 			}
-			alreadyBlock, _ := s.dao.GetFillAlreadyBlockNum(ctx)
+			lastNum, _ := s.dao.GetFillBestBlockNum(ctx)
 			finalizedBlock, _ := s.dao.GetFinalizedBlockNum(ctx)
 
-			startBlock := alreadyBlock + 1
-			if alreadyBlock == 0 {
-				startBlock = alreadyBlock
+			startBlock := lastNum + 1
+			if lastNum == 0 {
+				startBlock = lastNum
 			}
-			for i := startBlock; i <= int(blockNum); i++ {
+
+			for i := startBlock; i <= int(best); i++ {
 				wg.Add(1)
-				_ = p.Invoke(BlockFinalized{BlockNum: i, Finalized: finalizedBlock >= FinalizedWaitingBlockCount && uint64(i) <= finalizedBlock-FinalizedWaitingBlockCount})
+				_ = p.Invoke(BlockFinalized{
+					BlockNum:  i,
+					Finalized: finalizedBlock >= FinalizedWaitingBlockCount && uint64(i) <= finalizedBlock-FinalizedWaitingBlockCount,
+				})
 			}
 			wg.Wait()
 		case <-s.newFinHead:
-			blockNum, err := s.dao.GetFinalizedBlockNum(context.TODO())
-			if err != nil || blockNum == 0 {
+			final, err := s.dao.GetFinalizedBlockNum(context.TODO())
+			if err != nil || final == 0 {
 				time.Sleep(BlockTime * time.Second)
 				return
 			}
-			alreadyBlock, _ := s.dao.GetFillFinalizedBlockNum(ctx)
-			startBlock := alreadyBlock + 1
-			if alreadyBlock == 0 {
-				startBlock = alreadyBlock
+
+			lastNum, _ := s.dao.GetFillFinalizedBlockNum(ctx)
+			startBlock := lastNum + 1
+			if lastNum == 0 {
+				startBlock = lastNum
 			}
-			for i := startBlock; i <= int(blockNum-FinalizedWaitingBlockCount); i++ {
+
+			for i := startBlock; i <= int(final-FinalizedWaitingBlockCount); i++ {
 				wg.Add(1)
 				_ = p.Invoke(BlockFinalized{BlockNum: i, Finalized: true})
 			}
@@ -220,7 +219,7 @@ func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 		specVersion = s.GetCurrentRuntimeSpecVersion(blockNum)
 	} else {
 		specVersion = r.SpecVersion
-		_ = s.regRuntimeVersion(r.ImplName, specVersion)
+		_ = s.regRuntimeVersion(r.ImplName, specVersion, blockHash)
 	}
 
 	if specVersion > util.CurrentRuntimeSpecVersion {
@@ -249,8 +248,8 @@ func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 			block.ParentHash = rpcBlock.Block.Header.ParentHash
 			block.StateRoot = rpcBlock.Block.Header.StateRoot
 
-			block.Extrinsics = util.InterfaceToString(rpcBlock.Block.Extrinsics)
-			block.Logs = util.InterfaceToString(rpcBlock.Block.Header.Digest.Logs)
+			block.Extrinsics = util.ToString(rpcBlock.Block.Extrinsics)
+			block.Logs = util.ToString(rpcBlock.Block.Header.Digest.Logs)
 			block.Event = event
 
 			_ = s.UpdateBlockData(block, finalized)
@@ -271,8 +270,4 @@ func (s *Service) updateChainMetadata(metadata map[string]interface{}) (err erro
 	c := context.TODO()
 	err = s.dao.SetMetadata(c, metadata)
 	return
-}
-
-func (s *Service) GetCurrentBlockNum(c context.Context) (uint64, error) {
-	return s.dao.GetCurrentBlockNum(c)
 }
