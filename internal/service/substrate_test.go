@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -39,11 +38,5 @@ func TestSubscribeParserMessage(t *testing.T) {
 func TestService_FillBlockData(t *testing.T) {
 	testSrv.dao.(*MockDao).On("GetBlockByNum", 1245201).Return(nil, nil)
 	err := testSrv.FillBlockData(1245201, true)
-	assert.NoError(t, err)
-	testSrv.dao.(*MockDao).On("GetBlockByNum", 1245202).Return(&model.ChainBlock{
-		BlockNum:  1245202,
-		Finalized: false,
-	}, nil)
-	err = testSrv.FillBlockData(1245202, true)
 	assert.NoError(t, err)
 }
