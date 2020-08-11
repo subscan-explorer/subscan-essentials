@@ -13,18 +13,18 @@ Developers are free to use the codebase to extend functionalities and develop un
 
 ## Contents
 
-- [Subscan Essentials](#Subscan-Essentials)
-  - [Contents](#contents)
-  - [Feature](#Feature)
+- [Feature](#Feature)
+- [QuickStart](#QuickStart)
   - [Requirement](#Requirement)
   - [Installation](#Install)
   - [Usage](#Usage)
   - [Docker](#Docker)
-  - [LICENSE](#LICENSE)
-  - [Resource](#Resource)
+  - [Test](#Test)
+- [Contributions](#Contributions)
+- [LICENSE](#LICENSE)
+- [Resource](#Resource)
 
-
-### Feature
+## Feature
 
 1. Support Substrate network [custom](/custom_type.md) type registration 
 2. Support index Block, Extrinsic, Event, log
@@ -33,9 +33,12 @@ Developers are free to use the codebase to extend functionalities and develop un
 5. Built-in default HTTP API [DOC](/docs/index.md)
 
 
+## QuickStart
+
 ### Requirement
 
 * Linux / Mac OSX
+* Git
 * Golang 1.12.4+
 * Redis 3.0.4+
 * MySQL 5.6+
@@ -85,18 +88,29 @@ GLOBAL OPTIONS:
 
 ### Docker
 
-> db 
+Run mysql and redis container
 
 ```bash
 docker-compose -f docker-compose.db.yml up  -d
 ```
 
-> subscan
+Run subscan service
 
 ```bash
 docker-compose build
 docker-compose up -d
 ```
+
+### Test
+
+```bash
+go test ../.
+```
+
+
+## Contributions
+
+We welcome contributions of any kind. Issues labeled can be good (first) contributions.
 
 ## LICENSE
 
