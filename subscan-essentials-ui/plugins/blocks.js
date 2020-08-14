@@ -2,7 +2,6 @@ export default {
   type: "page",
   body: {
     type: "crud",
-    // api: "post:api/scan/blocks",
     api: {
       method: "post",
       url: "api/scan/blocks",
