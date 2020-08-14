@@ -1,0 +1,33 @@
+@import "var";
+a {
+  color: inherit;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: none;
+}
+.svg-icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  fill: currentColor;
+  overflow: hidden;
+}
+.text-overflow {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.space-between {
+  display: flex;
+  justify-content: space-between;
+}
+.align-items-center {
+  display: flex;
+  align-items: center;
+}
+
+* {
+  box-sizing: border-box;
+}
