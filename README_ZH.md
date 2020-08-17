@@ -10,15 +10,15 @@ Subscan Essentials是一个高精度的区块链浏览器脚手架项目，它�
 
 ## Contents
 
-- [Subscan Essentials](#Subscan-Essentials)
-  - [Contents](#contents)
-  - [Feature](#Feature)
+- [Feature](#Feature)
+- [QuickStart](#QuickStart)
   - [Requirement](#Requirement)
   - [Installation](#Install)
   - [Usage](#Usage)
   - [Docker](#Docker)
-  - [LICENSE](#LICENSE)
-  - [Resource](#Resource)
+  - [Test](#Test)
+- [LICENSE](#LICENSE)
+- [Resource](#Resource)
 
 
 ### Feature
@@ -75,18 +75,25 @@ GLOBAL OPTIONS:
 
 ### Docker
 
-> db 
+启动mysql和redis的 container
 
 ```bash
 docker-compose -f docker-compose.db.yml up  -d
 ```
 
-> subscan
+启动subscan服务
 
 ```bash
 docker-compose build
 docker-compose up -d
 ```
+
+### Test
+
+```bash
+go test ../.
+```
+
 
 ## LICENSE
 

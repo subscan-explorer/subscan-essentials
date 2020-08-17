@@ -25,7 +25,7 @@ func New() (s *Service) {
 	s = &Service{
 		dao: d,
 	}
-	websocket.RegWSEndPoint(util.WSEndPoint)
+	websocket.SetEndpoint(util.WSEndPoint)
 	s.initSubRuntimeLatest()
 
 	for _, plugin := range plugins.RegisteredPlugins {

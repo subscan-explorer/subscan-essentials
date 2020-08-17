@@ -158,6 +158,8 @@ github.com/itering/subscan-plugin v0.0.1 h1:YsbOrv9aZ3vzrUgnnsdtrxwdrh09USdRv7fg
 github.com/itering/subscan-plugin v0.0.1/go.mod h1:sfvj/gCCneyEQhQV5BIWnHHx0PcwiTvrgoz/DMETjzI=
 github.com/itering/substrate-api-rpc v0.0.1 h1:S3T2Zkzro4F5K4xeDxgUAgkSCwRjVUUKfY66VtENe2s=
 github.com/itering/substrate-api-rpc v0.0.1/go.mod h1:ZKxBwv7/sTG9ljne/SmkYTvHaCHkegIuMVjf4AF+w6w=
+github.com/itering/substrate-api-rpc v0.0.3 h1:YEXoWIBl0/Uhc75u1s47d3wNScQ7yakPVSHRGT7bBF8=
+github.com/itering/substrate-api-rpc v0.0.3/go.mod h1:ZKxBwv7/sTG9ljne/SmkYTvHaCHkegIuMVjf4AF+w6w=
 github.com/jcmturner/gofork v0.0.0-20190328161633-dc7c13fece03/go.mod h1:MK8+TM0La+2rjBD4jE12Kj1pCCxK7d2LK/UM3ncEo0o=
 github.com/jinzhu/gorm v1.9.14 h1:Kg3ShyTPcM6nzVo148fRrcMO6MNKuqtOUwnzqMgVniM=
 github.com/jinzhu/gorm v1.9.14/go.mod h1:G3LB3wezTOWM2ITLzPxEXgSkOXAntiLHS7UdBefADcs=

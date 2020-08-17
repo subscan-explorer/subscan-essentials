@@ -22,8 +22,8 @@
 
 | Name          | Type   | Desc |
 | ------------- | ------ | ------- |
-|row| int | min=1,max=100     |
-|page| int | min=0     |
+|row| int | min=1,max=100 defines how many results should be presented per page    |
+|page| int | min=0 defines which page should be shown   |
 
 
 -----

@@ -272,6 +272,6 @@ func init() {
 	testSrv = Service{
 		dao: d,
 	}
-	websocket.RegWSEndPoint(util.WSEndPoint)
+	websocket.SetEndpoint(util.WSEndPoint)
 	testSrv.initSubRuntimeLatest()
 }
