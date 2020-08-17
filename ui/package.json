@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.12.1",
-    "amis": "^1.0.14",
     "element-ui": "^2.4.11",
     "lodash": "^4.17.19",
     "moment": "^2.27.0",
