@@ -26,7 +26,6 @@ func (*Buffer) Close() error {
 type TestConn struct {
 	*websocket.Conn
 	Connected bool
-	reader    *Buffer // the current reader returned to the application
 	writer    *Buffer // the current writer returned to the application
 }
 
