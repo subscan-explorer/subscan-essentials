@@ -114,7 +114,7 @@ func (s *SubscribeService) subscribeFetchBlock() {
 	p, _ := ants.NewPoolWithFunc(10, func(i interface{}) {
 		blockNum := i.(BlockFinalized)
 		func(bf BlockFinalized) {
-			if err := s.FillBlockData(bf.BlockNum, bf.Finalized); err != nil {
+			if err := s.FillBlockData(nil, bf.BlockNum, bf.Finalized); err != nil {
 				log.Error("ChainGetBlockHash get error %v", err)
 			} else {
 				s.SetHeartBeat(fmt.Sprintf("%s:heartBeat:%s", util.NetworkNode, "substrate"))
@@ -178,7 +178,7 @@ const (
 	wsSpec
 )
 
-func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
+func (s *Service) FillBlockData(conn websocket.WsConn, blockNum int, finalized bool) (err error) {
 	block := s.dao.GetBlockByNum(blockNum)
 	if block != nil && block.Finalized && !block.CodecError {
 		return nil
@@ -187,7 +187,7 @@ func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 	v := &rpc.JsonRpcResult{}
 
 	// Block Hash
-	if err = websocket.SendWsRequest(nil, v, rpc.ChainGetBlockHash(wsBlockHash, blockNum)); err != nil {
+	if err = websocket.SendWsRequest(conn, v, rpc.ChainGetBlockHash(wsBlockHash, blockNum)); err != nil {
 		return fmt.Errorf("websocket send error: %v", err)
 	}
 	blockHash, err := v.ToString()
@@ -197,19 +197,19 @@ func (s *Service) FillBlockData(blockNum int, finalized bool) (err error) {
 	log.Info("Block num %d hash %s", blockNum, blockHash)
 
 	// block
-	if err = websocket.SendWsRequest(nil, v, rpc.ChainGetBlock(wsBlock, blockHash)); err != nil {
+	if err = websocket.SendWsRequest(conn, v, rpc.ChainGetBlock(wsBlock, blockHash)); err != nil {
 		return fmt.Errorf("websocket send error: %v", err)
 	}
 	rpcBlock := v.ToBlock()
 
 	// event
-	if err = websocket.SendWsRequest(nil, v, rpc.StateGetStorage(wsEvent, util.EventStorageKey, blockHash)); err != nil {
+	if err = websocket.SendWsRequest(conn, v, rpc.StateGetStorage(wsEvent, util.EventStorageKey, blockHash)); err != nil {
 		return fmt.Errorf("websocket send error: %v", err)
 	}
 	event, _ := v.ToString()
 
 	// runtime
-	if err = websocket.SendWsRequest(nil, v, rpc.ChainGetRuntimeVersion(wsSpec, blockHash)); err != nil {
+	if err = websocket.SendWsRequest(conn, v, rpc.ChainGetRuntimeVersion(wsSpec, blockHash)); err != nil {
 		return fmt.Errorf("websocket send error: %v", err)
 	}
 

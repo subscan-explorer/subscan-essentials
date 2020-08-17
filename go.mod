@@ -11,7 +11,7 @@ require (
 	github.com/huandu/xstrings v1.3.2
 	github.com/itering/scale.go v0.2.4
 	github.com/itering/subscan-plugin v0.0.1
-	github.com/itering/substrate-api-rpc v0.0.1
+	github.com/itering/substrate-api-rpc v0.0.3
 	github.com/jinzhu/gorm v1.9.14
 	github.com/jpillora/backoff v1.0.0
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect

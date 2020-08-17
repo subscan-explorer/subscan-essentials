@@ -21,7 +21,7 @@ import (
 func main() {
 	defer func() {
 		_ = log.Close()
-		websocket.CloseWsConnection()
+		websocket.Close()
 	}()
 	if err := setupApp().Run(os.Args); err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)

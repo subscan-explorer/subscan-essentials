@@ -78,7 +78,11 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 	if err != nil {
 		return err
 	}
-	validatorList, _ := rpc.GetValidatorFromSub(nil, cb.Hash)
+	validatorsRaw, _ := rpc.ReadStorage(nil, "Session", "Validators", cb.Hash)
+	var validatorList []string
+	for _, addr := range validatorsRaw.ToStringSlice() {
+		validatorList = append(validatorList, util.TrimHex(addr))
+	}
 	if validator, err = s.EmitLog(txn, hash, blockNum, logs, finalized, validatorList); err != nil {
 		return err
 	}
@@ -150,7 +154,11 @@ func (s *Service) UpdateBlockData(block *model.ChainBlock, finalized bool) (err 
 		return err
 	}
 
-	validatorList, _ := rpc.GetValidatorFromSub(nil, block.Hash)
+	validatorsRaw, _ := rpc.ReadStorage(nil, "Session", "Validators", block.Hash)
+	var validatorList []string
+	for _, addr := range validatorsRaw.ToStringSlice() {
+		validatorList = append(validatorList, util.TrimHex(addr))
+	}
 	validator, err := s.EmitLog(txn, block.Hash, block.BlockNum, logs, finalized, validatorList)
 	if err != nil {
 		return err

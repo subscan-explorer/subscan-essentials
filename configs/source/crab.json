@@ -16,7 +16,27 @@
   "Bloom": "[u8; 256]",
   "H": "Hash",
   "Address": "AccountId",
-  "Keys": "SessionKeysPolkadot",
+  "Keys": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "babe",
+        "AccountId"
+      ],
+      [
+        "grandpa",
+        "AccountId"
+      ],
+      [
+        "im_online",
+        "AccountId"
+      ],
+      [
+        "authority_discovery",
+        "AccountId"
+      ]
+    ]
+  },
   "Weight": "u64",
   "ModuleId": "[u8; 8]",
   "RuntimeDbWeight": {
@@ -751,5 +771,114 @@
   },
   "slashing::SpanRecord<RingBalance, KtonBalance>": "SpanRecord",
   "slashing::RKT": "RKT",
-  "ElectionResultT": "ElectionResult"
+  "Round": "u64",
+  "TcBlockNumber": "Vec<u8>",
+  "TcHeaderHash": "Vec<u8>",
+  "MMRHash": "Vec<u8>",
+  "GameId": "TcBlockNumber",
+  "RawHeaderThing": "Vec<u8>",
+  "EthereumNetworkType": "EthNetworkType",
+  "EthashProof": "DoubleNodeWithMerkleProof",
+  "MMRProof": "Vec<H256>",
+  "Proposal": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "proposer",
+        "AccountId"
+      ],
+      [
+        "beneficiary",
+        "AccountId"
+      ],
+      [
+        "ring_value",
+        "Balance"
+      ],
+      [
+        "kton_value",
+        "Balance"
+      ],
+      [
+        "ring_bond",
+        "Balance"
+      ],
+      [
+        "kton_bond",
+        "Balance"
+      ]
+    ]
+  },
+  "UnappliedSlash": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "validator",
+        "AccountId"
+      ],
+      [
+        "own",
+        "RKT"
+      ],
+      [
+        "others",
+        "Vec<(AccountId, RKT)>"
+      ],
+      [
+        "reporters",
+        "Vec<AccountId>"
+      ],
+      [
+        "payout",
+        "RKT"
+      ]
+    ]
+  },
+  "ElectionResultT": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "elected_stashes",
+        "Vec<AccountId>"
+      ],
+      [
+        "exposures",
+        "Vec<(AccountId, ExposureT)>"
+      ],
+      [
+        "compute",
+        "ElectionCompute"
+      ]
+    ]
+  },
+  "EthereumReceiptProof": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "index",
+        "u64"
+      ],
+      [
+        "proof",
+        "Bytes"
+      ],
+      [
+        "header_hash",
+        "H256"
+      ]
+    ]
+  },
+  "Unbonding#5-?": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "amount",
+        "Balance"
+      ],
+      [
+        "until",
+        "BlockNumber"
+      ]
+    ]
+  }
 }

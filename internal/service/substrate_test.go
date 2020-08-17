@@ -37,6 +37,6 @@ func TestSubscribeParserMessage(t *testing.T) {
 
 func TestService_FillBlockData(t *testing.T) {
 	testSrv.dao.(*MockDao).On("GetBlockByNum", 1245201).Return(nil, nil)
-	err := testSrv.FillBlockData(1245201, true)
+	err := testSrv.FillBlockData(nil, 1245201, true)
 	assert.NoError(t, err)
 }

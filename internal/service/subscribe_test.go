@@ -14,6 +14,8 @@ type TestConn struct {
 	Connected bool
 }
 
+func (t *TestConn) MarkUnusable() {}
+
 func (t *TestConn) Dial(urlStr string, reqHeader http.Header) {
 	conn, _, err := websocket.DefaultDialer.Dial(urlStr, nil)
 	t.Conn = conn

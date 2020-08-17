@@ -3,7 +3,6 @@ package service
 import (
 	"github.com/itering/substrate-api-rpc/rpc"
 	"github.com/itering/substrate-api-rpc/storageKey"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,6 +11,7 @@ import (
 	"github.com/go-kratos/kratos/pkg/log"
 	"github.com/gorilla/websocket"
 	"github.com/itering/subscan/util"
+	ws "github.com/itering/substrate-api-rpc/websocket"
 )
 
 var (
@@ -32,15 +32,7 @@ func subscribeStorage() []string {
 	return []string{util.AddHex(TotalIssuance.EncodeKey)}
 }
 
-type WsConn interface {
-	Dial(urlStr string, reqHeader http.Header)
-	IsConnected() bool
-	Close()
-	WriteMessage(messageType int, data []byte) error
-	ReadMessage() (messageType int, message []byte, err error)
-}
-
-func (s *Service) Subscribe(conn WsConn, interrupt chan os.Signal) {
+func (s *Service) Subscribe(conn ws.WsConn, interrupt chan os.Signal) {
 	var err error
 
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
