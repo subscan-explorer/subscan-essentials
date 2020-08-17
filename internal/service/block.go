@@ -11,9 +11,10 @@ import (
 	"github.com/itering/substrate-api-rpc"
 	"github.com/itering/substrate-api-rpc/rpc"
 	"github.com/itering/substrate-api-rpc/storage"
+	"github.com/itering/substrate-api-rpc/websocket"
 )
 
-func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, spec int, finalized bool) (err error) {
+func (s *Service) CreateChainBlock(conn websocket.WsConn, hash string, block *rpc.Block, event string, spec int, finalized bool) (err error) {
 	var (
 		decodeExtrinsics []map[string]interface{}
 		decodeEvent      interface{}
@@ -78,12 +79,7 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 	if err != nil {
 		return err
 	}
-	validatorsRaw, _ := rpc.ReadStorage(nil, "Session", "Validators", cb.Hash)
-	var validatorList []string
-	for _, addr := range validatorsRaw.ToStringSlice() {
-		validatorList = append(validatorList, util.TrimHex(addr))
-	}
-	if validator, err = s.EmitLog(txn, hash, blockNum, logs, finalized, validatorList); err != nil {
+	if validator, err = s.EmitLog(txn, hash, blockNum, logs, finalized, s.ValidatorsList(conn, hash)); err != nil {
 		return err
 	}
 
@@ -98,7 +94,7 @@ func (s *Service) CreateChainBlock(hash string, block *rpc.Block, event string, 
 	return err
 }
 
-func (s *Service) UpdateBlockData(block *model.ChainBlock, finalized bool) (err error) {
+func (s *Service) UpdateBlockData(conn websocket.WsConn, block *model.ChainBlock, finalized bool) (err error) {
 	c := context.TODO()
 
 	var (
@@ -154,12 +150,7 @@ func (s *Service) UpdateBlockData(block *model.ChainBlock, finalized bool) (err 
 		return err
 	}
 
-	validatorsRaw, _ := rpc.ReadStorage(nil, "Session", "Validators", block.Hash)
-	var validatorList []string
-	for _, addr := range validatorsRaw.ToStringSlice() {
-		validatorList = append(validatorList, util.TrimHex(addr))
-	}
-	validator, err := s.EmitLog(txn, block.Hash, block.BlockNum, logs, finalized, validatorList)
+	validator, err := s.EmitLog(txn, block.Hash, block.BlockNum, logs, finalized, s.ValidatorsList(conn, block.Hash))
 	if err != nil {
 		return err
 	}
@@ -273,4 +264,12 @@ func (s *Service) BlockAsSampleJson(c context.Context, block *model.ChainBlock) 
 
 func (s *Service) GetCurrentBlockNum(c context.Context) (uint64, error) {
 	return s.dao.GetBestBlockNum(c)
+}
+
+func (s *Service) ValidatorsList(conn websocket.WsConn, hash string) (validatorList []string) {
+	validatorsRaw, _ := rpc.ReadStorage(conn, "Session", "Validators", hash)
+	for _, addr := range validatorsRaw.ToStringSlice() {
+		validatorList = append(validatorList, util.TrimHex(addr))
+	}
+	return
 }

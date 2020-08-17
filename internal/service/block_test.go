@@ -27,7 +27,7 @@ func TestService_CreateChainBlock(t *testing.T) {
 			},
 		},
 	}
-	err := testSrv.CreateChainBlock(hash, &block, event, 4, true)
+	err := testSrv.CreateChainBlock(nil, hash, &block, event, 4, true)
 	assert.NoError(t, err)
 
 }
@@ -44,7 +44,7 @@ func TestService_UpdateBlockData(t *testing.T) {
 		Extrinsics:     `["0x280402000b10449a7e7301","0x1c0407005e8b4100"]`,
 		Event:          "0x080000000000000080e36a0900000000020000000100000000000000000000000000020000",
 	}
-	err := testSrv.UpdateBlockData(&block, true)
+	err := testSrv.UpdateBlockData(nil, &block, true)
 	assert.NoError(t, err)
 }
 

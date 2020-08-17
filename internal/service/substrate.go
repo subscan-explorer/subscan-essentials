@@ -251,14 +251,13 @@ func (s *Service) FillBlockData(conn websocket.WsConn, blockNum int, finalized b
 			block.Logs = util.ToString(rpcBlock.Block.Header.Digest.Logs)
 			block.Event = event
 
-			_ = s.UpdateBlockData(block, finalized)
+			_ = s.UpdateBlockData(conn, block, finalized)
 		}
 		setFinalized()
 		return
 	}
-
 	// for Create
-	if err = s.CreateChainBlock(blockHash, &rpcBlock.Block, event, specVersion, finalized); err == nil {
+	if err = s.CreateChainBlock(conn, blockHash, &rpcBlock.Block, event, specVersion, finalized); err == nil {
 		_ = s.dao.SaveFillAlreadyBlockNum(context.TODO(), blockNum)
 		setFinalized()
 	}
