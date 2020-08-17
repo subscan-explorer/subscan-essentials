@@ -56,6 +56,10 @@ type RecConn struct {
 	*websocket.Conn
 }
 
+func (rc *RecConn) MarkUnusable() {
+
+}
+
 // CloseAndReconnect will try to reconnect.
 func (rc *RecConn) closeAndReconnect() {
 	rc.Close()

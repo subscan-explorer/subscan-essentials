@@ -235,7 +235,6 @@ func (s *Service) FillBlockData(conn websocket.WsConn, blockNum int, finalized b
 			_ = s.dao.SaveFillAlreadyFinalizedBlockNum(context.TODO(), blockNum)
 		}
 	}
-
 	// refresh finalized info for update
 	if block != nil {
 		// Confirm data, only set block Finalized
