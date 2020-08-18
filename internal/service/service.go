@@ -3,11 +3,10 @@ package service
 import (
 	"fmt"
 	"github.com/go-kratos/kratos/pkg/log"
-	"github.com/itering/scale.go/source"
-	"github.com/itering/scale.go/types"
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/plugins"
 	"github.com/itering/subscan/util"
+	"github.com/itering/substrate-api-rpc"
 	"github.com/itering/substrate-api-rpc/metadata"
 	"github.com/itering/substrate-api-rpc/websocket"
 	"io/ioutil"
@@ -44,7 +43,7 @@ func (s *Service) initSubRuntimeLatest() {
 	defer func() {
 		go s.unknownToken()
 		if c, err := readTypeRegistry(); err == nil {
-			types.RegCustomTypes(source.LoadTypeRegistry(c))
+			substrate.RegCustomTypes(c)
 			if unknown := metadata.Decoder.CheckRegistry(); len(unknown) > 0 {
 				log.Warn("Found unknown type %s", strings.Join(unknown, ", "))
 			}

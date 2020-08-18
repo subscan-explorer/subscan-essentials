@@ -3,7 +3,7 @@ package observer
 import (
 	"fmt"
 	"github.com/itering/subscan/internal/dao"
-	"github.com/itering/subscan/pkg/recws"
+	"github.com/itering/substrate-api-rpc/pkg/recws"
 	"log"
 	"os"
 	"syscall"

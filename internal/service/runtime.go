@@ -1,7 +1,6 @@
 package service
 
 import (
-	"github.com/itering/scale.go/types"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc/metadata"
@@ -17,7 +16,7 @@ func (s *Service) SubstrateRuntimeList() []model.RuntimeVersion {
 	return s.dao.RuntimeVersionList()
 }
 
-func (s *Service) SubstrateRuntimeInfo(spec int) *types.MetadataStruct {
+func (s *Service) SubstrateRuntimeInfo(spec int) *metadata.Instant {
 	if metadataInstant, ok := metadata.RuntimeMetadata[spec]; ok {
 		return metadataInstant
 	}
@@ -49,7 +48,7 @@ func (s *Service) regCodecMetadata(hash ...string) string {
 	return ""
 }
 
-func (s *Service) setRuntimeData(spec int, runtime *types.MetadataStruct, rawData string) {
+func (s *Service) setRuntimeData(spec int, runtime *metadata.Instant, rawData string) {
 	var modules []string
 	for _, value := range runtime.Metadata.Modules {
 		modules = append(modules, value.Name)
@@ -57,7 +56,7 @@ func (s *Service) setRuntimeData(spec int, runtime *types.MetadataStruct, rawDat
 	s.dao.SetRuntimeData(spec, strings.Join(modules, "|"), rawData)
 }
 
-func (s *Service) getMetadataInstant(spec int, hash string) *types.MetadataStruct {
+func (s *Service) getMetadataInstant(spec int, hash string) *metadata.Instant {
 	metadataInstant, ok := metadata.RuntimeMetadata[spec]
 	if !ok {
 		raw := s.dao.RuntimeVersionRaw(spec)

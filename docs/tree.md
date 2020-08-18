@@ -30,7 +30,6 @@
 │   └── service             // used for business logic processing
 ├── log                     // logs file dir
 ├── model                   // db table model
-├── pkg                     // some dependency may changed
 ├── ui                      // Front-end code
 └── util                    // some tools function
 ```
