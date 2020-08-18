@@ -2,7 +2,7 @@
   <el-header class="navbar">
     <nav class="header">
       <router-link class="logo" to="/" tag="a">
-        <img src="~/assets/images/logo.png"/>
+        <img src="~/assets/images/logo.png" />
         <span>{{$t('subscan_essential')}}</span>
       </router-link>
       <div class="right-menu">
@@ -14,6 +14,9 @@
           <el-dropdown-menu slot="dropdown">
             <el-dropdown-item>
               <router-link to="/blocks" tag="a">blocks</router-link>
+            </el-dropdown-item>
+            <el-dropdown-item>
+              <router-link to="/events" tag="a">events</router-link>
             </el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
@@ -70,12 +73,12 @@ export default {
 <style>
 li.el-dropdown-menu__item {
   list-style: none;
-    line-height: 36px;
-    padding: 0 20px;
-    margin: 0;
-    font-size: 14px;
-    color: #606266;
-    cursor: pointer;
-    outline: none;
+  line-height: 36px;
+  padding: 0 20px;
+  margin: 0;
+  font-size: 14px;
+  color: #606266;
+  cursor: pointer;
+  outline: none;
 }
 </style>

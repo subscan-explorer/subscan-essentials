@@ -39,11 +39,9 @@
 </template>
 
 <script>
-import Logo from "~/components/Logo.vue";
 import NavBar from "~/components/NavBar.vue";
 export default {
   components: {
-    Logo,
     NavBar,
     JsonPretty: () =>
       process.client
