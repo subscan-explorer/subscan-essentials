@@ -1,7 +1,5 @@
 # subscan-essentials-ui
 
-> My transcendent Nuxt.js project
-
 ## Build Setup
 
 ```bash

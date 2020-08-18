@@ -58,7 +58,7 @@ export default {
 
   proxy: {
     "/api": {
-      target: "https://crab.subscan.io", // 接口的域名
+      target: "https://crab.demo.subscan.io", // 接口的域名
       secure: false,
       changeOrigin: true,
       pathRewrite: {

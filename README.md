@@ -17,6 +17,7 @@ Developers are free to use the codebase to extend functionalities and develop un
 - [QuickStart](#QuickStart)
   - [Requirement](#Requirement)
   - [Installation](#Install)
+  - [UI](#UI)
   - [Usage](#Usage)
   - [Docker](#Docker)
   - [Test](#Test)
@@ -42,11 +43,36 @@ Developers are free to use the codebase to extend functionalities and develop un
 * Golang 1.12.4+
 * Redis 3.0.4+
 * MySQL 5.6+
+* Node 8.9.0+
 
 ### Install
 
 ```bash
 ./build.sh install
+
+//UI
+cd ui && yarn && yarn dev
+```
+
+### UI
+
+The ui part is built with [nuxt.js](https://nuxtjs.org/) and [amis](https://github.com/baidu/amis)
+
+Demo: [blocks](/ui/plugins/blocks.js), refer to [amis docs](https://baidu.gitee.io/amis/docs/index) for further detail.
+
+Please change proxy target in nuxt.config.js to your server name in development.
+
+```js
+proxy: {
+   "/api": {
+      target: "https://your_server_name.com",
+      secure: false,
+      changeOrigin: true,
+      pathRewrite: {
+         "^/api": "/api"
+      }
+   },
+}
 ```
 
 ### Usage
