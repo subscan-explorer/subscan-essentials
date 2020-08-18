@@ -16,6 +16,7 @@ Developers are free to use the codebase to extend functionalities and develop un
 - [Feature](#Feature)
 - [QuickStart](#QuickStart)
   - [Requirement](#Requirement)
+  - [Structure](docs/tree.md)
   - [Installation](#Install)
   - [Usage](#Usage)
   - [Docker](#Docker)

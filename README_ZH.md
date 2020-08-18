@@ -13,6 +13,7 @@ Subscan Essentials是一个高精度的区块链浏览器脚手架项目，它�
 - [Feature](#Feature)
 - [QuickStart](#QuickStart)
   - [Requirement](#Requirement)
+  - [Structure](docs/tree.md)
   - [Installation](#Install)
   - [Usage](#Usage)
   - [Docker](#Docker)
@@ -28,6 +29,8 @@ Subscan Essentials是一个高精度的区块链浏览器脚手架项目，它�
 3. 可自定义[插件](/plugins)索引更多的数据
 4. [Gen](https://github.com/itering/subscan-plugin/tree/master/tool) 工具可自动生成插件模版
 5. 内置默认的HTTP API [DOC](/docs/index.md)
+
+## QuickStart
 
 ### Requirement
 
