@@ -15,6 +15,7 @@ Subscan Essentials是一个高精度的区块链浏览器脚手架项目，它�
   - [Requirement](#Requirement)
   - [Structure](docs/tree.md)
   - [Installation](#Install)
+  - [UI](#UI)
   - [Usage](#Usage)
   - [Docker](#Docker)
   - [Test](#Test)
@@ -35,16 +36,41 @@ Subscan Essentials是一个高精度的区块链浏览器脚手架项目，它�
 ### Requirement
 
 * Linux / Mac OSX
+* Git
 * Golang 1.12.4+
 * Redis 3.0.4+
 * MySQL 5.6+
+* Node 8.9.0+
 
 ### Install
 
 ```bash
 ./build.sh install
+
+//UI
+cd ui && yarn && yarn dev
 ```
 
+### UI
+
+UI部分使用 [nuxt.js](https://nuxtjs.org/) 和 [amis](https://github.com/baidu/amis)
+
+Demo: [blocks](/ui/plugins/blocks.js), 更多配置请参考 [amis docs](https://baidu.gitee.io/amis/docs/index)
+
+在开发环境中请替换nuxt.config.js中的proxy target
+
+```js
+proxy: {
+   "/api": {
+      target: "https://your_server_name.com",
+      secure: false,
+      changeOrigin: true,
+      pathRewrite: {
+         "^/api": "/api"
+      }
+   },
+}
+```
 
 ### Usage
 

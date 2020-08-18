@@ -1,4 +1,5 @@
 const path = require("path");
+
 function resolve(dir) {
   return path.join(__dirname, dir);
 }
@@ -23,21 +24,19 @@ export default {
         content: process.env.npm_package_description || ''
       }
     ],
-    script: [
-      {
-        src: 'https://houtai.baidu.com/v2/jssdk'
-      }
-    ],
+    script: [{
+      src: 'https://houtai.baidu.com/v2/jssdk'
+    }],
     link: [{
-      rel: 'icon',
-      type: 'image/x-icon',
-      href: '/favicon.ico'
-    },
-    {
-      rel: 'stylesheet',
-      href: 'https://houtai.baidu.com/v2/csssdk'
-    }
-  ]
+        rel: 'icon',
+        type: 'image/x-icon',
+        href: '/favicon.ico'
+      },
+      {
+        rel: 'stylesheet',
+        href: 'https://houtai.baidu.com/v2/csssdk'
+      }
+    ]
   },
   /*
    ** Customize the progress-bar color
@@ -58,7 +57,7 @@ export default {
 
   proxy: {
     "/api": {
-      target: "https://crab.subscan.io", // 接口的域名
+      target: "https://crab.demo.subscan.io", // 接口的域名
       secure: false,
       changeOrigin: true,
       pathRewrite: {
