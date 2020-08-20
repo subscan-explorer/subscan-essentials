@@ -6,6 +6,7 @@ import (
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc/metadata"
+	"github.com/itering/substrate-api-rpc/websocket"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -271,5 +272,6 @@ func init() {
 	testSrv = Service{
 		dao: d,
 	}
+	websocket.SetEndpoint(util.WSEndPoint)
 	testSrv.initSubRuntimeLatest()
 }

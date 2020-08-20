@@ -56,7 +56,7 @@ func (t *TestConn) ReadMessage() (messageType int, message []byte, err error) {
 }
 
 func (t *TestConn) WriteMessage(messageType int, data []byte) error {
-	if strings.EqualFold(string(data), `{"id":4,"method":"state_subscribeStorage","params":[["0x481e203dcea218263e3a96ca9e4b193857c875e4cff74148e4628f264b974c80"]],"jsonrpc":"2.0"}`) {
+	if strings.EqualFold(string(data), `{"id":3,"method":"chain_subscribeFinalizedHeads","params":[],"jsonrpc":"2.0"}`) {
 		_ = syscall.Kill(syscall.Getpid(), syscall.SIGINT)
 	}
 	wb := new(Buffer)

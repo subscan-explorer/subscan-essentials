@@ -71,6 +71,7 @@ func (s *SubscribeService) parser(message []byte) (err error) {
 		_ = s.regRuntimeVersion(r.ImplName, r.SpecVersion)
 		_ = s.updateChainMetadata(map[string]interface{}{"implName": r.ImplName, "specVersion": r.SpecVersion})
 		util.CurrentRuntimeSpecVersion = r.SpecVersion
+		return
 	}
 
 	switch j.Method {
