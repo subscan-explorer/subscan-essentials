@@ -13,8 +13,7 @@ import (
 )
 
 const (
-	subscribeTimeoutInterval = 30
-	runtimeVersion           = iota
+	runtimeVersion = iota + 1
 	newHeader
 	finalizeHeader
 )

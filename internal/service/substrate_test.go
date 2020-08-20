@@ -34,3 +34,13 @@ func TestService_FillBlockData(t *testing.T) {
 	err := testSrv.FillBlockData(&tc, 1245201, true)
 	assert.NoError(t, err)
 }
+
+func TestService_subscribeFetchBlock(t *testing.T) {
+	done := make(chan struct{})
+	defer close(done)
+	testSrv.dao.(*MockDao).On("GetFinalizedBlockNum", context.TODO()).Return(uint64(1245201), nil)
+	testSrv.dao.(*MockDao).On("GetFillFinalizedBlockNum", context.TODO()).Return(1245200, nil)
+	sub := testSrv.initSubscribeService(done)
+	go sub.subscribeFetchBlock()
+	sub.newFinHead <- true
+}

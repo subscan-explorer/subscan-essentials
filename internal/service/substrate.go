@@ -110,8 +110,7 @@ func (s *SubscribeService) subscribeFetchBlock() {
 		BlockNum  int  `json:"block_num"`
 		Finalized bool `json:"finalized"`
 	}
-	var dealPanic = func(c interface{}) {}
-	options := ants.Options{PanicHandler: dealPanic}
+
 	p, _ := ants.NewPoolWithFunc(10, func(i interface{}) {
 		blockNum := i.(BlockFinalized)
 		func(bf BlockFinalized) {
@@ -122,7 +121,8 @@ func (s *SubscribeService) subscribeFetchBlock() {
 			}
 		}(blockNum)
 		wg.Done()
-	}, ants.WithOptions(options))
+	}, ants.WithOptions(ants.Options{PanicHandler: func(c interface{}) {}}))
+
 	defer p.Release()
 	for {
 		select {

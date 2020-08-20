@@ -31,12 +31,14 @@ func main() {
 
 func setupApp() *cli.App {
 	app := cli.NewApp()
-	app.Name = "SubScan"
-	app.Usage = "SubScan Backend Service, use -h get help"
+	app.Name = "SUBSCAN"
+	app.Usage = "SUBSCAN Backend Service, use -h get help"
 	app.Version = "1.0"
 	app.Action = func(*cli.Context) error { run(); return nil }
 	app.Description = "SubScan Backend Service, substrate blockchain explorer"
-	app.Flags = []cli.Flag{cli.StringFlag{Name: "conf", Value: "../configs"}}
+	app.Flags = []cli.Flag{
+		cli.StringFlag{Name: "conf", Value: "../configs"},
+	}
 	app.Before = func(context *cli.Context) error {
 		if client, err := paladin.NewFile(context.String("conf")); err != nil {
 			panic(err)

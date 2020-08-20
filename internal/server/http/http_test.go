@@ -34,22 +34,26 @@ func testRequest(w *httptest.ResponseRecorder, req *http.Request) {
 var testCases = []struct {
 	url     string
 	payload io.Reader
+	method  string
 }{
-	{"/api/scan/metadata", nil},
-	{"/api/scan/blocks", strings.NewReader(`{"row": 10, "page": 0}`)},
-	{"/api/scan/block", strings.NewReader(`{"block_hash": "0xbadc6963e1add4d7a588e350d837579491d08bb270f02c56b3dd5f17018dee0c"}`)},
-	{"/api/scan/extrinsics", strings.NewReader(`{"row": 10, "page": 0}`)},
-	{"/api/scan/extrinsic", strings.NewReader(`{"hash": "0xbadc6963e1add4d7a588e350d837579491d08bb270f02c56b3dd5f17018dee0c"}`)},
-	{"/api/scan/events", strings.NewReader(`{"row": 10, "page": 0}`)},
-	{"/api/scan/check_hash", strings.NewReader(`{"hash": "0xbadc6963e1add4d7a588e350d837579491d08bb270f02c56b3dd5f17018dee0c"}`)},
-	{"/api/scan/runtime/metadata", strings.NewReader(`{"spec": 1}`)},
-	{"/api/scan/runtime/list", nil},
+	{"/api/scan/metadata", nil, "POST"},
+	{"/api/scan/blocks", strings.NewReader(`{"row": 10, "page": 0}`), "POST"},
+	{"/api/scan/block", strings.NewReader(`{"block_hash": "0xbadc6963e1add4d7a588e350d837579491d08bb270f02c56b3dd5f17018dee0c"}`), "POST"},
+	{"/api/scan/extrinsics", strings.NewReader(`{"row": 10, "page": 0}`), "POST"},
+	{"/api/scan/extrinsic", strings.NewReader(`{"hash": "0xbadc6963e1add4d7a588e350d837579491d08bb270f02c56b3dd5f17018dee0c"}`), "POST"},
+	{"/api/scan/events", strings.NewReader(`{"row": 10, "page": 0}`), "POST"},
+	{"/api/scan/check_hash", strings.NewReader(`{"hash": "0xbadc6963e1add4d7a588e350d837579491d08bb270f02c56b3dd5f17018dee0c"}`), "POST"},
+	{"/api/scan/runtime/metadata", strings.NewReader(`{"spec": 1}`), "POST"},
+	{"/api/scan/runtime/list", nil, "POST"},
+	{"/api/now", nil, "POST"},
+	{"/api/system/status", nil, "GET"},
+	{"/ping", nil, "GET"},
 }
 
 func TestRouter(t *testing.T) {
 	for _, test := range testCases {
 		w := httptest.NewRecorder()
-		req, err := http.NewRequest("POST", test.url, test.payload)
+		req, err := http.NewRequest(test.method, test.url, test.payload)
 		assert.NotNil(t, req)
 
 		req.Header.Set("Content-Type", "application/json")
