@@ -8,5 +8,5 @@
   "search_title": "搜索条件",
   "search_type": "搜索类型",
   "search_content": "搜索内容",
-  "search_placeholder": "search by block/extrinsic"
+  "search_placeholder": "search by block/extrinsic/runtime_version"
 }

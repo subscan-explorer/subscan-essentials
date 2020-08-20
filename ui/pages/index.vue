@@ -15,6 +15,7 @@
                 >
                   <el-option :label="$t('block')" value="block"></el-option>
                   <el-option :label="$t('extrinsic')" value="extrinsic"></el-option>
+                  <el-option :label="$t('runtime')" value="runtime"></el-option>
                 </el-select>
               </el-form-item>
               <el-form-item :label="$t('search_content')">
@@ -90,6 +91,11 @@ export default {
           };
         }
         result = await this.$axios.$post("/api/scan/extrinsic", payload);
+      } else if (this.input.type === "runtime") {
+        payload = {
+          spec: +this.input.content,
+        };
+        result = await this.$axios.$post("/api/scan/runtime/metadata", payload);
       }
       this.output = result;
     },
@@ -117,7 +123,8 @@ export default {
   .title {
     margin-bottom: 50px;
   }
-  .input, .output {
+  .input,
+  .output {
     width: 50%;
     padding: 20px 20px 0 0;
   }
@@ -131,7 +138,8 @@ export default {
     .main-content {
       flex-direction: column;
     }
-    .input, .output {
+    .input,
+    .output {
       width: 100%;
       padding: 20px 20px 0 0;
     }
