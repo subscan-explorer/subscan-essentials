@@ -155,8 +155,12 @@ func runtimeMetadata(c *bm.Context) {
 	if err := c.BindWith(p, binding.JSON); err != nil {
 		return
 	}
-	info := svc.SubstrateRuntimeInfo(p.Spec)
-	c.JSON(map[string]interface{}{
-		"info": info,
-	}, nil)
+	if info := svc.SubstrateRuntimeInfo(p.Spec); info == nil {
+		c.JSON(map[string]interface{}{"info": nil}, nil)
+	} else {
+		c.JSON(map[string]interface{}{
+			"info": info.Metadata.Modules,
+		}, nil)
+	}
+
 }
