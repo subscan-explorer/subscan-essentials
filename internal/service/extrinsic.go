@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/internal/dao"
-	"github.com/itering/subscan/internal/service/transaction"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/plugins"
 	"github.com/itering/subscan/util"
@@ -49,7 +48,7 @@ func (s *Service) createExtrinsic(c context.Context,
 		extrinsic.BlockTimestamp = blockTimestamp
 		if extrinsic.ExtrinsicHash != "" {
 
-			fee, _ := transaction.GetExtrinsicFee(encodeExtrinsics[index])
+			fee, _ := GetExtrinsicFee(nil, encodeExtrinsics[index])
 			extrinsic.Fee = fee
 
 			extrinsicFee[extrinsic.ExtrinsicIndex] = fee

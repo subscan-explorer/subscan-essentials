@@ -37,8 +37,6 @@ func (s *Service) Subscribe(conn ws.WsConn, interrupt chan os.Signal) {
 
 	signal.Notify(interrupt, os.Interrupt, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
 
-	conn.Dial(util.WSEndPoint, nil)
-
 	defer conn.Close()
 
 	done := make(chan struct{})

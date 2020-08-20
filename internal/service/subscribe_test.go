@@ -86,6 +86,8 @@ func (t *TestConn) ReadJSON(v interface{}) error {
 		}
 	case "chain_getRuntimeVersion":
 		_ = json.Unmarshal([]byte(`{"result":{"specVersion":5}}`), v)
+	case "payment_queryInfo":
+		_ = json.Unmarshal([]byte(`{"result":{"partialFee":1000000}}`), v)
 	}
 	return nil
 }

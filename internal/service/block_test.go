@@ -65,8 +65,8 @@ func TestService_GetExtrinsicList(t *testing.T) {
 }
 
 func TestService_GetBlocksSampleByNums(t *testing.T) {
-	blocks := testSrv.GetBlocksSampleByNums(0, 10)
 	util.AddressType = "42"
+	blocks := testSrv.GetBlocksSampleByNums(0, 10)
 	assert.Equal(t, []model.SampleBlockJson{{
 		BlockNum:       947687,
 		BlockTimestamp: 1594791900,
