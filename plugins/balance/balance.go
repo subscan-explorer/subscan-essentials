@@ -42,9 +42,6 @@ func (a *Account) Version() string {
 }
 
 func (a *Account) Migrate() {
-	db := a.d.DB()
-	db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
-		&model.Account{},
-	)
-	db.Model(model.Account{}).AddUniqueIndex("address", "address")
+	a.d.AutoMigration(&model.Account{})
+	a.d.AddUniqueIndex(&model.Account{}, "address", "address")
 }

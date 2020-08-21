@@ -5,6 +5,8 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"github.com/itering/subscan/configs"
+	"github.com/itering/subscan/model"
+	"github.com/itering/substrate-api-rpc/websocket"
 	"os"
 	"strings"
 	"time"
@@ -14,6 +16,67 @@ import (
 	"github.com/itering/subscan/util"
 	"github.com/jinzhu/gorm"
 )
+
+type DbStorage struct {
+	db     *gorm.DB
+	Prefix string
+}
+
+var protectedTables []string
+
+func (d *DbStorage) SpecialMetadata(spec int) string {
+	var raw model.RuntimeVersion
+	if query := d.db.Where("spec_version = ?", spec).First(&raw); query.RecordNotFound() {
+		return ""
+	}
+	return raw.RawData
+}
+
+func (d *DbStorage) getModelTableName(model interface{}) string {
+	return d.db.Unscoped().NewScope(model).TableName()
+}
+
+func (d *DbStorage) checkProtected() error {
+	return nil
+}
+
+func (d *DbStorage) RPCPool() *websocket.PoolConn {
+	conn, _ := websocket.Init()
+	return conn
+}
+
+func (d *DbStorage) FindBy(record interface{}, query interface{}) bool {
+	q := d.db.Where(query).Find(record)
+	return q.RecordNotFound()
+}
+
+func (d *DbStorage) AutoMigration(model interface{}) {
+	fmt.Println(d.Prefix)
+	d.db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(model)
+}
+
+func (d *DbStorage) AddIndex(model interface{}, indexName string, columns ...string) {
+	d.db.Model(model).AddIndex(indexName, columns...)
+}
+
+func (d *DbStorage) AddUniqueIndex(model interface{}, indexName string, columns ...string) {
+	d.db.Model(model).AddUniqueIndex(indexName, columns...)
+}
+
+func (d *DbStorage) Create(record interface{}) error {
+	q := d.db.Create(record)
+	return q.Error
+}
+
+func (d *DbStorage) Update(model interface{}, query interface{}, attr map[string]interface{}) error {
+	q := d.db.Model(model).Where(query).Update(attr)
+	return q.Error
+}
+
+func (d *DbStorage) Delete(model interface{}, query interface{}) error {
+	q := d.db.Where(query).Delete(model)
+	return q.Error
+}
 
 // logs
 type ormLog struct{}

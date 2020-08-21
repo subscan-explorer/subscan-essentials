@@ -20,15 +20,17 @@ type Service struct {
 
 // New new a service and return.
 func New() (s *Service) {
-	d := dao.New()
+	d, dbStorage := dao.New()
 	s = &Service{
 		dao: d,
 	}
 	websocket.SetEndpoint(util.WSEndPoint)
 	s.initSubRuntimeLatest()
 
-	for _, plugin := range plugins.RegisteredPlugins {
-		plugin.InitDao(d)
+	for name, plugin := range plugins.RegisteredPlugins {
+		db := *dbStorage
+		db.Prefix = name
+		plugin.InitDao(&db)
 	}
 	return s
 }
