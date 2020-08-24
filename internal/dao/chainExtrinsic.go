@@ -107,7 +107,7 @@ func (d *Dao) GetExtrinsicsByHash(c context.Context, hash string) *model.ChainEx
 	var extrinsic model.ChainExtrinsic
 	blockNum, _ := d.GetFillBestBlockNum(c)
 	for index := blockNum / (model.SplitTableBlockNum); index >= 0; index-- {
-		query := d.db.Model(model.ChainExtrinsic{BlockNum: index * model.SplitTableBlockNum}).Where("extrinsic_hash = ?", hash).First(&extrinsic)
+		query := d.db.Model(model.ChainExtrinsic{BlockNum: index * model.SplitTableBlockNum}).Where("extrinsic_hash = ?", hash).Order("id asc").Limit(1).Scan(&extrinsic)
 		if query != nil && !query.RecordNotFound() {
 			return &extrinsic
 		}
