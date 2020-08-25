@@ -3,7 +3,9 @@ package dao
 import (
 	"database/sql"
 	"database/sql/driver"
+	"errors"
 	"fmt"
+	"github.com/go-sql-driver/mysql"
 	"github.com/itering/subscan/configs"
 	"github.com/itering/subscan/model"
 	"github.com/itering/substrate-api-rpc/websocket"
@@ -12,7 +14,6 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/pkg/log"
-	"github.com/go-sql-driver/mysql"
 	"github.com/itering/subscan/util"
 	"github.com/jinzhu/gorm"
 )
@@ -36,7 +37,10 @@ func (d *DbStorage) getModelTableName(model interface{}) string {
 	return d.db.Unscoped().NewScope(model).TableName()
 }
 
-func (d *DbStorage) checkProtected() error {
+func (d *DbStorage) checkProtected(model interface{}) error {
+	if util.StringInSlice(d.getModelTableName(model), protectedTables) {
+		return errors.New("protected tables")
+	}
 	return nil
 }
 
@@ -46,13 +50,16 @@ func (d *DbStorage) RPCPool() *websocket.PoolConn {
 }
 
 func (d *DbStorage) FindBy(record interface{}, query interface{}) bool {
-	q := d.db.Where(query).Find(record)
-	return q.RecordNotFound()
+	tx := d.db.Where(query).Find(record)
+	return errors.Is(tx.Error, gorm.ErrRecordNotFound)
 }
 
 func (d *DbStorage) AutoMigration(model interface{}) {
-	fmt.Println(d.Prefix)
-	d.db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(model)
+	if d.checkProtected(model) == nil {
+		d.db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(model)
+		return
+	}
+	return
 }
 
 func (d *DbStorage) AddIndex(model interface{}, indexName string, columns ...string) {
@@ -64,18 +71,30 @@ func (d *DbStorage) AddUniqueIndex(model interface{}, indexName string, columns 
 }
 
 func (d *DbStorage) Create(record interface{}) error {
-	q := d.db.Create(record)
-	return q.Error
+	if err := d.checkProtected(record); err == nil {
+		tx := d.db.Create(record)
+		return tx.Error
+	} else {
+		return err
+	}
 }
 
 func (d *DbStorage) Update(model interface{}, query interface{}, attr map[string]interface{}) error {
-	q := d.db.Model(model).Where(query).Update(attr)
-	return q.Error
+	if err := d.checkProtected(model); err == nil {
+		tx := d.db.Model(model).Where(query).Updates(attr)
+		return tx.Error
+	} else {
+		return err
+	}
 }
 
 func (d *DbStorage) Delete(model interface{}, query interface{}) error {
-	q := d.db.Where(query).Delete(model)
-	return q.Error
+	if err := d.checkProtected(model); err == nil {
+		tx := d.db.Where(query).Delete(model)
+		return tx.Error
+	} else {
+		return err
+	}
 }
 
 // logs

@@ -157,8 +157,8 @@ github.com/itering/subscan-plugin v0.0.3/go.mod h1:yzh3pYoDWb37doOTaWEWxiTRsgc6m
 github.com/itering/substrate-api-rpc v0.0.5 h1:xXmahTqKfm/gcCxG4iipSQ5FecuHNK9UjvDD68OproQ=
 github.com/itering/substrate-api-rpc v0.0.5/go.mod h1:Cr1wq4fy7y6ZvNB0WHJDPwCjDaE84wrmaQilC5+wFjk=
 github.com/jcmturner/gofork v0.0.0-20190328161633-dc7c13fece03/go.mod h1:MK8+TM0La+2rjBD4jE12Kj1pCCxK7d2LK/UM3ncEo0o=
-github.com/jinzhu/gorm v1.9.14 h1:Kg3ShyTPcM6nzVo148fRrcMO6MNKuqtOUwnzqMgVniM=
-github.com/jinzhu/gorm v1.9.14/go.mod h1:G3LB3wezTOWM2ITLzPxEXgSkOXAntiLHS7UdBefADcs=
+github.com/jinzhu/gorm v1.9.16 h1:+IyIjPEABKRpsu/F8OvDPy9fyQlgsg2luMV2ZIH5i5o=
+github.com/jinzhu/gorm v1.9.16/go.mod h1:G3LB3wezTOWM2ITLzPxEXgSkOXAntiLHS7UdBefADcs=
 github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=
 github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkryuEj+Srlc=
 github.com/jinzhu/now v1.0.1 h1:HjfetcXq097iXP0uoPCdnM4Efp5/9MsM0/M+XOTeR3M=

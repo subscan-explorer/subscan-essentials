@@ -14,7 +14,11 @@ import (
 func (d *Dao) CreateBlock(txn *GormDB, cb *model.ChainBlock) (err error) {
 	query := txn.Create(&cb)
 	if !d.db.HasTable(model.ChainBlock{BlockNum: cb.BlockNum + model.SplitTableBlockNum}) {
-		go d.blockMigrate(cb.BlockNum + model.SplitTableBlockNum)
+		go func() {
+			_ = d.db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
+				d.InternalTables(cb.BlockNum + model.SplitTableBlockNum)...)
+
+		}()
 	}
 	return d.checkDBError(query.Error)
 }
