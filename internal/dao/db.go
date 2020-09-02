@@ -49,6 +49,14 @@ func (d *DbStorage) RPCPool() *websocket.PoolConn {
 	return conn
 }
 
+func (d *DbStorage) getPluginPrefixTableName(instant interface{}) string {
+	tableName := d.getModelTableName(instant)
+	if util.StringInSlice(tableName, protectedTables) {
+		return tableName
+	}
+	return fmt.Sprintf("%s_%s", d.Prefix, tableName)
+}
+
 func (d *DbStorage) FindBy(record interface{}, query interface{}) bool {
 	tx := d.db.Where(query).Find(record)
 	return errors.Is(tx.Error, gorm.ErrRecordNotFound)
@@ -56,6 +64,7 @@ func (d *DbStorage) FindBy(record interface{}, query interface{}) bool {
 
 func (d *DbStorage) AutoMigration(model interface{}) {
 	if d.checkProtected(model) == nil {
+		d.db.NewScope(model).Search.Table(d.getPluginPrefixTableName(model))
 		d.db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(model)
 		return
 	}

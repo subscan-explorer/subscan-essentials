@@ -154,7 +154,7 @@ func (d *Dao) UpdateEventAndExtrinsic(txn *GormDB, block *model.ChainBlock, even
 
 func (d *Dao) GetNearBlock(blockNum int) *model.ChainBlock {
 	var block model.ChainBlock
-	query := d.db.Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num > ?", blockNum).Order("block_num desc").First(&block)
+	query := d.db.Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num > ?", blockNum).Order("block_num desc").Scan(&block)
 	if query == nil || query.Error != nil || query.RecordNotFound() {
 		return nil
 	}
