@@ -49,7 +49,7 @@ Developers are free to use the codebase to extend functionalities and develop un
 ### Install
 
 ```bash
-./build.sh install
+./build.sh build
 
 //UI
 cd ui && yarn && yarn dev
