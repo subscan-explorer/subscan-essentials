@@ -7,7 +7,7 @@ import (
 )
 
 func (d *Dao) CreateLog(txn *GormDB, ce *model.ChainLog) error {
-	query := txn.Create(&ce)
+	query := txn.Create(ce)
 	return d.checkDBError(query.Error)
 }
 
