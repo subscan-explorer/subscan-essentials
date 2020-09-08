@@ -4,8 +4,8 @@ function resolve(dir) {
   return path.join(__dirname, dir);
 }
 export default {
-  mode: 'universal',
-  // mode: 'spa',
+  // mode: 'universal',
+  mode: 'spa',
   /*
    ** Headers of the page
    */

@@ -19,6 +19,7 @@ Developers are free to use the codebase to extend functionalities and develop un
   - [Structure](docs/tree.md)
   - [Installation](#Install)
   - [UI](#UI)
+  - [Config](#Config)
   - [Usage](#Usage)
   - [Docker](#Docker)
   - [Test](#Test)
@@ -76,7 +77,22 @@ proxy: {
 }
 ```
 
-### Conf
+#### Example
+
+![ui_demo](./ui_demo.png)
+
+First choose a search type, and enter search content.
+Then click search button, result will be shown in the output section.
+
+#### Feature Supported
+
+- search block detail by block number or block hash
+- search extrinsic detail by extrinsic index or extrinsic hash
+- search runtime info by spec version
+- plugin (blocks, events)
+
+
+### Config
 
 #### Init config file 
 
@@ -165,6 +181,9 @@ docker-compose up -d
 
 ```bash
 go test ./...
+
+//UI
+cd ui && yarn && yarn test
 ```
 
 

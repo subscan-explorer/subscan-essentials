@@ -72,6 +72,8 @@ proxy: {
 }
 ```
 
+![ui_demo](./ui_demo.png)
+
 ### Usage
 
 ```
@@ -121,6 +123,9 @@ docker-compose up -d
 
 ```bash
 go test ./...
+
+//UI
+cd ui && yarn && yarn test
 ```
 
 
