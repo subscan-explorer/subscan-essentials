@@ -58,30 +58,34 @@ func (d *DbStorage) getPluginPrefixTableName(instant interface{}) string {
 }
 
 func (d *DbStorage) FindBy(record interface{}, query interface{}) bool {
-	tx := d.db.Where(query).Find(record)
+	tx := d.db.Where(query)
+	tx = tx.Find(record)
 	return errors.Is(tx.Error, gorm.ErrRecordNotFound)
 }
 
 func (d *DbStorage) AutoMigration(model interface{}) {
 	if d.checkProtected(model) == nil {
-		d.db.NewScope(model).Search.Table(d.getPluginPrefixTableName(model))
-		d.db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(model)
+		d.db.Table(d.getPluginPrefixTableName(model)).Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(model)
 		return
 	}
 	return
 }
 
 func (d *DbStorage) AddIndex(model interface{}, indexName string, columns ...string) {
-	d.db.Model(model).AddIndex(indexName, columns...)
+	if d.checkProtected(model) == nil {
+		d.db.Table(d.getPluginPrefixTableName(model)).AddIndex(indexName, columns...)
+	}
 }
 
 func (d *DbStorage) AddUniqueIndex(model interface{}, indexName string, columns ...string) {
-	d.db.Model(model).AddUniqueIndex(indexName, columns...)
+	if d.checkProtected(model) == nil {
+		d.db.Table(d.getPluginPrefixTableName(model)).AddUniqueIndex(indexName, columns...)
+	}
 }
 
 func (d *DbStorage) Create(record interface{}) error {
 	if err := d.checkProtected(record); err == nil {
-		tx := d.db.Create(record)
+		tx := d.db.Table(d.getPluginPrefixTableName(record)).Create(record)
 		return tx.Error
 	} else {
 		return err
@@ -90,7 +94,7 @@ func (d *DbStorage) Create(record interface{}) error {
 
 func (d *DbStorage) Update(model interface{}, query interface{}, attr map[string]interface{}) error {
 	if err := d.checkProtected(model); err == nil {
-		tx := d.db.Model(model).Where(query).Updates(attr)
+		tx := d.db.Table(d.getPluginPrefixTableName(model)).Where(query).Updates(attr)
 		return tx.Error
 	} else {
 		return err
@@ -99,7 +103,7 @@ func (d *DbStorage) Update(model interface{}, query interface{}, attr map[string
 
 func (d *DbStorage) Delete(model interface{}, query interface{}) error {
 	if err := d.checkProtected(model); err == nil {
-		tx := d.db.Where(query).Delete(model)
+		tx := d.db.Table(d.getPluginPrefixTableName(model)).Where(query).Delete(model)
 		return tx.Error
 	} else {
 		return err
