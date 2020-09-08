@@ -52,12 +52,13 @@ export default {
   ],
 
   axios: {
-    proxy: true
+    proxy: process.env.NODE_ENV !== 'production',
+    browserBaseURL: process.env.NODE_ENV !== 'production' ? "" : "http://127.0.0.1/4399"
   },
 
   proxy: {
     "/api": {
-      target: "https://crab.demo.subscan.io", // 接口的域名
+      target: "http://127.0.0.1/4399", // 接口的域名
       secure: false,
       changeOrigin: true,
       pathRewrite: {

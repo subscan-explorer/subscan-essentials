@@ -72,6 +72,15 @@ proxy: {
 }
 ```
 
+在生产环境中请替换nuxt.config.js中的browserBaseURL
+
+```js
+axios: {
+   proxy: process.env.NODE_ENV !== 'production',
+    browserBaseURL: process.env.NODE_ENV !== 'production' ? "" : "https://your_server_name.com"
+},
+```
+
 ![ui_demo](./ui_demo.png)
 
 ### Usage

@@ -77,6 +77,15 @@ proxy: {
 }
 ```
 
+Please change browserBaseURL in nuxt.config.js to your server name in production.
+
+```js
+axios: {
+   proxy: process.env.NODE_ENV !== 'production',
+    browserBaseURL: process.env.NODE_ENV !== 'production' ? "" : "https://your_server_name.com"
+},
+```
+
 #### Example
 
 ![ui_demo](./ui_demo.png)
