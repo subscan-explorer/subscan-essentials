@@ -120,7 +120,7 @@ docker-compose up -d
 ### Test
 
 ```bash
-go test ../.
+go test ./...
 ```
 
 

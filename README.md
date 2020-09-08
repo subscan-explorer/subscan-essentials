@@ -164,7 +164,7 @@ docker-compose up -d
 **default test mysql database is subscan_test. Please CREATE it or change configs/mysql.toml**
 
 ```bash
-go test ../.
+go test ./...
 ```
 
 
