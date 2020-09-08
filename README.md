@@ -94,7 +94,7 @@ cp configs/redis.toml.example configs/redis.toml && cp configs/mysql.toml.exampl
 
 > host: mysql host (default: 127.0.0.1)
 > user: mysql user (default: root)
-> pass: mysql user passwd(default: "")
+> pass: mysql user passwd (default: "")
 > db:   mysql db name (default: "subscan")
 
 3. Http   configs/http.toml
