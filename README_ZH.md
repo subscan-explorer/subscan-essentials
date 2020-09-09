@@ -57,6 +57,8 @@ UI部分使用 [nuxt.js](https://nuxtjs.org/) 和 [amis](https://github.com/baid
 
 Demo: [blocks](/ui/plugins/blocks.js), 更多配置请参考 [amis docs](https://baidu.gitee.io/amis/docs/index)
 
+[在线示例](https://crab.demo.subscan.io/)
+
 在开发环境中请替换nuxt.config.js中的proxy target
 
 ```js

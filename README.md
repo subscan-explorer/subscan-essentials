@@ -62,6 +62,8 @@ The ui part is built with [nuxt.js](https://nuxtjs.org/) and [amis](https://gith
 
 Demo: [blocks](/ui/plugins/blocks.js), refer to [amis docs](https://baidu.gitee.io/amis/docs/index) for further detail.
 
+[Online Demo](https://crab.demo.subscan.io/)
+
 Please change proxy target in nuxt.config.js to your server name in development.
 
 ```js
