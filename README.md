@@ -19,6 +19,7 @@ Developers are free to use the codebase to extend functionalities and develop un
   - [Structure](docs/tree.md)
   - [Installation](#Install)
   - [UI](#UI)
+  - [Config](#Config)
   - [Usage](#Usage)
   - [Docker](#Docker)
   - [Test](#Test)
@@ -49,7 +50,7 @@ Developers are free to use the codebase to extend functionalities and develop un
 ### Install
 
 ```bash
-./build.sh install
+./build.sh build
 
 //UI
 cd ui && yarn && yarn dev
@@ -60,6 +61,8 @@ cd ui && yarn && yarn dev
 The ui part is built with [nuxt.js](https://nuxtjs.org/) and [amis](https://github.com/baidu/amis)
 
 Demo: [blocks](/ui/plugins/blocks.js), refer to [amis docs](https://baidu.gitee.io/amis/docs/index) for further detail.
+
+[Online Demo](https://crab.demo.subscan.io/)
 
 Please change proxy target in nuxt.config.js to your server name in development.
 
@@ -76,9 +79,61 @@ proxy: {
 }
 ```
 
+Please change browserBaseURL in nuxt.config.js to your server name in production.
+
+```js
+axios: {
+   proxy: process.env.NODE_ENV !== 'production',
+    browserBaseURL: process.env.NODE_ENV !== 'production' ? "" : "https://your_server_name.com"
+},
+```
+
+#### Example
+
+![ui_demo](./ui_demo.png)
+
+First choose a search type, and enter search content.
+Then click search button, result will be shown in the output section.
+
+#### Feature Supported
+
+- search block detail by block number or block hash
+- search extrinsic detail by extrinsic index or extrinsic hash
+- search runtime info by spec version
+- plugin (blocks, events)
+
+
+### Config
+
+#### Init config file 
+
+```bash
+cp configs/redis.toml.example configs/redis.toml && cp configs/mysql.toml.example configs/mysql.toml && cp configs/http.toml.example configs/http.toml
+```
+
+#### Set
+
+1. Redis  configs/redis.toml
+
+> addr： redis host and port (default: 127.0.0.1:6379)
+
+2. Mysql  configs/mysql.toml
+
+> host: mysql host (default: 127.0.0.1)
+> user: mysql user (default: root)
+> pass: mysql user passwd (default: "")
+> db:   mysql db name (default: "subscan")
+
+3. Http   configs/http.toml
+
+> addr: local http server port (default: 0.0.0.0:4399)
+
+
 ### Usage
 
 - Run
+
+**Make sure you have started redis and mysql**
 
 ```bash
 ./cmd/subscan --conf configs
@@ -115,6 +170,8 @@ GLOBAL OPTIONS:
 
 ### Docker
 
+Use [docker-compose](https://docs.docker.com/compose/) can start projects quickly 
+
 Run mysql and redis container
 
 ```bash
@@ -130,8 +187,14 @@ docker-compose up -d
 
 ### Test
 
+
+**default test mysql database is subscan_test. Please CREATE it or change configs/mysql.toml**
+
 ```bash
-go test ../.
+go test ./...
+
+//UI
+cd ui && yarn && yarn test
 ```
 
 

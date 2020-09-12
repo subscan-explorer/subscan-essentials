@@ -45,7 +45,7 @@ Subscan Essentials是一个高精度的区块链浏览器脚手架项目，它�
 ### Install
 
 ```bash
-./build.sh install
+./build.sh build
 
 //UI
 cd ui && yarn && yarn dev
@@ -56,6 +56,8 @@ cd ui && yarn && yarn dev
 UI部分使用 [nuxt.js](https://nuxtjs.org/) 和 [amis](https://github.com/baidu/amis)
 
 Demo: [blocks](/ui/plugins/blocks.js), 更多配置请参考 [amis docs](https://baidu.gitee.io/amis/docs/index)
+
+[在线示例](https://crab.demo.subscan.io/)
 
 在开发环境中请替换nuxt.config.js中的proxy target
 
@@ -71,6 +73,17 @@ proxy: {
    },
 }
 ```
+
+在生产环境中请替换nuxt.config.js中的browserBaseURL
+
+```js
+axios: {
+   proxy: process.env.NODE_ENV !== 'production',
+    browserBaseURL: process.env.NODE_ENV !== 'production' ? "" : "https://your_server_name.com"
+},
+```
+
+![ui_demo](./ui_demo.png)
 
 ### Usage
 
@@ -120,7 +133,10 @@ docker-compose up -d
 ### Test
 
 ```bash
-go test ../.
+go test ./...
+
+//UI
+cd ui && yarn && yarn test
 ```
 
 

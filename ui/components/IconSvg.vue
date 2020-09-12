@@ -9,8 +9,7 @@ export default {
   name: 'icon-svg',
   props: {
     iconClass: {
-      type: String,
-      required: true
+      type: String
     }
   },
   computed: {

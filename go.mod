@@ -11,9 +11,7 @@ require (
 	github.com/huandu/xstrings v1.3.2
 	github.com/itering/subscan-plugin v0.0.3
 	github.com/itering/substrate-api-rpc v0.0.5
-	github.com/jinzhu/gorm v1.9.16
-	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
-	github.com/ompluscator/dynamic-struct v1.2.0
+	github.com/jinzhu/gorm v1.9.14
 	github.com/panjf2000/ants/v2 v2.4.0
 	github.com/pkg/errors v0.9.1
 	github.com/sevlyar/go-daemon v0.1.5
@@ -21,6 +19,5 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/urfave/cli v1.20.0
 	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
-	golang.org/x/sys v0.0.0-20200824131525-c12d262b63d8 // indirect
 	gopkg.in/go-playground/validator.v9 v9.29.1
 )

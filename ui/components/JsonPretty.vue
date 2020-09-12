@@ -15,7 +15,6 @@ export default {
   props: {
     data: {
       type: [Object, Array, String],
-      required: true
     },
     deep: {
       type: Number,

@@ -8,7 +8,7 @@
       <div class="right-menu">
         <el-dropdown trigger="click">
           <div class="el-dropdown-link">
-            插件
+            {{$t('plugin')}}
             <i class="el-icon-arrow-down el-icon--right"></i>
           </div>
           <el-dropdown-menu slot="dropdown">

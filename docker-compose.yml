@@ -24,6 +24,16 @@ services:
     networks:
       - app_net
 
+  subscan-static:
+    build:
+      context: ./ui
+    environment:
+      NODE_ENV: 'production'
+    ports:
+      - '80:80'
+    networks:
+      - app_net
+
 networks:
   app_net:
     external: true
