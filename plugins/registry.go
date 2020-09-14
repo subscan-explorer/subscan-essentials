@@ -3,6 +3,7 @@ package plugins
 import (
 	"github.com/itering/subscan-plugin"
 	"github.com/itering/subscan/plugins/balance"
+	"github.com/itering/subscan/plugins/system"
 	"reflect"
 	"strings"
 )
@@ -41,7 +42,9 @@ func List() []string {
 
 func registerNative() {
 	balancePlugin := balance.New()
+	systemPlugin := system.New()
 	Register(reflect.TypeOf(*balancePlugin).Name(), balancePlugin)
+	Register(reflect.TypeOf(*systemPlugin).Name(), systemPlugin)
 }
 
 // Currently the go plugin solution is not stable yet

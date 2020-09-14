@@ -153,10 +153,8 @@ github.com/itering/scale.go v0.2.4 h1:WxFfVDdy737RtVcGaC0+5KfBhkFOXFUq6T/hRznzTw
 github.com/itering/scale.go v0.2.4/go.mod h1:ufrA/8oz/qi4mtK8TXz4LFZzfJ4ZUQ+4z+cUNpY9jts=
 github.com/itering/scale.go v0.5.1 h1:J2oIvDwCKhJNcZx09JzUdD2Que0fABDklSpzA9Xa2tM=
 github.com/itering/scale.go v0.5.1/go.mod h1:ufrA/8oz/qi4mtK8TXz4LFZzfJ4ZUQ+4z+cUNpY9jts=
-github.com/itering/subscan-plugin v0.0.6 h1:SW49pxsAQkCcz7TsweGMyL+A3JsmA61qFmspkKDh1Lk=
-github.com/itering/subscan-plugin v0.0.6/go.mod h1:yzh3pYoDWb37doOTaWEWxiTRsgc6mpHUAMFSwJXGmVA=
-github.com/itering/subscan-plugin v0.1.0 h1:u01psj+tvliO7lI78+EaQFfDGhRQqePUpExOzU/XpwA=
-github.com/itering/subscan-plugin v0.1.0/go.mod h1:yzh3pYoDWb37doOTaWEWxiTRsgc6mpHUAMFSwJXGmVA=
+github.com/itering/subscan-plugin v0.1.1 h1:WOL6bq9ZJh1OFHyHvler1S2F6CfNCkl9VEU74iIa31Q=
+github.com/itering/subscan-plugin v0.1.1/go.mod h1:yzh3pYoDWb37doOTaWEWxiTRsgc6mpHUAMFSwJXGmVA=
 github.com/itering/substrate-api-rpc v0.0.5 h1:xXmahTqKfm/gcCxG4iipSQ5FecuHNK9UjvDD68OproQ=
 github.com/itering/substrate-api-rpc v0.0.5/go.mod h1:Cr1wq4fy7y6ZvNB0WHJDPwCjDaE84wrmaQilC5+wFjk=
 github.com/itering/substrate-api-rpc v0.1.0 h1:vlsAJLlVgpOrTFglIYcgpXzVYAZzBPQN+LFe/uj/Ak8=

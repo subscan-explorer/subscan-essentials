@@ -24,6 +24,10 @@ type DbStorage struct {
 	Prefix string
 }
 
+func (d *DbStorage) SetPrefix(prefix string) {
+	d.Prefix = prefix
+}
+
 var protectedTables []string
 
 func (d *DbStorage) SpecialMetadata(spec int) string {
