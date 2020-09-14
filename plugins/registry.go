@@ -3,6 +3,8 @@ package plugins
 import (
 	"github.com/itering/subscan-plugin"
 	"github.com/itering/subscan/plugins/balance"
+	"reflect"
+	"strings"
 )
 
 func init() {
@@ -15,6 +17,7 @@ type PluginFactory subscan_plugin.Plugin
 var RegisteredPlugins = make(map[string]PluginFactory)
 
 func Register(name string, f interface{}) {
+	name = strings.ToLower(name)
 	if f == nil {
 		return
 	}
@@ -23,8 +26,9 @@ func Register(name string, f interface{}) {
 		return
 	}
 
-	RegisteredPlugins[name] = f.(PluginFactory)
-
+	if _, ok := f.(PluginFactory); ok {
+		RegisteredPlugins[name] = f.(PluginFactory)
+	}
 }
 
 func List() []string {
@@ -36,7 +40,8 @@ func List() []string {
 }
 
 func registerNative() {
-	Register("balance", balance.New())
+	balancePlugin := balance.New()
+	Register(reflect.TypeOf(*balancePlugin).Name(), balancePlugin)
 }
 
 // Currently the go plugin solution is not stable yet

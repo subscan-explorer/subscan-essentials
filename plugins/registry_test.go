@@ -27,9 +27,17 @@ func (a *TPlugin) Migrate() {}
 
 func (a *TPlugin) Version() string { return "0.1" }
 
+func (a *TPlugin) SubscribeExtrinsic() []string { return nil }
+
+func (a *TPlugin) SubscribeEvent() []string { return nil }
+
 func TestRegister(t *testing.T) {
 	plugins.Register("test", &TPlugin{})
+	plugins.Register("test2", nil)
+	plugins.Register("test", &TPlugin{})
 	assert.NotNil(t, plugins.RegisteredPlugins["test"])
+	assert.Nil(t, plugins.RegisteredPlugins["test2"])
+	assert.Equal(t, 2, len(plugins.List()))
 }
 
 func TestList(t *testing.T) {

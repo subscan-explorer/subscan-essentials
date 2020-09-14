@@ -11,37 +11,45 @@ import (
 
 var srv *service.Service
 
-type Account struct {
+type Balance struct {
 	d storage.Dao
 }
 
-func New() *Account {
-	return &Account{}
+func New() *Balance {
+	return &Balance{}
 }
 
-func (a *Account) InitDao(d storage.Dao) {
+func (a *Balance) InitDao(d storage.Dao) {
 	srv = service.New(d)
 	a.d = d
 	a.Migrate()
 }
 
-func (a *Account) InitHttp() []router.Http {
+func (a *Balance) InitHttp() []router.Http {
 	return http.Router(srv)
 }
 
-func (a *Account) ProcessExtrinsic(block *storage.Block, extrinsic *storage.Extrinsic, events []storage.Event) error {
+func (a *Balance) ProcessExtrinsic(block *storage.Block, extrinsic *storage.Extrinsic, events []storage.Event) error {
 	return nil
 }
 
-func (a *Account) ProcessEvent(block *storage.Block, event *storage.Event, fee decimal.Decimal) error {
+func (a *Balance) ProcessEvent(block *storage.Block, event *storage.Event, fee decimal.Decimal) error {
 	return nil
 }
 
-func (a *Account) Version() string {
+func (a *Balance) SubscribeExtrinsic() []string {
+	return nil
+}
+
+func (a *Balance) SubscribeEvent() []string {
+	return nil
+}
+
+func (a *Balance) Version() string {
 	return "0.1"
 }
 
-func (a *Account) Migrate() {
-	a.d.AutoMigration(&model.Account{})
-	a.d.AddUniqueIndex(&model.Account{}, "address", "address")
+func (a *Balance) Migrate() {
+	_ = a.d.AutoMigration(&model.Account{})
+	_ = a.d.AddUniqueIndex(&model.Account{}, "address", "address")
 }

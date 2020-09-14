@@ -4,10 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/model"
-	"github.com/itering/subscan/plugins"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/address"
 	"github.com/shopspring/decimal"
@@ -56,7 +54,7 @@ func (s *Service) createExtrinsic(c context.Context,
 		}
 
 		if err = s.dao.CreateExtrinsic(c, txn, &extrinsic); err == nil {
-			go s.afterExtrinsic(block, &extrinsic, eventMap[extrinsic.ExtrinsicIndex])
+			go s.emitExtrinsic(block, &extrinsic, eventMap[extrinsic.ExtrinsicIndex])
 		} else {
 			return 0, 0, nil, nil, err
 		}
@@ -116,19 +114,4 @@ func (s *Service) getExtrinsicSuccess(e []model.ChainEvent) bool {
 		}
 	}
 	return true
-}
-
-func (s *Service) afterExtrinsic(block *model.ChainBlock, extrinsic *model.ChainExtrinsic, events []model.ChainEvent) {
-	block.BlockTimestamp = extrinsic.BlockTimestamp
-	pBlock := block.AsPlugin()
-	pExtrinsic := extrinsic.AsPlugin()
-
-	var pEvents []storage.Event
-	for _, event := range events {
-		pEvents = append(pEvents, *event.AsPlugin())
-	}
-
-	for _, plugin := range plugins.RegisteredPlugins {
-		_ = plugin.ProcessExtrinsic(pBlock, pExtrinsic, pEvents)
-	}
 }

@@ -75,7 +75,7 @@ func (s *Service) CreateChainBlock(conn websocket.WsConn, hash string, block *rp
 		return err
 	}
 	cb.BlockTimestamp = blockTimestamp
-	eventCount, err := s.AddEvent(c, txn, &cb, e, extrinsicHash, extrinsicFee)
+	eventCount, err := s.AddEvent(txn, &cb, e, extrinsicHash, extrinsicFee)
 	if err != nil {
 		return err
 	}
@@ -145,7 +145,7 @@ func (s *Service) UpdateBlockData(conn websocket.WsConn, block *model.ChainBlock
 	}
 	block.BlockTimestamp = blockTimestamp
 
-	eventCount, err := s.AddEvent(c, txn, block, e, extrinsicHash, extrinsicFee)
+	eventCount, err := s.AddEvent(txn, block, e, extrinsicHash, extrinsicFee)
 	if err != nil {
 		return err
 	}

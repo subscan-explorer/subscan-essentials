@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-sql-driver/mysql"
+	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/configs"
 	"github.com/itering/subscan/model"
 	"github.com/itering/substrate-api-rpc/websocket"
@@ -57,30 +58,37 @@ func (d *DbStorage) getPluginPrefixTableName(instant interface{}) string {
 	return fmt.Sprintf("%s_%s", d.Prefix, tableName)
 }
 
-func (d *DbStorage) FindBy(record interface{}, query interface{}) bool {
+func (d *DbStorage) FindBy(record interface{}, query interface{}, option *storage.Option) bool {
 	tx := d.db.Where(query)
+	if option != nil {
+		tx.Table(fmt.Sprintf("%s_%s", option.PluginPrefix, d.getModelTableName(record)))
+	}
 	tx = tx.Find(record)
 	return errors.Is(tx.Error, gorm.ErrRecordNotFound)
 }
 
-func (d *DbStorage) AutoMigration(model interface{}) {
+func (d *DbStorage) AutoMigration(model interface{}) error {
 	if d.checkProtected(model) == nil {
-		d.db.Table(d.getPluginPrefixTableName(model)).Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(model)
-		return
+		tx := d.db.Table(d.getPluginPrefixTableName(model)).Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(model)
+		return tx.Error
 	}
-	return
+	return nil
 }
 
-func (d *DbStorage) AddIndex(model interface{}, indexName string, columns ...string) {
+func (d *DbStorage) AddIndex(model interface{}, indexName string, columns ...string) error {
 	if d.checkProtected(model) == nil {
-		d.db.Table(d.getPluginPrefixTableName(model)).AddIndex(indexName, columns...)
+		tx := d.db.Table(d.getPluginPrefixTableName(model)).AddIndex(indexName, columns...)
+		return tx.Error
 	}
+	return nil
 }
 
-func (d *DbStorage) AddUniqueIndex(model interface{}, indexName string, columns ...string) {
+func (d *DbStorage) AddUniqueIndex(model interface{}, indexName string, columns ...string) error {
 	if d.checkProtected(model) == nil {
-		d.db.Table(d.getPluginPrefixTableName(model)).AddUniqueIndex(indexName, columns...)
+		tx := d.db.Table(d.getPluginPrefixTableName(model)).AddUniqueIndex(indexName, columns...)
+		return tx.Error
 	}
+	return nil
 }
 
 func (d *DbStorage) Create(record interface{}) error {

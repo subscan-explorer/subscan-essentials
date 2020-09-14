@@ -118,7 +118,7 @@ func events(c *bm.Context) {
 	if p.Call != "" {
 		query = append(query, fmt.Sprintf("event_id = '%s'", p.Call))
 	}
-	events, count := svc.GetEventList(p.Page, p.Row, "desc", query...)
+	events, count := svc.RenderEvents(p.Page, p.Row, "desc", query...)
 	c.JSON(map[string]interface{}{
 		"events": events, "count": count,
 	}, nil)
