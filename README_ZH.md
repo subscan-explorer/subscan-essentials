@@ -85,7 +85,50 @@ axios: {
 
 ![ui_demo](./ui_demo.png)
 
+### Config
+
+#### Init config file 
+
+```bash
+cp configs/redis.toml.example configs/redis.toml && cp configs/mysql.toml.example configs/mysql.toml && cp configs/http.toml.example configs/http.toml
+```
+
+#### Set
+
+1. Redis  configs/redis.toml
+
+> addr： redis host and port (default: 127.0.0.1:6379)
+
+2. Mysql  configs/mysql.toml
+
+> host: mysql host (default: 127.0.0.1)
+> user: mysql user (default: root)
+> pass: mysql user passwd (default: "")
+> db:   mysql db name (default: "subscan")
+
+3. Http   configs/http.toml
+
+> addr: local http server port (default: 0.0.0.0:4399)
+
+
+
 ### Usage
+
+- Run
+
+**Make sure you have started redis and mysql**
+
+- Substrate Daemon
+```bash
+./cmd/subscan --conf configs start substrate
+```
+
+- Api Server
+```bash
+./cmd/subscan --conf configs
+```
+
+- Help
 
 ```
 NAME:
