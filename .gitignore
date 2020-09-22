@@ -6,6 +6,7 @@ configs/http.toml
 configs/mysql.toml
 configs/redis.toml
 log/*
+!log/.gitkeep
 node_modules
 target
 *.so
