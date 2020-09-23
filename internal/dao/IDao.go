@@ -30,7 +30,7 @@ type IDao interface {
 	CreateEvent(txn *GormDB, event *model.ChainEvent) error
 	DropEventNotFinalizedData(blockNum int, finalized bool) bool
 	GetEventByBlockNum(blockNum int, where ...string) []model.ChainEventJson
-	GetEventList(c context.Context, page, row int, order string, where ...string) ([]model.ChainEvent, int)
+	GetEventList(page, row int, order string, where ...string) ([]model.ChainEvent, int)
 	GetEventsByIndex(extrinsicIndex string) []model.ChainEvent
 	GetEventByIdx(index string) *model.ChainEvent
 	CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.ChainExtrinsic) error

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/go-kratos/kratos/pkg/log"
 	"github.com/itering/subscan/internal/dao"
-	"github.com/itering/subscan/plugins"
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc"
 	"github.com/itering/substrate-api-rpc/metadata"
@@ -20,16 +19,11 @@ type Service struct {
 
 // New new a service and return.
 func New() (s *Service) {
-	d := dao.New()
-	s = &Service{
-		dao: d,
-	}
 	websocket.SetEndpoint(util.WSEndPoint)
+	d, dbStorage := dao.New()
+	s = &Service{dao: d}
 	s.initSubRuntimeLatest()
-
-	for _, plugin := range plugins.RegisteredPlugins {
-		plugin.InitDao(d)
-	}
+	pluginRegister(dbStorage)
 	return s
 }
 

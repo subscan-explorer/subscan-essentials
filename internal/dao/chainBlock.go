@@ -14,7 +14,11 @@ import (
 func (d *Dao) CreateBlock(txn *GormDB, cb *model.ChainBlock) (err error) {
 	query := txn.Create(cb)
 	if !d.db.HasTable(model.ChainBlock{BlockNum: cb.BlockNum + model.SplitTableBlockNum}) {
-		go d.blockMigrate(cb.BlockNum + model.SplitTableBlockNum)
+		go func() {
+			_ = d.db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
+				d.InternalTables(cb.BlockNum + model.SplitTableBlockNum)...)
+
+		}()
 	}
 	return d.checkDBError(query.Error)
 }
@@ -150,7 +154,7 @@ func (d *Dao) UpdateEventAndExtrinsic(txn *GormDB, block *model.ChainBlock, even
 
 func (d *Dao) GetNearBlock(blockNum int) *model.ChainBlock {
 	var block model.ChainBlock
-	query := d.db.Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num > ?", blockNum).Order("block_num desc").First(&block)
+	query := d.db.Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num > ?", blockNum).Order("block_num desc").Scan(&block)
 	if query == nil || query.Error != nil || query.RecordNotFound() {
 		return nil
 	}

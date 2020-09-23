@@ -52,12 +52,12 @@ func (d *Dao) GetEventByBlockNum(blockNum int, where ...string) []model.ChainEve
 	return events
 }
 
-func (d *Dao) GetEventList(c context.Context, page, row int, order string, where ...string) ([]model.ChainEvent, int) {
+func (d *Dao) GetEventList(page, row int, order string, where ...string) ([]model.ChainEvent, int) {
 	var Events []model.ChainEvent
 
 	var count int
 
-	blockNum, _ := d.GetFillBestBlockNum(c)
+	blockNum, _ := d.GetFillBestBlockNum(context.TODO())
 	for index := blockNum / model.SplitTableBlockNum; index >= 0; index-- {
 		var tableData []model.ChainEvent
 		var tableCount int

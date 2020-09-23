@@ -1,7 +1,6 @@
 package dao
 
 import (
-	"context"
 	"github.com/itering/subscan/model"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -34,8 +33,7 @@ func TestDao_GetEventByBlockNum(t *testing.T) {
 }
 
 func TestDao_GetEventList(t *testing.T) {
-	ctx := context.TODO()
-	events, _ := testDao.GetEventList(ctx, 0, 100, "desc")
+	events, _ := testDao.GetEventList(0, 100, "desc")
 	assert.GreaterOrEqual(t, 1, len(events))
 }
 
