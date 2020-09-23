@@ -1,9 +1,9 @@
 package dao
 
 import (
-	"github.com/itering/subscan-plugin/example/system/model"
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan-plugin/tools"
+	"github.com/itering/subscan/plugins/system/model"
 	"github.com/itering/substrate-api-rpc/metadata"
 	"strings"
 )
