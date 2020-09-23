@@ -11,6 +11,7 @@ import (
 	"github.com/itering/subscan/model"
 	"github.com/itering/substrate-api-rpc/websocket"
 	"os"
+	"reflect"
 	"strings"
 	"time"
 
@@ -26,6 +27,10 @@ type DbStorage struct {
 
 func (d *DbStorage) SetPrefix(prefix string) {
 	d.Prefix = prefix
+}
+
+func (d *DbStorage) GetPrefix() string {
+	return d.Prefix
 }
 
 var protectedTables []string
@@ -59,13 +64,16 @@ func (d *DbStorage) getPluginPrefixTableName(instant interface{}) string {
 	if util.StringInSlice(tableName, protectedTables) {
 		return tableName
 	}
-	return fmt.Sprintf("%s_%s", d.Prefix, tableName)
+	return fmt.Sprintf("%s_%s", d.GetPrefix(), tableName)
 }
 
 func (d *DbStorage) FindBy(record interface{}, query interface{}, option *storage.Option) bool {
-	tx := d.db.Where(query)
+	tx := d.db
+	if reflect.ValueOf(query).IsValid() {
+		tx = tx.Where(query)
+	}
 	if option != nil {
-		tx.Table(fmt.Sprintf("%s_%s", option.PluginPrefix, d.getModelTableName(record)))
+		tx = tx.Table(fmt.Sprintf("%s_%s", option.PluginPrefix, d.getModelTableName(record)))
 	}
 	tx = tx.Find(record)
 	return errors.Is(tx.Error, gorm.ErrRecordNotFound)

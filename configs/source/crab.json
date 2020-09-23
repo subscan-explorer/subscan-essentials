@@ -20,6 +20,7 @@
   "Address": "AccountId",
   "LookupSource": "AccountId",
   "EthereumAddress": "H160",
+  "MappedRing": "u128",
   "Keys": {
     "type": "struct",
     "type_mapping": [
@@ -480,6 +481,30 @@
         "Bytes"
       ],
       [
+        "state_root",
+        "H256"
+      ],
+      [
+        "receipts_root",
+        "H256"
+      ],
+      [
+        "log_bloom",
+        "Bloom"
+      ],
+      [
+        "gas_used",
+        "U256"
+      ],
+      [
+        "gas_limit",
+        "U256"
+      ],
+      [
+        "difficulty",
+        "U256"
+      ],
+      [
         "seal",
         "Vec<Bytes>"
       ],
@@ -876,6 +901,36 @@
   "EthereumNetworkType": "EthNetworkType",
   "EthashProof": "DoubleNodeWithMerkleProof",
   "MMRProof": "Vec<H256>",
+  "MMRProof#11-?": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "member_leaf_index",
+        "u64"
+      ],
+      [
+        "last_leaf_index",
+        "u64"
+      ],
+      [
+        "proof",
+        "Vec<H256>"
+      ]
+    ]
+  },
+  "ConfirmedEthereumHeaderInfo": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "header",
+        "EthereumHeader"
+      ],
+      [
+        "mmr_root",
+        "H256"
+      ]
+    ]
+  },
   "Proposal": {
     "type": "struct",
     "type_mapping": [

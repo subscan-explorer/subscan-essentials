@@ -153,12 +153,16 @@ github.com/itering/scale.go v0.2.4 h1:WxFfVDdy737RtVcGaC0+5KfBhkFOXFUq6T/hRznzTw
 github.com/itering/scale.go v0.2.4/go.mod h1:ufrA/8oz/qi4mtK8TXz4LFZzfJ4ZUQ+4z+cUNpY9jts=
 github.com/itering/scale.go v0.5.1 h1:J2oIvDwCKhJNcZx09JzUdD2Que0fABDklSpzA9Xa2tM=
 github.com/itering/scale.go v0.5.1/go.mod h1:ufrA/8oz/qi4mtK8TXz4LFZzfJ4ZUQ+4z+cUNpY9jts=
+github.com/itering/scale.go v0.6.1 h1:MAqkHWw6wLLuL2fpI9w2lIxSz0H4aMvtn50+MynJc3U=
+github.com/itering/scale.go v0.6.1/go.mod h1:ufrA/8oz/qi4mtK8TXz4LFZzfJ4ZUQ+4z+cUNpY9jts=
 github.com/itering/subscan-plugin v0.1.1 h1:WOL6bq9ZJh1OFHyHvler1S2F6CfNCkl9VEU74iIa31Q=
 github.com/itering/subscan-plugin v0.1.1/go.mod h1:yzh3pYoDWb37doOTaWEWxiTRsgc6mpHUAMFSwJXGmVA=
 github.com/itering/substrate-api-rpc v0.0.5 h1:xXmahTqKfm/gcCxG4iipSQ5FecuHNK9UjvDD68OproQ=
 github.com/itering/substrate-api-rpc v0.0.5/go.mod h1:Cr1wq4fy7y6ZvNB0WHJDPwCjDaE84wrmaQilC5+wFjk=
 github.com/itering/substrate-api-rpc v0.1.0 h1:vlsAJLlVgpOrTFglIYcgpXzVYAZzBPQN+LFe/uj/Ak8=
 github.com/itering/substrate-api-rpc v0.1.0/go.mod h1:P1MTKTNeRJUsufrCBnd0GbUYghh7+EMM5b0j/313Yc8=
+github.com/itering/substrate-api-rpc v0.1.1 h1:27aH94aJNGAfNxzbkAvh5FWBaUL59+OmfdfVV98/9a4=
+github.com/itering/substrate-api-rpc v0.1.1/go.mod h1:ly10eVuI96jO5fzWulkFYSMAaNL6cE5uE+TiK626XrY=
 github.com/jcmturner/gofork v0.0.0-20190328161633-dc7c13fece03/go.mod h1:MK8+TM0La+2rjBD4jE12Kj1pCCxK7d2LK/UM3ncEo0o=
 github.com/jinzhu/gorm v1.9.14 h1:Kg3ShyTPcM6nzVo148fRrcMO6MNKuqtOUwnzqMgVniM=
 github.com/jinzhu/gorm v1.9.14/go.mod h1:G3LB3wezTOWM2ITLzPxEXgSkOXAntiLHS7UdBefADcs=

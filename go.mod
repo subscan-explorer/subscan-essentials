@@ -10,7 +10,7 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/huandu/xstrings v1.3.2
 	github.com/itering/subscan-plugin v0.1.1
-	github.com/itering/substrate-api-rpc v0.1.0
+	github.com/itering/substrate-api-rpc v0.1.1
 	github.com/jinzhu/gorm v1.9.14
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/panjf2000/ants/v2 v2.4.0

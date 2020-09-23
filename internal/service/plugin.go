@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/itering/subscan-plugin/storage"
+	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/plugins"
 	"github.com/shopspring/decimal"
@@ -13,12 +14,11 @@ var (
 )
 
 // registered storage
-func pluginRegister(ds storage.Dao) {
+func pluginRegister(ds *dao.DbStorage) {
 	for name, plugin := range plugins.RegisteredPlugins {
-		db := ds
-		db.SetPrefix(name)
-		plugin.InitDao(db)
-
+		db := *ds
+		db.Prefix = name
+		plugin.InitDao(&db)
 		for _, moduleId := range plugin.SubscribeExtrinsic() {
 			subscribeExtrinsic[moduleId] = append(subscribeExtrinsic[moduleId], plugin)
 		}

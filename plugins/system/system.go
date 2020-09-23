@@ -29,11 +29,11 @@ func (a *System) InitHttp() (routers []router.Http) {
 	return nil
 }
 
-func (a *System) ProcessExtrinsic(block *storage.Block, extrinsic *storage.Extrinsic, events []storage.Event) error {
+func (a *System) ProcessExtrinsic(*storage.Block, *storage.Extrinsic, []storage.Event) error {
 	return nil
 }
 
-func (a *System) ProcessEvent(block *storage.Block, event *storage.Event, fee decimal.Decimal) error {
+func (a *System) ProcessEvent(block *storage.Block, event *storage.Event, _ decimal.Decimal) error {
 	var paramEvent []storage.EventParam
 	tools.UnmarshalToAnything(&paramEvent, event.Params)
 	switch event.EventId {
@@ -58,5 +58,5 @@ func (a *System) SubscribeExtrinsic() []string {
 }
 
 func (a *System) SubscribeEvent() []string {
-	return nil
+	return []string{"system"}
 }

@@ -1,24 +1,39 @@
 package dao
 
 import (
+	"fmt"
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/plugins/balance/model"
+	"github.com/itering/subscan/util"
+	"github.com/itering/substrate-api-rpc/rpc"
+	"github.com/shopspring/decimal"
 )
 
-func GetAccountList(db storage.DB, page, row int, order, field string, queryWhere ...string) ([]model.Account, int) {
+func GetAccountList(db storage.DB, page, row int) ([]model.Account, int) {
 	var accounts []model.Account
-	// queryOrigin := db.Model(&model.Account{})
-	// if field == "" {
-	// 	field = "id"
-	// }
-	// for _, w := range queryWhere {
-	// 	queryOrigin = queryOrigin.Where(w)
-	// }
-	// query := queryOrigin.Order(fmt.Sprintf("%s %s", field, order)).Offset(page * row).Limit(row).Scan(&accounts)
-	// if query == nil || query.Error != nil || query.RecordNotFound() {
-	// 	return accounts, 0
-	// }
-	// var count int
-	// queryOrigin.Count(&count)
-	return accounts, 0
+	db.FindBy(&accounts, nil, &storage.Option{PluginPrefix: "balance"})
+	return accounts, len(accounts)
+}
+
+func NewAccount(db storage.DB, accountId string) error {
+	accountId = util.TrimHex(accountId)
+	err := db.Create(&model.Account{Address: accountId})
+	if err != nil {
+		err = AfterAccountCreate(db, accountId)
+	}
+	return err
+}
+
+func AfterAccountCreate(db storage.DB, accountId string) error {
+	accountDataRaw, err := rpc.ReadStorage(nil, "system", "account", "", accountId)
+	if err != nil {
+		return err
+	}
+	accountData := new(model.AccountData)
+	accountDataRaw.ToAny(accountData)
+	return db.Update(model.Account{}, fmt.Sprintf("address = '%s'", accountId), map[string]interface{}{
+		"nonce":   accountData.Nonce,
+		"balance": accountData.Data.Free.Add(accountData.Data.Reserved),
+		"lock":    decimal.Max(accountData.Data.MiscFrozen, accountData.Data.FeeFrozen),
+	})
 }
