@@ -10,3 +10,5 @@ log/*
 node_modules
 target
 *.so
+data/*
+!data/.gitkeep
