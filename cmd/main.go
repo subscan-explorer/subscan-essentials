@@ -79,8 +79,8 @@ func setupApp() *cli.App {
 }
 
 func run() {
-	serviceService := service.New()
-	engine := http.New(serviceService)
+	svc := service.New()
+	engine := http.New(svc)
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
 	for {
@@ -93,7 +93,7 @@ func run() {
 				log.Error("httpSrv.Shutdown error(%v)", err)
 			}
 			cancel()
-			serviceService.Close()
+			svc.Close()
 			log.Info("SubScan End exit")
 			time.Sleep(time.Second)
 			return

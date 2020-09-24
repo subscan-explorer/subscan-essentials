@@ -162,7 +162,7 @@ func (m *MockDao) GetEventByBlockNum(blockNum int, where ...string) []model.Chai
 	return nil
 }
 
-func (m *MockDao) GetEventList(c context.Context, page, row int, order string, where ...string) ([]model.ChainEvent, int) {
+func (m *MockDao) GetEventList(page, row int, order string, where ...string) ([]model.ChainEvent, int) {
 	return []model.ChainEvent{testEvent}, 1
 }
 
