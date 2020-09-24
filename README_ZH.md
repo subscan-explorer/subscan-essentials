@@ -160,6 +160,12 @@ GLOBAL OPTIONS:
 
 ### Docker
 
+创建本地docker网络
+
+```
+docker network create app_net
+```
+
 启动mysql和redis的 container
 
 ```bash
