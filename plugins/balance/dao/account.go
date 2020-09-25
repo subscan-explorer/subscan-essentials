@@ -9,9 +9,9 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func GetAccountList(db storage.DB, page, row int) ([]model.Account, int) {
+func GetAccountList(db storage.DB, page, row int, order string) ([]model.Account, int) {
 	var accounts []model.Account
-	db.FindBy(&accounts, nil, &storage.Option{PluginPrefix: "balance"})
+	db.FindBy(&accounts, nil, &storage.Option{PluginPrefix: "balance",PageSize: row,Page: page,Order: order})
 	return accounts, len(accounts)
 }
 
