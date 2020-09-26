@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/itering/subscan-plugin/router"
 	"github.com/itering/subscan-plugin/storage"
-	"github.com/itering/subscan-plugin/tools"
 	"github.com/itering/subscan/plugins/balance/dao"
 	"github.com/itering/subscan/plugins/balance/http"
 	"github.com/itering/subscan/plugins/balance/model"
@@ -43,7 +42,7 @@ func (a *Balance) ProcessEvent(block *storage.Block, event *storage.Event, fee d
 		return nil
 	}
 	var paramEvent []storage.EventParam
-	tools.UnmarshalToAnything(&paramEvent, event.Params)
+	util.UnmarshalAny(&paramEvent, event.Params)
 
 	switch fmt.Sprintf("%s-%s", strings.ToLower(event.ModuleId), strings.ToLower(event.EventId)) {
 	case strings.ToLower("System-NewAccount"):
