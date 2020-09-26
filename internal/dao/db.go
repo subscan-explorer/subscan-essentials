@@ -74,6 +74,12 @@ func (d *DbStorage) FindBy(record interface{}, query interface{}, option *storag
 	}
 	if option != nil {
 		tx = tx.Table(fmt.Sprintf("%s_%s", option.PluginPrefix, d.getModelTableName(record)))
+		if (option.Page >0) && (option.PageSize >0) {
+			tx = tx.Limit(option.PageSize).Offset((option.Page-1)*option.PageSize)
+		}
+		if option.Order != "" {
+			tx = tx.Order(option.Order)
+		}
 	}
 	tx = tx.Find(record)
 	return errors.Is(tx.Error, gorm.ErrRecordNotFound)
@@ -194,7 +200,7 @@ func newDb(dc configs.MysqlConf) (db *gorm.DB) {
 		db.SetLogger(ormLog{})
 	}
 	if os.Getenv("TEST_MOD") != "true" {
-		db.LogMode(true)
+		db.LogMode(false)
 	}
 	return db
 }
