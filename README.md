@@ -178,6 +178,12 @@ GLOBAL OPTIONS:
 
 Use [docker-compose](https://docs.docker.com/compose/) can start projects quickly 
 
+Create local network
+
+```
+docker network create app_net
+```
+
 Run mysql and redis container
 
 ```bash

@@ -79,6 +79,12 @@ func (d *DbStorage) FindBy(record interface{}, query interface{}, option *storag
 	// plugin prefix table
 	if option != nil && option.PluginPrefix != "" {
 		tx = tx.Table(fmt.Sprintf("%s_%s", option.PluginPrefix, d.getModelTableName(record)))
+		if (option.Page > 0) && (option.PageSize > 0) {
+			tx = tx.Limit(option.PageSize).Offset((option.Page - 1) * option.PageSize)
+		}
+		if option.Order != "" {
+			tx = tx.Order(option.Order)
+		}
 	}
 	// rows count
 	tx.Count(&count)
@@ -211,7 +217,7 @@ func newDb(dc configs.MysqlConf) (db *gorm.DB) {
 		db.SetLogger(ormLog{})
 	}
 	if os.Getenv("TEST_MOD") != "true" {
-		db.LogMode(true)
+		db.LogMode(false)
 	}
 	return db
 }
