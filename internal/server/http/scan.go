@@ -5,6 +5,7 @@ import (
 	"fmt"
 	bm "github.com/go-kratos/kratos/pkg/net/http/blademaster"
 	"github.com/go-kratos/kratos/pkg/net/http/blademaster/binding"
+	"github.com/itering/subscan/plugins"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/ss58"
 )
@@ -163,4 +164,22 @@ func runtimeMetadata(c *bm.Context) {
 		}, nil)
 	}
 
+}
+
+func pluginList(c *bm.Context) {
+	c.JSON(plugins.List(), nil)
+}
+
+func pluginUIConfig(c *bm.Context) {
+	p := new(struct {
+		Name string `json:"name" validate:"required"`
+	})
+	if err := c.BindWith(p, binding.JSON); err != nil {
+		return
+	}
+	if plugin, ok := plugins.RegisteredPlugins[p.Name]; ok {
+		c.JSON(plugin.UiConf(), nil)
+		return
+	}
+	c.JSON(nil, nil)
 }

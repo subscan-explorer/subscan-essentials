@@ -8,16 +8,17 @@ import (
 	"strings"
 )
 
-func init() {
-	registerNative()
-	// registerStatic()
-}
-
 type PluginFactory subscan_plugin.Plugin
 
 var RegisteredPlugins = make(map[string]PluginFactory)
 
-func Register(name string, f interface{}) {
+// register local plugin
+func init() {
+	registerNative(balance.New())
+	registerNative(system.New())
+}
+
+func register(name string, f interface{}) {
 	name = strings.ToLower(name)
 	if f == nil {
 		return
@@ -32,44 +33,20 @@ func Register(name string, f interface{}) {
 	}
 }
 
-func List() []string {
-	plugins := make([]string, 0, len(RegisteredPlugins))
-	for name := range RegisteredPlugins {
-		plugins = append(plugins, name)
+func registerNative(p interface{}) {
+	register(reflect.ValueOf(p).Type().Elem().Name(), p)
+}
+
+type PluginInfo struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
+	Ui      bool   `json:"ui"`
+}
+
+func List() []PluginInfo {
+	plugins := make([]PluginInfo, 0, len(RegisteredPlugins))
+	for name, plugin := range RegisteredPlugins {
+		plugins = append(plugins, PluginInfo{Name: name, Version: plugin.Version(), Ui: plugin.UiConf() != nil})
 	}
 	return plugins
 }
-
-func registerNative() {
-	balancePlugin := balance.New()
-	systemPlugin := system.New()
-	Register(reflect.TypeOf(*balancePlugin).Name(), balancePlugin)
-	Register(reflect.TypeOf(*systemPlugin).Name(), systemPlugin)
-}
-
-// Currently the go plugin solution is not stable yet
-// func registerStatic() {
-// 	flag.Parse()
-//
-// 	pluginsDir := "../configs/plugins"
-// 	if confFlag := flag.Lookup("conf"); confFlag != nil {
-// 		pluginsDir = fmt.Sprintf("%s/plugins", flag.Lookup("conf").Value)
-// 	}
-//
-// 	files, _ := ioutil.ReadDir(pluginsDir)
-// 	for _, file := range files {
-// 		p, err := plugin.Open(fmt.Sprintf("%s/%s", pluginsDir, file.Name()))
-// 		if err != nil {
-// 			panic(err)
-// 		}
-// 		if file.IsDir() {
-// 			return
-// 		}
-// 		pluginName := strings.Split(file.Name(), ".")[0]
-// 		f, err := p.Lookup("New")
-// 		if err != nil {
-// 			panic(err)
-// 		}
-// 		Register(pluginName, reflect.ValueOf(f).Call(nil)[0].Interface())
-// 	}
-// }

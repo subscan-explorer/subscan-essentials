@@ -2,9 +2,9 @@ package balance
 
 import (
 	"fmt"
+	plugin "github.com/itering/subscan-plugin"
 	"github.com/itering/subscan-plugin/router"
 	"github.com/itering/subscan-plugin/storage"
-	"github.com/itering/subscan-plugin/tools"
 	"github.com/itering/subscan/plugins/balance/dao"
 	"github.com/itering/subscan/plugins/balance/http"
 	"github.com/itering/subscan/plugins/balance/model"
@@ -43,7 +43,7 @@ func (a *Balance) ProcessEvent(block *storage.Block, event *storage.Event, fee d
 		return nil
 	}
 	var paramEvent []storage.EventParam
-	tools.UnmarshalToAnything(&paramEvent, event.Params)
+	util.UnmarshalAny(&paramEvent, event.Params)
 
 	switch fmt.Sprintf("%s-%s", strings.ToLower(event.ModuleId), strings.ToLower(event.EventId)) {
 	case strings.ToLower("System-NewAccount"):
@@ -63,6 +63,21 @@ func (a *Balance) SubscribeEvent() []string {
 
 func (a *Balance) Version() string {
 	return "0.1"
+}
+
+func (a *Balance) UiConf() *plugin.UiConfig {
+	conf := new(plugin.UiConfig)
+	conf.Init()
+	conf.Body.Api.Method = "POST"
+	conf.Body.Api.Url = "api/plugin/balance/accounts"
+	conf.Body.Api.Adaptor = fmt.Sprintf(conf.Body.Api.Adaptor, "list")
+	conf.Body.Columns = []plugin.UiColumns{
+		{Name: "address", Label: "address"},
+		{Name: "nonce", Label: "nonce"},
+		{Name: "balance", Label: "balance"},
+		{Name: "lock", Label: "lock"},
+	}
+	return conf
 }
 
 func (a *Balance) Migrate() {

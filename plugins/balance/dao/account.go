@@ -11,17 +11,15 @@ import (
 
 func GetAccountList(db storage.DB, page, row int) ([]model.Account, int) {
 	var accounts []model.Account
-	db.FindBy(&accounts, nil, &storage.Option{PluginPrefix: "balance"})
+	opt := storage.Option{PluginPrefix: "balance", Page: page, PageSize: row}
+	db.FindBy(&accounts, nil, &opt)
 	return accounts, len(accounts)
 }
 
 func NewAccount(db storage.DB, accountId string) error {
 	accountId = util.TrimHex(accountId)
-	err := db.Create(&model.Account{Address: accountId})
-	if err != nil {
-		err = AfterAccountCreate(db, accountId)
-	}
-	return err
+	_ = db.Create(&model.Account{Address: accountId})
+	return AfterAccountCreate(db, accountId)
 }
 
 func AfterAccountCreate(db storage.DB, accountId string) error {

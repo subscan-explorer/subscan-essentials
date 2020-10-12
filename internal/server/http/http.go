@@ -60,8 +60,13 @@ func initRouter(e *bm.Engine) {
 
 			s.POST("check_hash", checkSearchHash)
 
+			// Runtime
 			s.POST("runtime/metadata", runtimeMetadata)
 			s.POST("runtime/list", runtimeList)
+
+			// Plugin
+			s.POST("plugins", pluginList)
+			s.POST("plugins/ui", pluginUIConfig)
 		}
 		pluginRouter(g)
 	}

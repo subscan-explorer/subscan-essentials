@@ -9,6 +9,8 @@
 1.  [check_hash](#check-hash)
 1.  [runtime_list](#runtime-list)
 1.  [runtime_info](#runtime-info)
+1.  [plugin_list](#plugin-list)
+1.  [plugin_ui](#plugin-ui)
 
 
 ## Description
@@ -388,20 +390,21 @@
 ### Example Response
 
 `200 OK` and
-
-    {
-        "code": 0,
-        "message": "Success",
-        "ttl": 1,
-        "data": {
-            "list": [
-                {
-                    "spec_version": 83,
-                    "modules": "RandomnessCollectiveFlip|System|Babe|Balances|Indices|Kton|Timestamp|Balances|Authorship|GrandpaFinality|ImOnline||Offences|Session|Staking|Contract|Sudo||EthRelay|EthBacking"
-                }
-            ]
-        }
+```json
+{
+    "code": 0,
+    "message": "Success",
+    "ttl": 1,
+    "data": {
+        "list": [
+            {
+                "spec_version": 83,
+                "modules": "RandomnessCollectiveFlip|System|Babe|Balances|Indices|Kton|Timestamp|Balances|Authorship|GrandpaFinality|ImOnline||Offences|Session|Staking|Contract|Sudo||EthRelay|EthBacking"
+            }
+        ]
     }
+}
+```
 -----
 
 ## runtime-info
@@ -421,39 +424,128 @@
 ### Example Response
 
 `200 OK` and
-
-    {
-        "code": 0,
-        "message": "Success",
-        "ttl": 1,
-        "data": {
-            "info": {
-                "name": "RandomnessCollectiveFlip",
-                "prefix": "RandomnessCollectiveFlip",
-                "storage": [
-                    {
-                        "name": "RandomMaterial",
-                        "modifier": "Default",
-                        "type": {
-                            "origin": "PlainType",
-                            "plain_type": "Vec<Hash>"
-                        },
-                        "fallback": "0x00",
-                        "docs": [
-                            " Series of block headers from the last 81 blocks that acts as random seed material. This",
-                            " is arranged as a ring buffer with `block_number % 81` being the index into the `Vec` of",
-                            " the oldest hash."
-                        ]
-                    }
-                ],
-                "calls": null,
-                "events": null,
-                "errors": null
-            }
+```json
+{
+    "code": 0,
+    "message": "Success",
+    "ttl": 1,
+    "data": {
+        "info": {
+            "name": "RandomnessCollectiveFlip",
+            "prefix": "RandomnessCollectiveFlip",
+            "storage": [
+                {
+                    "name": "RandomMaterial",
+                    "modifier": "Default",
+                    "type": {
+                        "origin": "PlainType",
+                        "plain_type": "Vec<Hash>"
+                    },
+                    "fallback": "0x00",
+                    "docs": [
+                        " Series of block headers from the last 81 blocks that acts as random seed material. This",
+                        " is arranged as a ring buffer with `block_number % 81` being the index into the `Vec` of",
+                        " the oldest hash."
+                    ]
+                }
+            ],
+            "calls": null,
+            "events": null,
+            "errors": null
         }
     }
+}
+```
 -----
 
+## plugin-list
+
+### URL Request
+
+`POST /api/scan/plugins`
+
+
+### Example Response
+
+`200 OK` and
+```json
+{
+    "code": 0,
+    "message": "Success",
+    "ttl": 1,
+    "data": {
+        "list": [
+            {
+                "name": "balance",
+                "version": "0.1"
+            },
+            {
+                "name": "system",
+                "version": "0.1"
+            }
+        ]
+    }
+}
+```
+
+-----
+## plugin-ui
+
+### URL Request
+
+`POST /api/scan/plugins/ui`
+
+
+### payload
+
+| Name          | Type   | Require |
+| ------------- | ------ | ------- |
+| name| string | yes(plugin name)   |
+
+### Example Response
+
+`200 OK` and
+```json
+{
+    "code": 0,
+    "message": "Success",
+    "ttl": 1,
+    "data": {
+        "type": "page",
+        "body": {
+            "type": "crud",
+            "api": {
+                "method": "POST",
+                "url": "api/plugin/balance/accounts",
+                "requestAdaptor": "return {...api, data: {...api.data, page: api.data.page - 1, row: api.data.perPage,} }",
+                "adaptor": "return {...payload, status: payload.code, data: {items: payload.data.list, count: payload.data.count}, msg: payload.message };"
+            },
+            "syncLocation": false,
+            "headerToolbar": [],
+            "columns": [
+                {
+                    "name": "address",
+                    "label": "address"
+                },
+                {
+                    "name": "nonce",
+                    "label": "nonce"
+                },
+                {
+                    "name": "balance",
+                    "label": "balance"
+                },
+                {
+                    "name": "lock",
+                    "label": "lock"
+                }
+            ]
+        }
+    }
+}
+```
+
+-----
 
 ### Possible Responses Code
 

@@ -5,7 +5,7 @@ import (
 )
 
 type Account struct {
-	ID      uint            `gorm:"primary_key"`
+	ID      uint            `gorm:"primary_key" json:"-"`
 	Address string          `sql:"default: null;size:100" json:"address"`
 	Nonce   int             `json:"nonce"`
 	Balance decimal.Decimal `json:"balance" sql:"type:decimal(30,0);"`

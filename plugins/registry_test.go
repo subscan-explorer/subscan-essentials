@@ -1,9 +1,9 @@
-package plugins_test
+package plugins
 
 import (
+	subscan_plugin "github.com/itering/subscan-plugin"
 	"github.com/itering/subscan-plugin/router"
 	"github.com/itering/subscan-plugin/storage"
-	"github.com/itering/subscan/plugins"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -31,14 +31,16 @@ func (a *TPlugin) SubscribeExtrinsic() []string { return nil }
 
 func (a *TPlugin) SubscribeEvent() []string { return nil }
 
+func (a *TPlugin) UiConf() *subscan_plugin.UiConfig { return nil }
+
 func TestRegister(t *testing.T) {
-	plugins.Register("test", &TPlugin{})
-	plugins.Register("test2", nil)
-	plugins.Register("test", &TPlugin{})
-	assert.NotNil(t, plugins.RegisteredPlugins["test"])
-	assert.Nil(t, plugins.RegisteredPlugins["test2"])
+	register("test", &TPlugin{})
+	register("test2", nil)
+	register("test", &TPlugin{})
+	assert.NotNil(t, RegisteredPlugins["test"])
+	assert.Nil(t, RegisteredPlugins["test2"])
 }
 
 func TestList(t *testing.T) {
-	assert.Equal(t, len(plugins.List()), len(plugins.RegisteredPlugins))
+	assert.Equal(t, len(List()), len(RegisteredPlugins))
 }

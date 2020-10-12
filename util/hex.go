@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// Add `0x` prefix
 func AddHex(s string) string {
 	if strings.TrimSpace(s) == "" {
 		return ""

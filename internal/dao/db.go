@@ -67,16 +67,33 @@ func (d *DbStorage) getPluginPrefixTableName(instant interface{}) string {
 	return fmt.Sprintf("%s_%s", d.GetPrefix(), tableName)
 }
 
-func (d *DbStorage) FindBy(record interface{}, query interface{}, option *storage.Option) bool {
+func (d *DbStorage) FindBy(record interface{}, query interface{}, option *storage.Option) (int, bool) {
+	var count int
 	tx := d.db
+
+	// where
 	if reflect.ValueOf(query).IsValid() {
 		tx = tx.Where(query)
 	}
-	if option != nil {
+
+	// plugin prefix table
+	if option != nil && option.PluginPrefix != "" {
 		tx = tx.Table(fmt.Sprintf("%s_%s", option.PluginPrefix, d.getModelTableName(record)))
 	}
+	// rows count
+	tx.Count(&count)
+
+	// pagination
+	if option != nil {
+		// default page limit 1000
+		if option.PageSize == 0 {
+			option.PageSize = 1000
+		}
+		tx = tx.Offset(option.Page * option.PageSize).Limit(option.PageSize)
+	}
+
 	tx = tx.Find(record)
-	return errors.Is(tx.Error, gorm.ErrRecordNotFound)
+	return count, errors.Is(tx.Error, gorm.ErrRecordNotFound)
 }
 
 func (d *DbStorage) AutoMigration(model interface{}) error {

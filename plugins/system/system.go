@@ -1,11 +1,12 @@
 package system
 
 import (
+	ui "github.com/itering/subscan-plugin"
 	"github.com/itering/subscan-plugin/router"
 	"github.com/itering/subscan-plugin/storage"
-	"github.com/itering/subscan-plugin/tools"
 	"github.com/itering/subscan/plugins/system/model"
 	"github.com/itering/subscan/plugins/system/service"
+	"github.com/itering/subscan/util"
 	"github.com/shopspring/decimal"
 )
 
@@ -35,10 +36,10 @@ func (a *System) ProcessExtrinsic(*storage.Block, *storage.Extrinsic, []storage.
 
 func (a *System) ProcessEvent(block *storage.Block, event *storage.Event, _ decimal.Decimal) error {
 	var paramEvent []storage.EventParam
-	tools.UnmarshalToAnything(&paramEvent, event.Params)
+	util.UnmarshalAny(&paramEvent, event.Params)
 	switch event.EventId {
 	case "ExtrinsicFailed":
-		srv.ExtrinsicFailed(block.SpecVersion, block.BlockTimestamp, block.Hash, event, paramEvent)
+		srv.ExtrinsicFailed(block.SpecVersion, event, paramEvent)
 	}
 	return nil
 }
@@ -59,4 +60,8 @@ func (a *System) SubscribeExtrinsic() []string {
 
 func (a *System) SubscribeEvent() []string {
 	return []string{"system"}
+}
+
+func (a *System) UiConf() *ui.UiConfig {
+	return nil
 }

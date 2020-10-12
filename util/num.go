@@ -13,6 +13,7 @@ func IntToString(i int) string {
 	return strconv.Itoa(i)
 }
 
+// Convert str to int, return 0 if error
 func StringToInt(s string) int {
 	if i, err := strconv.Atoi(s); err == nil {
 		return i
@@ -44,7 +45,7 @@ func U256(v string) *big.Int {
 	return n
 }
 
-// interface
+// Convert int64, uint64, float64, string to int, return 0 if other types
 func IntFromInterface(i interface{}) int {
 	switch i := i.(type) {
 	case int:
