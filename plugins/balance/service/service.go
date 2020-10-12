@@ -10,8 +10,8 @@ type Service struct {
 	d storage.Dao
 }
 
-func (s *Service) GetAccountListJson(page, row int, order string) ([]model.Account, int) {
-	return dao.GetAccountList(s.d, page, row, order)
+func (s *Service) GetAccountListJson(page, row int) ([]model.Account, int) {
+	return dao.GetAccountList(s.d, page, row)
 }
 
 func New(d storage.Dao) *Service {
