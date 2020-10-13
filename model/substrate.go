@@ -22,7 +22,7 @@ type ChainBlock struct {
 	Extrinsics      string `json:"extrinsics" sql:"type:MEDIUMTEXT;"`
 	EventCount      int    `json:"event_count"`
 	ExtrinsicsCount int    `json:"extrinsics_count"`
-	Event           string `json:"event" sql:"type:text;"`
+	Event           string `json:"event" sql:"type:MEDIUMTEXT;"`
 	SpecVersion     int    `json:"spec_version"`
 	Validator       string `json:"validator"`
 	CodecError      bool   `json:"codec_error"`
