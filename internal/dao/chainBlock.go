@@ -20,7 +20,7 @@ func (d *Dao) CreateBlock(txn *GormDB, cb *model.ChainBlock) (err error) {
 
 		}()
 	}
-	return d.checkDBError(query.Error)
+	return query.Error
 }
 
 func (d *Dao) SaveFillAlreadyBlockNum(c context.Context, blockNum int) (err error) {

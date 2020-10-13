@@ -263,6 +263,9 @@ func (s *Service) FillBlockData(conn websocket.WsConn, blockNum int, finalized b
 		_ = s.dao.SaveFillAlreadyBlockNum(context.TODO(), blockNum)
 		setFinalized()
 	}
+	if err != nil {
+		log.Error("Create chain block error %v", err)
+	}
 	return
 }
 
