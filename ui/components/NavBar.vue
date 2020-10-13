@@ -18,6 +18,12 @@
             <el-dropdown-item>
               <router-link to="/events" tag="a">events</router-link>
             </el-dropdown-item>
+            <el-dropdown-item
+              v-for="item in pluginList"
+              :key="item.name"
+            >
+              <router-link :to="`/${item.name}`" tag="a">{{item.name}}</router-link>
+            </el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
       </div>
@@ -27,6 +33,7 @@
 <script>
 // import SearchInput from "@/views/Components/SearchInputNetwork";
 // import { isSubscanHome } from "~/utils/tools";
+import _ from "lodash";
 export default {
   name: "NavBar",
   components: {
@@ -34,7 +41,17 @@ export default {
   },
   props: {},
   data() {
-    return {};
+    return {
+      pluginList:[]
+    };
+  },
+  async mounted() {
+    let result = await this.$axios.$post("/api/scan/plugins");
+    if (result.data && result.data.length > 0) {
+      this.pluginList = _.filter(result.data,(item)=>{
+        return item.ui;
+      });
+    }
   },
   computed: {},
   methods: {},

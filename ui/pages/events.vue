@@ -22,12 +22,9 @@ export default {
   },
   async mounted() {
     if (process.client) {
-      let name = this.$route.params && this.$route.params.pathMatch;
-      let result = await this.$axios.$post("/api/scan/plugins/ui", {name: name});
-      if (result.data) {
-        this.demo = result.data;
-        this.initAmis();
-      }
+      let module = await import(`~/plugins/external${this.$route.path}.json`)
+      this.demo = module;
+      this.initAmis();
     }
   },
   methods: {
