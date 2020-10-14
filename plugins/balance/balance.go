@@ -68,7 +68,7 @@ func (a *Balance) Version() string {
 func (a *Balance) UiConf() *plugin.UiConfig {
 	conf := new(plugin.UiConfig)
 	conf.Init()
-	conf.Body.Api.Method = "POST"
+	conf.Body.Api.Method = "post"
 	conf.Body.Api.Url = "api/plugin/balance/accounts"
 	conf.Body.Api.Adaptor = fmt.Sprintf(conf.Body.Api.Adaptor, "list")
 	conf.Body.Columns = []plugin.UiColumns{
