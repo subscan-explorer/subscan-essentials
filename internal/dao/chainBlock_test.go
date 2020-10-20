@@ -7,13 +7,6 @@ import (
 	"testing"
 )
 
-func TestDao_CreateBlock(t *testing.T) {
-	txn := testDao.DbBegin()
-	err := testDao.CreateBlock(txn, &testBlock)
-	txn.Commit()
-	assert.NoError(t, err)
-}
-
 func TestDao_FillAlreadyBlockNum(t *testing.T) {
 	ctx := context.TODO()
 	err := testDao.SaveFillAlreadyBlockNum(ctx, 900000)

@@ -81,6 +81,7 @@ jobs:
           NETWORK_NODE: crab
           MYSQL_HOST: 127.0.0.1
           MYSQL_DB: test
+          TEST_MOD: true
 
   golangci:
     name: Lint

@@ -9,6 +9,7 @@ import (
 	"github.com/itering/substrate-api-rpc/metadata"
 	"github.com/itering/substrate-api-rpc/websocket"
 	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -40,6 +41,10 @@ func (s *Service) initSubRuntimeLatest() {
 			substrate.RegCustomTypes(c)
 			if unknown := metadata.Decoder.CheckRegistry(); len(unknown) > 0 {
 				log.Warn("Found unknown type %s", strings.Join(unknown, ", "))
+			}
+		} else {
+			if os.Getenv("TEST_MOD") != "true" {
+				panic(err)
 			}
 		}
 	}()
