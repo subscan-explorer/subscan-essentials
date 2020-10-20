@@ -2,6 +2,7 @@ FROM golang:1.14.6 as builder
 
 WORKDIR /subscan
 
+RUN mkdir log
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . /subscan
@@ -19,7 +20,6 @@ COPY configs/http.toml.example configs/http.toml
 COPY --from=builder /subscan/cmd/subscan cmd/subscan
 COPY cmd/run.py cmd/run.py
 WORKDIR cmd
-RUN mkdir log
 
 ENV TINI_VERSION v0.19.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
