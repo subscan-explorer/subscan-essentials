@@ -114,18 +114,21 @@ cp configs/redis.toml.example configs/redis.toml && cp configs/mysql.toml.exampl
 
 ### Usage
 
-- Run
+- Start DB
 
 **Make sure you have started redis and mysql**
 
+
 - Substrate Daemon
 ```bash
-./cmd/subscan --conf configs start substrate
+cd cmd
+./subscan start substrate
 ```
 
 - Api Server
 ```bash
-./cmd/subscan --conf configs
+cd cmd
+./subscan
 ```
 
 - Help
