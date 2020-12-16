@@ -155,23 +155,6 @@
       ]
     ]
   },
-  "RewardDestination": {
-    "type": "enum",
-    "type_mapping": [
-      [
-        "Staked",
-        "Staked"
-      ],
-      [
-        "Stash",
-        "null"
-      ],
-      [
-        "Controller",
-        "null"
-      ]
-    ]
-  },
   "Staked": {
     "type": "struct",
     "type_mapping": [
@@ -394,61 +377,6 @@
       ]
     ]
   },
-  "EthereumHeaderBrief": {
-    "type": "struct",
-    "type_mapping": [
-      [
-        "total_difficulty",
-        "U256"
-      ],
-      [
-        "parent_hash",
-        "H256"
-      ],
-      [
-        "number",
-        "EthereumBlockNumber"
-      ],
-      [
-        "relayer",
-        "AccountId"
-      ]
-    ]
-  },
-  "EthereumHeaderThingWithProof": {
-    "type": "struct",
-    "type_mapping": [
-      [
-        "header",
-        "EthereumHeader"
-      ],
-      [
-        "ethash_proof",
-        "Vec<EthashProof>"
-      ],
-      [
-        "mmr_root",
-        "H256"
-      ],
-      [
-        "mmr_proof",
-        "Vec<H256>"
-      ]
-    ]
-  },
-  "EthereumHeaderThing": {
-    "type": "struct",
-    "type_mapping": [
-      [
-        "header",
-        "EthereumHeader"
-      ],
-      [
-        "mmr_root",
-        "H256"
-      ]
-    ]
-  },
   "EthereumHeader": {
     "type": "struct",
     "type_mapping": [
@@ -658,7 +586,7 @@
       ],
       [
         "Deposit",
-        "EthReceiptProof"
+        "NULL"
       ]
     ]
   },
@@ -846,14 +774,6 @@
       ]
     ]
   },
-  "DispatchClass": {
-    "type": "enum",
-    "value_list": [
-      "Normal",
-      "Operational",
-      "Mandatory"
-    ]
-  },
   "DispatchResult": {
     "type": "enum",
     "type_mapping": [
@@ -894,9 +814,7 @@
   },
   "slashing::SpanRecord<RingBalance, KtonBalance>": "SpanRecord",
   "slashing::RKT": "RKT",
-  "Round": "u64",
   "MMRHash": "Vec<u8>",
-  "GameId": "TcBlockNumber",
   "RawHeaderThing": "Vec<u8>",
   "EthereumNetworkType": "EthNetworkType",
   "EthashProof": "DoubleNodeWithMerkleProof",
@@ -915,19 +833,6 @@
       [
         "proof",
         "Vec<H256>"
-      ]
-    ]
-  },
-  "ConfirmedEthereumHeaderInfo": {
-    "type": "struct",
-    "type_mapping": [
-      [
-        "header",
-        "EthereumHeader"
-      ],
-      [
-        "mmr_root",
-        "H256"
       ]
     ]
   },
@@ -1019,23 +924,6 @@
       ]
     ]
   },
-  "RelayProposalT": {
-    "type": "struct",
-    "type_mapping": [
-      [
-        "relayer",
-        "AccountId"
-      ],
-      [
-        "bonded_proposal",
-        "Vec<(Balance, TcHeaderThing)>"
-      ],
-      [
-        "extend_from_header_hash",
-        "Option<TcHeaderHash>"
-      ]
-    ]
-  },
   "Unbonding#5-?": {
     "type": "struct",
     "type_mapping": [
@@ -1049,9 +937,149 @@
       ]
     ]
   },
-  "TcHeaderThingWithProof": "EthereumHeaderThingWithProof",
+  "RelayVotingState": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "ayes",
+        "Vec<AccountId>"
+      ],
+      [
+        "nays",
+        "Vec<AccountId>"
+      ]
+    ]
+  },
   "TcHeaderMMR": "Vec<u8>",
-  "TcHeaderThing": "EthereumHeaderThing",
-  "TcBlockNumber": "u64",
-  "TcHeaderHash": "H256"
+  "CompactAssignments#17-?": "CompactAssignmentsLatest",
+  "ProxyType": {
+    "type": "enum",
+    "value_list": [
+      "Any",
+      "NonTransfer",
+      "Governance",
+      "Staking",
+      "IdentityJudgement",
+      "EthereumBridge"
+    ]
+  },
+  "TreasuryProposal": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "proposer",
+        "AccountId"
+      ],
+      [
+        "beneficiary",
+        "AccountId"
+      ],
+      [
+        "ring_value",
+        "Balance"
+      ],
+      [
+        "kton_value",
+        "Balance"
+      ],
+      [
+        "ring_bond",
+        "Balance"
+      ],
+      [
+        "kton_bond",
+        "Balance"
+      ]
+    ]
+  },
+  "RewardDestination": "RewardDestinationLatest",
+  "RefCount#21-?": "u32",
+  "EthereumRelayHeaderParcel": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "header",
+        "EthereumHeader"
+      ],
+      [
+        "mmr_root",
+        "H256"
+      ]
+    ]
+  },
+  "EthereumRelayProofs": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "ethash_proof",
+        "Vec<EthashProof>"
+      ],
+      [
+        "mmr_proof",
+        "Vec<H256>"
+      ]
+    ]
+  },
+  "RelayHeaderId": "EthereumBlockNumber",
+  "RelayHeaderParcel": "EthereumRelayHeaderParcel",
+  "RelayProofs": "EthereumRelayProofs",
+  "RelayAffirmationId": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "game_id",
+        "EthereumBlockNumber"
+      ],
+      [
+        "round",
+        "u32"
+      ],
+      [
+        "index",
+        "u32"
+      ]
+    ]
+  },
+  "RelayAffirmationT": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "relayer",
+        "AccountId"
+      ],
+      [
+        "relay_header_parcels",
+        "EthereumRelayHeaderParcel"
+      ],
+      [
+        "bond",
+        "Balance"
+      ],
+      [
+        "maybe_extended_relay_affirmation_id",
+        "Option<RelayAffirmationId>"
+      ],
+      [
+        "verified",
+        "bool"
+      ]
+    ]
+  },
+  "RewardDestination#0-16": {
+    "type": "enum",
+    "type_mapping": [
+      [
+        "Staked",
+        "Staked"
+      ],
+      [
+        "Stash",
+        "null"
+      ],
+      [
+        "Controller",
+        "null"
+      ]
+    ]
+  }
 }

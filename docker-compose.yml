@@ -12,6 +12,7 @@ services:
       CHAIN_WS_ENDPOINT: 'wss://crab.darwinia.network'
       NETWORK_NODE: 'crab'
       WEB_HOST: 'http://subscan-api:4399'
+      DEPLOY_ENV: 'prod'
     ports:
       - '4399:4399'
     networks:

@@ -180,7 +180,6 @@ const (
 )
 
 func (s *Service) FillBlockData(conn websocket.WsConn, blockNum int, finalized bool) (err error) {
-	fmt.Println(blockNum)
 	block := s.dao.GetBlockByNum(blockNum)
 	if block != nil && block.Finalized && !block.CodecError {
 		return nil

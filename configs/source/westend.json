@@ -1,0 +1,51 @@
+{
+  "Address": "AccountId",
+  "BlockNumber": "u32",
+  "LeasePeriod": "BlockNumber",
+  "Keys": "SessionKeysPolkadot",
+  "Weight": "u32",
+  "Weight#3-?": "u64",
+  "DispatchInfo": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "weight",
+        "Weight"
+      ],
+      [
+        "class",
+        "DispatchClass"
+      ],
+      [
+        "paysFee",
+        "Pays"
+      ]
+    ]
+  },
+  "DispatchResult": {
+    "type": "enum",
+    "type_mapping": [
+      [
+        "Ok",
+        "Null"
+      ],
+      [
+        "Error",
+        "DispatchError"
+      ]
+    ]
+  },
+  "ProxyType": {
+    "type": "enum",
+    "value_list": [
+      "Any",
+      "NonTransfer",
+      "Staking",
+      "SudoBalances",
+      "IdentityJudgement"
+    ]
+  },
+  "CompactAssignments#43-?": "CompactAssignmentsLatest",
+  "RewardDestination#43-?": "RewardDestinationLatest",
+  "RefCount#45-?": "u32"
+}

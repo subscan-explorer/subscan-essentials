@@ -1,0 +1,115 @@
+{
+  "Address": "AccountId",
+  "BlockNumber": "U32",
+  "LeasePeriod": "BlockNumber",
+  "Weight": "u64",
+  "Keys": "SessionKeysPolkadot",
+  "DispatchInfo": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "weight",
+        "Weight"
+      ],
+      [
+        "class",
+        "DispatchClass"
+      ],
+      [
+        "paysFee",
+        "Pays"
+      ]
+    ]
+  },
+  "DispatchResult": {
+    "type": "enum",
+    "type_mapping": [
+      [
+        "Ok",
+        "Null"
+      ],
+      [
+        "Error",
+        "DispatchError"
+      ]
+    ]
+  },
+  "Timepoint": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "height",
+        "BlockNumber"
+      ],
+      [
+        "index",
+        "u32"
+      ]
+    ]
+  },
+  "Multisig": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "when",
+        "Timepoint"
+      ],
+      [
+        "deposit",
+        "Balance"
+      ],
+      [
+        "depositor",
+        "AccountId"
+      ],
+      [
+        "approvals",
+        "Vec<AccountId>"
+      ]
+    ]
+  },
+  "BalanceLock<Balance, BlockNumber>": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "id",
+        "LockIdentifier"
+      ],
+      [
+        "amount",
+        "Balance"
+      ],
+      [
+        "reasons",
+        "Reasons"
+      ]
+    ]
+  },
+  "ProxyType": {
+    "type": "enum",
+    "value_list": [
+      "Any",
+      "NonTransfer",
+      "Governance",
+      "Staking",
+      "SudoBalances",
+      "IdentityJudgement"
+    ]
+  },
+  "ReferendumInfo": {
+    "type": "enum",
+    "type_mapping": [
+      [
+        "Ongoing",
+        "ReferendumStatus"
+      ],
+      [
+        "Finished",
+        "ReferendumInfoFinished"
+      ]
+    ]
+  },
+  "CompactAssignments#23-?": "CompactAssignmentsLatest",
+  "RewardDestination#23-?": "RewardDestinationLatest",
+  "RefCount": "u32"
+}
