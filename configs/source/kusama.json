@@ -1,0 +1,216 @@
+{
+  "Keys": "SessionKeysPolkadot",
+  "ValidatorPrefs": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "Commission",
+        "Compact<Balance>"
+      ]
+    ]
+  },
+  "Timepoint": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "height",
+        "BlockNumber"
+      ],
+      [
+        "index",
+        "u32"
+      ]
+    ]
+  },
+  "Multisig": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "when",
+        "Timepoint"
+      ],
+      [
+        "deposit",
+        "Balance"
+      ],
+      [
+        "depositor",
+        "AccountId"
+      ],
+      [
+        "approvals",
+        "Vec<AccountId>"
+      ]
+    ]
+  },
+  "BalanceLock<Balance>": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "id",
+        "LockIdentifier"
+      ],
+      [
+        "amount",
+        "Balance"
+      ],
+      [
+        "reasons",
+        "Reasons"
+      ]
+    ]
+  },
+  "ReferendumInfo<BlockNumber, Hash>": {
+    "type": "enum",
+    "type_mapping": [
+      [
+        "Ongoing",
+        "ReferendumStatus"
+      ],
+      [
+        "Finished",
+        "ReferendumInfoFinished"
+      ]
+    ]
+  },
+  "DispatchResult": {
+    "type": "enum",
+    "type_mapping": [
+      [
+        "Ok",
+        "Null"
+      ],
+      [
+        "Error",
+        "DispatchError"
+      ]
+    ]
+  },
+  "Heartbeat": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "blockNumber",
+        "BlockNumber"
+      ],
+      [
+        "networkState",
+        "OpaqueNetworkState"
+      ],
+      [
+        "sessionIndex",
+        "SessionIndex"
+      ],
+      [
+        "authorityIndex",
+        "AuthIndex"
+      ]
+    ]
+  },
+  "Weight#1058-?": "u64",
+  "Heartbeat#1062-?": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "blockNumber",
+        "BlockNumber"
+      ],
+      [
+        "networkState",
+        "OpaqueNetworkState"
+      ],
+      [
+        "sessionIndex",
+        "SessionIndex"
+      ],
+      [
+        "authorityIndex",
+        "AuthIndex"
+      ],
+      [
+        "validatorsLen",
+        "u32"
+      ]
+    ]
+  },
+  "ReferendumInfo<BlockNumber, Hash, BalanceOf>": {
+    "type": "enum",
+    "type_mapping": [
+      [
+        "Ongoing",
+        "ReferendumStatus"
+      ],
+      [
+        "Finished",
+        "ReferendumInfoFinished"
+      ]
+    ]
+  },
+  "DispatchInfo#1019-1061": "DispatchInfo258",
+  "DispatchInfo#1062-?": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "weight",
+        "Weight"
+      ],
+      [
+        "class",
+        "DispatchClass"
+      ],
+      [
+        "paysFee",
+        "Pays"
+      ]
+    ]
+  },
+  "ReferendumInfo#1019-1054": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "end",
+        "BlockNumber"
+      ],
+      [
+        "proposal",
+        "Proposal"
+      ],
+      [
+        "threshold",
+        "VoteThreshold"
+      ],
+      [
+        "delay",
+        "BlockNumber"
+      ]
+    ]
+  },
+  "DispatchError#1019-1031": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "module",
+        "Option<u8>"
+      ],
+      [
+        "error",
+        "u8"
+      ]
+    ]
+  },
+  "ProxyType": {
+    "type": "enum",
+    "value_list": [
+      "Any",
+      "NonTransfer",
+      "Governance",
+      "Staking",
+      "IdentityJudgement"
+    ]
+  },
+  "Address#1050-?": "AccountId",
+  "Box<Proposal>": "BoxProposal",
+  "CompactAssignments#2023-?": "CompactAssignmentsLatest",
+  "RewardDestination#2023-?": "RewardDestinationLatest",
+  "RefCount": "u32"
+}
