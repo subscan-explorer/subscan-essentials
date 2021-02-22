@@ -92,8 +92,9 @@
       "NonTransfer",
       "Governance",
       "Staking",
-      "SudoBalances",
-      "IdentityJudgement"
+      "DeprecatedSudoBalances",
+      "IdentityJudgement",
+      "CancelProxy"
     ]
   },
   "ReferendumInfo": {
@@ -111,5 +112,10 @@
   },
   "CompactAssignments#23-?": "CompactAssignmentsLatest",
   "RewardDestination#23-?": "RewardDestinationLatest",
-  "RefCount": "u32"
+  "RefCount": "u32",
+  "Box<<T as Config>::Call>": "Call",
+  "Box<<T as Config<I>>::Proposal>": "Proposal",
+  "AccountInfo#28-?": "AccountInfoWithProviders",
+  "Address#28-?": "MultiAddress",
+  "LookupSource#28-?": "MultiAddress"
 }

@@ -1081,5 +1081,51 @@
         "null"
       ]
     ]
-  }
+  },
+  "Signer": "EthereumAddress",
+  "RelayAuthorityT": {
+    "type_mapping": [
+      [
+        "accountId",
+        "AccountId"
+      ],
+      [
+        "signer",
+        "Signer"
+      ],
+      [
+        "stake",
+        "Balance"
+      ],
+      [
+        "term",
+        "BlockNumber"
+      ]
+    ],
+    "type": "struct"
+  },
+  "MMRRoot": "Hash",
+  "EcdsaAddress": "EthereumAddress",
+  "EcdsaSignature": "[u8; 65]",
+  "EcdsaMessage": "H256",
+  "RelayAuthoritySigner": "EcdsaAddress",
+  "RelayAuthorityMessage": "EcdsaMessage",
+  "RelayAuthoritySignature": "EcdsaSignature",
+  "RelayAuthoritySignature<T, I>": "EcdsaSignature",
+  "Term": "u32",
+  "OpCode": "[u8; 4]",
+  "ScheduledAuthoritiesChange": {
+    "type_mapping": [
+      [
+        "next_authorities",
+        "Vec<RelayAuthorityT>"
+      ],
+      [
+        "deadline",
+        "BlockNumber"
+      ]
+    ],
+    "type": "struct"
+  },
+  "ScheduledAuthoritiesChangeT": "ScheduledAuthoritiesChange"
 }
