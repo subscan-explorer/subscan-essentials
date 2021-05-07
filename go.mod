@@ -9,9 +9,8 @@ require (
 	github.com/golang/protobuf v1.3.5
 	github.com/gorilla/websocket v1.4.2
 	github.com/huandu/xstrings v1.3.2
-	github.com/itering/scale.go v1.0.3 // indirect
 	github.com/itering/subscan-plugin v0.2.3
-	github.com/itering/substrate-api-rpc v0.3.4
+	github.com/itering/substrate-api-rpc v0.3.6
 	github.com/jinzhu/gorm v1.9.14
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/panjf2000/ants/v2 v2.4.0
@@ -20,7 +19,6 @@ require (
 	github.com/shopspring/decimal v1.2.0
 	github.com/stretchr/testify v1.6.1
 	github.com/urfave/cli v1.20.0
-	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
-	golang.org/x/sys v0.0.0-20210220050731-9a76102bfb43 // indirect
+	golang.org/x/crypto v0.0.0-20210506145944-38f3c27a63bf
 	gopkg.in/go-playground/validator.v9 v9.29.1
 )

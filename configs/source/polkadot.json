@@ -111,11 +111,42 @@
     ]
   },
   "CompactAssignments#23-?": "CompactAssignmentsLatest",
-  "RewardDestination#23-?": "RewardDestinationLatest",
   "RefCount": "u32",
   "Box<<T as Config>::Call>": "Call",
   "Box<<T as Config<I>>::Proposal>": "Proposal",
-  "AccountInfo#28-?": "AccountInfoWithProviders",
+  "AccountInfo": "AccountInfoWithProviders",
   "Address#28-?": "MultiAddress",
-  "LookupSource#28-?": "MultiAddress"
+  "LookupSource#28-?": "MultiAddress",
+  "Keys#28-29": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "grandpa",
+        "AccountId"
+      ],
+      [
+        "babe",
+        "AccountId"
+      ],
+      [
+        "im_online",
+        "AccountId"
+      ],
+      [
+        "para_validator",
+        "AccountId"
+      ],
+      [
+        "para_assignment",
+        "AccountId"
+      ],
+      [
+        "authority_discovery",
+        "AccountId"
+      ]
+    ]
+  },
+  "ValidatorPrefs#28-?": "ValidatorPrefsWithBlocked",
+  "Keys#30-?": "SessionKeys7B",
+  "AccountInfo#30-?": "AccountInfoWithTripleRefCount"
 }

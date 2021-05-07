@@ -212,14 +212,13 @@
   "Address#1050-2027": "AccountId",
   "Box<Proposal>": "BoxProposal",
   "CompactAssignments#2023-?": "CompactAssignmentsLatest",
-  "RewardDestination#2023-?": "RewardDestinationLatest",
   "RefCount": "u32",
   "Box<<T as Config>::Call>": "Call",
   "Box<<T as Config<I>>::Proposal>": "Proposal",
-  "AccountInfo": "AccountInfoWithProviders",
+  "AccountInfo": "AccountInfoWithTripleRefCount",
   "Address#2028-?": "MultiAddress",
   "LookupSource#2028-?": "MultiAddress",
-  "Keys#2028-?": {
+  "Keys#2028-2029": {
     "type": "struct",
     "type_mapping": [
       [
@@ -248,5 +247,6 @@
       ]
     ]
   },
-  "ValidatorPrefs#2028-?": "ValidatorPrefsWithBlocked"
+  "ValidatorPrefs#2028-?": "ValidatorPrefsWithBlocked",
+  "Keys#2030-?": "SessionKeys7B"
 }
