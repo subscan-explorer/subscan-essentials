@@ -14,7 +14,7 @@
   "dependencies": {
     "@nuxtjs/axios": "^5.12.1",
     "element-ui": "^2.4.11",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.21",
     "moment": "^2.27.0",
     "nuxt": "^2.0.0",
     "vue-i18n": "^8.20.0",
