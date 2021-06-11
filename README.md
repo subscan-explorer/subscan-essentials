@@ -13,19 +13,24 @@ Developers are free to use the codebase to extend functionalities and develop un
 
 ## Contents
 
-- [Feature](#Feature)
-- [QuickStart](#QuickStart)
-  - [Requirement](#Requirement)
-  - [Structure](docs/tree.md)
-  - [Installation](#Install)
-  - [UI](#UI)
-  - [Config](#Config)
-  - [Usage](#Usage)
-  - [Docker](#Docker)
-  - [Test](#Test)
-- [Contributions](#Contributions)
-- [LICENSE](#LICENSE)
-- [Resource](#Resource)
+- [Subscan Essentials](#subscan-essentials)
+  - [Contents](#contents)
+  - [Feature](#feature)
+  - [QuickStart](#quickstart)
+    - [Requirement](#requirement)
+    - [Install](#install)
+    - [UI](#ui)
+      - [Example](#example)
+      - [Feature Supported](#feature-supported)
+    - [Config](#config)
+      - [Init config file](#init-config-file)
+      - [Set](#set)
+    - [Usage](#usage)
+    - [Docker](#docker)
+    - [Test](#test)
+  - [Contributions](#contributions)
+  - [LICENSE](#license)
+  - [Resource](#resource)
 
 ## Feature
 
