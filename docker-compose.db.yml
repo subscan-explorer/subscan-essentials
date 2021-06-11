@@ -5,6 +5,7 @@ services:
     image: mysql:5.7
     restart: always
     environment:
+      # Name of the db created on start up
       MYSQL_DATABASE: subscan
       MYSQL_ROOT_PASSWORD: helloload
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
