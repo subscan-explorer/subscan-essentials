@@ -17,7 +17,7 @@ func (d *Dao) CreateBlock(txn *GormDB, cb *model.ChainBlock) (err error) {
 		go func() {
 			_ = d.db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
 				d.InternalTables(cb.BlockNum + model.SplitTableBlockNum)...)
-
+			d.AddIndex(cb.BlockNum + model.SplitTableBlockNum)
 		}()
 	}
 	return query.Error
