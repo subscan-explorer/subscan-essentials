@@ -7,9 +7,13 @@ services:
     environment: &app_base
       MYSQL_HOST: mysql
       MYSQL_PASS: 'helloload'
+      # Name of the database subscan will connect to and use
+      # this db must exist
       MYSQL_DB: 'subscan'
       REDIS_ADDR: redis:6379
       CHAIN_WS_ENDPOINT: 'wss://rpc.polkadot.io'
+      # the types file used for the chain as:
+      # configs/source/{NETWORK_NODE}.json
       NETWORK_NODE: 'polkadot'
       WEB_HOST: 'http://subscan-api:4399'
       DEPLOY_ENV: 'prod'
