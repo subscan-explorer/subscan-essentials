@@ -91,7 +91,7 @@ LOOP:
 	for {
 		if dt == "substrate" {
 			interrupt := make(chan os.Signal, 1)
-			subscribeConn := &recws.RecConn{KeepAliveTimeout: 10 * time.Second}
+			subscribeConn := &recws.RecConn{KeepAliveTimeout: 10 * time.Second, WriteTimeout: time.Second * 5, ReadTimeout: 10 * time.Second}
 			subscribeConn.Dial(util.WSEndPoint, nil)
 			srv.Subscribe(subscribeConn, interrupt)
 		} else {

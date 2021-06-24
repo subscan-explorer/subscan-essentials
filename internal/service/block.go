@@ -79,7 +79,7 @@ func (s *Service) CreateChainBlock(conn websocket.WsConn, hash string, block *rp
 	if err != nil {
 		return err
 	}
-	if validator, err = s.EmitLog(txn, hash, blockNum, logs, finalized, s.ValidatorsList(conn, hash)); err != nil {
+	if validator, err = s.EmitLog(txn, blockNum, logs, finalized, s.ValidatorsList(conn, hash)); err != nil {
 		return err
 	}
 
@@ -150,7 +150,7 @@ func (s *Service) UpdateBlockData(conn websocket.WsConn, block *model.ChainBlock
 		return err
 	}
 
-	validator, err := s.EmitLog(txn, block.Hash, block.BlockNum, logs, finalized, s.ValidatorsList(conn, block.Hash))
+	validator, err := s.EmitLog(txn, block.BlockNum, logs, finalized, s.ValidatorsList(conn, block.Hash))
 	if err != nil {
 		return err
 	}

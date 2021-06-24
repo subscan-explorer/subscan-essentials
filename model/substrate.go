@@ -128,7 +128,7 @@ type RuntimeVersion struct {
 	Id          int    `json:"-"`
 	Name        string `json:"-"`
 	SpecVersion int    `json:"spec_version"`
-	Modules     string `json:"modules"`
+	Modules     string `json:"modules"  sql:"type:TEXT;"`
 	RawData     string `json:"-" sql:"type:MEDIUMTEXT;"`
 }
 

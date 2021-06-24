@@ -35,6 +35,8 @@ func (s *Service) regRuntimeVersion(name string, spec int, hash ...string) error
 		if coded := s.regCodecMetadata(hash...); coded != "" {
 			runtime := metadata.RegNewMetadataType(spec, coded)
 			s.setRuntimeData(spec, runtime, coded)
+		} else {
+			panic("get runtime metadata error")
 		}
 	}
 	runtimeSpecs = append(runtimeSpecs, spec)

@@ -31,8 +31,8 @@ type subscription struct {
 }
 
 var (
-	onceNewHead, onceFinHead sync.Once
-	subscriptionIds          = []subscription{{Topic: ChainNewHead}, {Topic: ChainFinalizedHead}, {Topic: StateStorage}}
+	onceFinHead     sync.Once
+	subscriptionIds = []subscription{{Topic: ChainNewHead}, {Topic: ChainFinalizedHead}, {Topic: StateStorage}}
 )
 
 type SubscribeService struct {
@@ -79,12 +79,6 @@ func (s *SubscribeService) parser(message []byte) (err error) {
 		r := j.ToNewHead()
 		_ = s.updateChainMetadata(map[string]interface{}{"blockNum": util.HexToNumStr(r.Number)})
 		upgradeHealth(j.Method)
-		go func() {
-			s.newHead <- true
-			onceNewHead.Do(func() {
-				go s.subscribeFetchBlock()
-			})
-		}()
 	case ChainFinalizedHead:
 		r := j.ToNewHead()
 		_ = s.updateChainMetadata(map[string]interface{}{"finalized_blockNum": util.HexToNumStr(r.Number)})
@@ -126,28 +120,6 @@ func (s *SubscribeService) subscribeFetchBlock() {
 	defer p.Release()
 	for {
 		select {
-		case <-s.newHead:
-			best, err := s.dao.GetBestBlockNum(ctx)
-			if err != nil || best == 0 {
-				time.Sleep(BlockTime * time.Second)
-				return
-			}
-			lastNum, _ := s.dao.GetFillBestBlockNum(ctx)
-			finalizedBlock, _ := s.dao.GetFinalizedBlockNum(ctx)
-
-			startBlock := lastNum + 1
-			if lastNum == 0 {
-				startBlock = lastNum
-			}
-
-			for i := startBlock; i <= int(best); i++ {
-				wg.Add(1)
-				_ = p.Invoke(BlockFinalized{
-					BlockNum:  i,
-					Finalized: finalizedBlock >= FinalizedWaitingBlockCount && uint64(i) <= finalizedBlock-FinalizedWaitingBlockCount,
-				})
-			}
-			wg.Wait()
 		case <-s.newFinHead:
 			final, err := s.dao.GetFinalizedBlockNum(context.TODO())
 			if err != nil || final == 0 {
@@ -238,23 +210,15 @@ func (s *Service) FillBlockData(conn websocket.WsConn, blockNum int, finalized b
 	}
 	// refresh finalized info for update
 	if block != nil {
-		// Confirm data, only set block Finalized
-		if block.Hash == blockHash && block.ExtrinsicsRoot == rpcBlock.Block.Header.ExtrinsicsRoot && block.Event == event && !block.CodecError && finalized {
-			s.dao.SetBlockFinalized(block)
-		} else {
-			// refresh all block data
-			block.ExtrinsicsRoot = rpcBlock.Block.Header.ExtrinsicsRoot
-			block.Hash = blockHash
-			block.ParentHash = rpcBlock.Block.Header.ParentHash
-			block.StateRoot = rpcBlock.Block.Header.StateRoot
-
-			block.Extrinsics = util.ToString(rpcBlock.Block.Extrinsics)
-			block.Logs = util.ToString(rpcBlock.Block.Header.Digest.Logs)
-			block.Event = event
-
-			_ = s.UpdateBlockData(conn, block, finalized)
-		}
-		setFinalized()
+		// Confirm data, only set block Finalized, refresh all block data
+		block.ExtrinsicsRoot = rpcBlock.Block.Header.ExtrinsicsRoot
+		block.Hash = blockHash
+		block.ParentHash = rpcBlock.Block.Header.ParentHash
+		block.StateRoot = rpcBlock.Block.Header.StateRoot
+		block.Extrinsics = util.ToString(rpcBlock.Block.Extrinsics)
+		block.Logs = util.ToString(rpcBlock.Block.Header.Digest.Logs)
+		block.Event = event
+		_ = s.UpdateBlockData(conn, block, finalized)
 		return
 	}
 	// for Create

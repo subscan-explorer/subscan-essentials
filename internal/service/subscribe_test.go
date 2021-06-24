@@ -29,6 +29,9 @@ type TestConn struct {
 	writer    *Buffer // the current writer returned to the application
 }
 
+func (t *TestConn) CloseAndReconnect() {
+}
+
 func (t *TestConn) MarkUnusable() {}
 
 func (t *TestConn) Dial(urlStr string, reqHeader http.Header) {

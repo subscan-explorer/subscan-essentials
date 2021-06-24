@@ -16,7 +16,6 @@ func (s *Service) AddEvent(
 	hashMap map[string]string,
 	feeMap map[string]decimal.Decimal) (eventCount int, err error) {
 
-	s.dao.DropEventNotFinalizedData(block.BlockNum, block.Finalized)
 	for _, event := range e {
 		event.ModuleId = strings.ToLower(event.ModuleId)
 		event.ExtrinsicHash = hashMap[fmt.Sprintf("%d-%d", block.BlockNum, event.ExtrinsicIdx)]

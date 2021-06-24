@@ -10,8 +10,7 @@ import (
 	"strings"
 )
 
-func (s *Service) EmitLog(txn *dao.GormDB, blockHash string, blockNum int, l []storage.DecoderLog, finalized bool, validatorList []string) (validator string, err error) {
-	s.dao.DropLogsNotFinalizedData(blockNum, finalized)
+func (s *Service) EmitLog(txn *dao.GormDB, blockNum int, l []storage.DecoderLog, finalized bool, validatorList []string) (validator string, err error) {
 	for index, logData := range l {
 		dataStr := util.ToString(logData.Value)
 

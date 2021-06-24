@@ -110,7 +110,7 @@
       ]
     ]
   },
-  "CompactAssignments#23-?": "CompactAssignmentsLatest",
+  "CompactAssignments#23-9000": "CompactAssignmentsLatest",
   "RefCount": "u32",
   "Box<<T as Config>::Call>": "Call",
   "Box<<T as Config<I>>::Proposal>": "Proposal",
@@ -147,6 +147,7 @@
     ]
   },
   "ValidatorPrefs#28-?": "ValidatorPrefsWithBlocked",
-  "Keys#30-?": "SessionKeys7B",
-  "AccountInfo#30-?": "AccountInfoWithTripleRefCount"
+  "Keys#30-?": "SessionKeys6",
+  "AccountInfo#30-?": "AccountInfoWithTripleRefCount",
+  "CompactAssignments#9010-?": "CompactAssignmentsWith24"
 }

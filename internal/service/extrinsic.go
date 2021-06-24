@@ -32,8 +32,6 @@ func (s *Service) createExtrinsic(c context.Context,
 
 	hash := make(map[string]string)
 
-	s.dao.DropExtrinsicNotFinalizedData(c, block.BlockNum, block.Finalized)
-
 	for index, extrinsic := range e {
 		extrinsic.CallModule = strings.ToLower(extrinsic.CallModule)
 		extrinsic.BlockNum = block.BlockNum

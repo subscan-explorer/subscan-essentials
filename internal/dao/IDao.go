@@ -28,13 +28,11 @@ type IDao interface {
 	GetBlockList(page, row int) []model.ChainBlock
 	BlockAsJson(c context.Context, block *model.ChainBlock) *model.ChainBlockJson
 	CreateEvent(txn *GormDB, event *model.ChainEvent) error
-	DropEventNotFinalizedData(blockNum int, finalized bool) bool
 	GetEventByBlockNum(blockNum int, where ...string) []model.ChainEventJson
 	GetEventList(page, row int, order string, where ...string) ([]model.ChainEvent, int)
 	GetEventsByIndex(extrinsicIndex string) []model.ChainEvent
 	GetEventByIdx(index string) *model.ChainEvent
 	CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.ChainExtrinsic) error
-	DropExtrinsicNotFinalizedData(c context.Context, blockNum int, finalized bool) bool
 	GetExtrinsicsByBlockNum(blockNum int) []model.ChainExtrinsicJson
 	GetExtrinsicList(c context.Context, page, row int, order string, queryWhere ...string) ([]model.ChainExtrinsic, int)
 	GetExtrinsicsByHash(c context.Context, hash string) *model.ChainExtrinsic
@@ -42,7 +40,6 @@ type IDao interface {
 	GetExtrinsicsDetailByIndex(c context.Context, index string) *model.ExtrinsicDetail
 	ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsicJson
 	CreateLog(txn *GormDB, ce *model.ChainLog) error
-	DropLogsNotFinalizedData(blockNum int, finalized bool) bool
 	GetLogsByIndex(index string) *model.ChainLogJson
 	GetLogByBlockNum(blockNum int) []model.ChainLogJson
 	SetMetadata(c context.Context, metadata map[string]interface{}) (err error)
