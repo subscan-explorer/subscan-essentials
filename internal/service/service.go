@@ -11,18 +11,20 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"sync"
 )
 
 // Service
 type Service struct {
 	dao dao.IDao
+	mu  *sync.Mutex
 }
 
 // New new a service and return.
 func New() (s *Service) {
 	websocket.SetEndpoint(util.WSEndPoint)
 	d, dbStorage := dao.New()
-	s = &Service{dao: d}
+	s = &Service{dao: d, mu: &sync.Mutex{}}
 	s.initSubRuntimeLatest()
 	pluginRegister(dbStorage)
 	return s

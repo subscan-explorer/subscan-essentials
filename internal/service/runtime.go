@@ -59,6 +59,8 @@ func (s *Service) setRuntimeData(spec int, runtime *metadata.Instant, rawData st
 }
 
 func (s *Service) getMetadataInstant(spec int, hash string) *metadata.Instant {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	metadataInstant, ok := metadata.RuntimeMetadata[spec]
 	if !ok {
 		raw := s.dao.RuntimeVersionRaw(spec)
