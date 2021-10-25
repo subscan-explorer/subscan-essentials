@@ -159,6 +159,10 @@ github.com/itering/scale.go v1.1.11 h1:Xgoxq/sPiVn+XvL9/sIIaOjwEJnDmg0dERNoDpN+w
 github.com/itering/scale.go v1.1.11/go.mod h1:Eg8T/07SKybkN9E1LmiEdSN/pLtV4rZDN9zuj486Gbs=
 github.com/itering/scale.go v1.1.17 h1:d0lOSj9FGcXhNClb0TMvBIqurYfiWQygU5kNl840sOQ=
 github.com/itering/scale.go v1.1.17/go.mod h1:Eg8T/07SKybkN9E1LmiEdSN/pLtV4rZDN9zuj486Gbs=
+github.com/itering/scale.go v1.1.22 h1:lpWkLroMa4fXOXUKYSaNW0PxsKpG2R+lcyxLvG0oppg=
+github.com/itering/scale.go v1.1.22/go.mod h1:Eg8T/07SKybkN9E1LmiEdSN/pLtV4rZDN9zuj486Gbs=
+github.com/itering/scale.go v1.1.24 h1:ulegaI5Sc1etEAWZJf8TKrEmYe+ZexOO6iRfVBJKGOE=
+github.com/itering/scale.go v1.1.24/go.mod h1:Eg8T/07SKybkN9E1LmiEdSN/pLtV4rZDN9zuj486Gbs=
 github.com/itering/subscan-plugin v0.2.3 h1:8TpU/qCy+iLirkpv/4j1VXsmar7DWye8ePIFUmHG9Jk=
 github.com/itering/subscan-plugin v0.2.3/go.mod h1:yzh3pYoDWb37doOTaWEWxiTRsgc6mpHUAMFSwJXGmVA=
 github.com/itering/substrate-api-rpc v0.0.5 h1:xXmahTqKfm/gcCxG4iipSQ5FecuHNK9UjvDD68OproQ=
@@ -169,6 +173,8 @@ github.com/itering/substrate-api-rpc v0.4.0 h1:QFkXmQLP35W4GK+KtbArPM6UMZOW+a4iE
 github.com/itering/substrate-api-rpc v0.4.0/go.mod h1:t5Y0hM0lpsG+OvMV/65TNua5V/hKOu2z872ba9WwsAQ=
 github.com/itering/substrate-api-rpc v0.4.3 h1:U/Y9HRf3abRfXfuRTfnOCvN5Jhs5PCxcEMwHCn458+g=
 github.com/itering/substrate-api-rpc v0.4.3/go.mod h1:SrhHgUkptlWWSkouSWpeg1eCv4l0OMWa1FUE1GWIDGk=
+github.com/itering/substrate-api-rpc v0.4.6 h1:XmIFxwEPeCLVgJtuoECH/wFy1Tc9b+VDoiuhV4oZlrM=
+github.com/itering/substrate-api-rpc v0.4.6/go.mod h1:Vid403JTqrVkVnVVVbRbHm17b6dZSCGg1hPTI7V6VC8=
 github.com/jcmturner/gofork v0.0.0-20190328161633-dc7c13fece03/go.mod h1:MK8+TM0La+2rjBD4jE12Kj1pCCxK7d2LK/UM3ncEo0o=
 github.com/jinzhu/gorm v1.9.14 h1:Kg3ShyTPcM6nzVo148fRrcMO6MNKuqtOUwnzqMgVniM=
 github.com/jinzhu/gorm v1.9.14/go.mod h1:G3LB3wezTOWM2ITLzPxEXgSkOXAntiLHS7UdBefADcs=
@@ -308,6 +314,8 @@ github.com/shirou/gopsutil v2.19.11+incompatible h1:lJHR0foqAjI4exXqWsU3DbH7bX1x
 github.com/shirou/gopsutil v2.19.11+incompatible/go.mod h1:5b4v6he4MtMOwMlS0TUMTu2PcXUg8+E1lC7eC3UO/RA=
 github.com/shopspring/decimal v1.2.0 h1:abSATXmQEYyShuxI4/vyW3tV1MrKAJzCZ/0zLUXYbsQ=
 github.com/shopspring/decimal v1.2.0/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFRcu2hWCYk4o=
+github.com/shopspring/decimal v1.3.1 h1:2Usl1nmF/WZucqkFZhnfFYxxxu8LG21F6nPQBE5gKV8=
+github.com/shopspring/decimal v1.3.1/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFRcu2hWCYk4o=
 github.com/shurcooL/sanitized_anchor_name v1.0.0 h1:PdmoCO6wvbs+7yrJyMORt4/BmY5IYyJwS/kOiWx8mHo=
 github.com/shurcooL/sanitized_anchor_name v1.0.0/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=
 github.com/siddontang/go v0.0.0-20180604090527-bdc77568d726/go.mod h1:3yhqj7WBBfRhbBlzyOC3gUxftwsU0u8gqevxwIHQpMw=
@@ -461,6 +469,8 @@ golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6 h1:foEbQz/B0Oz6YIqu/69kfXPYe
 golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20211007075335-d3039528d8ac h1:oN6lz7iLW/YC7un8pq+9bOLyXrprv2+DKfkJY+2LJJw=
 golang.org/x/sys v0.0.0-20211007075335-d3039528d8ac/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.0.0-20211023085530-d6a326fbbf70 h1:SeSEfdIxyvwGJliREIJhRPPXvW6sDlLT+UQ3B0hD0NA=
+golang.org/x/sys v0.0.0-20211023085530-d6a326fbbf70/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.0.0-20201126162022-7de9c90e9dd1/go.mod h1:bj7SfCRtBDWHUb9snDiAeCFNEtKQo2Wmx5Cou7ajbmo=
 golang.org/x/term v0.0.0-20210503060354-a79de5458b56/go.mod h1:tfny5GFUkzUvx4ps4ajbZsCe5lw1metzhBm9T3x7oIY=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=

@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/address"
 	"github.com/shopspring/decimal"
-	"strings"
 )
 
 func (s *Service) createExtrinsic(c context.Context,
@@ -98,6 +99,9 @@ func (s *Service) getTimestamp(extrinsic *model.ChainExtrinsic) (blockTimestamp 
 
 	for _, p := range paramsInstant {
 		if p.Name == "now" {
+			if strings.EqualFold(p.Type, "compact<U64>") {
+				return int(util.Int64FromInterface(p.Value) / 1000)
+			}
 			extrinsic.BlockTimestamp = util.IntFromInterface(p.Value)
 			return extrinsic.BlockTimestamp
 		}
