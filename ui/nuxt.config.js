@@ -12,30 +12,30 @@ export default {
   head: {
     title: process.env.npm_package_name || '',
     meta: [{
-        charset: 'utf-8'
-      },
-      {
-        name: 'viewport',
-        content: 'width=device-width, initial-scale=1'
-      },
-      {
-        hid: 'description',
-        name: 'description',
-        content: process.env.npm_package_description || ''
-      }
+      charset: 'utf-8'
+    },
+    {
+      name: 'viewport',
+      content: 'width=device-width, initial-scale=1'
+    },
+    {
+      hid: 'description',
+      name: 'description',
+      content: process.env.npm_package_description || ''
+    }
     ],
     script: [{
       src: 'https://houtai.baidu.com/v2/jssdk'
     }],
     link: [{
-        rel: 'icon',
-        type: 'image/x-icon',
-        href: '/favicon.ico'
-      },
-      {
-        rel: 'stylesheet',
-        href: 'https://houtai.baidu.com/v2/csssdk'
-      }
+      rel: 'icon',
+      type: 'image/x-icon',
+      href: '/favicon.ico'
+    },
+    {
+      rel: 'stylesheet',
+      href: 'https://houtai.baidu.com/v2/csssdk'
+    }
     ]
   },
   /*
@@ -71,17 +71,17 @@ export default {
    ** Plugins to load before mounting the App
    */
   plugins: [{
-      src: '~/plugins/i18n.js'
-    },
-    {
-      src: '~/plugins/icon'
-    },
-    {
-      src: '~/plugins/element-ui'
-    },
-    {
-      src: '~/plugins/axios'
-    }
+    src: '~/plugins/i18n.js'
+  },
+  {
+    src: '~/plugins/icon'
+  },
+  {
+    src: '~/plugins/element-ui'
+  },
+  {
+    src: '~/plugins/axios'
+  }
   ],
   /*
    ** Nuxt.js dev-modules

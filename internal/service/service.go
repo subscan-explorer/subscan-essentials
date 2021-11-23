@@ -2,15 +2,16 @@ package service
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"strings"
+
 	"github.com/go-kratos/kratos/pkg/log"
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc"
 	"github.com/itering/substrate-api-rpc/metadata"
 	"github.com/itering/substrate-api-rpc/websocket"
-	"io/ioutil"
-	"os"
-	"strings"
 )
 
 // Service
@@ -48,13 +49,17 @@ func (s *Service) initSubRuntimeLatest() {
 			}
 		}
 	}()
-
+	raw := s.regCodecMetadata()
+	fmt.Println("raw", raw)
+	r := s.dao.RuntimeVersionRecent()
+	fmt.Println("recent", r.RawData)
 	// find db
-	if recent := s.dao.RuntimeVersionRecent(); recent != nil && strings.HasPrefix(recent.RawData, "0x") {
-		metadata.Latest(&metadata.RuntimeRaw{Spec: recent.SpecVersion, Raw: recent.RawData})
-		return
-	}
+	// if recent := s.dao.RuntimeVersionRecent(); recent != nil && strings.HasPrefix(recent.RawData, "0x") {
+	// 	metadata.Latest(&metadata.RuntimeRaw{Spec: recent.SpecVersion, Raw: recent.RawData})
+	// 	return
+	// }
 	// find metadata for blockChain
+	//
 	if raw := s.regCodecMetadata(); strings.HasPrefix(raw, "0x") {
 		metadata.Latest(&metadata.RuntimeRaw{Spec: 1, Raw: raw})
 		return

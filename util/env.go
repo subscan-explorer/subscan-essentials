@@ -1,16 +1,18 @@
 package util
 
 import (
+	"fmt"
 	"os"
 )
 
+// CHAIN_WS_ENDPOINT=wss://rpc.polkadot.io
 var (
 	CurrentRuntimeSpecVersion int
 	EventStorageKey           = GetEnv("SUBSTRATE_EVENT_KEY", "0x26aa394eea5630e07c48ae0c9558cef780d41e5e16056765bc8461851072c9d7")
 	AddressType               = GetEnv("SUBSTRATE_ADDRESS_TYPE", "1")
 	BalanceAccuracy           = GetEnv("SUBSTRATE_ACCURACY", "9")
 	CommissionAccuracy        = GetEnv("COMMISSION_ACCURACY", "9")
-	WSEndPoint                = GetEnv("CHAIN_WS_ENDPOINT", "wss://polkadot.elara.patract.io")
+	WSEndPoint                = GetEnv("CHAIN_WS_ENDPOINT", "wss://rpc.polkadot.io")
 	NetworkNode               = GetEnv("NETWORK_NODE", "polkadot")
 	IsProduction              = os.Getenv("DEPLOY_ENV") == "prod"
 )
@@ -20,5 +22,6 @@ func GetEnv(key, defaultValue string) string {
 	if value == "" {
 		value = defaultValue
 	}
+	fmt.Println("GetEnv ", key, value)
 	return value
 }
