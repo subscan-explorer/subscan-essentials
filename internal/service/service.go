@@ -2,15 +2,16 @@ package service
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"strings"
+
 	"github.com/go-kratos/kratos/pkg/log"
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc"
 	"github.com/itering/substrate-api-rpc/metadata"
 	"github.com/itering/substrate-api-rpc/websocket"
-	"io/ioutil"
-	"os"
-	"strings"
 )
 
 // Service
@@ -26,6 +27,10 @@ func New() (s *Service) {
 	s.initSubRuntimeLatest()
 	pluginRegister(dbStorage)
 	return s
+}
+
+func (s *Service) GetDao() dao.IDao {
+	return s.dao
 }
 
 // Close close the resource.

@@ -2,6 +2,7 @@ package dao
 
 import (
 	"context"
+
 	"github.com/itering/subscan/model"
 	"github.com/itering/substrate-api-rpc/metadata"
 )
@@ -24,6 +25,7 @@ type IDao interface {
 	SaveFillAlreadyBlockNum(context.Context, int) error
 	SaveFillAlreadyFinalizedBlockNum(c context.Context, blockNum int) (err error)
 	GetFillBestBlockNum(c context.Context) (num int, err error)
+	GetBlockNumArr(start, end int) []int
 	GetFillFinalizedBlockNum(c context.Context) (num int, err error)
 	GetBlockList(page, row int) []model.ChainBlock
 	BlockAsJson(c context.Context, block *model.ChainBlock) *model.ChainBlockJson

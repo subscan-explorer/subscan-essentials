@@ -3,10 +3,11 @@ package dao
 import (
 	"context"
 	"fmt"
+	"sort"
+
 	"github.com/go-kratos/kratos/pkg/cache/redis"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util/address"
-	"sort"
 )
 
 // CreateBlock, mysql db transaction
@@ -187,4 +188,10 @@ func (d *Dao) BlocksReverseByNum(blockNums []int) map[int]model.ChainBlock {
 	}
 
 	return toMap
+}
+
+func (d *Dao) GetBlockNumArr(start, end int) []int {
+	var blockNums []int
+	d.db.Model(model.ChainBlock{BlockNum: end}).Where("block_num BETWEEN ? AND ?", start, end).Order("block_num asc").Pluck("block_num", &blockNums)
+	return blockNums
 }

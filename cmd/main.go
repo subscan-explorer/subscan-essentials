@@ -3,6 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"runtime"
+	"syscall"
+	"time"
+
 	"github.com/go-kratos/kratos/pkg/conf/paladin"
 	"github.com/go-kratos/kratos/pkg/log"
 	"github.com/itering/subscan/internal/observer"
@@ -11,11 +17,6 @@ import (
 	"github.com/itering/subscan/internal/service"
 	"github.com/itering/substrate-api-rpc/websocket"
 	"github.com/urfave/cli"
-	"os"
-	"os/signal"
-	"runtime"
-	"syscall"
-	"time"
 )
 
 func main() {
@@ -71,6 +72,14 @@ func setupApp() *cli.App {
 			Usage: "Create database and create default conf file",
 			Action: func(c *cli.Context) error {
 				script.Install(c.Parent().String("conf"))
+				return nil
+			},
+		},
+		{
+			Name:  "CheckCompleteness",
+			Usage: "Create blocks completeness",
+			Action: func(c *cli.Context) error {
+				script.CheckCompleteness()
 				return nil
 			},
 		},
