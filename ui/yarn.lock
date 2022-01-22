@@ -6604,9 +6604,9 @@ nan@^2.12.1, nan@^2.13.2:
   integrity sha1-174036MQW5FJTDFHCJMV7/iHSwE=
 
 nanoid@^3.1.10:
-  version "3.1.12"
-  resolved "https://registry.npm.taobao.org/nanoid/download/nanoid-3.1.12.tgz#6f7736c62e8d39421601e4a0c77623a97ea69654"
-  integrity sha1-b3c2xi6NOUIWAeSgx3YjqX6mllQ=
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.2.0.tgz#62667522da6673971cca916a6d3eff3f415ff80c"
+  integrity sha512-fmsZYa9lpn69Ad5eDn7FMcnnSR+8R34W9qJEijxYhTbfOWzr22n1QxCMzXLK+ODyW2973V3Fux959iQoUxzUIA==
 
 nanomatch@^1.2.1, nanomatch@^1.2.9:
   version "1.2.13"
