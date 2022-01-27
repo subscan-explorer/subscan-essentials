@@ -17,6 +17,13 @@ func New(d storage.Dao) *Service {
 	}
 }
 
+///
+func (s *Service) GetSysError(page, row int) ([]model.ExtrinsicError, int) {
+	return dao.GetSError(s.dao, page, row)
+}
+
+///
+
 func (s *Service) GetExtrinsicError(hash string) *model.ExtrinsicError {
 	return dao.ExtrinsicError(s.dao, hash)
 }

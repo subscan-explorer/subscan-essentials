@@ -2,6 +2,7 @@ package dao
 
 import (
 	"fmt"
+
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/plugins/balance/model"
 	"github.com/itering/subscan/util"
@@ -16,6 +17,16 @@ func GetAccountList(db storage.DB, page, row int) ([]model.Account, int) {
 	return accounts, len(accounts)
 }
 
+///
+func GetAccountById(db storage.DB, accountId string) *model.Account {
+	var accountser model.Account
+	opt := storage.Option{PluginPrefix: "balance"}
+	query := map[string]interface{}{"address": accountId}
+	db.FindBy(&accountser, query, &opt)
+	return &accountser
+}
+
+///
 func NewAccount(db storage.DB, accountId string) error {
 	accountId = util.TrimHex(accountId)
 	_ = db.Create(&model.Account{Address: accountId})

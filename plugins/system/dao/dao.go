@@ -1,12 +1,21 @@
 package dao
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/plugins/system/model"
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc/metadata"
-	"strings"
 )
+
+func GetSError(db storage.DB, page, row int) ([]model.ExtrinsicError, int) {
+	var extrinsicError []model.ExtrinsicError
+	opt := storage.Option{PluginPrefix: "system", Page: page, PageSize: row}
+	db.FindBy(&extrinsicError, nil, &opt)
+	return extrinsicError, len(extrinsicError)
+}
 
 func CreateExtrinsicError(db storage.DB, hash string, moduleError *model.MetadataModuleError) error {
 	if moduleError == nil {
@@ -23,7 +32,11 @@ func CreateExtrinsicError(db storage.DB, hash string, moduleError *model.Metadat
 
 func ExtrinsicError(db storage.DB, hash string) *model.ExtrinsicError {
 	var e model.ExtrinsicError
-	db.FindBy(&e, map[string]interface{}{"extrinsic_hash": hash}, nil)
+	opt := storage.Option{PluginPrefix: "system"}
+
+	query := map[string]interface{}{"extrinsic_hash": hash}
+	db.FindBy(&e, query, &opt)
+	fmt.Println(e)
 	return &e
 }
 

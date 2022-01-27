@@ -2,11 +2,12 @@ package http
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/itering/subscan-plugin/router"
 	"github.com/itering/subscan/plugins/balance/service"
 	"github.com/itering/subscan/util/validator"
 	"github.com/pkg/errors"
-	"net/http"
 )
 
 var (
@@ -16,9 +17,29 @@ var (
 func Router(s *service.Service) []router.Http {
 	svc = s
 	return []router.Http{
-		{"accounts", accounts},
+		//{"accounts", accounts},
+		{"findac", findac},
 	}
 }
+
+///
+func findac(w http.ResponseWriter, r *http.Request) error {
+	p := new(struct {
+		AccountSerch string `json:"account_id"`
+	})
+	if err := validator.Validate(r.Body, p); err != nil {
+		toJson(w, 10001, nil, err)
+		return nil
+	}
+	out := svc.GetAccountDetail(p.AccountSerch)
+	toJson(w, 0, map[string]interface{}{
+		"value": out,
+	}, nil)
+	return nil
+
+}
+
+///
 
 func accounts(w http.ResponseWriter, r *http.Request) error {
 	p := new(struct {

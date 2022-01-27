@@ -5,6 +5,6 @@
 	idle = 10
 	active = 10
 	dialTimeout = "1s"
-	readTimeout = "1s"
+	readTimeout = "10s"
 	writeTimeout = "1s"
-	idleTimeout = "10s"
+	idleTimeout = "1s"

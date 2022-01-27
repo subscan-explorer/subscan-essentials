@@ -5,15 +5,16 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
+	"os"
+	"reflect"
+	"strings"
+	"time"
+
 	"github.com/go-sql-driver/mysql"
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/configs"
 	"github.com/itering/subscan/model"
 	"github.com/itering/substrate-api-rpc/websocket"
-	"os"
-	"reflect"
-	"strings"
-	"time"
 
 	"github.com/go-kratos/kratos/pkg/log"
 	"github.com/itering/subscan/util"
@@ -70,12 +71,16 @@ func (d *DbStorage) getPluginPrefixTableName(instant interface{}) string {
 func (d *DbStorage) FindBy(record interface{}, query interface{}, option *storage.Option) (int, bool) {
 	var count int
 	tx := d.db
-
+	// fmt.Println("--------------------------------------------")
+	// fmt.Println(query)
+	// fmt.Println("--------------------------------------------")
+	// fmt.Println(option)
 	// where
 	if reflect.ValueOf(query).IsValid() {
 		tx = tx.Where(query)
 	}
-
+	// fmt.Println("------------------------")
+	// fmt.Println(tx)
 	// plugin prefix table
 	if option != nil && option.PluginPrefix != "" {
 		tx = tx.Table(fmt.Sprintf("%s_%s", option.PluginPrefix, d.getModelTableName(record)))

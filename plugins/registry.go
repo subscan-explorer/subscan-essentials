@@ -1,11 +1,12 @@
 package plugins
 
 import (
-	"github.com/itering/subscan-plugin"
-	"github.com/itering/subscan/plugins/balance"
-	"github.com/itering/subscan/plugins/system"
 	"reflect"
 	"strings"
+
+	subscan_plugin "github.com/itering/subscan-plugin"
+	"github.com/itering/subscan/plugins/balance"
+	"github.com/itering/subscan/plugins/system"
 )
 
 type PluginFactory subscan_plugin.Plugin

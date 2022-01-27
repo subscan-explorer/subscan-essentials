@@ -1,9 +1,12 @@
 package system
 
 import (
+	"fmt"
+
 	ui "github.com/itering/subscan-plugin"
 	"github.com/itering/subscan-plugin/router"
 	"github.com/itering/subscan-plugin/storage"
+	"github.com/itering/subscan/plugins/system/http"
 	"github.com/itering/subscan/plugins/system/model"
 	"github.com/itering/subscan/plugins/system/service"
 	"github.com/itering/subscan/util"
@@ -27,7 +30,7 @@ func (a *System) InitDao(d storage.Dao) {
 }
 
 func (a *System) InitHttp() (routers []router.Http) {
-	return nil
+	return http.Router(srv)
 }
 
 func (a *System) ProcessExtrinsic(*storage.Block, *storage.Extrinsic, []storage.Event) error {
@@ -63,5 +66,17 @@ func (a *System) SubscribeEvent() []string {
 }
 
 func (a *System) UiConf() *ui.UiConfig {
-	return nil
+	conf := new(ui.UiConfig)
+	conf.Init()
+	conf.Body.Api.Method = "post"
+	conf.Body.Api.Url = "api/plugin/system/systems"
+	conf.Body.Api.Adaptor = fmt.Sprintf(conf.Body.Api.Adaptor, "list")
+	conf.Body.Columns = []ui.UiColumns{
+		{Name: "id", Label: "id"},
+		{Name: "extrinsic_hash", Label: "extrinsic_hash"},
+		{Name: "module", Label: "module"},
+		{Name: "name", Label: "name"},
+		{Name: "doc", Label: "doc"},
+	}
+	return conf
 }

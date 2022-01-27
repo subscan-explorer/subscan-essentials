@@ -2,12 +2,13 @@ package observer
 
 import (
 	"fmt"
-	"github.com/itering/subscan/internal/dao"
-	"github.com/itering/substrate-api-rpc/pkg/recws"
 	"log"
 	"os"
 	"syscall"
 	"time"
+
+	"github.com/itering/subscan/internal/dao"
+	"github.com/itering/substrate-api-rpc/pkg/recws"
 
 	"github.com/itering/subscan/internal/service"
 	"github.com/itering/subscan/util"
@@ -91,7 +92,7 @@ LOOP:
 	for {
 		if dt == "substrate" {
 			interrupt := make(chan os.Signal, 1)
-			subscribeConn := &recws.RecConn{KeepAliveTimeout: 10 * time.Second, WriteTimeout: time.Second * 5, ReadTimeout: 10 * time.Second}
+			subscribeConn := &recws.RecConn{KeepAliveTimeout: 20 * time.Second, WriteTimeout: time.Second * 20, ReadTimeout: 20 * time.Second}
 			subscribeConn.Dial(util.WSEndPoint, nil)
 			srv.Subscribe(subscribeConn, interrupt)
 		} else {
