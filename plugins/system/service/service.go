@@ -30,7 +30,7 @@ func (s *Service) ExtrinsicFailed(spec int, event *storage.Event, paramEvent []s
 
 	for _, param := range paramEvent {
 
-		if param.Type == "DispatchError" {
+		if param.Type == "sp_runtime:DispatchError" {
 
 			var dr map[string]interface{}
 			util.UnmarshalAny(&dr, param.Value)
