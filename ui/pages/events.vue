@@ -38,7 +38,7 @@ export default {
 
 <style lang='scss' scoped>
 .app-wrapper {
-  /deep/ .a-Page {
+  ::v-deep .a-Page {
     height: 100%;
   }
 }
