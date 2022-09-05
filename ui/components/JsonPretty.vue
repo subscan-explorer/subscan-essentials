@@ -42,7 +42,7 @@ export default {
 
 <style lang="scss" scoped>
 .json-pretty-component {
-  /deep/ .vjs-tree {
+  ::v-deep .vjs-tree {
     font-family: initial;
     color: #333;
     .vjs-value__string {
