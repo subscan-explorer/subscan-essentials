@@ -5,17 +5,18 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"github.com/go-sql-driver/mysql"
-	"github.com/itering/subscan-plugin/storage"
-	"github.com/itering/subscan/configs"
-	"github.com/itering/subscan/model"
-	"github.com/itering/substrate-api-rpc/websocket"
+	"log"
 	"os"
 	"reflect"
 	"strings"
 	"time"
 
-	"github.com/go-kratos/kratos/pkg/log"
+	"github.com/go-sql-driver/mysql"
+	"github.com/itering/subscan-plugin/storage"
+	"github.com/itering/subscan/configs"
+	"github.com/itering/subscan/model"
+	"github.com/itering/substrate-api-rpc/websocket"
+
 	"github.com/itering/subscan/util"
 	"github.com/jinzhu/gorm"
 )
@@ -157,7 +158,7 @@ func (d *DbStorage) Delete(model interface{}, query interface{}) error {
 type ormLog struct{}
 
 func (l ormLog) Print(v ...interface{}) {
-	log.Info(strings.Repeat("%v ", len(v)), v...)
+	log.Printf(strings.Repeat("%v ", len(v)), v...)
 }
 
 // db
@@ -198,14 +199,14 @@ func (d *Dao) DbBegin() *GormDB {
 }
 
 // private funcs
-func newDb(dc configs.MysqlConf) (db *gorm.DB) {
+func newDb() (db *gorm.DB) {
 	var err error
 	if os.Getenv("TASK_MOD") == "true" {
-		db, err = gorm.Open("mysql", dc.Task.DSN)
+		db, err = gorm.Open("mysql", configs.Boot.Database.DSN)
 	} else if os.Getenv("TEST_MOD") == "true" {
-		db, err = gorm.Open("mysql", dc.Test.DSN)
+		db, err = gorm.Open("mysql", configs.Boot.Database.DSN)
 	} else {
-		db, err = gorm.Open("mysql", dc.Api.DSN)
+		db, err = gorm.Open("mysql", configs.Boot.Database.DSN)
 	}
 	if err != nil {
 		panic(err)

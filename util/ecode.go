@@ -1,6 +1,6 @@
 package util
 
-import "github.com/go-kratos/kratos/pkg/ecode"
+import "github.com/itering/subscan/pkg/ecode"
 
 var (
 	ParamsError           = ecode.New(10001)

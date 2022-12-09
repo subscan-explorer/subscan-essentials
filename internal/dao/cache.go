@@ -3,12 +3,13 @@ package dao
 import (
 	"context"
 	"encoding/json"
-	"github.com/go-kratos/kratos/pkg/cache/redis"
 	"strconv"
+
+	"github.com/gomodule/redigo/redis"
 )
 
 func (d *Dao) setCache(c context.Context, key string, value interface{}, ttl int) (err error) {
-	conn := d.redis.Get(c)
+	conn, _ := d.redis.GetContext(c)
 	defer conn.Close()
 	var val string
 	switch v := value.(type) {
@@ -33,7 +34,7 @@ func (d *Dao) setCache(c context.Context, key string, value interface{}, ttl int
 }
 
 func (d *Dao) getCacheBytes(c context.Context, key string) []byte {
-	conn := d.redis.Get(c)
+	conn, _ := d.redis.GetContext(c)
 	defer conn.Close()
 	if cache, err := redis.Bytes(conn.Do("get", key)); err == nil {
 		return cache
@@ -42,7 +43,7 @@ func (d *Dao) getCacheBytes(c context.Context, key string) []byte {
 }
 
 func (d *Dao) getCacheString(c context.Context, key string) string {
-	conn := d.redis.Get(c)
+	conn, _ := d.redis.GetContext(c)
 	defer conn.Close()
 	if cache, err := redis.String(conn.Do("get", key)); err == nil {
 		return cache
@@ -51,7 +52,7 @@ func (d *Dao) getCacheString(c context.Context, key string) string {
 }
 
 func (d *Dao) getCacheInt64(c context.Context, key string) int64 {
-	conn := d.redis.Get(c)
+	conn, _ := d.redis.GetContext(c)
 	defer conn.Close()
 	if cache, err := redis.Int64(conn.Do("get", key)); err == nil {
 		return cache
@@ -63,7 +64,7 @@ func (d *Dao) delCache(c context.Context, key ...string) error {
 	if len(key) == 0 {
 		return nil
 	}
-	conn := d.redis.Get(c)
+	conn, _ := d.redis.GetContext(c)
 	defer conn.Close()
 	args := redis.Args{}
 	for _, v := range key {

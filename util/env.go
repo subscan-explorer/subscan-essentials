@@ -13,6 +13,7 @@ var (
 	WSEndPoint                = GetEnv("CHAIN_WS_ENDPOINT", "wss://polkadot.api.onfinality.io/public-ws")
 	NetworkNode               = GetEnv("NETWORK_NODE", "polkadot")
 	IsProduction              = os.Getenv("DEPLOY_ENV") == "prod"
+	ConfDir                   = GetEnv("CONF_DIR", "../configs")
 )
 
 func GetEnv(key, defaultValue string) string {

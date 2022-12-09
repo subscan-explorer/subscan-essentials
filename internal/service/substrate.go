@@ -8,7 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-kratos/kratos/pkg/log"
+	"log"
+
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc/rpc"
 	"github.com/itering/substrate-api-rpc/websocket"
@@ -106,11 +107,11 @@ func (s *SubscribeService) subscribeFetchBlock() {
 		Finalized bool `json:"finalized"`
 	}
 
-	p, _ := ants.NewPoolWithFunc(10, func(i interface{}) {
+	p, _ := ants.NewPoolWithFunc(5, func(i interface{}) {
 		blockNum := i.(BlockFinalized)
 		func(bf BlockFinalized) {
 			if err := s.FillBlockData(nil, bf.BlockNum, bf.Finalized); err != nil {
-				log.Error("ChainGetBlockHash get error %v", err)
+				log.Printf("ChainGetBlockHash get error %v", err)
 			} else {
 				s.SetHeartBeat(fmt.Sprintf("%s:heartBeat:%s", util.NetworkNode, "substrate"))
 			}
@@ -168,7 +169,7 @@ func (s *Service) FillBlockData(conn websocket.WsConn, blockNum int, finalized b
 	if err != nil || blockHash == "" {
 		return fmt.Errorf("ChainGetBlockHash get error %v", err)
 	}
-	log.Info("Block num %d hash %s", blockNum, blockHash)
+	log.Printf("Block num %d hash %s", blockNum, blockHash)
 
 	// block
 	if err = websocket.SendWsRequest(conn, v, rpc.ChainGetBlock(wsBlock, blockHash)); err != nil {
@@ -227,7 +228,7 @@ func (s *Service) FillBlockData(conn websocket.WsConn, blockNum int, finalized b
 		_ = s.dao.SaveFillAlreadyBlockNum(context.TODO(), blockNum)
 		setFinalized()
 	} else {
-		log.Error("Create chain block error %v", err)
+		log.Printf("Create chain block error %v", err)
 	}
 	return
 }

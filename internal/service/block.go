@@ -4,7 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/go-kratos/kratos/pkg/log"
+	"log"
+
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/address"
@@ -30,14 +31,14 @@ func (s *Service) CreateChainBlock(conn websocket.WsConn, hash string, block *rp
 	// Extrinsic
 	decodeExtrinsics, err = substrate.DecodeExtrinsic(block.Extrinsics, metadataInstant, spec)
 	if err != nil {
-		log.Error("%v", err)
+		log.Printf("%v", err)
 	}
 
 	// event
 	if err == nil {
 		decodeEvent, err = substrate.DecodeEvent(event, metadataInstant, spec)
 		if err != nil {
-			log.Error("%v", err)
+			log.Printf("%v", err)
 		}
 	}
 
@@ -45,7 +46,7 @@ func (s *Service) CreateChainBlock(conn websocket.WsConn, hash string, block *rp
 	if err == nil {
 		logs, err = substrate.DecodeLogDigest(block.Header.Digest.Logs)
 		if err != nil {
-			log.Error("%v", err)
+			log.Printf("%v", err)
 		}
 	}
 

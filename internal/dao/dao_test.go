@@ -3,12 +3,10 @@ package dao
 import (
 	"context"
 	"fmt"
-	"github.com/go-kratos/kratos/pkg/cache/redis"
-	"github.com/go-kratos/kratos/pkg/conf/paladin"
+
 	"github.com/itering/subscan/configs"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
-	"github.com/jinzhu/gorm"
 )
 
 var (
@@ -89,31 +87,13 @@ var (
 )
 
 func init() {
-	if client, err := paladin.NewFile("../../configs"); err != nil {
-		panic(err)
-	} else {
-		paladin.DefaultClient = client
-	}
-	var (
-		dc configs.MysqlConf
-		rc configs.RedisConf
-	)
-	dc.MergeConf()
-	rc.MergeConf()
+	util.ConfDir = "../../configs"
+	configs.Init()
 
-	db, err := gorm.Open("mysql", dc.Test.DSN)
-	if err != nil {
-		panic(err)
-	}
-	db.LogMode(false)
-	const testRedisDb = 1
-
-	testDao = &Dao{
-		db:    db,
-		redis: redis.NewPool(rc.Config, redis.DialDatabase(testRedisDb)),
-	}
+	testDao, _ = New()
 	var tables []string
-	err = db.Raw("show tables;").Pluck("Tables_in_subscan_test", &tables).Error
+	db := testDao.db
+	err := db.Raw("show tables;").Pluck("Tables_in_subscan_test", &tables).Error
 	if err != nil {
 		panic(err)
 	}
@@ -134,7 +114,7 @@ func init() {
 	testDao.CreateRuntimeVersion("polkadot", 1)
 	testDao.SetRuntimeData(1, "system|staking", "0x0")
 
-	conn := testDao.redis.Get(ctx)
+	conn, _ := testDao.redis.GetContext(ctx)
 	_, _ = conn.Do("FLUSHALL")
 	defer conn.Close()
 }

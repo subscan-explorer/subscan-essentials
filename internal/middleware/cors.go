@@ -1,11 +1,13 @@
 package middlewares
 
-import bm "github.com/go-kratos/kratos/pkg/net/http/blademaster"
+import (
+	"github.com/gin-gonic/gin"
+)
 
 // CORS middleware
 // Set header with Access-Control-*
-func CORS() bm.HandlerFunc {
-	return func(context *bm.Context) {
+func CORS() gin.HandlerFunc {
+	return func(context *gin.Context) {
 		context.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		context.Writer.Header().Set("Access-Control-Max-Age", "86400")
 		context.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
