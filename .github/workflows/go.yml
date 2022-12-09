@@ -42,10 +42,10 @@ jobs:
         os: [ubuntu-latest]
     steps:
       # Set up golang env
-      - name: Set up GO 1.13
+      - name: Set up GO 1.17
         uses: actions/setup-go@v1
         with:
-          go-version: 1.13
+          go-version: 1.17
         id: go
       # Checkout Go module directory
       - name: Check out code into the Go module directory
@@ -72,13 +72,11 @@ jobs:
       # Trigger api tests when merge
       - name: Tests
         run: |
-          cp configs/redis.toml.example configs/redis.toml
-          cp configs/mysql.toml.example configs/mysql.toml
-          cp configs/http.toml.example configs/http.toml
+          cp configs/config.yaml.example configs/config.yaml
           go test -v ./...
         env:
           REDIS_ADDR: localhost:6379
-          NETWORK_NODE: crab
+          NETWORK_NODE: polkadot
           MYSQL_HOST: 127.0.0.1
           MYSQL_DB: test
           TEST_MOD: true
@@ -87,8 +85,10 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
+      - uses: actions/checkout@v3
         with:
-          version: v1.29
+          fetch-depth: 0
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          args: --timeout=3m

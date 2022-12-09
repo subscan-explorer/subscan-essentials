@@ -108,7 +108,7 @@ Then click search button, result will be shown in the output section.
 #### Init config file 
 
 ```bash
-cp configs/redis.toml.example configs/redis.toml && cp configs/mysql.toml.example configs/mysql.toml && cp configs/http.toml.example configs/http.toml
+cp configs/config.yaml.example configs/config.yaml
 ```
 
 #### Set
@@ -164,7 +164,6 @@ DESCRIPTION:
 
 COMMANDS:
      start    Start one worker, E.g substrate
-     stop     Stop one worker, E.g substrate
      install  Create database and create default conf file
      help, h  Shows a list of commands or help for one command
 

@@ -3,14 +3,14 @@ package service
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/gorilla/websocket"
-	"github.com/itering/substrate-api-rpc/rpc"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 	"syscall"
 	"testing"
+
+	"github.com/gorilla/websocket"
+	"github.com/itering/substrate-api-rpc/rpc"
 )
 
 type Buffer struct {
@@ -97,6 +97,6 @@ func (t *TestConn) ReadJSON(v interface{}) error {
 
 func TestService_Subscribe(t *testing.T) {
 	tc := TestConn{}
-	interrupt := make(chan os.Signal, 1)
-	testSrv.Subscribe(&tc, interrupt)
+	stop := make(chan struct{}, 2)
+	testSrv.Subscribe(&tc, stop)
 }

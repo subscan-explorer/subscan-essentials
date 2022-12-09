@@ -1,9 +1,14 @@
 package http
 
 import (
-	"github.com/go-kratos/kratos/pkg/conf/paladin"
-	bm "github.com/go-kratos/kratos/pkg/net/http/blademaster"
-	"github.com/itering/subscan/internal/middleware"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/go-kratos/kratos/v2/middleware/metrics"
+	"github.com/go-kratos/kratos/v2/middleware/tracing"
+	"github.com/go-kratos/kratos/v2/middleware/validate"
+	"github.com/go-kratos/kratos/v2/transport/http"
+	"github.com/itering/subscan/configs"
 	"github.com/itering/subscan/internal/service"
 	"github.com/itering/subscan/plugins"
 )
@@ -12,34 +17,37 @@ var (
 	svc *service.Service
 )
 
-func New(s *service.Service) (engine *bm.Engine) {
-	var (
-		hc struct {
-			Server *bm.ServerConfig
-		}
-	)
-	if err := paladin.Get("http.toml").UnmarshalTOML(&hc); err != nil {
-		if err != paladin.ErrNotExist {
-			panic(err)
-		}
+// NewHTTPServer new a HTTP server.
+func NewHTTPServer(c *configs.Server, s *service.Service) *http.Server {
+	var opts = []http.ServerOption{
+		http.Middleware(
+			tracing.Server(),
+			metrics.Server(),
+			validate.Validator(),
+		),
 	}
+
 	svc = s
-	engine = bm.DefaultServer(hc.Server)
-	engine.HandleMethodNotAllowed = false
-
-	initRouter(engine)
-
-	if err := engine.Start(); err != nil {
-		panic(err)
+	if c.Http.Network != "" {
+		opts = append(opts, http.Network(c.Http.Network))
 	}
+	if c.Http.Addr != "" {
+		opts = append(opts, http.Address(c.Http.Addr))
+	}
+	if c.Http.Timeout != "" {
+		timeout, _ := time.ParseDuration(c.Http.Timeout)
+		opts = append(opts, http.Timeout(timeout))
+	}
+	engine := http.NewServer(opts...)
+	e := gin.New()
+	e.Use(gin.Recovery())
+	defer engine.HandlePrefix("/", e)
+	initRouter(e)
 	return engine
 }
 
-func initRouter(e *bm.Engine) {
-	limiter := bm.NewRateLimiter(nil)
-	e.Use(limiter.Limit(), middlewares.CORS())
-
-	e.Ping(ping)
+func initRouter(e *gin.Engine) {
+	e.GET("ping", ping)
 	// internal
 	g := e.Group("/api")
 	{
@@ -72,10 +80,10 @@ func initRouter(e *bm.Engine) {
 	}
 }
 
-func pluginRouter(g *bm.RouterGroup) {
+func pluginRouter(g *gin.RouterGroup) {
 	for name, plugin := range plugins.RegisteredPlugins {
 		for _, r := range plugin.InitHttp() {
-			g.Group("plugin").Group(name).POST(r.Router, func(context *bm.Context) {
+			g.Group("plugin").Group(name).POST(r.Router, func(context *gin.Context) {
 				_ = r.Handle(context.Writer, context.Request)
 			})
 		}

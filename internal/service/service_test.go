@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
@@ -70,6 +71,10 @@ var (
 
 type MockDao struct {
 	mock.Mock
+}
+
+func (m *MockDao) GetBlockNumArr(start, end int) []int {
+	return nil
 }
 
 func (m *MockDao) Close() {}

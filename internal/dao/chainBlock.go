@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/go-kratos/kratos/pkg/cache/redis"
+	"github.com/gomodule/redigo/redis"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util/address"
 )
@@ -25,7 +25,7 @@ func (d *Dao) CreateBlock(txn *GormDB, cb *model.ChainBlock) (err error) {
 }
 
 func (d *Dao) SaveFillAlreadyBlockNum(c context.Context, blockNum int) (err error) {
-	conn := d.redis.Get(c)
+	conn, _ := d.redis.GetContext(c)
 	defer conn.Close()
 	if num, _ := redis.Int(conn.Do("GET", RedisFillAlreadyBlockNum)); blockNum > num {
 		_, err = conn.Do("SET", RedisFillAlreadyBlockNum, blockNum)
@@ -34,7 +34,7 @@ func (d *Dao) SaveFillAlreadyBlockNum(c context.Context, blockNum int) (err erro
 }
 
 func (d *Dao) SaveFillAlreadyFinalizedBlockNum(c context.Context, blockNum int) (err error) {
-	conn := d.redis.Get(c)
+	conn, _ := d.redis.GetContext(c)
 	defer func() {
 		conn.Close()
 	}()
@@ -46,14 +46,14 @@ func (d *Dao) SaveFillAlreadyFinalizedBlockNum(c context.Context, blockNum int) 
 }
 
 func (d *Dao) GetFillBestBlockNum(c context.Context) (num int, err error) {
-	conn := d.redis.Get(c)
+	conn, _ := d.redis.GetContext(c)
 	defer conn.Close()
 	num, err = redis.Int(conn.Do("GET", RedisFillAlreadyBlockNum))
 	return
 }
 
 func (d *Dao) GetFillFinalizedBlockNum(c context.Context) (num int, err error) {
-	conn := d.redis.Get(c)
+	conn, _ := d.redis.GetContext(c)
 	defer conn.Close()
 	num, err = redis.Int(conn.Do("GET", RedisFillFinalizedBlockNum))
 	return

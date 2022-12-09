@@ -1,0 +1,21 @@
+# Please copy this `config.yaml.example` to `config.yaml` and edit it\
+# This example is Docker Image default config file
+
+server:
+  http:
+    addr: 0.0.0.0:4399
+    timeout: 30s
+  grpc:
+    addr: 0.0.0.0:9000
+database:
+  api: "?writeTimeout=3s&parseTime=true&loc=Local&charset=utf8mb4,utf8"
+  task: "?parseTime=true&loc=Local&charset=utf8mb4,utf8"
+  test: "mysql://root:@127.0.0.1:3306/subscan_test?parseTime=true&loc=Local&charset=utf8mb4,utf8"
+redis:
+  proto: tcp
+  addr: 127.0.0.1:6379
+  password:
+  read_timeout: 1s
+  write_timeout: 1s
+  idle: 10
+  active: 100

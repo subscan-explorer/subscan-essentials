@@ -1,15 +1,14 @@
 package service
 
 import (
-	"github.com/go-kratos/kratos/pkg/log"
+	"math/rand"
+	"time"
+
+	"log"
+
 	"github.com/gorilla/websocket"
 	"github.com/itering/substrate-api-rpc/rpc"
 	ws "github.com/itering/substrate-api-rpc/websocket"
-	"math/rand"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 )
 
 const (
@@ -18,10 +17,8 @@ const (
 	finalizeHeader
 )
 
-func (s *Service) Subscribe(conn ws.WsConn, interrupt chan os.Signal) {
+func (s *Service) Subscribe(conn ws.WsConn, stop chan struct{}) {
 	var err error
-
-	signal.Notify(interrupt, os.Interrupt, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
 
 	defer conn.Close()
 
@@ -36,7 +33,7 @@ func (s *Service) Subscribe(conn ws.WsConn, interrupt chan os.Signal) {
 			}
 			_, message, err := conn.ReadMessage()
 			if err != nil {
-				log.Error("read: %s", err)
+				log.Printf("read: %s", err)
 				continue
 			}
 			_ = subscribeSrv.parser(message)
@@ -44,13 +41,13 @@ func (s *Service) Subscribe(conn ws.WsConn, interrupt chan os.Signal) {
 	}()
 
 	if err = conn.WriteMessage(websocket.TextMessage, rpc.ChainGetRuntimeVersion(runtimeVersion)); err != nil {
-		log.Info("write: %s", err)
+		log.Printf("write: %s", err)
 	}
 	if err = conn.WriteMessage(websocket.TextMessage, rpc.ChainSubscribeNewHead(newHeader)); err != nil {
-		log.Info("write: %s", err)
+		log.Printf("write: %s", err)
 	}
 	if err = conn.WriteMessage(websocket.TextMessage, rpc.ChainSubscribeFinalizedHeads(finalizeHeader)); err != nil {
-		log.Info("write: %s", err)
+		log.Printf("write: %s", err)
 	}
 
 	ticker := time.NewTicker(time.Second * 3)
@@ -62,16 +59,16 @@ func (s *Service) Subscribe(conn ws.WsConn, interrupt chan os.Signal) {
 			return
 		case <-ticker.C:
 			if err := conn.WriteMessage(websocket.TextMessage, rpc.SystemHealth(rand.Intn(100)+finalizeHeader)); err != nil {
-				log.Info("SystemHealth get error: %v", err)
+				log.Printf("SystemHealth get error: %v", err)
 			}
-		case <-interrupt:
+		case <-stop:
 			close(done)
-			log.Info("interrupt")
 			err = conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			if err != nil {
-				log.Error("write close: %s", err)
+				log.Printf("write close: %s", err)
 				return
 			}
+			conn.Close()
 			return
 		}
 	}

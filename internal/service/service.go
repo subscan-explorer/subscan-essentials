@@ -6,7 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/go-kratos/kratos/pkg/log"
+	"log"
+
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc"
@@ -19,7 +20,7 @@ type Service struct {
 	dao dao.IDao
 }
 
-// New new a service and return.
+// New  a service and return.
 func New() (s *Service) {
 	websocket.SetEndpoint(util.WSEndPoint)
 	d, dbStorage := dao.New()
@@ -45,7 +46,7 @@ func (s *Service) initSubRuntimeLatest() {
 		if c, err := readTypeRegistry(); err == nil {
 			substrate.RegCustomTypes(c)
 			if unknown := metadata.Decoder.CheckRegistry(); len(unknown) > 0 {
-				log.Warn("Found unknown type %s", strings.Join(unknown, ", "))
+				log.Printf("Found unknown type %s", strings.Join(unknown, ", "))
 			}
 		} else {
 			if os.Getenv("TEST_MOD") != "true" {
@@ -69,5 +70,5 @@ func (s *Service) initSubRuntimeLatest() {
 
 // read custom registry from local or remote
 func readTypeRegistry() ([]byte, error) {
-	return ioutil.ReadFile(fmt.Sprintf("../configs/source/%s.json", util.NetworkNode))
+	return ioutil.ReadFile(fmt.Sprintf(util.ConfDir+"/source/%s.json", util.NetworkNode))
 }

@@ -3,49 +3,50 @@ package http
 import (
 	"context"
 	"fmt"
-	bm "github.com/go-kratos/kratos/pkg/net/http/blademaster"
-	"github.com/go-kratos/kratos/pkg/net/http/blademaster/binding"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"github.com/itering/subscan/plugins"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/ss58"
 )
 
-func metadata(c *bm.Context) {
+func metadata(c *gin.Context) {
 	metadata, err := svc.Metadata()
-	c.JSON(metadata, err)
+	toJson(c, metadata, err)
 }
 
-func blocks(c *bm.Context) {
+func blocks(c *gin.Context) {
 	p := new(struct {
 		Row  int `json:"row" validate:"min=1,max=100"`
 		Page int `json:"page" validate:"min=0"`
 	})
-	if err := c.BindWith(p, binding.JSON); err != nil {
+	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
 	}
 	blockNum, err := svc.GetCurrentBlockNum(context.TODO())
 	blocks := svc.GetBlocksSampleByNums(p.Page, p.Row)
-	c.JSON(map[string]interface{}{
+	toJson(c, map[string]interface{}{
 		"blocks": blocks, "count": blockNum,
 	}, err)
 }
 
-func block(c *bm.Context) {
+func block(c *gin.Context) {
 	p := new(struct {
 		BlockNum  int    `json:"block_num" validate:"omitempty,min=0"`
 		BlockHash string `json:"block_hash" validate:"omitempty,len=66"`
 	})
-	if err := c.BindWith(p, binding.JSON); err != nil {
+	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
 	}
 	if p.BlockHash == "" {
-		c.JSON(svc.GetBlockByNum(p.BlockNum), nil)
+		toJson(c, svc.GetBlockByNum(p.BlockNum), nil)
 	} else {
-		c.JSON(svc.GetBlockByHashJson(p.BlockHash), nil)
+		toJson(c, svc.GetBlockByHashJson(p.BlockHash), nil)
 	}
 }
 
-func extrinsics(c *bm.Context) {
+func extrinsics(c *gin.Context) {
 	p := new(struct {
 		Row     int    `json:"row" validate:"min=1,max=100"`
 		Page    int    `json:"page" validate:"min=0"`
@@ -54,7 +55,7 @@ func extrinsics(c *bm.Context) {
 		Module  string `json:"module" validate:"omitempty"`
 		Call    string `json:"call" validate:"omitempty"`
 	})
-	if err := c.BindWith(p, binding.JSON); err != nil {
+	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
 	}
 	var query []string
@@ -71,45 +72,45 @@ func extrinsics(c *bm.Context) {
 	if p.Address != "" {
 		account := ss58.Decode(p.Address, util.StringToInt(util.AddressType))
 		if account == "" {
-			c.JSON(nil, util.InvalidAccountAddress)
+			toJson(c, nil, util.InvalidAccountAddress)
 			return
 		}
 		query = append(query, fmt.Sprintf("is_signed = 1 and account_id = '%s'", account))
 	}
-	extrinsics, count := svc.GetExtrinsicList(p.Page, p.Row, "desc", query...)
-	c.JSON(map[string]interface{}{
-		"extrinsics": extrinsics, "count": count,
+	list, count := svc.GetExtrinsicList(p.Page, p.Row, "desc", query...)
+	toJson(c, map[string]interface{}{
+		"extrinsics": list, "count": count,
 	}, nil)
 
 }
 
-func extrinsic(c *bm.Context) {
+func extrinsic(c *gin.Context) {
 	p := new(struct {
 		ExtrinsicIndex string `json:"extrinsic_index" validate:"omitempty"`
 		Hash           string `json:"hash" validate:"omitempty,len=66"`
 	})
-	if err := c.BindWith(p, binding.JSON); err != nil {
+	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
 	}
 	if p.ExtrinsicIndex == "" && p.Hash == "" {
-		c.JSON(nil, util.ParamsError)
+		toJson(c, nil, util.ParamsError)
 		return
 	}
 	if p.ExtrinsicIndex != "" {
-		c.JSON(svc.GetExtrinsicByIndex(p.ExtrinsicIndex), nil)
+		toJson(c, svc.GetExtrinsicByIndex(p.ExtrinsicIndex), nil)
 	} else {
-		c.JSON(svc.GetExtrinsicDetailByHash(p.Hash), nil)
+		toJson(c, svc.GetExtrinsicDetailByHash(p.Hash), nil)
 	}
 }
 
-func events(c *bm.Context) {
+func events(c *gin.Context) {
 	p := new(struct {
 		Row    int    `json:"row" validate:"min=1,max=100"`
 		Page   int    `json:"page" validate:"min=0"`
 		Module string `json:"module" validate:"omitempty"`
 		Call   string `json:"call" validate:"omitempty"`
 	})
-	if err := c.BindWith(p, binding.JSON); err != nil {
+	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
 	}
 	var query []string
@@ -120,66 +121,66 @@ func events(c *bm.Context) {
 		query = append(query, fmt.Sprintf("event_id = '%s'", p.Call))
 	}
 	events, count := svc.RenderEvents(p.Page, p.Row, "desc", query...)
-	c.JSON(map[string]interface{}{
+	toJson(c, map[string]interface{}{
 		"events": events, "count": count,
 	}, nil)
 }
 
-func checkSearchHash(c *bm.Context) {
+func checkSearchHash(c *gin.Context) {
 	p := new(struct {
 		Hash string `json:"hash" validate:"len=66"`
 	})
-	if err := c.BindWith(p, binding.JSON); err != nil {
+	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
 	}
 	if block := svc.GetBlockByHash(p.Hash); block != nil {
-		c.JSON(map[string]string{"hash_type": "block"}, nil)
+		toJson(c, map[string]string{"hash_type": "block"}, nil)
 		return
 	}
 	if extrinsic := svc.GetExtrinsicByHash(p.Hash); extrinsic != nil {
-		c.JSON(map[string]string{"hash_type": "extrinsic"}, nil)
+		toJson(c, map[string]string{"hash_type": "extrinsic"}, nil)
 		return
 	}
-	c.JSON(nil, util.RecordNotFound)
+	toJson(c, nil, util.RecordNotFound)
 }
 
-func runtimeList(c *bm.Context) {
-	c.JSON(map[string]interface{}{
+func runtimeList(c *gin.Context) {
+	toJson(c, map[string]interface{}{
 		"list": svc.SubstrateRuntimeList(),
 	}, nil)
 }
 
-func runtimeMetadata(c *bm.Context) {
+func runtimeMetadata(c *gin.Context) {
 	p := new(struct {
 		Spec int `json:"spec"`
 	})
-	if err := c.BindWith(p, binding.JSON); err != nil {
+	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
 	}
 	if info := svc.SubstrateRuntimeInfo(p.Spec); info == nil {
-		c.JSON(map[string]interface{}{"info": nil}, nil)
+		toJson(c, map[string]interface{}{"info": nil}, nil)
 	} else {
-		c.JSON(map[string]interface{}{
+		toJson(c, map[string]interface{}{
 			"info": info.Metadata.Modules,
 		}, nil)
 	}
 
 }
 
-func pluginList(c *bm.Context) {
-	c.JSON(plugins.List(), nil)
+func pluginList(c *gin.Context) {
+	toJson(c, plugins.List(), nil)
 }
 
-func pluginUIConfig(c *bm.Context) {
+func pluginUIConfig(c *gin.Context) {
 	p := new(struct {
 		Name string `json:"name" validate:"required"`
 	})
-	if err := c.BindWith(p, binding.JSON); err != nil {
+	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
 	}
 	if plugin, ok := plugins.RegisteredPlugins[p.Name]; ok {
-		c.JSON(plugin.UiConf(), nil)
+		toJson(c, plugin.UiConf(), nil)
 		return
 	}
-	c.JSON(nil, nil)
+	toJson(c, nil, nil)
 }

@@ -1,4 +1,0 @@
-
-[server]
-    addr = "0.0.0.0:4399"
-    timeout = "1s"

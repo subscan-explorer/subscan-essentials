@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/util"
 	"github.com/shopspring/decimal"

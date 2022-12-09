@@ -1,11 +1,12 @@
 package service
 
 import (
+	"strings"
+
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc/metadata"
 	"github.com/itering/substrate-api-rpc/rpc"
-	"strings"
 )
 
 var (

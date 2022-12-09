@@ -1,31 +1,29 @@
 package http
 
 import (
-	"github.com/itering/subscan/internal/service"
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 
-	"github.com/go-kratos/kratos/pkg/conf/paladin"
-	bm "github.com/go-kratos/kratos/pkg/net/http/blademaster"
+	"github.com/gin-gonic/gin"
+	"github.com/itering/subscan/configs"
+	"github.com/itering/subscan/internal/service"
+	"github.com/itering/subscan/util"
+
 	"github.com/stretchr/testify/assert"
 )
 
 func init() {
-	_ = os.Setenv("TEST_MOD", "true")
-	if client, err := paladin.NewFile("../../../configs"); err != nil {
-		panic(err)
-	} else {
-		paladin.DefaultClient = client
-	}
+	util.ConfDir = "../../../configs"
+	configs.Init()
 	svc = service.New()
 }
 
 func testRequest(w *httptest.ResponseRecorder, req *http.Request) {
-	e := bm.DefaultServer(nil)
+	e := gin.New()
+	gin.SetMode(gin.ReleaseMode)
 	req.RemoteAddr = "127.0.0.1:8080"
 	initRouter(e)
 	e.ServeHTTP(w, req)

@@ -1,24 +1,26 @@
 package http
 
 import (
-	"github.com/go-kratos/kratos/pkg/log"
-	bm "github.com/go-kratos/kratos/pkg/net/http/blademaster"
 	"net/http"
 	"time"
+
+	"log"
+
+	"github.com/gin-gonic/gin"
 )
 
-func ping(ctx *bm.Context) {
+func ping(ctx *gin.Context) {
 	if _, err := svc.Ping(ctx, nil); err != nil {
-		log.Error("ping error(%v)", err)
+		log.Printf("ping error(%v)", err)
 		ctx.AbortWithStatus(http.StatusServiceUnavailable)
 	}
 }
 
-func now(c *bm.Context) {
-	c.JSON(time.Now().Unix(), nil)
+func now(c *gin.Context) {
+	toJson(c, time.Now().Unix(), nil)
 }
 
-func systemStatus(c *bm.Context) {
+func systemStatus(c *gin.Context) {
 	status := svc.DaemonHealth(c)
-	c.JSON(status, nil)
+	toJson(c, status, nil)
 }
