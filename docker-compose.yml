@@ -25,7 +25,7 @@ services:
     environment:
       <<: *app_base
     image: subscan/api
-    command: ["python","run.py","substrate"]
+    command: ["subscan","start","substrate"]
     networks:
       - app_net
 
