@@ -1,4 +1,4 @@
-FROM node:10.17.0-jessie as builder
+FROM node:12 as builder
 
 WORKDIR /app
 COPY package.json /app
