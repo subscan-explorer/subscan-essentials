@@ -4,15 +4,19 @@ import (
 	"encoding/json"
 	"net/http"
 
+	scale "github.com/itering/scale.go/types"
+	"github.com/itering/scale.go/types/scaleBytes"
 	"github.com/itering/subscan-plugin/router"
+	"github.com/itering/subscan/plugins/staking/dao"
+	"github.com/itering/subscan/plugins/staking/model"
 	"github.com/itering/subscan/plugins/staking/service"
+	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/validator"
 	"github.com/pkg/errors"
+	"golang.org/x/exp/slog"
 )
 
-var (
-	svc *service.Service
-)
+var svc *service.Service
 
 func Router(s *service.Service) []router.Http {
 	svc = s
@@ -21,7 +25,7 @@ func Router(s *service.Service) []router.Http {
 
 func rewardsSlashes(w http.ResponseWriter, r *http.Request) error {
 	p := new(struct {
-		Row     int    `json:"row" validate:"min=1,max=100"`
+		Row     int    `json:"row" validate:"min=1,max=5000"`
 		Page    int    `json:"page" validate:"min=0"`
 		Address string `json:"address" validate:"required"`
 	})
@@ -30,10 +34,33 @@ func rewardsSlashes(w http.ResponseWriter, r *http.Request) error {
 		return nil
 	}
 
-	list, count := svc.GetPayoutListJson(p.Page, p.Row, p.Address)
+	list, _ := svc.GetPayoutListJson(p.Page, p.Row, p.Address)
+
+	depthConstant := svc.Dao().GetRuntimeConstantLatest("Staking", "HistoryDepth")
+
+	if depthConstant == nil {
+		slog.Error("get runtime constant failed", "module", "Staking", "name", "HistoryDepth")
+		toJson(w, 10001, nil, errors.New("get runtime constant failed"))
+		return nil
+	}
+
+	m := scale.ScaleDecoder{}
+	m.Init(scaleBytes.ScaleBytes{Data: util.HexToBytes(depthConstant.Value)}, nil)
+	depth := m.ProcessAndUpdateData("U32").(uint32)
+
+	activeEra := dao.GetLatestEra(svc.Storage())
+
+	filteredList := make([]model.Payout, 0)
+
+	for _, item := range list {
+		if item.Era < activeEra-depth {
+			continue
+		}
+		filteredList = append(filteredList, item)
+	}
 
 	toJson(w, 0, map[string]interface{}{
-		"list": list, "count": count,
+		"list": filteredList, "count": len(filteredList),
 	}, nil)
 	return nil
 }
