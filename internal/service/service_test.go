@@ -92,8 +92,10 @@ func (m *MockDao) DaemonHeath(context.Context) map[string]bool {
 func (m *MockDao) DbBegin() *dao.GormDB {
 	return &dao.GormDB{}
 }
+
 func (m *MockDao) DbCommit(*dao.GormDB) {
 }
+
 func (m *MockDao) DbRollback(*dao.GormDB) {
 }
 
@@ -163,7 +165,6 @@ func (m *MockDao) DropEventNotFinalizedData(blockNum int, finalized bool) bool {
 }
 
 func (m *MockDao) GetEventByBlockNum(blockNum int, where ...string) []model.ChainEventJson {
-
 	return nil
 }
 
@@ -198,12 +199,15 @@ func (m *MockDao) GetExtrinsicList(c context.Context, page, row int, order strin
 func (m *MockDao) GetExtrinsicsByHash(c context.Context, hash string) *model.ChainExtrinsic {
 	return nil
 }
+
 func (m *MockDao) GetExtrinsicsDetailByHash(c context.Context, hash string) *model.ExtrinsicDetail {
 	return nil
 }
+
 func (m *MockDao) GetExtrinsicsDetailByIndex(c context.Context, index string) *model.ExtrinsicDetail {
 	return nil
 }
+
 func (m *MockDao) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsicJson {
 	return nil
 }
