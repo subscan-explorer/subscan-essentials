@@ -1,6 +1,7 @@
 package plugins
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -15,7 +16,6 @@ import (
 )
 
 type Plugin interface {
-
 	// Init storage interface
 	InitDao(d storage.Dao, dd *dao.Dao)
 
@@ -72,7 +72,7 @@ func register(name string, f interface{}) {
 	if _, ok := f.(PluginFactory); ok {
 		RegisteredPlugins[name] = f.(PluginFactory)
 	} else {
-		panic("plugin must implement PluginFactory interface")
+		panic(fmt.Sprintf("plugin must implement PluginFactory interface: %s", name))
 	}
 
 	slog.Debug("Now registered plugins: %v", RegisteredPlugins)
@@ -88,7 +88,6 @@ type PluginInfo struct {
 }
 
 func List() []PluginInfo {
-
 	plugins := make([]PluginInfo, 0, len(RegisteredPlugins))
 
 	for name, plugin := range RegisteredPlugins {
