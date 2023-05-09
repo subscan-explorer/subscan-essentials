@@ -10,17 +10,26 @@ import (
 
 type Service struct {
 	d  storage.Dao
-	dd *internalDao.Dao
+	Dd *internalDao.Dao
+}
+
+func (s *Service) Storage() storage.Dao {
+	return s.d
+}
+
+func (s *Service) Dao() *internalDao.Dao {
+	return s.Dd
 }
 
 func New(d storage.Dao, dd *internalDao.Dao) *Service {
 	return &Service{
 		d:  d,
-		dd: dd,
+		Dd: dd,
 	}
 }
 
 func (s *Service) GetPayoutListJson(page, row int, address string) ([]model.Payout, int) {
-	slog.Debug("GetPayoutListJson: ", page, row, address)
-	return dao.GetPayoutList(s.d, page, row, address)
+	res, count := dao.GetPayoutList(s.d, page, row, address)
+	slog.Debug("GetPayoutListJson", "page", page, "row", row, "address", address, "found", count)
+	return res, count
 }
