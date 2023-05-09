@@ -29,5 +29,8 @@
     "sass-loader": "^10",
     "svg-sprite-loader": "^5.0.0",
     "vue-jest": "^4.0.0-0"
+  },
+  "volta": {
+    "node": "16.20.0"
   }
 }

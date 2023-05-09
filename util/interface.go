@@ -2,6 +2,7 @@ package util
 
 import (
 	"encoding/json"
+	"fmt"
 	"runtime"
 	"strings"
 )
@@ -26,6 +27,16 @@ func BoolFromInterface(i interface{}) bool {
 		return i
 	}
 	return false
+}
+
+func StringFromInterface(i interface{}) (string, error) {
+	switch i := i.(type) {
+	case string:
+		return i, nil
+	case []byte:
+		return string(i), nil
+	}
+	return "", fmt.Errorf("error converting interface to string. value: %+v, type: %T", i, i)
 }
 
 func ToString(i interface{}) string {

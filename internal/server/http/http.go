@@ -9,6 +9,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/validate"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/itering/subscan/configs"
+	middlewares "github.com/itering/subscan/internal/middleware"
 	"github.com/itering/subscan/internal/service"
 	"github.com/itering/subscan/plugins"
 )
@@ -41,6 +42,7 @@ func NewHTTPServer(c *configs.Server, s *service.Service) *http.Server {
 	engine := http.NewServer(opts...)
 	e := gin.New()
 	e.Use(gin.Recovery())
+	e.Use(middlewares.CORS())
 	defer engine.HandlePrefix("/", e)
 	initRouter(e)
 	return engine

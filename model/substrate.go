@@ -48,6 +48,30 @@ func (c *ChainBlock) AsPlugin() *storage.Block {
 	}
 }
 
+type CallArg struct {
+	Name  string      `json:"name"`
+	Type  string      `json:"type"`
+	Value interface{} `json:"value"`
+}
+
+func (a CallArg) GetName() string {
+	return a.Name
+}
+func (a CallArg) GetValue() interface{} {
+	return a.Value
+}
+
+type ChainCall struct {
+	BlockNum       int          `json:"block_num"`
+	CallIdx        int          `json:"call_idx"`
+	BlockTimestamp int          `json:"block_timestamp"`
+	ExtrinsicHash  string       `json:"extrinsic_hash"`
+	ModuleId       string       `json:"module_id"`
+	CallId         string       `json:"call_id"`
+	Params         []CallArg    `json:"params" sql:"type:text;"`
+	Events         []ChainEvent `json:"events"`
+}
+
 type ChainEvent struct {
 	ID            uint        `gorm:"primary_key" json:"-"`
 	EventIndex    string      `sql:"default: null;size:100;" json:"event_index"`

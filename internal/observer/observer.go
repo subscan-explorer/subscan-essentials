@@ -7,10 +7,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/itering/substrate-api-rpc/pkg/recws"
-
 	"github.com/itering/subscan/internal/service"
-	"github.com/itering/subscan/util"
+	"golang.org/x/exp/slog"
 )
 
 var (
@@ -24,9 +22,9 @@ func Run(dt string) {
 	for {
 		switch dt {
 		case "substrate":
-			subscribeConn := &recws.RecConn{KeepAliveTimeout: 10 * time.Second, WriteTimeout: time.Second * 5, ReadTimeout: 10 * time.Second}
-			subscribeConn.Dial(util.WSEndPoint, nil)
-			go srv.Subscribe(subscribeConn, stop)
+
+			go srv.Subscribe(stop)
+			slog.Debug("Connected to substrate node")
 		default:
 			log.Fatalf("no such daemon component: %s", dt)
 		}
@@ -42,7 +40,7 @@ func enableTermSignalHandler() {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
 	go func() {
-		log.Printf("Received signal %s, exiting...\n", <-sigs)
+		slog.Info("Received signal, exiting...", "signal", <-sigs)
 		stop <- struct{}{}
 	}()
 }

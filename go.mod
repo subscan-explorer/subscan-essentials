@@ -1,6 +1,6 @@
 module github.com/itering/subscan
 
-go 1.17
+go 1.20
 
 require (
 	github.com/garyburd/redigo v1.6.0

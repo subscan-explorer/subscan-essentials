@@ -5,7 +5,6 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"reflect"
 	"strings"
@@ -16,6 +15,7 @@ import (
 	"github.com/itering/subscan/configs"
 	"github.com/itering/subscan/model"
 	"github.com/itering/substrate-api-rpc/websocket"
+	"golang.org/x/exp/slog"
 
 	"github.com/itering/subscan/util"
 	"github.com/jinzhu/gorm"
@@ -158,7 +158,7 @@ func (d *DbStorage) Delete(model interface{}, query interface{}) error {
 type ormLog struct{}
 
 func (l ormLog) Print(v ...interface{}) {
-	log.Printf(strings.Repeat("%v ", len(v)), v...)
+	slog.Debug(strings.Repeat("%v ", len(v)), v...)
 }
 
 // db

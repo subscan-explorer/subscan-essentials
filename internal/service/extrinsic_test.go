@@ -23,3 +23,7 @@ func TestService_createExtrinsic(t *testing.T) {
 	assert.Equal(t, 1, len(feeMap))
 	assert.Equal(t, map[string]string{"947687-2": "5ee3f70a70d033d30755eeb1afe80520433cdc1d99348a522f2302d785ac907a"}, txMap)
 }
+
+func TestThing_mapInterfaceAsStruct(t *testing.T) {
+	
+}

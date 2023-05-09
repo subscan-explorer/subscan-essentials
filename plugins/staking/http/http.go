@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/itering/subscan-plugin/router"
-	"github.com/itering/subscan/plugins/balance/service"
+	"github.com/itering/subscan/plugins/staking/service"
 	"github.com/itering/subscan/util/validator"
 	"github.com/pkg/errors"
 )
@@ -16,22 +16,21 @@ var (
 
 func Router(s *service.Service) []router.Http {
 	svc = s
-	return []router.Http{
-		{"accounts", accounts},
-	}
+	return []router.Http{{Router: "rewardsSlashes", Handle: rewardsSlashes}}
 }
 
-func accounts(w http.ResponseWriter, r *http.Request) error {
+func rewardsSlashes(w http.ResponseWriter, r *http.Request) error {
 	p := new(struct {
-		Row  int `json:"row" validate:"min=1,max=100"`
-		Page int `json:"page" validate:"min=0"`
+		Row     int    `json:"row" validate:"min=1,max=100"`
+		Page    int    `json:"page" validate:"min=0"`
+		Address string `json:"address" validate:"required"`
 	})
 	if err := validator.Validate(r.Body, p); err != nil {
 		toJson(w, 10001, nil, err)
 		return nil
 	}
 
-	list, count := svc.GetAccountListJson(p.Page, p.Row)
+	list, count := svc.GetPayoutListJson(p.Page, p.Row, p.Address)
 
 	toJson(w, 0, map[string]interface{}{
 		"list": list, "count": count,
@@ -50,6 +49,7 @@ func (j J) Render(w http.ResponseWriter) error {
 	header := w.Header()
 	if val := header["Content-Type"]; len(val) == 0 {
 		header["Content-Type"] = []string{"application/json; charset=utf-8"}
+		header["Access-Control-Allow-Origin"] = []string{"*"}
 	}
 	return nil
 }

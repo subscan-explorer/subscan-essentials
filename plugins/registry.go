@@ -1,24 +1,65 @@
 package plugins
 
 import (
-	"github.com/itering/subscan-plugin"
-	"github.com/itering/subscan/plugins/balance"
-	"github.com/itering/subscan/plugins/system"
 	"reflect"
 	"strings"
+
+	subscanPlugin "github.com/itering/subscan-plugin"
+	"github.com/itering/subscan-plugin/router"
+	"github.com/itering/subscan-plugin/storage"
+	"github.com/itering/subscan/internal/dao"
+	"github.com/itering/subscan/model"
+	"github.com/itering/subscan/plugins/staking"
+	"github.com/shopspring/decimal"
+	"golang.org/x/exp/slog"
 )
 
-type PluginFactory subscan_plugin.Plugin
+type Plugin interface {
+
+	// Init storage interface
+	InitDao(d storage.Dao, dd *dao.Dao)
+
+	// Init http router
+	InitHttp() []router.Http
+
+	// Receive Extrinsic data when subscribe extrinsic dispatch
+	ProcessExtrinsic(*model.ChainBlock, *model.ChainExtrinsic, []model.ChainEvent) error
+
+	// Receive Extrinsic data when subscribe extrinsic dispatch
+	ProcessEvent(*model.ChainBlock, *model.ChainEvent, decimal.Decimal, *model.ChainExtrinsic) error
+
+	ProcessCall(*model.ChainBlock, *model.ChainCall, []model.ChainEvent, *model.ChainExtrinsic) error
+
+	// Mysql tables schema auto migrate
+	Migrate()
+
+	// Subscribe Extrinsic with special module
+	SubscribeExtrinsic() []string
+
+	// Subscribe Events with special module
+	SubscribeEvent() []string
+
+	// Subscribe Call with special module
+	SubscribeCall() []string
+
+	// Plugins version
+	Version() string
+
+	UiConf() *subscanPlugin.UiConfig
+}
+type PluginFactory Plugin
 
 var RegisteredPlugins = make(map[string]PluginFactory)
 
 // register local plugin
 func init() {
-	registerNative(balance.New())
-	registerNative(system.New())
+	// registerNative(balance.New())
+	// registerNative(system.New())
+	registerNative(staking.New())
 }
 
 func register(name string, f interface{}) {
+	slog.Debug("register plugin", name)
 	name = strings.ToLower(name)
 	if f == nil {
 		return
@@ -30,7 +71,11 @@ func register(name string, f interface{}) {
 
 	if _, ok := f.(PluginFactory); ok {
 		RegisteredPlugins[name] = f.(PluginFactory)
+	} else {
+		panic("plugin must implement PluginFactory interface")
 	}
+
+	slog.Debug("Now registered plugins: %v", RegisteredPlugins)
 }
 
 func registerNative(p interface{}) {
@@ -40,13 +85,14 @@ func registerNative(p interface{}) {
 type PluginInfo struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
-	Ui      bool   `json:"ui"`
 }
 
 func List() []PluginInfo {
+
 	plugins := make([]PluginInfo, 0, len(RegisteredPlugins))
+
 	for name, plugin := range RegisteredPlugins {
-		plugins = append(plugins, PluginInfo{Name: name, Version: plugin.Version(), Ui: plugin.UiConf() != nil})
+		plugins = append(plugins, PluginInfo{Name: name, Version: plugin.Version()})
 	}
 	return plugins
 }
