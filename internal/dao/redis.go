@@ -5,17 +5,16 @@ import (
 	"fmt"
 	"time"
 
-	"log"
-
 	"github.com/gomodule/redigo/redis"
 	"github.com/itering/subscan/util"
+	"golang.org/x/exp/slog"
 )
 
 func (d *Dao) pingRedis(ctx context.Context) (err error) {
 	conn, _ := d.redis.GetContext(ctx)
 	defer conn.Close()
 	if _, err = conn.Do("SET", "ping", "pong"); err != nil {
-		log.Printf("conn.Set(PING) error(%v)", err)
+		slog.Debug("conn.Set(PING) error(%v)", err)
 	}
 	return
 }

@@ -1,10 +1,11 @@
 package address
 
 import (
-	"github.com/itering/subscan/util"
-	"github.com/stretchr/testify/assert"
 	"strconv"
 	"testing"
+
+	"github.com/itering/subscan/util"
+	"github.com/stretchr/testify/assert"
 )
 
 var testCases = []struct {
@@ -18,6 +19,7 @@ var testCases = []struct {
 	{"0890a6c7e0c98bc7a7466c5c07eeaec85784627c1fb4360b5071c8da267c383e", 42, "5CFwDB4oKXFv1EU3ziJXG61gdwqbWViups5e4pEzRi7zAVCp"},
 	{"124de43e638b9cb913e7f8b619f72172824c5fdd43cd3e9c31127d365a75223c", 7, "hvcoyfLo51QTJW3dSfP5gm7fiRa8BKX6kvLaBM673pzeepv"},
 	{"124de43e638b9cb913e7f8b619f72172824c5fdd43c", 16, ""},
+	{"fe65717dad0447d715f660a0a58411de509b42e6efb8375f562f58a554d5860e", 42, "5HpG9w8EBLe5XCrbczpwq5TSXvedjrBGCwqxK1iQ7qUsSWFc"},
 }
 
 func Test_SS58Address(t *testing.T) {

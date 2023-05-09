@@ -2,6 +2,8 @@ package balance
 
 import (
 	"fmt"
+	"strings"
+
 	plugin "github.com/itering/subscan-plugin"
 	"github.com/itering/subscan-plugin/router"
 	"github.com/itering/subscan-plugin/storage"
@@ -11,7 +13,6 @@ import (
 	"github.com/itering/subscan/plugins/balance/service"
 	"github.com/itering/subscan/util"
 	"github.com/shopspring/decimal"
-	"strings"
 )
 
 var srv *service.Service

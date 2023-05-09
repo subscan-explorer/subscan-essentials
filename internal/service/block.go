@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
@@ -13,6 +12,7 @@ import (
 	"github.com/itering/substrate-api-rpc/rpc"
 	"github.com/itering/substrate-api-rpc/storage"
 	"github.com/itering/substrate-api-rpc/websocket"
+	"golang.org/x/exp/slog"
 )
 
 func (s *Service) CreateChainBlock(conn websocket.WsConn, hash string, block *rpc.Block, event string, spec int, finalized bool) (err error) {
@@ -31,14 +31,14 @@ func (s *Service) CreateChainBlock(conn websocket.WsConn, hash string, block *rp
 	// Extrinsic
 	decodeExtrinsics, err = substrate.DecodeExtrinsic(block.Extrinsics, metadataInstant, spec)
 	if err != nil {
-		log.Printf("%v", err)
+		slog.Error("%v", err)
 	}
 
 	// event
 	if err == nil {
 		decodeEvent, err = substrate.DecodeEvent(event, metadataInstant, spec)
 		if err != nil {
-			log.Printf("%v", err)
+			slog.Error("%v", err)
 		}
 	}
 
@@ -46,7 +46,7 @@ func (s *Service) CreateChainBlock(conn websocket.WsConn, hash string, block *rp
 	if err == nil {
 		logs, err = substrate.DecodeLogDigest(block.Header.Digest.Logs)
 		if err != nil {
-			log.Printf("%v", err)
+			slog.Error("%v", err)
 		}
 	}
 
@@ -267,9 +267,9 @@ func (s *Service) GetCurrentBlockNum(c context.Context) (uint64, error) {
 }
 
 func (s *Service) ValidatorsList(conn websocket.WsConn, hash string) (validatorList []string) {
-	validatorsRaw, _ := rpc.ReadStorage(conn, "Session", "Validators", hash)
-	for _, addr := range validatorsRaw.ToStringSlice() {
-		validatorList = append(validatorList, util.TrimHex(addr))
-	}
+	// validatorsRaw, _ := rpc.ReadStorage(conn, "Session", "Validators", hash)
+	// for _, addr := range validatorsRaw.ToStringSlice() {
+	// 	validatorList = append(validatorList, util.TrimHex(addr))
+	// }
 	return
 }

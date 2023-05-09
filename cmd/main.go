@@ -12,13 +12,17 @@ import (
 	"github.com/itering/subscan/internal/server/http"
 	"github.com/itering/subscan/internal/service"
 	"github.com/itering/substrate-api-rpc/websocket"
+	"github.com/lmittmann/tint"
 	"github.com/urfave/cli"
+	"golang.org/x/exp/slog"
 )
 
 func main() {
 	defer func() {
 		websocket.Close()
 	}()
+	logger := slog.New(tint.Options{Level: slog.LevelDebug}.NewHandler(os.Stderr))
+	slog.SetDefault(logger)
 	if err := setupApp().Run(os.Args); err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

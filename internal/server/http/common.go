@@ -4,14 +4,13 @@ import (
 	"net/http"
 	"time"
 
-	"log"
-
 	"github.com/gin-gonic/gin"
+	"golang.org/x/exp/slog"
 )
 
 func ping(ctx *gin.Context) {
 	if _, err := svc.Ping(ctx, nil); err != nil {
-		log.Printf("ping error(%v)", err)
+		slog.Warn("ping error(%v)", err)
 		ctx.AbortWithStatus(http.StatusServiceUnavailable)
 	}
 }
