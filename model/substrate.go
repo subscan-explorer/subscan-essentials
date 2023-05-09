@@ -57,6 +57,7 @@ type CallArg struct {
 func (a CallArg) GetName() string {
 	return a.Name
 }
+
 func (a CallArg) GetValue() interface{} {
 	return a.Value
 }
@@ -155,6 +156,15 @@ type RuntimeVersion struct {
 	SpecVersion int    `json:"spec_version"`
 	Modules     string `json:"modules"  sql:"type:TEXT;"`
 	RawData     string `json:"-" sql:"type:MEDIUMTEXT;"`
+}
+
+type RuntimeConstant struct {
+	ID           uint   `gorm:"primary_key"`
+	SpecVersion  int    `gorm:"index" json:"spec_version"`
+	ModuleName   string `gorm:"index" json:"module_name" sql:"type:varchar(100);"`
+	ConstantName string `gorm:"index" json:"constant_name" sql:"type:varchar(100);"`
+	Type         string `json:"type" sql:"type:varchar(100);"`
+	Value        string `json:"value" sql:"type:MEDIUMTEXT;"`
 }
 
 type ChainLog struct {

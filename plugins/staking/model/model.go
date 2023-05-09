@@ -18,3 +18,11 @@ type Payout struct {
 	ExtrinsicIndex string          `json:"extrinsic_index"`
 	EventIndex     string          `json:"event_index"`
 }
+
+type ValidatorPrefs struct {
+	ID                uint            `gorm:"primary_key" json:"-"`
+	Account           string          `gorm:"index;unique" sql:"default: null;size:100" json:"account"`
+	Commission        decimal.Decimal `sql:"type:decimal(12,11);" json:"commission"`
+	BlockedNomination bool            `json:"blocked_nomination"`
+	CommissionHistory string          `sql:"type:text;" json:"commission_history"`
+}

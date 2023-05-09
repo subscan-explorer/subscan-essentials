@@ -254,6 +254,14 @@ func (m *MockDao) SetRuntimeData(specVersion int, modules string, rawData string
 	return 0
 }
 
+func (m *MockDao) CreateRuntimeConstants(specVersion int, constants []model.RuntimeConstant) error {
+	return nil
+}
+
+func (m *MockDao) GetRuntimeConstantLatest(moduleName string, constantName string) *model.RuntimeConstant {
+	return nil
+}
+
 func (m *MockDao) RuntimeVersionList() []model.RuntimeVersion {
 	return nil
 }

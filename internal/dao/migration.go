@@ -2,6 +2,7 @@ package dao
 
 import (
 	"context"
+
 	"github.com/itering/subscan/model"
 )
 
@@ -20,6 +21,7 @@ func (d *Dao) Migration() {
 
 func (d *Dao) InternalTables(blockNum int) (models []interface{}) {
 	models = append(models, model.RuntimeVersion{})
+	models = append(models, model.RuntimeConstant{})
 	for i := 0; i <= blockNum/model.SplitTableBlockNum; i++ {
 		models = append(
 			models,

@@ -3,7 +3,6 @@ package staking
 import (
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"reflect"
 	"strings"
 
@@ -21,9 +20,7 @@ import (
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/address"
 	"github.com/itering/substrate-api-rpc/rpc"
-	rpcStorage "github.com/itering/substrate-api-rpc/storage"
 	"github.com/itering/substrate-api-rpc/storageKey"
-	"github.com/itering/substrate-api-rpc/websocket"
 	"github.com/shopspring/decimal"
 	"golang.org/x/exp/slog"
 )
@@ -58,6 +55,10 @@ func (a *Staking) ProcessExtrinsic(block *scanModel.ChainBlock, extrinsic *scanM
 
 type SS58Address string
 
+func (a SS58Address) String() string {
+	return string(a)
+}
+
 func SS58AddressFromHex(hex string) SS58Address {
 	return SS58Address(address.SS58Address(hex))
 }
@@ -76,9 +77,35 @@ func CastUnnamedArg[T any](arg GetValue) (T, error) {
 
 	ty := reflect.TypeOf(v)
 	ret := reflect.New(ty).Elem()
+
+	value := arg.GetValue()
+
+	// gross special casing
+	var anyv any = v
+	switch anyv.(type) {
+	case decimal.Decimal:
+		dec, err := util.MaybeDecimalFromInterface(value)
+		if err != nil {
+			return v, err
+		}
+		ret.Set(reflect.ValueOf(dec))
+		return ret.Interface().(T), nil
+	}
+	name := ty.Name()
+	switch name {
+	case "Decimal":
+		dec, err := util.MaybeDecimalFromInterface(value)
+		if err != nil {
+			return v, err
+		}
+		ret.Set(reflect.ValueOf(dec))
+		return ret.Interface().(T), nil
+	}
+	// end
+
 	switch ty.Kind() {
 	case reflect.String:
-		s, err := util.StringFromInterface(arg.GetValue())
+		s, err := util.StringFromInterface(value)
 		if err != nil {
 			return v, err
 		}
@@ -89,31 +116,22 @@ func CastUnnamedArg[T any](arg GetValue) (T, error) {
 		ret.SetString(s)
 		return ret.Interface().(T), nil
 	case reflect.Uint32:
-		switch arg.GetValue().(type) {
+		switch value.(type) {
 		case uint32:
-			ret.SetUint(uint64(arg.GetValue().(uint32)))
+			ret.SetUint(uint64(value.(uint32)))
 			return ret.Interface().(T), nil
 		case float64:
-			ret.SetUint(uint64(arg.GetValue().(float64)))
+			ret.SetUint(uint64(value.(float64)))
 			return ret.Interface().(T), nil
 		}
-		if val, ok := arg.GetValue().(uint32); ok {
+		if val, ok := value.(uint32); ok {
 			ret.SetUint(uint64(val))
 			return ret.Interface().(T), nil
 		}
-		return v, fmt.Errorf("unexpected type. wanted uint32 but got %+v", reflect.TypeOf(arg.GetValue()))
-		// u, err := util.IntFromInterface(arg.Value)
-	default:
-		name := ty.Name()
-		switch name {
-		case "Decimal":
-			dec, err := util.MaybeDecimalFromInterface(arg.GetValue())
-			if err != nil {
-				return v, err
-			}
-			ret.Set(reflect.ValueOf(dec))
-			return ret.Interface().(T), nil
-		}
+		return v, fmt.Errorf("unexpected type. wanted uint32 but got %+v", reflect.TypeOf(value))
+	// u, err := util.IntFromInterface(arg.Value)
+	case reflect.Struct:
+		return util.MapInterfaceAsStruct[T](value)
 	}
 	return v, fmt.Errorf("unsupported type: %s", ty)
 }
@@ -128,7 +146,6 @@ func CastArg[T any](arg GetNameValue, name string) (T, error) {
 
 func switchName(a, b string) string {
 	return fmt.Sprintf("%s.%s", strings.ToLower(a), strings.ToLower(b))
-
 }
 
 func (a *Staking) ProcessCall(block *scanModel.ChainBlock, call *scanModel.ChainCall, events []scanModel.ChainEvent, extrinsic *scanModel.ChainExtrinsic) error {
@@ -151,23 +168,23 @@ func (a *Staking) ProcessCall(block *scanModel.ChainBlock, call *scanModel.Chain
 			return err
 		}
 		for _, e := range events {
-			slog.Debug("event: %+v", e)
-			var paramEvent []map[string]interface{}
-			util.UnmarshalAny(&paramEvent, e.Params)
-			args, err := getEventArgs(e.Params)
-			if err != nil {
-				return err
-			}
-			address, err := CastUnnamedArg[string](args[0])
-			if err != nil {
-				return err
-			}
-			amount, err := CastUnnamedArg[decimal.Decimal](args[1])
-			if err != nil {
-				return err
-			}
 			eventName := switchName(e.ModuleId, e.EventId)
 			if eventName == "staking.rewarded" {
+				var paramEvent []map[string]interface{}
+				util.UnmarshalAny(&paramEvent, e.Params)
+				args, err := GetEventArgs(e.Params)
+				if err != nil {
+					return err
+				}
+				address, err := CastUnnamedArg[string](args[0])
+				if err != nil {
+					return err
+				}
+				amount, err := CastUnnamedArg[decimal.Decimal](args[1])
+				if err != nil {
+					return err
+				}
+				slog.Debug("staking.rewarded", "address", address, "amount", amount, "era", era, "event", e)
 				dao.NewClaimedPayout(a.d, address, string(validator), amount, era, &e, block, extrinsic.ExtrinsicIndex)
 			}
 		}
@@ -187,7 +204,7 @@ func (a EventArg) GetValue() interface{} {
 	return a.Value
 }
 
-func getEventArgs(raw interface{}) ([]EventArg, error) {
+func GetEventArgs(raw interface{}) ([]EventArg, error) {
 	var paramEvent []map[string]interface{}
 	util.UnmarshalAny(&paramEvent, raw)
 	var args []EventArg
@@ -199,84 +216,6 @@ func getEventArgs(raw interface{}) ([]EventArg, error) {
 		args = append(args, arg)
 	}
 	return args, nil
-}
-
-// remove
-
-func SendWsRequest(c websocket.WsConn, v interface{}, action []byte) (err error) {
-	var p *websocket.PoolConn
-	if c == nil {
-		if p, err = websocket.Init(); err != nil {
-			return
-		}
-		defer p.Close()
-		c = p.Conn
-	}
-	if err = c.WriteMessage(1, action); err != nil {
-		if p != nil {
-			p.MarkUnusable()
-		}
-		return fmt.Errorf("websocket send error: %v", err)
-	}
-	if err = c.ReadJSON(v); err != nil {
-		if p != nil {
-			p.MarkUnusable()
-		}
-		slog.Error("websocket read error", "error", err)
-		return
-	}
-	return nil
-}
-
-// 0x5f3e4907f716ac89b6347d15ececedca8bde0a0ea8864605e3b68ed9cb2da01b26ae334d66562f1490000000
-// 0x5f3e4907f716ac89b6347d15ececedca8bde0a0ea8864605e3b68ed9cb2da01b26ae334d66562f1490000000
-// 0x5f3e4907f716ac89b6347d15ececedca8bde0a0ea8864605e3b68ed9cb2da01b26ae334d66562f1490000000
-
-func ReadStorage(p websocket.WsConn, module, prefix string, hash string, arg ...string) (r rpcStorage.StateStorage, err error) {
-	key := storageKey.EncodeStorageKey(module, prefix, arg...)
-
-	slog.Info("readstorage", "key", key)
-	v := &rpc.JsonRpcResult{}
-	if err = websocket.SendWsRequest(p, v, rpc.StateGetStorage(rand.Intn(10000), util.AddHex(key.EncodeKey), hash)); err != nil {
-		return
-	}
-	slog.Info("readstorage", "response", fmt.Sprintf("%+v", v))
-	if dataHex, err := v.ToString(); err == nil {
-		if dataHex == "" {
-			slog.Info("empty storage")
-			return "", nil
-		}
-
-		return rpcStorage.Decode(dataHex, key.ScaleType, nil)
-	}
-	return r, err
-}
-
-// end
-func structureQuery(param rpc.Param) []byte {
-	param.JsonRpc = "2.0"
-	b, _ := json.Marshal(param)
-	return b
-}
-
-func StateGetKeysPagedAt(id int, storageKey string, at string) []byte {
-	rpc := rpc.Param{Id: id, Method: "state_getKeysPaged", Params: []interface{}{storageKey, 256, nil, at}}
-	return structureQuery(rpc)
-}
-
-func ReadKeysPaged(p websocket.WsConn, at, module, prefix string, args ...string) (r []string, scale string, err error) {
-	key := storageKey.EncodeStorageKey(module, prefix, args...)
-	slog.Debug("readkeys", "key", key)
-	v := &rpc.JsonRpcResult{}
-	if err = websocket.SendWsRequest(p, v, StateGetKeysPagedAt(rand.Intn(10000), util.AddHex(key.EncodeKey), at)); err != nil {
-		return
-	}
-	if keys, err := v.ToInterfaces(); err == nil {
-		for _, k := range keys {
-			r = append(r, k.(string))
-		}
-	}
-	return r, key.ScaleType, err
 }
 
 type EraStakerKey struct {
@@ -356,14 +295,16 @@ type EraPoints struct {
 	} `json:"individual"`
 }
 
-func getEraInfo(era uint32, blockHash string, totalRewards decimal.Decimal) (EraInfo, error) {
+func (a *Staking) getEraInfo(era uint32, blockHash string, totalRewards decimal.Decimal) (EraInfo, error) {
 	var bad EraInfo
 	var stakes []EraStake
 	eraEnc := scale.Encode("U32", era)
-	keys, scaleType, err := ReadKeysPaged(nil, blockHash, "Staking", "ErasStakers", eraEnc)
+	keys, scaleType, err := util.ReadKeysPaged(nil, blockHash, "Staking", "ErasStakersClipped", eraEnc)
 	if err != nil {
 		return bad, err
 	}
+	totalStakeRes := util.StartReadStorage(nil, "Staking", "ErasTotalStake", blockHash, eraEnc)
+	pointsRes := util.StartReadStorage(nil, "Staking", "ErasRewardPoints", blockHash, eraEnc)
 	for _, key := range keys {
 		k := eraStakerKey(key, scaleType)
 		response, err := rpc.ReadStorageByKey(nil, k.StorageKey, blockHash)
@@ -393,12 +334,12 @@ func getEraInfo(era uint32, blockHash string, totalRewards decimal.Decimal) (Era
 			stakes = append(stakes, EraStake{Validator: k.Validator, Staker: SS58AddressFromHex(other.Who), Amount: amount, ValidatorTotal: validatorTotal})
 		}
 	}
-	totalStakeRaw, err := ReadStorage(nil, "Staking", "ErasTotalStake", blockHash, eraEnc)
+	totalStakeRaw, err := totalStakeRes.Wait()
 	if err != nil {
 		return bad, err
 	}
 	totalStake := totalStakeRaw.ToDecimal()
-	pointsRaw, err := ReadStorage(nil, "Staking", "ErasRewardPoints", blockHash, eraEnc)
+	pointsRaw, err := pointsRes.Wait()
 	if err != nil {
 		return bad, err
 	}
@@ -414,29 +355,51 @@ func getEraInfo(era uint32, blockHash string, totalRewards decimal.Decimal) (Era
 	}
 
 	validatorRewards := make(map[SS58Address]decimal.Decimal)
+	validatorCuts := make(map[SS58Address]decimal.Decimal)
 	stakerRewards := make(map[SS58Address]decimal.Decimal)
 	totalPoints := decimal.NewFromInt(int64(eraPoints.Total))
 	for v, points := range validatorPoints {
-		share := decimal.NewFromInt(int64(points)).Div(totalPoints)
+		prefs, err := dao.GetValidatorPrefs(a.d, v.String())
+		if err != nil {
+			return bad, err
+		}
+		share := decimal.NewFromInt(int64(points)).Div(totalPoints).Round(9)
 		slog.Debug("getEraInfo", "share", share, "totalRewards", totalRewards)
-		validatorRewards[v] = totalRewards.Mul(share)
+
+		validatorRewards[v] = totalRewards.Mul(share).Round(0)
+		validatorCuts[v] = validatorRewards[v].Mul(prefs.Commission.Round(9)).Round(0)
 	}
 	for _, stake := range stakes {
-		share := stake.Amount.Div(stake.ValidatorTotal)
-		stakerRewards[stake.Staker] = validatorRewards[stake.Validator].Mul(share)
+		totalRewardForValidator := validatorRewards[stake.Validator]
+		cut := validatorCuts[stake.Validator]
+		afterCut := totalRewardForValidator.Sub(cut)
+		share := stake.Amount.Div(stake.ValidatorTotal).Round(9)
+		stakerReward := afterCut.Mul(share).Round(0)
+		if stake.Staker == stake.Validator {
+			// validators take their cut
+			stakerReward = stakerReward.Add(cut)
+		}
+		stakerRewards[stake.Staker] = stakerReward
 	}
-	return EraInfo{Era: era, TotalStake: totalStake, Stakes: stakes, TotalPoints: eraPoints.Total, ValidatorPoints: validatorPoints, ValidatorRewards: validatorRewards, StakerRewards: stakerRewards}, nil
+	return EraInfo{Era: era, TotalStake: totalStake, Stakes: stakes, TotalPoints: eraPoints.Total, TotalRewards: totalRewards, ValidatorPoints: validatorPoints, ValidatorRewards: validatorRewards, StakerRewards: stakerRewards}, nil
+}
+
+type ValidatorPrefs struct {
+	Commission float64 `json:"commission"`
+	Blocked    bool    `json:"blocked"`
 }
 
 func (a *Staking) ProcessEvent(block *scanModel.ChainBlock, event *scanModel.ChainEvent, fee decimal.Decimal, extrinsic *scanModel.ChainExtrinsic) error {
 	name := switchName(event.ModuleId, event.EventId)
-	args, err := getEventArgs(event.Params)
 	switch name {
 	case "staking.erapaid":
+		args, err := GetEventArgs(event.Params)
+		if len(args) < 2 {
+			return fmt.Errorf("staking.erapaid: not enough arguments. got %d, expected at least 2", len(args))
+		}
 		if err != nil {
 			return err
 		}
-		slog.Debug("staking.erapaid", "args", args)
 		era, err := CastUnnamedArg[uint32](args[0])
 		if err != nil {
 			return err
@@ -445,13 +408,42 @@ func (a *Staking) ProcessEvent(block *scanModel.ChainBlock, event *scanModel.Cha
 		if err != nil {
 			return err
 		}
-		eraInfo, err := getEraInfo(era, block.Hash, reward)
+		eraInfo, err := a.getEraInfo(era, block.Hash, reward)
 		if err != nil {
 			return err
 		}
+		for _, stake := range eraInfo.Stakes {
+			rewardAmount := eraInfo.StakerRewards[stake.Staker]
+			if err := dao.NewUnclaimedPayout(a.d, stake.Staker.String(), stake.Validator.String(), rewardAmount, era); err != nil {
+				slog.Error("failed to create new unclaimed payout", "error", err, "staker", stake.Staker.String(), "validator", stake.Validator.String(), "amount", rewardAmount.String(), "era", era)
+			}
+		}
 		slog.Info("staking.erapaid", "era", era, "reward", reward, "eraInfo", fmt.Sprintf("%+v", eraInfo))
-
+	case "staking.validatorprefsset":
+		args, err := GetEventArgs(event.Params)
+		if err != nil {
+			return err
+		}
+		if len(args) < 2 {
+			return fmt.Errorf("staking.validatorprefsset: not enough arguments. got %d, expected at least 2", len(args))
+		}
+		slog.Info("staking.validatorprefsset", "args", args)
+		account, err := CastUnnamedArg[SS58Address](args[0])
+		if err != nil {
+			return err
+		}
+		prefs, err := CastUnnamedArg[ValidatorPrefs](args[1])
+		if err != nil {
+			return err
+		}
+		slog.Info("staking.validatorprefsset", "account", account, "prefs", prefs)
+		// the commission is in parts per billion
+		commission := decimal.NewFromFloat(prefs.Commission).Div(decimal.NewFromInt(1_000_000_000))
+		if err := dao.NewValidatorPrefs(a.d, account.String(), commission, prefs.Blocked, uint32(block.BlockNum)); err != nil {
+			return err
+		}
 	}
+
 	return nil
 }
 
@@ -488,4 +480,5 @@ func (a *Staking) UiConf() *plugin.UiConfig {
 
 func (a *Staking) Migrate() {
 	_ = a.d.AutoMigration(&model.Payout{})
+	_ = a.d.AutoMigration(&model.ValidatorPrefs{})
 }

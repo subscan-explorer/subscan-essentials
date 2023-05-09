@@ -51,6 +51,8 @@ type IDao interface {
 	GetFinalizedBlockNum(c context.Context) (uint64, error)
 	CreateRuntimeVersion(name string, specVersion int) int64
 	SetRuntimeData(specVersion int, modules string, rawData string) int64
+	CreateRuntimeConstants(specVersion int, constants []model.RuntimeConstant) error
+	GetRuntimeConstantLatest(moduleName string, constantName string) *model.RuntimeConstant
 	RuntimeVersionList() []model.RuntimeVersion
 	RuntimeVersionRaw(spec int) *metadata.RuntimeRaw
 	RuntimeVersionRecent() *model.RuntimeVersion
