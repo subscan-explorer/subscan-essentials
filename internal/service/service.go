@@ -6,13 +6,12 @@ import (
 	"os"
 	"strings"
 
-	"log"
-
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc"
 	"github.com/itering/substrate-api-rpc/metadata"
 	"github.com/itering/substrate-api-rpc/websocket"
+	"golang.org/x/exp/slog"
 )
 
 // Service
@@ -26,7 +25,7 @@ func New() (s *Service) {
 	d, dbStorage := dao.New()
 	s = &Service{dao: d}
 	s.initSubRuntimeLatest()
-	pluginRegister(dbStorage)
+	pluginRegister(dbStorage, d)
 	return s
 }
 
@@ -46,7 +45,7 @@ func (s *Service) initSubRuntimeLatest() {
 		if c, err := readTypeRegistry(); err == nil {
 			substrate.RegCustomTypes(c)
 			if unknown := metadata.Decoder.CheckRegistry(); len(unknown) > 0 {
-				log.Printf("Found unknown type %s", strings.Join(unknown, ", "))
+				slog.Warn("Found unknown type %s", strings.Join(unknown, ", "))
 			}
 		} else {
 			if os.Getenv("TEST_MOD") != "true" {

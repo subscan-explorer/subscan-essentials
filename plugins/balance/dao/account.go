@@ -2,6 +2,7 @@ package dao
 
 import (
 	"fmt"
+
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/plugins/balance/model"
 	"github.com/itering/subscan/util"

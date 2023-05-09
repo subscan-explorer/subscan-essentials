@@ -2,11 +2,12 @@ package service
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"github.com/shopspring/decimal"
-	"strings"
 )
 
 func (s *Service) AddEvent(
@@ -23,7 +24,8 @@ func (s *Service) AddEvent(
 		event.BlockNum = block.BlockNum
 
 		if err = s.dao.CreateEvent(txn, &event); err == nil {
-			go s.emitEvent(block, &event, feeMap[event.EventIndex])
+			ext := s.GetExtrinsicByHash(event.ExtrinsicHash)
+			go s.emitEvent(block, &event, feeMap[event.EventIndex], ext)
 		} else {
 			return 0, err
 		}

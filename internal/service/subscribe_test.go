@@ -96,7 +96,7 @@ func (t *TestConn) ReadJSON(v interface{}) error {
 }
 
 func TestService_Subscribe(t *testing.T) {
-	tc := TestConn{}
+	// tc := TestConn{}
 	stop := make(chan struct{}, 2)
-	testSrv.Subscribe(&tc, stop)
+	testSrv.Subscribe(stop)
 }

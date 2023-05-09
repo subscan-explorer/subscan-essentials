@@ -29,6 +29,10 @@ func HexToNumStr(v string) string {
 	return U256(v).String()
 }
 
+func HexToNum(v string) uint64 {
+	return U256(v).Uint64()
+}
+
 func HexToBytes(s string) []byte {
 	s = strings.TrimPrefix(s, "0x")
 	c := make([]byte, hex.DecodedLen(len(s)))

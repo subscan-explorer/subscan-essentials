@@ -2,10 +2,11 @@ package dao
 
 import (
 	"context"
+	"testing"
+
 	"github.com/garyburd/redigo/redis"
 	"github.com/itering/subscan/util"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestDao_SetMetadata(t *testing.T) {
@@ -15,7 +16,7 @@ func TestDao_SetMetadata(t *testing.T) {
 	err := testDao.SetMetadata(ctx, testCase)
 	assert.NoError(t, err)
 
-	conn := testDao.redis.Get(ctx)
+	conn, _ := testDao.redis.GetContext(ctx)
 	defer conn.Close()
 	for key, expect := range testCase {
 		value, _ := redis.String(conn.Do("HGET", RedisMetadataKey, key))
@@ -28,7 +29,7 @@ func TestDao_IncrMetadata(t *testing.T) {
 	testCase := map[string]interface{}{"key1": "1", "key2": "2"}
 	_ = testDao.SetMetadata(ctx, testCase)
 
-	conn := testDao.redis.Get(ctx)
+	conn, _ := testDao.redis.GetContext(ctx)
 	defer conn.Close()
 
 	for key, expect := range testCase {

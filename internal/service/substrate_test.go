@@ -2,8 +2,9 @@ package service
 
 import (
 	"context"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSubscribeParserMessage(t *testing.T) {
@@ -42,5 +43,5 @@ func TestService_subscribeFetchBlock(t *testing.T) {
 	testSrv.dao.(*MockDao).On("GetFillFinalizedBlockNum", context.TODO()).Return(1245200, nil)
 	sub := testSrv.initSubscribeService(done)
 	go sub.subscribeFetchBlock()
-	sub.newFinHead <- true
+	sub.newFinHead <- 1
 }

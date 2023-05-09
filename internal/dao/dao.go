@@ -7,6 +7,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/itering/subscan/configs"
 	"github.com/jinzhu/gorm"
+	"golang.org/x/exp/slog"
 )
 
 var (
@@ -64,6 +65,7 @@ func newCachePool(host, password string) *redis.Pool {
 			return nil
 		},
 	}
+	slog.Debug("redis pool init success")
 	return pool
 }
 

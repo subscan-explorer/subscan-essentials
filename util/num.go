@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"math/big"
 	"strconv"
 	"strings"
@@ -80,18 +81,23 @@ func Int64FromInterface(i interface{}) int64 {
 }
 
 func DecimalFromInterface(i interface{}) decimal.Decimal {
+	r, _ := MaybeDecimalFromInterface(i)
+	return r
+}
+
+func MaybeDecimalFromInterface(i interface{}) (decimal.Decimal, error) {
 	switch i := i.(type) {
 	case int:
-		return decimal.New(int64(i), 0)
+		return decimal.New(int64(i), 0), nil
 	case int64:
-		return decimal.New(i, 0)
+		return decimal.New(i, 0), nil
 	case uint64:
-		return decimal.New(int64(i), 0)
+		return decimal.New(int64(i), 0), nil
 	case float64:
-		return decimal.NewFromFloat(i)
+		return decimal.NewFromFloat(i), nil
 	case string:
 		r, _ := decimal.NewFromString(i)
-		return r
+		return r, nil
 	}
-	return decimal.Zero
+	return decimal.Zero, fmt.Errorf("incorrect type: %T", i)
 }

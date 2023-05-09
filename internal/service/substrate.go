@@ -8,23 +8,22 @@ import (
 	"sync"
 	"time"
 
-	"log"
-
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc/rpc"
 	"github.com/itering/substrate-api-rpc/websocket"
 	"github.com/panjf2000/ants/v2"
+	"golang.org/x/exp/slog"
 )
 
 // FinalizedWaitingBlockCount
 // Because when receive chain_finalizedHead, get block still not finalized
 // so set Waiting block count to try avoid
 const (
-	FinalizedWaitingBlockCount = 3
+	FinalizedWaitingBlockCount = 0
 	ChainNewHead               = "chain_newHead"
 	ChainFinalizedHead         = "chain_finalizedHead"
 	StateStorage               = "state_storage"
-	BlockTime                  = 6
+	BlockTime                  = 5
 )
 
 type subscription struct {
@@ -40,7 +39,7 @@ var (
 type SubscribeService struct {
 	*Service
 	newHead    chan bool
-	newFinHead chan bool
+	newFinHead chan int
 	done       chan struct{}
 }
 
@@ -48,7 +47,7 @@ func (s *Service) initSubscribeService(done chan struct{}) *SubscribeService {
 	return &SubscribeService{
 		Service:    s,
 		newHead:    make(chan bool, 1),
-		newFinHead: make(chan bool, 1),
+		newFinHead: make(chan int, 1),
 		done:       done,
 	}
 }
@@ -83,10 +82,11 @@ func (s *SubscribeService) parser(message []byte) (err error) {
 		upgradeHealth(j.Method)
 	case ChainFinalizedHead:
 		r := j.ToNewHead()
+		num := util.HexToNum(r.Number)
 		_ = s.updateChainMetadata(map[string]interface{}{"finalized_blockNum": util.HexToNumStr(r.Number)})
 		upgradeHealth(j.Method)
 		go func() {
-			s.newFinHead <- true
+			s.newFinHead <- int(num)
 			onceFinHead.Do(func() {
 				go s.subscribeFetchBlock()
 			})
@@ -111,7 +111,7 @@ func (s *SubscribeService) subscribeFetchBlock() {
 		blockNum := i.(BlockFinalized)
 		func(bf BlockFinalized) {
 			if err := s.FillBlockData(nil, bf.BlockNum, bf.Finalized); err != nil {
-				log.Printf("ChainGetBlockHash get error %v", err)
+				logError("ChainGetBlockHash get", err)
 			} else {
 				s.SetHeartBeat(fmt.Sprintf("%s:heartBeat:%s", util.NetworkNode, "substrate"))
 			}
@@ -122,9 +122,8 @@ func (s *SubscribeService) subscribeFetchBlock() {
 	defer p.Release()
 	for {
 		select {
-		case <-s.newFinHead:
-			final, err := s.dao.GetFinalizedBlockNum(context.TODO())
-			if err != nil || final == 0 {
+		case newHead := <-s.newFinHead:
+			if newHead == 0 {
 				time.Sleep(BlockTime * time.Second)
 				return
 			}
@@ -135,7 +134,7 @@ func (s *SubscribeService) subscribeFetchBlock() {
 				startBlock = lastNum
 			}
 
-			for i := startBlock; i <= int(final-FinalizedWaitingBlockCount); i++ {
+			for i := startBlock; i <= int(newHead-FinalizedWaitingBlockCount); i++ {
 				wg.Add(1)
 				_ = p.Invoke(BlockFinalized{BlockNum: i, Finalized: true})
 			}
@@ -169,7 +168,7 @@ func (s *Service) FillBlockData(conn websocket.WsConn, blockNum int, finalized b
 	if err != nil || blockHash == "" {
 		return fmt.Errorf("ChainGetBlockHash get error %v", err)
 	}
-	log.Printf("Block num %d hash %s", blockNum, blockHash)
+	slog.Info("Got new block", "Number", blockNum, "Hash", blockHash)
 
 	// block
 	if err = websocket.SendWsRequest(conn, v, rpc.ChainGetBlock(wsBlock, blockHash)); err != nil {
@@ -228,7 +227,7 @@ func (s *Service) FillBlockData(conn websocket.WsConn, blockNum int, finalized b
 		_ = s.dao.SaveFillAlreadyBlockNum(context.TODO(), blockNum)
 		setFinalized()
 	} else {
-		log.Printf("Create chain block error %v", err)
+		slog.Error("Create chain block error %v", err)
 	}
 	return
 }
