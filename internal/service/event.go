@@ -15,8 +15,8 @@ func (s *Service) AddEvent(
 	block *model.ChainBlock,
 	e []model.ChainEvent,
 	hashMap map[string]string,
-	feeMap map[string]decimal.Decimal) (eventCount int, err error) {
-
+	feeMap map[string]decimal.Decimal,
+) (eventCount int, err error) {
 	for _, event := range e {
 		event.ModuleId = strings.ToLower(event.ModuleId)
 		event.ExtrinsicHash = hashMap[fmt.Sprintf("%d-%d", block.BlockNum, event.ExtrinsicIdx)]
