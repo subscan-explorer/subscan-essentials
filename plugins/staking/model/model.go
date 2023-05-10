@@ -3,6 +3,7 @@ package model
 import (
 	"github.com/itering/subscan/util/address"
 	"github.com/shopspring/decimal"
+	"gorm.io/datatypes"
 )
 
 type Payout struct {
@@ -27,4 +28,22 @@ type ValidatorPrefs struct {
 	BlockedNomination bool                `json:"blocked_nomination"`
 	CommissionHistory string              `sql:"type:text;" json:"commission_history"`
 }
+
+type EraInfo struct {
+	ID               uint            `gorm:"primary_key" json:"-"`
+	Era              uint32          `gorm:"index" json:"era"`
+	TotalStake       decimal.Decimal `sql:"type:decimal(30,0);" json:"total_stake"`
+	Stakes           datatypes.JSONSlice[EraStake]
+	TotalPoints      uint32
+	TotalRewards     decimal.Decimal
+	ValidatorPoints  datatypes.JSONType[map[address.SS58Address]uint32]
+	ValidatorRewards datatypes.JSONType[map[address.SS58Address]decimal.Decimal]
+	StakerRewards    datatypes.JSONType[map[address.SS58Address]decimal.Decimal]
+}
+
+type EraStake struct {
+	Validator      address.SS58Address
+	Staker         address.SS58Address
+	Amount         decimal.Decimal
+	ValidatorTotal decimal.Decimal
 }

@@ -1,11 +1,12 @@
 package model_test
 
 import (
-	"github.com/itering/subscan-plugin/storage"
+	"testing"
+
 	"github.com/itering/subscan/model"
+	"github.com/itering/subscan/plugins/storage"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 var testCases = []struct {
@@ -46,5 +47,4 @@ func TestModelPluginRender(t *testing.T) {
 
 	extrinsic := model.ChainExtrinsic{BlockNum: 1, BlockTimestamp: 1, ExtrinsicHash: "0x0", Params: `{"a":"b"}`, Fee: decimal.New(1, 0)}
 	assert.Equal(t, &storage.Extrinsic{ExtrinsicHash: "0x0", Params: []byte(`{"a":"b"}`), Fee: decimal.New(1, 0)}, extrinsic.AsPlugin())
-
 }

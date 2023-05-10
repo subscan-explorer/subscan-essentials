@@ -6,11 +6,11 @@ import (
 
 	plugin "github.com/itering/subscan-plugin"
 	"github.com/itering/subscan-plugin/router"
-	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/plugins/balance/dao"
 	"github.com/itering/subscan/plugins/balance/http"
 	"github.com/itering/subscan/plugins/balance/model"
 	"github.com/itering/subscan/plugins/balance/service"
+	"github.com/itering/subscan/plugins/storage"
 	"github.com/itering/subscan/util"
 	"github.com/shopspring/decimal"
 )

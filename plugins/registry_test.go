@@ -5,9 +5,9 @@ import (
 
 	subscan_plugin "github.com/itering/subscan-plugin"
 	"github.com/itering/subscan-plugin/router"
-	"github.com/itering/subscan-plugin/storage"
 	internalDao "github.com/itering/subscan/internal/dao"
 	scanModel "github.com/itering/subscan/model"
+	"github.com/itering/subscan/plugins/storage"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 )

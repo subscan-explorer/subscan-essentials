@@ -1,9 +1,9 @@
 package service
 
 import (
-	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/plugins/balance/dao"
 	"github.com/itering/subscan/plugins/balance/model"
+	"github.com/itering/subscan/plugins/storage"
 )
 
 type Service struct {
