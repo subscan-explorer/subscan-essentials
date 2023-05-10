@@ -11,6 +11,7 @@ import (
 	"github.com/itering/subscan/internal/script"
 	"github.com/itering/subscan/internal/server/http"
 	"github.com/itering/subscan/internal/service"
+	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc/websocket"
 	"github.com/lmittmann/tint"
 	"github.com/urfave/cli"
@@ -30,6 +31,7 @@ func main() {
 }
 
 func setupApp() *cli.App {
+	util.AddressType = "42"
 	app := cli.NewApp()
 	app.Name = "SUBSCAN"
 	app.Usage = "SUBSCAN Backend Service, use -h get help"

@@ -13,8 +13,8 @@ import (
 // CreateBlock, mysql db transaction
 // Check if you need to create a new table(block, extrinsic, event, log ) after created
 func (d *Dao) CreateBlock(txn *GormDB, cb *model.ChainBlock) (err error) {
-	query := txn.Create(cb)
-	if !d.db.HasTable(model.ChainBlock{BlockNum: cb.BlockNum + model.SplitTableBlockNum}) {
+	query := txn.Save(cb)
+	if !d.db.Migrator().HasTable(model.ChainBlock{BlockNum: cb.BlockNum + model.SplitTableBlockNum}) {
 		go func() {
 			_ = d.db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
 				d.InternalTables(cb.BlockNum + model.SplitTableBlockNum)...)
@@ -99,7 +99,7 @@ func (d *Dao) GetBlockByHash(c context.Context, hash string) *model.ChainBlock {
 	blockNum, _ := d.GetBestBlockNum(context.TODO())
 	for index := int(blockNum / uint64(model.SplitTableBlockNum)); index >= 0; index-- {
 		query := d.db.Model(&model.ChainBlock{BlockNum: index * model.SplitTableBlockNum}).Where("hash = ?", hash).Scan(&block)
-		if query != nil && !query.RecordNotFound() {
+		if query != nil && !RecordNotFound(query) {
 			return &block
 		}
 	}
@@ -109,7 +109,7 @@ func (d *Dao) GetBlockByHash(c context.Context, hash string) *model.ChainBlock {
 func (d *Dao) GetBlockByNum(blockNum int) *model.ChainBlock {
 	var block model.ChainBlock
 	query := d.db.Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num = ?", blockNum).Scan(&block)
-	if query == nil || query.Error != nil || query.RecordNotFound() {
+	if query == nil || query.Error != nil || RecordNotFound(query) {
 		return nil
 	}
 	return &block
@@ -135,7 +135,7 @@ func (d *Dao) BlockAsJson(c context.Context, block *model.ChainBlock) *model.Cha
 }
 
 func (d *Dao) UpdateEventAndExtrinsic(txn *GormDB, block *model.ChainBlock, eventCount, extrinsicsCount, blockTimestamp int, validator string, codecError bool, finalized bool) error {
-	query := txn.Where("block_num = ?", block.BlockNum).Model(block).UpdateColumn(map[string]interface{}{
+	query := txn.Where("block_num = ?", block.BlockNum).Model(block).UpdateColumns(map[string]interface{}{
 		"event_count":      eventCount,
 		"extrinsics_count": extrinsicsCount,
 		"block_timestamp":  blockTimestamp,
@@ -156,14 +156,14 @@ func (d *Dao) UpdateEventAndExtrinsic(txn *GormDB, block *model.ChainBlock, even
 func (d *Dao) GetNearBlock(blockNum int) *model.ChainBlock {
 	var block model.ChainBlock
 	query := d.db.Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num > ?", blockNum).Order("block_num desc").Scan(&block)
-	if query == nil || query.Error != nil || query.RecordNotFound() {
+	if query == nil || query.Error != nil || RecordNotFound(query) {
 		return nil
 	}
 	return &block
 }
 
 func (d *Dao) SetBlockFinalized(block *model.ChainBlock) {
-	d.db.Model(block).UpdateColumn(model.ChainBlock{Finalized: true})
+	d.db.Model(block).Updates(model.ChainBlock{Finalized: true})
 }
 
 func (d *Dao) BlocksReverseByNum(blockNums []int) map[int]model.ChainBlock {
@@ -176,7 +176,7 @@ func (d *Dao) BlocksReverseByNum(blockNums []int) map[int]model.ChainBlock {
 	for index := lastNum / model.SplitTableBlockNum; index >= 0; index-- {
 		var tableData []model.ChainBlock
 		query := d.db.Model(model.ChainBlock{BlockNum: index * model.SplitTableBlockNum}).Where("block_num in (?)", blockNums).Scan(&tableData)
-		if query == nil || query.Error != nil || query.RecordNotFound() {
+		if query == nil || query.Error != nil || RecordNotFound(query) {
 			continue
 		}
 		blocks = append(blocks, tableData...)

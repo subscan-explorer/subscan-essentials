@@ -6,13 +6,11 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/itering/subscan/configs"
-	"github.com/jinzhu/gorm"
 	"golang.org/x/exp/slog"
+	"gorm.io/gorm"
 )
 
-var (
-	DaemonAction = []string{"substrate"}
-)
+var DaemonAction = []string{"substrate"}
 
 // dao
 type Dao struct {
@@ -34,7 +32,7 @@ func New() (dao *Dao, storage *DbStorage) {
 }
 
 func newCachePool(host, password string) *redis.Pool {
-	var pool = &redis.Pool{
+	pool := &redis.Pool{
 		MaxIdle:     10,
 		IdleTimeout: 240 * time.Second,
 		Dial: func() (redis.Conn, error) {
@@ -74,7 +72,8 @@ func (d *Dao) Close() {
 	if d.redis != nil {
 		_ = d.redis.Close()
 	}
-	_ = d.db.Close()
+	db, _ := d.db.DB()
+	_ = db.Close()
 }
 
 // Ping ping the resource.
@@ -84,4 +83,10 @@ func (d *Dao) Ping(ctx context.Context) (err error) {
 	}
 	// gorm auto ping
 	return
+}
+
+func (d *Dao) GetModelTableName(model interface{}) string {
+	stmt := &gorm.Statement{DB: d.db}
+	stmt.Parse(model)
+	return stmt.Schema.Table
 }
