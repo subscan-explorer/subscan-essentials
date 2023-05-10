@@ -122,6 +122,10 @@ func (d *DbStorage) AddUniqueIndex(model interface{}, indexName string, columns 
 	return d.AddIndex(model, indexName, columns...)
 }
 
+func (d *DbStorage) Query(model interface{}) *gorm.DB {
+	return d.db.Table(d.getPluginPrefixTableName(model))
+}
+
 func (d *DbStorage) Create(record interface{}) error {
 	if err := d.checkProtected(record); err == nil {
 		tx := d.db.Table(d.getPluginPrefixTableName(record)).Save(record)
