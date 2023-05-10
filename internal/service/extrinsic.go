@@ -59,7 +59,7 @@ func (s *Service) createExtrinsic(c context.Context,
 			return 0, 0, nil, nil, err
 		}
 
-		s.handleCalls(block, &extrinsic, eventMap[extrinsic.ExtrinsicIndex])
+		s.handleCalls(block, &extrinsic, eventMap[extrinsic.ExtrinsicIndex], hash)
 	}
 	return len(e), blockTimestamp, hash, extrinsicFee, err
 }
@@ -98,7 +98,7 @@ func formatModuleFunction(module, function string) string {
 	return fmt.Sprintf("%s.%s", strings.ToLower(module), strings.ToLower(function))
 }
 
-func (s *Service) handleCalls(block *model.ChainBlock, extrinsic *model.ChainExtrinsic, events []model.ChainEvent) {
+func (s *Service) handleCalls(block *model.ChainBlock, extrinsic *model.ChainExtrinsic, events []model.ChainEvent, hashMap map[string]string) {
 	switch formatModuleFunction(extrinsic.CallModule, extrinsic.CallModuleFunction) {
 	case "utility.batch":
 		args, err := extrinsicArgs(extrinsic)
@@ -124,6 +124,11 @@ func (s *Service) handleCalls(block *model.ChainBlock, extrinsic *model.ChainExt
 		for i := 0; i < len(calls); i++ {
 			for ; eventIdx < len(events); eventIdx++ {
 				ev := events[eventIdx]
+				ev.ModuleId = strings.ToLower(ev.ModuleId)
+				ev.ExtrinsicHash = hashMap[fmt.Sprintf("%d-%d", block.BlockNum, ev.ExtrinsicIdx)]
+				ev.EventIndex = fmt.Sprintf("%d-%d", block.BlockNum, ev.ExtrinsicIdx)
+				ev.BlockNum = block.BlockNum
+
 				if e := formatModuleFunction(ev.ModuleId, ev.EventId); e == "utility.itemcompleted" {
 					eventIdx++
 					break
@@ -135,8 +140,7 @@ func (s *Service) handleCalls(block *model.ChainBlock, extrinsic *model.ChainExt
 		for i := 0; i < len(calls); i++ {
 			call := calls[i]
 			callEvents := callEvents[i]
-			slog.Debug("call:", call)
-			slog.Debug("callEvents:", callEvents)
+			slog.Debug("handleCalls", "call", call, "callEvents", callEvents)
 			chainCall := &model.ChainCall{
 				BlockNum:       block.BlockNum,
 				ExtrinsicHash:  extrinsic.ExtrinsicHash,
