@@ -3,9 +3,9 @@ package dao
 import (
 	"errors"
 
-	"github.com/itering/subscan-plugin/storage"
 	scanModel "github.com/itering/subscan/model"
 	"github.com/itering/subscan/plugins/staking/model"
+	"github.com/itering/subscan/plugins/storage"
 	"github.com/itering/subscan/util/address"
 	"github.com/shopspring/decimal"
 	"golang.org/x/exp/slog"

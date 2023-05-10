@@ -3,7 +3,7 @@ package system
 import (
 	ui "github.com/itering/subscan-plugin"
 	"github.com/itering/subscan-plugin/router"
-	"github.com/itering/subscan-plugin/storage"
+	"github.com/itering/subscan/plugins/storage"
 	"github.com/itering/subscan/plugins/system/model"
 	"github.com/itering/subscan/plugins/system/service"
 	"github.com/itering/subscan/util"

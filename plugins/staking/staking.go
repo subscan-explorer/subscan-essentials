@@ -10,19 +10,20 @@ import (
 	"github.com/itering/scale.go/types/scaleBytes"
 	plugin "github.com/itering/subscan-plugin"
 	"github.com/itering/subscan-plugin/router"
-	"github.com/itering/subscan-plugin/storage"
 	internalDao "github.com/itering/subscan/internal/dao"
 	scanModel "github.com/itering/subscan/model"
 	"github.com/itering/subscan/plugins/staking/dao"
 	"github.com/itering/subscan/plugins/staking/http"
 	"github.com/itering/subscan/plugins/staking/model"
 	"github.com/itering/subscan/plugins/staking/service"
+	"github.com/itering/subscan/plugins/storage"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/address"
 	"github.com/itering/substrate-api-rpc/rpc"
 	"github.com/itering/substrate-api-rpc/storageKey"
 	"github.com/shopspring/decimal"
 	"golang.org/x/exp/slog"
+	"gorm.io/datatypes"
 )
 
 var srv *service.Service
@@ -241,33 +242,6 @@ func eraStakerKey(key, scaleType string) EraStakerKey {
 	return EraStakerKey{StorageKey: storageKey.StorageKey{EncodeKey: key, ScaleType: scaleType}, Era: era, Validator: staker}
 }
 
-type EraInfo struct {
-	Era              uint32
-	TotalStake       decimal.Decimal
-	Stakes           []EraStake
-	TotalPoints      uint32
-	TotalRewards     decimal.Decimal
-	ValidatorPoints  map[address.SS58Address]uint32
-	ValidatorRewards map[address.SS58Address]decimal.Decimal
-	StakerRewards    map[address.SS58Address]decimal.Decimal
-}
-
-type EraStake struct {
-	Validator      address.SS58Address
-	Staker         address.SS58Address
-	Amount         decimal.Decimal
-	ValidatorTotal decimal.Decimal
-}
-
-/*
-{
-	total: 80
-	individual: {
-		5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY: 80
-	}
-}
-*/
-
 type StakeExposure struct {
 	Total  string `json:"total"`
 	Own    string `json:"own"`
@@ -285,9 +259,9 @@ type EraPoints struct {
 	} `json:"individual"`
 }
 
-func (a *Staking) getEraInfo(era uint32, blockHash string, totalRewards decimal.Decimal) (EraInfo, error) {
-	var bad EraInfo
-	var stakes []EraStake
+func (a *Staking) getEraInfo(era uint32, blockHash string, totalRewards decimal.Decimal) (*model.EraInfo, error) {
+	var bad *model.EraInfo
+	var stakes []model.EraStake
 	eraEnc := scale.Encode("U32", era)
 	keys, scaleType, err := util.ReadKeysPaged(nil, blockHash, "Staking", "ErasStakersClipped", eraEnc)
 	if err != nil {
@@ -314,14 +288,14 @@ func (a *Staking) getEraInfo(era uint32, blockHash string, totalRewards decimal.
 		if err != nil {
 			return bad, err
 		}
-		stakes = append(stakes, EraStake{Validator: k.Validator, Staker: k.Validator, Amount: ownAmount, ValidatorTotal: validatorTotal})
+		stakes = append(stakes, model.EraStake{Validator: k.Validator, Staker: k.Validator, Amount: ownAmount, ValidatorTotal: validatorTotal})
 
 		for _, other := range exposure.Others {
 			amount, err := decimal.NewFromString(other.Value)
 			if err != nil {
 				return bad, err
 			}
-			stakes = append(stakes, EraStake{Validator: k.Validator, Staker: address.SS58AddressFromHex(other.Who), Amount: amount, ValidatorTotal: validatorTotal})
+			stakes = append(stakes, model.EraStake{Validator: k.Validator, Staker: address.SS58AddressFromHex(other.Who), Amount: amount, ValidatorTotal: validatorTotal})
 		}
 	}
 	totalStakeRaw, err := totalStakeRes.Wait()
@@ -339,14 +313,14 @@ func (a *Staking) getEraInfo(era uint32, blockHash string, totalRewards decimal.
 	if err != nil {
 		return bad, err
 	}
-	validatorPoints := make(map[SS58Address]uint32)
+	validatorPoints := make(map[address.SS58Address]uint32)
 	for _, indiv := range eraPoints.Individual {
-		validatorPoints[SS58AddressFromHex(indiv.Col1)] = indiv.Col2
+		validatorPoints[address.SS58AddressFromHex(indiv.Col1)] = indiv.Col2
 	}
 
-	validatorRewards := make(map[SS58Address]decimal.Decimal)
-	validatorCuts := make(map[SS58Address]decimal.Decimal)
-	stakerRewards := make(map[SS58Address]decimal.Decimal)
+	validatorRewards := make(map[address.SS58Address]decimal.Decimal)
+	validatorCuts := make(map[address.SS58Address]decimal.Decimal)
+	stakerRewards := make(map[address.SS58Address]decimal.Decimal)
 	totalPoints := decimal.NewFromInt(int64(eraPoints.Total))
 	for v, points := range validatorPoints {
 		prefs, err := dao.GetValidatorPrefs(a.d, v.String())
@@ -371,7 +345,7 @@ func (a *Staking) getEraInfo(era uint32, blockHash string, totalRewards decimal.
 		}
 		stakerRewards[stake.Staker] = stakerReward
 	}
-	return EraInfo{Era: era, TotalStake: totalStake, Stakes: stakes, TotalPoints: eraPoints.Total, TotalRewards: totalRewards, ValidatorPoints: validatorPoints, ValidatorRewards: validatorRewards, StakerRewards: stakerRewards}, nil
+	return &model.EraInfo{Era: era, TotalStake: totalStake, Stakes: stakes, TotalPoints: eraPoints.Total, TotalRewards: totalRewards, ValidatorPoints: datatypes.NewJSONType(validatorPoints), ValidatorRewards: datatypes.NewJSONType(validatorRewards), StakerRewards: datatypes.NewJSONType(stakerRewards)}, nil
 }
 
 type ValidatorPrefs struct {
@@ -399,11 +373,12 @@ func (a *Staking) ProcessEvent(block *scanModel.ChainBlock, event *scanModel.Cha
 			return err
 		}
 		eraInfo, err := a.getEraInfo(era, block.Hash, reward)
+		dao.NewEraInfo(a.d, eraInfo)
 		if err != nil {
 			return err
 		}
 		for _, stake := range eraInfo.Stakes {
-			rewardAmount := eraInfo.StakerRewards[stake.Staker]
+			rewardAmount := eraInfo.StakerRewards.Data()[stake.Staker]
 			if err := dao.NewUnclaimedPayout(a.d, stake.Staker, stake.Validator, rewardAmount, era); err != nil {
 				slog.Error("failed to create new unclaimed payout", "error", err, "staker", stake.Staker.String(), "validator", stake.Validator.String(), "amount", rewardAmount.String(), "era", era)
 			}

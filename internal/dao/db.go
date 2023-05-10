@@ -8,9 +8,9 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/configs"
 	"github.com/itering/subscan/model"
+	"github.com/itering/subscan/plugins/storage"
 	"github.com/itering/substrate-api-rpc/websocket"
 
 	"github.com/itering/subscan/util"

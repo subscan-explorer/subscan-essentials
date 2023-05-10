@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/plugins/staking/model"
+	"github.com/itering/subscan/plugins/storage"
 	"github.com/itering/subscan/util/address"
 	"github.com/shopspring/decimal"
 	"golang.org/x/exp/slog"
