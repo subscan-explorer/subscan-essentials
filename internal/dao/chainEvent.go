@@ -3,9 +3,10 @@ package dao
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
-	"strings"
 )
 
 func (d *Dao) CreateEvent(txn *GormDB, event *model.ChainEvent) error {
@@ -46,7 +47,7 @@ func (d *Dao) GetEventByBlockNum(blockNum int, where ...string) []model.ChainEve
 		queryOrigin = queryOrigin.Where(w)
 	}
 	query := queryOrigin.Order("id asc").Scan(&events)
-	if query == nil || query.RecordNotFound() {
+	if query == nil || RecordNotFound(query) {
 		return nil
 	}
 	return events
@@ -55,12 +56,12 @@ func (d *Dao) GetEventByBlockNum(blockNum int, where ...string) []model.ChainEve
 func (d *Dao) GetEventList(page, row int, order string, where ...string) ([]model.ChainEvent, int) {
 	var Events []model.ChainEvent
 
-	var count int
+	var count int64
 
 	blockNum, _ := d.GetFillBestBlockNum(context.TODO())
 	for index := blockNum / model.SplitTableBlockNum; index >= 0; index-- {
 		var tableData []model.ChainEvent
-		var tableCount int
+		var tableCount int64
 		queryOrigin := d.db.Model(model.ChainEvent{BlockNum: index * model.SplitTableBlockNum})
 		for _, w := range where {
 			queryOrigin = queryOrigin.Where(w)
@@ -76,14 +77,14 @@ func (d *Dao) GetEventList(page, row int, order string, where ...string) ([]mode
 		if len(Events) >= row {
 			continue
 		}
-		query := queryOrigin.Order(fmt.Sprintf("block_num %s", order)).Offset(page*row - preCount).Limit(row - len(Events)).Scan(&tableData)
-		if query == nil || query.Error != nil || query.RecordNotFound() {
+		query := queryOrigin.Order(fmt.Sprintf("block_num %s", order)).Offset(page*row - int(preCount)).Limit(row - len(Events)).Scan(&tableData)
+		if query == nil || query.Error != nil || RecordNotFound(query) {
 			continue
 		}
 		Events = append(Events, tableData...)
 
 	}
-	return Events, count
+	return Events, int(count)
 }
 
 func (d *Dao) GetEventsByIndex(extrinsicIndex string) []model.ChainEvent {
@@ -91,7 +92,7 @@ func (d *Dao) GetEventsByIndex(extrinsicIndex string) []model.ChainEvent {
 	indexArr := strings.Split(extrinsicIndex, "-")
 	query := d.db.Model(model.ChainEvent{BlockNum: util.StringToInt(indexArr[0])}).
 		Where("event_index = ?", extrinsicIndex).Scan(&Event)
-	if query == nil || query.RecordNotFound() {
+	if query == nil || RecordNotFound(query) {
 		return nil
 	}
 	return Event
@@ -106,7 +107,7 @@ func (d *Dao) GetEventByIdx(index string) *model.ChainEvent {
 	query := d.db.Model(model.ChainEvent{BlockNum: util.StringToInt(indexArr[0])}).
 		Where("block_num = ?", indexArr[0]).
 		Where("event_idx = ?", indexArr[1]).Scan(&Event)
-	if query == nil || query.RecordNotFound() {
+	if query == nil || RecordNotFound(query) {
 		return nil
 	}
 	return &Event
