@@ -6,9 +6,15 @@ import (
 	"github.com/itering/subscan/util/ss58"
 )
 
-func SS58Address(address string) string {
+func SS58AddressFromHex(address string) SS58Address {
 	address = strings.TrimPrefix(address, "0x")
 	// addressType := util.StringToInt(util.AddressType)
 
-	return ss58.Encode(address, 42)
+	return SS58Address(ss58.Encode(address, 42))
+}
+
+type SS58Address string
+
+func (a SS58Address) String() string {
+	return string(a)
 }

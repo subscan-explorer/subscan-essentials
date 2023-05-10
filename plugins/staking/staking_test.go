@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	scanModel "github.com/itering/subscan/model"
+	"github.com/itering/subscan/util/address"
 	"github.com/lmittmann/tint"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/exp/slog"
@@ -16,9 +17,9 @@ func Test_castArg(t *testing.T) {
 		Name:  "validator_stash",
 		Value: "0xbe5ddb1579b72e84524fc29e78609e3caf42e85aa118ebfe0b0ad404b5bdd25f",
 	}
-	acct, err := CastArg[SS58Address](arg, "validator_stash")
+	acct, err := CastArg[address.SS58Address](arg, "validator_stash")
 	assert.NoError(t, err)
-	assert.Equal(t, SS58Address("5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY"), acct)
+	assert.Equal(t, address.SS58Address("5GNJqTPyNqANBkUVMN1LPPrxXnFouWXoe2wNSmmEoLctxiZY"), acct)
 
 	acctStr, err := CastArg[string](arg, "validator_stash")
 	assert.NoError(t, err)
