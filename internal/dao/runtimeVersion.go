@@ -6,6 +6,12 @@ import (
 )
 
 func (d *Dao) CreateRuntimeVersion(name string, specVersion int) int64 {
+	var versions []model.RuntimeVersion
+	d.db.Select("id").Where("spec_version = ?", specVersion).Limit(1).Find(&versions)
+	if len(versions) > 0 {
+		return 0
+	}
+
 	query := d.db.Create(&model.RuntimeVersion{
 		Name:        name,
 		SpecVersion: specVersion,
@@ -28,12 +34,12 @@ func (d *Dao) RuntimeVersionList() []model.RuntimeVersion {
 }
 
 func (d *Dao) RuntimeVersionRecent() *model.RuntimeVersion {
-	var list model.RuntimeVersion
-	query := d.db.Select("spec_version,raw_data").Model(model.RuntimeVersion{}).Order("spec_version DESC").First(&list)
-	if RecordNotFound(query) {
+	var list []model.RuntimeVersion
+	_ = d.db.Select("spec_version,raw_data").Model(model.RuntimeVersion{}).Limit(1).Order("spec_version DESC").Find(&list)
+	if len(list) == 0 {
 		return nil
 	}
-	return &list
+	return &list[0]
 }
 
 func (d *Dao) RuntimeVersionRaw(spec int) *metadata.RuntimeRaw {
