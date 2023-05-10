@@ -22,7 +22,6 @@ func (s *Service) createExtrinsic(c context.Context,
 	decodeExtrinsics []map[string]interface{},
 	eventMap map[string][]model.ChainEvent,
 ) (int, int, map[string]string, map[string]decimal.Decimal, error) {
-
 	var (
 		blockTimestamp int
 		e              []model.ChainExtrinsic
@@ -82,6 +81,7 @@ type HasNameValue interface {
 func (a ExtrinsicArg) GetName() string {
 	return a.Name
 }
+
 func (a ExtrinsicArg) GetValue() interface{} {
 	return a.Value
 }
@@ -194,7 +194,7 @@ func (s *Service) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsi
 		CallModule:         e.CallModule,
 		CallModuleFunction: e.CallModuleFunction,
 		Params:             util.ToString(e.Params),
-		AccountId:          address.SS58Address(e.AccountId),
+		AccountId:          address.SS58AddressFromHex(e.AccountId),
 		Signature:          e.Signature,
 		Nonce:              e.Nonce,
 		Fee:                e.Fee,
@@ -203,7 +203,7 @@ func (s *Service) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsi
 	if err := json.Unmarshal([]byte(ej.Params), &paramsInstant); err != nil {
 		for pi, param := range paramsInstant {
 			if paramsInstant[pi].Type == "Address" {
-				paramsInstant[pi].Value = address.SS58Address(param.Value.(string))
+				paramsInstant[pi].Value = address.SS58AddressFromHex(param.Value.(string))
 			}
 		}
 		bp, _ := json.Marshal(paramsInstant)

@@ -145,7 +145,7 @@ func (d *Dao) extrinsicsAsDetail(c context.Context, e *model.ChainExtrinsic) *mo
 		BlockNum:           e.BlockNum,
 		CallModule:         e.CallModule,
 		CallModuleFunction: e.CallModuleFunction,
-		AccountId:          address.SS58Address(e.AccountId),
+		AccountId:          address.SS58AddressFromHex(e.AccountId),
 		Signature:          e.Signature,
 		Nonce:              e.Nonce,
 		ExtrinsicHash:      e.ExtrinsicHash,
@@ -178,7 +178,7 @@ func (d *Dao) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsicJso
 		CallModule:         e.CallModule,
 		CallModuleFunction: e.CallModuleFunction,
 		Params:             util.ToString(e.Params),
-		AccountId:          address.SS58Address(e.AccountId),
+		AccountId:          address.SS58AddressFromHex(e.AccountId),
 		Signature:          e.Signature,
 		Nonce:              e.Nonce,
 		Fee:                e.Fee,
@@ -187,7 +187,7 @@ func (d *Dao) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsicJso
 	if err := json.Unmarshal([]byte(ej.Params), &paramsInstant); err != nil {
 		for pi, param := range paramsInstant {
 			if paramsInstant[pi].Type == "Address" {
-				paramsInstant[pi].Value = address.SS58Address(param.Value.(string))
+				paramsInstant[pi].Value = address.SS58AddressFromHex(param.Value.(string))
 			}
 		}
 		bp, _ := json.Marshal(paramsInstant)

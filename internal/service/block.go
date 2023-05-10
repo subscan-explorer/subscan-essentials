@@ -256,7 +256,7 @@ func (s *Service) BlockAsSampleJson(block *model.ChainBlock) *model.SampleBlockJ
 		Hash:            block.Hash,
 		EventCount:      block.EventCount,
 		ExtrinsicsCount: block.ExtrinsicsCount,
-		Validator:       address.SS58Address(block.Validator),
+		Validator:       address.SS58AddressFromHex(block.Validator),
 		Finalized:       block.Finalized,
 	}
 	return &b
