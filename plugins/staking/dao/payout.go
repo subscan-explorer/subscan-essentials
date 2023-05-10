@@ -12,7 +12,7 @@ import (
 )
 
 func NewClaimedPayout(db storage.DB, addressHex string, validatorAccountSs58 string, amount decimal.Decimal, era uint32, event *scanModel.ChainEvent, block *scanModel.ChainBlock, extrinsicIndex string) error {
-	accountId := address.SS58Address(addressHex)
+	accountId := address.SS58AddressFromHex(addressHex)
 	slog.Info("NewClaimedPayout", "account", accountId, "validator", validatorAccountSs58, "amount", amount)
 	opt := storage.Option{PluginPrefix: "staking"}
 	var unclaimedPayout []model.Payout
@@ -49,7 +49,7 @@ func NewClaimedPayout(db storage.DB, addressHex string, validatorAccountSs58 str
 	return nil
 }
 
-func NewUnclaimedPayout(db storage.DB, addressSS58 string, validatorAccountSs58 string, amount decimal.Decimal, era uint32) error {
+func NewUnclaimedPayout(db storage.DB, addressSS58 address.SS58Address, validatorAccountSs58 address.SS58Address, amount decimal.Decimal, era uint32) error {
 	slog.Info("NewUnclaimedPayout", "account", addressSS58, "validator", validatorAccountSs58, "amount", amount)
 	_ = db.Create(&model.Payout{Account: addressSS58, Amount: amount, Stash: addressSS58, ValidatorStash: validatorAccountSs58, Era: era})
 	return nil

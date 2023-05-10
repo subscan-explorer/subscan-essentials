@@ -25,6 +25,6 @@ var testCases = []struct {
 func Test_SS58Address(t *testing.T) {
 	for _, test := range testCases {
 		util.AddressType = strconv.Itoa(test.prefix)
-		assert.Equal(t, SS58Address(test.pk), test.address)
+		assert.Equal(t, SS58AddressFromHex(test.pk), test.address)
 	}
 }

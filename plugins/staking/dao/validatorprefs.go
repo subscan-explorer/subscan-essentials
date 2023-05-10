@@ -6,6 +6,7 @@ import (
 
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/plugins/staking/model"
+	"github.com/itering/subscan/util/address"
 	"github.com/shopspring/decimal"
 	"golang.org/x/exp/slog"
 )
@@ -17,7 +18,7 @@ type CommissionHistoryRecord struct {
 
 type CommissionHistory []CommissionHistoryRecord
 
-func NewValidatorPrefs(db storage.DB, addressSS58 string, commission decimal.Decimal, blockedNomination bool, blockNumber uint32) error {
+func NewValidatorPrefs(db storage.DB, addressSS58 address.SS58Address, commission decimal.Decimal, blockedNomination bool, blockNumber uint32) error {
 	slog.Info("NewValidatorPrefs", "account", addressSS58, "commission", commission, "blockedNomination", blockedNomination)
 	var maybe []model.ValidatorPrefs
 	opt := storage.Option{PluginPrefix: "staking"}

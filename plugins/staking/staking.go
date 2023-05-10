@@ -53,16 +53,6 @@ func (a *Staking) ProcessExtrinsic(block *scanModel.ChainBlock, extrinsic *scanM
 	return nil
 }
 
-type SS58Address string
-
-func (a SS58Address) String() string {
-	return string(a)
-}
-
-func SS58AddressFromHex(hex string) SS58Address {
-	return SS58Address(address.SS58Address(hex))
-}
-
 type GetNameValue interface {
 	GetName() string
 	GetValue
@@ -111,7 +101,7 @@ func CastUnnamedArg[T any](arg GetValue) (T, error) {
 		}
 
 		if ty.Name() == "SS58Address" && strings.HasPrefix(s, "0x") {
-			s = address.SS58Address(s)
+			s = address.SS58AddressFromHex(s).String()
 		}
 		ret.SetString(s)
 		return ret.Interface().(T), nil
@@ -159,7 +149,7 @@ func (a *Staking) ProcessCall(block *scanModel.ChainBlock, call *scanModel.Chain
 	slog.Info("staking process call", "name", name)
 	switch name {
 	case "staking.payout_stakers":
-		validator, err := CastArg[SS58Address](call.Params[0], "validator_stash")
+		validator, err := CastArg[address.SS58Address](call.Params[0], "validator_stash")
 		if err != nil {
 			return err
 		}
@@ -221,7 +211,7 @@ func GetEventArgs(raw interface{}) ([]EventArg, error) {
 type EraStakerKey struct {
 	StorageKey storageKey.StorageKey
 	Era        uint32
-	Validator  SS58Address
+	Validator  address.SS58Address
 }
 
 func eraStakerKey(key, scaleType string) EraStakerKey {
@@ -247,7 +237,7 @@ func eraStakerKey(key, scaleType string) EraStakerKey {
 	decoder.Init(scaleBytes.ScaleBytes{Data: keyBytes}, nil)
 	stakerRaw := decoder.ProcessAndUpdateData("AccountId")
 	stakerString := stakerRaw.(string)
-	staker := SS58AddressFromHex(stakerString)
+	staker := address.SS58AddressFromHex(stakerString)
 	return EraStakerKey{StorageKey: storageKey.StorageKey{EncodeKey: key, ScaleType: scaleType}, Era: era, Validator: staker}
 }
 
@@ -257,14 +247,14 @@ type EraInfo struct {
 	Stakes           []EraStake
 	TotalPoints      uint32
 	TotalRewards     decimal.Decimal
-	ValidatorPoints  map[SS58Address]uint32
-	ValidatorRewards map[SS58Address]decimal.Decimal
-	StakerRewards    map[SS58Address]decimal.Decimal
+	ValidatorPoints  map[address.SS58Address]uint32
+	ValidatorRewards map[address.SS58Address]decimal.Decimal
+	StakerRewards    map[address.SS58Address]decimal.Decimal
 }
 
 type EraStake struct {
-	Validator      SS58Address
-	Staker         SS58Address
+	Validator      address.SS58Address
+	Staker         address.SS58Address
 	Amount         decimal.Decimal
 	ValidatorTotal decimal.Decimal
 }
@@ -331,7 +321,7 @@ func (a *Staking) getEraInfo(era uint32, blockHash string, totalRewards decimal.
 			if err != nil {
 				return bad, err
 			}
-			stakes = append(stakes, EraStake{Validator: k.Validator, Staker: SS58AddressFromHex(other.Who), Amount: amount, ValidatorTotal: validatorTotal})
+			stakes = append(stakes, EraStake{Validator: k.Validator, Staker: address.SS58AddressFromHex(other.Who), Amount: amount, ValidatorTotal: validatorTotal})
 		}
 	}
 	totalStakeRaw, err := totalStakeRes.Wait()
@@ -414,7 +404,7 @@ func (a *Staking) ProcessEvent(block *scanModel.ChainBlock, event *scanModel.Cha
 		}
 		for _, stake := range eraInfo.Stakes {
 			rewardAmount := eraInfo.StakerRewards[stake.Staker]
-			if err := dao.NewUnclaimedPayout(a.d, stake.Staker.String(), stake.Validator.String(), rewardAmount, era); err != nil {
+			if err := dao.NewUnclaimedPayout(a.d, stake.Staker, stake.Validator, rewardAmount, era); err != nil {
 				slog.Error("failed to create new unclaimed payout", "error", err, "staker", stake.Staker.String(), "validator", stake.Validator.String(), "amount", rewardAmount.String(), "era", era)
 			}
 		}
@@ -428,7 +418,7 @@ func (a *Staking) ProcessEvent(block *scanModel.ChainBlock, event *scanModel.Cha
 			return fmt.Errorf("staking.validatorprefsset: not enough arguments. got %d, expected at least 2", len(args))
 		}
 		slog.Info("staking.validatorprefsset", "args", args)
-		account, err := CastUnnamedArg[SS58Address](args[0])
+		account, err := CastUnnamedArg[address.SS58Address](args[0])
 		if err != nil {
 			return err
 		}
@@ -439,7 +429,7 @@ func (a *Staking) ProcessEvent(block *scanModel.ChainBlock, event *scanModel.Cha
 		slog.Info("staking.validatorprefsset", "account", account, "prefs", prefs)
 		// the commission is in parts per billion
 		commission := decimal.NewFromFloat(prefs.Commission).Div(decimal.NewFromInt(1_000_000_000))
-		if err := dao.NewValidatorPrefs(a.d, account.String(), commission, prefs.Blocked, uint32(block.BlockNum)); err != nil {
+		if err := dao.NewValidatorPrefs(a.d, account, commission, prefs.Blocked, uint32(block.BlockNum)); err != nil {
 			return err
 		}
 	}
