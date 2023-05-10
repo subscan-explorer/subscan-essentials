@@ -3,6 +3,7 @@ package storage
 import (
 	"github.com/itering/substrate-api-rpc/websocket"
 	"github.com/shopspring/decimal"
+	"gorm.io/gorm"
 )
 
 type Dao interface {
@@ -27,6 +28,8 @@ type Option struct {
 // DB interface
 // Every query can be found here https://gorm.io/docs/
 type DB interface {
+	Query(model interface{}) *gorm.DB
+
 	// Can query database all tables data
 	// Query ** no prefix ** table default, option PluginPrefix can specify other plugin model
 	FindBy(record interface{}, query interface{}, option *Option) (int, bool)

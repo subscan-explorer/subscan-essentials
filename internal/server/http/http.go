@@ -14,13 +14,11 @@ import (
 	"github.com/itering/subscan/plugins"
 )
 
-var (
-	svc *service.Service
-)
+var svc *service.Service
 
 // NewHTTPServer new a HTTP server.
 func NewHTTPServer(c *configs.Server, s *service.Service) *http.Server {
-	var opts = []http.ServerOption{
+	opts := []http.ServerOption{
 		http.Middleware(
 			tracing.Server(),
 			metrics.Server(),
@@ -83,11 +81,12 @@ func initRouter(e *gin.Engine) {
 }
 
 func pluginRouter(g *gin.RouterGroup) {
+	plug := g.Group("plugin")
 	for name, plugin := range plugins.RegisteredPlugins {
-		for _, r := range plugin.InitHttp() {
-			g.Group("plugin").Group(name).POST(r.Router, func(context *gin.Context) {
-				_ = r.Handle(context.Writer, context.Request)
-			})
+		group := plug.Group(name)
+		routers := plugin.InitHttp()
+		for _, r := range routers {
+			group.POST(r.Router, r.Handle)
 		}
 	}
 }
