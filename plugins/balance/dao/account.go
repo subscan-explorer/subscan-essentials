@@ -3,8 +3,8 @@ package dao
 import (
 	"fmt"
 
-	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/plugins/balance/model"
+	"github.com/itering/subscan/plugins/storage"
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc/rpc"
 	"github.com/shopspring/decimal"

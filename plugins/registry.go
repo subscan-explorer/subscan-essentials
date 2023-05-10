@@ -7,10 +7,10 @@ import (
 
 	subscanPlugin "github.com/itering/subscan-plugin"
 	"github.com/itering/subscan-plugin/router"
-	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/plugins/staking"
+	"github.com/itering/subscan/plugins/storage"
 	"github.com/shopspring/decimal"
 	"golang.org/x/exp/slog"
 )
