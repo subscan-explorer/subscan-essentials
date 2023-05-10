@@ -5,7 +5,6 @@ import (
 	internalDao "github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/plugins/staking/dao"
 	"github.com/itering/subscan/plugins/staking/model"
-	"golang.org/x/exp/slog"
 )
 
 type Service struct {
@@ -30,6 +29,5 @@ func New(d storage.Dao, dd *internalDao.Dao) *Service {
 
 func (s *Service) GetPayoutListJson(page, row int, address string) ([]model.Payout, int) {
 	res, count := dao.GetPayoutList(s.d, page, row, address)
-	slog.Debug("GetPayoutListJson", "page", page, "row", row, "address", address, "found", count)
 	return res, count
 }

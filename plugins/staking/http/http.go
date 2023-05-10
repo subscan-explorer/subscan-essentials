@@ -53,11 +53,13 @@ func rewardsSlashes(w http.ResponseWriter, r *http.Request) error {
 	filteredList := make([]model.Payout, 0)
 
 	for _, item := range list {
-		if item.Era < activeEra-depth {
+		if uint32(item.BlockTimestamp) == 0 && item.Era < activeEra-depth {
 			continue
 		}
 		filteredList = append(filteredList, item)
 	}
+
+	slog.Debug("RewardsSlashes", "page", p.Page, "row", p.Row, "address", p.Address, "found", len(filteredList))
 
 	toJson(w, 0, map[string]interface{}{
 		"list": filteredList, "count": len(filteredList),
