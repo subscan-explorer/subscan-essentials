@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	scale "github.com/itering/scale.go/types"
 	"github.com/itering/scale.go/types/scaleBytes"
-	"github.com/itering/subscan-plugin/router"
+	"github.com/itering/subscan/plugins/router"
 	"github.com/itering/subscan/plugins/staking/dao"
-	"github.com/itering/subscan/plugins/staking/model"
 	"github.com/itering/subscan/plugins/staking/service"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/validator"
@@ -23,25 +23,21 @@ func Router(s *service.Service) []router.Http {
 	return []router.Http{{Router: "rewardsSlashes", Handle: rewardsSlashes}}
 }
 
-func rewardsSlashes(w http.ResponseWriter, r *http.Request) error {
-	p := new(struct {
-		Row     int    `json:"row" validate:"min=1,max=5000"`
-		Page    int    `json:"page" validate:"min=0"`
-		Address string `json:"address" validate:"required"`
-	})
+
+func rewardsSlashes(c *gin.Context) {
+	w := c.Writer
+	r := c.Request
+	p := new(AddressReq)
 	if err := validator.Validate(r.Body, p); err != nil {
 		toJson(w, 10001, nil, err)
-		return nil
+		return
 	}
-
-	list, _ := svc.GetPayoutListJson(p.Page, p.Row, p.Address)
-
 	depthConstant := svc.Dao().GetRuntimeConstantLatest("Staking", "HistoryDepth")
 
 	if depthConstant == nil {
 		slog.Error("get runtime constant failed", "module", "Staking", "name", "HistoryDepth")
 		toJson(w, 10001, nil, errors.New("get runtime constant failed"))
-		return nil
+		return
 	}
 
 	m := scale.ScaleDecoder{}
@@ -49,8 +45,16 @@ func rewardsSlashes(w http.ResponseWriter, r *http.Request) error {
 	depth := m.ProcessAndUpdateData("U32").(uint32)
 
 	activeEra := dao.GetLatestEra(svc.Storage())
+	minEra := activeEra - depth
 
-	filteredList := make([]model.Payout, 0)
+	list, _ := svc.GetPayoutListJson(p.Page, p.Row, p.Address, minEra)
+
+	slog.Debug("RewardsSlashes", "page", p.Page, "row", p.Row, "address", p.Address, "found", len(list))
+
+	toJson(w, 0, map[string]interface{}{
+		"list": list, "count": len(list),
+	}, nil)
+}
 
 	for _, item := range list {
 		if uint32(item.BlockTimestamp) == 0 && item.Era < activeEra-depth {

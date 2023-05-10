@@ -13,7 +13,7 @@ import (
 
 func NewClaimedPayout(db storage.DB, addressHex string, validatorAccountSs58 string, amount decimal.Decimal, era uint32, event *scanModel.ChainEvent, block *scanModel.ChainBlock, extrinsicIndex string) error {
 	accountId := address.SS58AddressFromHex(addressHex)
-	slog.Info("NewClaimedPayout", "account", accountId, "validator", validatorAccountSs58, "amount", amount)
+	slog.Info("NewClaimedPayout", "account", accountId, "validator", validatorAccountSs58, "amount", amount, "eventIndex", event.EventIndex)
 	opt := storage.Option{PluginPrefix: "staking"}
 	var unclaimedPayout []model.Payout
 	db.FindBy(&unclaimedPayout, map[string]interface{}{"account": accountId, "era": era}, &opt)
@@ -31,6 +31,7 @@ func NewClaimedPayout(db storage.DB, addressHex string, validatorAccountSs58 str
 		payout.ModuleId = "staking"
 		payout.EventId = "Rewarded"
 		payout.Amount = amount
+		payout.Claimed = true
 		if err := db.Update(&payout, map[string]interface{}{"ID": payout.ID}, map[string]interface{}{
 			"block_timestamp": payout.BlockTimestamp,
 			"event_index":     payout.EventIndex,
@@ -38,6 +39,7 @@ func NewClaimedPayout(db storage.DB, addressHex string, validatorAccountSs58 str
 			"module_id":       payout.ModuleId,
 			"event_id":        payout.EventId,
 			"amount":          payout.Amount,
+			"claimed":         payout.Claimed,
 		}); err != nil {
 			return err
 		}
@@ -59,10 +61,9 @@ func AfterClaimedPayoutCreate(db storage.DB, accountId string) error {
 	return nil
 }
 
-func GetPayoutList(db storage.DB, page, row int, address string) ([]model.Payout, int) {
+func GetPayoutList(db storage.DB, page, row int, address string, minEra uint32) ([]model.Payout, int) {
 	var claimedPayouts []model.Payout
-	opt := storage.Option{PluginPrefix: "staking", Page: page, PageSize: row}
-	db.FindBy(&claimedPayouts, map[string]interface{}{"account": address}, &opt)
+	db.Query(model.Payout{}).Where("account = ? and (era >= ? or claimed <> 0)", address, minEra).Order("block_timestamp DESC").Limit(row).Offset((page - 1) * row).Find(&claimedPayouts)
 	return claimedPayouts, len(claimedPayouts)
 }
 

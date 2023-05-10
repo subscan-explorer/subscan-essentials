@@ -9,9 +9,9 @@ import (
 	scale "github.com/itering/scale.go/types"
 	"github.com/itering/scale.go/types/scaleBytes"
 	plugin "github.com/itering/subscan-plugin"
-	"github.com/itering/subscan-plugin/router"
 	internalDao "github.com/itering/subscan/internal/dao"
 	scanModel "github.com/itering/subscan/model"
+	"github.com/itering/subscan/plugins/router"
 	"github.com/itering/subscan/plugins/staking/dao"
 	"github.com/itering/subscan/plugins/staking/http"
 	"github.com/itering/subscan/plugins/staking/model"
@@ -446,4 +446,5 @@ func (a *Staking) UiConf() *plugin.UiConfig {
 func (a *Staking) Migrate() {
 	_ = a.d.AutoMigration(&model.Payout{})
 	_ = a.d.AutoMigration(&model.ValidatorPrefs{})
+	_ = a.d.AutoMigration(&model.EraInfo{})
 }

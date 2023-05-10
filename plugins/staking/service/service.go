@@ -27,7 +27,7 @@ func New(d storage.Dao, dd *internalDao.Dao) *Service {
 	}
 }
 
-func (s *Service) GetPayoutListJson(page, row int, address string) ([]model.Payout, int) {
-	res, count := dao.GetPayoutList(s.d, page, row, address)
+func (s *Service) GetPayoutListJson(page, row int, address string, minEra uint32) ([]model.Payout, int) {
+	res, count := dao.GetPayoutList(s.d, page, row, address, minEra)
 	return res, count
 }
