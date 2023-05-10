@@ -11,6 +11,7 @@ import (
 	"github.com/itering/subscan/plugins/staking/dao"
 	"github.com/itering/subscan/plugins/staking/service"
 	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/util/address"
 	"github.com/itering/subscan/util/validator"
 	"github.com/pkg/errors"
 	"golang.org/x/exp/slog"
@@ -20,9 +21,14 @@ var svc *service.Service
 
 func Router(s *service.Service) []router.Http {
 	svc = s
-	return []router.Http{{Router: "rewardsSlashes", Handle: rewardsSlashes}}
+	return []router.Http{{Router: "eraStat", Handle: eraStat}, {Router: "rewardsSlashes", Handle: rewardsSlashes}}
 }
 
+type AddressReq struct {
+	Row     int    `json:"row" validate:"min=1,max=5000"`
+	Page    int    `json:"page" validate:"min=0"`
+	Address string `json:"address" validate:"required"`
+}
 
 func rewardsSlashes(c *gin.Context) {
 	w := c.Writer
@@ -56,19 +62,37 @@ func rewardsSlashes(c *gin.Context) {
 	}, nil)
 }
 
-	for _, item := range list {
-		if uint32(item.BlockTimestamp) == 0 && item.Era < activeEra-depth {
-			continue
-		}
-		filteredList = append(filteredList, item)
+// right now the staking dashboard only uses the era and number of points
+type EraStat struct {
+	Era         uint32 `json:"era"`
+	RewardPoint uint32 `json:"reward_point"`
+}
+
+func eraStat(c *gin.Context) {
+	w := c.Writer
+	r := c.Request
+	p := new(AddressReq)
+	if err := validator.Validate(r.Body, p); err != nil {
+		toJson(w, 10001, nil, err)
 	}
 
-	slog.Debug("RewardsSlashes", "page", p.Page, "row", p.Row, "address", p.Address, "found", len(filteredList))
+	addressSS58 := address.SS58Address(p.Address)
+
+	eraAndPointsList, _ := dao.GetEraPointsList(svc.Storage(), p.Page, p.Row)
+
+	eraStats := make([]EraStat, 0, len(eraAndPointsList))
+	for _, eraAndPoints := range eraAndPointsList {
+		eraStats = append(eraStats, EraStat{
+			Era:         eraAndPoints.Era,
+			RewardPoint: eraAndPoints.Points[addressSS58],
+		})
+	}
+
+	slog.Debug("EraStat", "page", p.Page, "row", p.Row, "address", p.Address, "found", len(eraStats))
 
 	toJson(w, 0, map[string]interface{}{
-		"list": filteredList, "count": len(filteredList),
+		"list": eraStats, "count": len(eraStats),
 	}, nil)
-	return nil
 }
 
 type J struct {
