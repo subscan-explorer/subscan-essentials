@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/itering/subscan/model"
+	"gorm.io/gorm"
 )
 
 func (d *Dao) Migration() {
@@ -32,17 +33,23 @@ func (d *Dao) InternalTables(blockNum int) (models []interface{}) {
 	}
 	var tablesName []string
 	for _, m := range models {
-		tablesName = append(tablesName, d.db.Unscoped().NewScope(m).TableName())
+		tablesName = append(tablesName, d.GetModelTableName(m))
 	}
 	protectedTables = tablesName
 	return models
+}
+
+func addIndex(db *gorm.DB, model interface{}, indexName string) {
+	if !db.Migrator().HasIndex(model, indexName) {
+		db.Migrator().CreateIndex(model, indexName)
+	}
 }
 
 func (d *Dao) AddIndex(blockNum int) {
 	db := d.db
 
 	if blockNum == 0 {
-		db.Model(model.RuntimeVersion{}).AddUniqueIndex("spec_version", "spec_version")
+		addIndex(db, model.RuntimeVersion{}, "spec_version")
 	}
 
 	blockModel := model.ChainBlock{BlockNum: blockNum}
@@ -50,25 +57,26 @@ func (d *Dao) AddIndex(blockNum int) {
 	extrinsicModel := model.ChainExtrinsic{BlockNum: blockNum}
 	logModel := model.ChainLog{BlockNum: blockNum}
 
-	db.Model(blockModel).AddUniqueIndex("hash", "hash")
-	db.Model(blockModel).AddUniqueIndex("block_num", "block_num")
-	_ = db.Model(blockModel).AddIndex("codec_error", "codec_error")
+	addIndex(db, blockModel, "hash")
 
-	db.Model(extrinsicModel).AddIndex("extrinsic_hash", "extrinsic_hash")
-	db.Model(extrinsicModel).AddUniqueIndex("extrinsic_index", "extrinsic_index")
-	db.Model(extrinsicModel).AddIndex("block_num", "block_num")
-	db.Model(extrinsicModel).AddIndex("is_signed", "is_signed")
-	db.Model(extrinsicModel).AddIndex("account_id", "is_signed,account_id")
-	db.Model(extrinsicModel).AddIndex("call_module", "call_module")
-	db.Model(extrinsicModel).AddIndex("call_module_function", "call_module_function")
+	addIndex(db, blockModel, "block_num")
+	addIndex(db, blockModel, "codec_error")
 
-	db.Model(eventModel).AddIndex("block_num", "block_num")
-	db.Model(eventModel).AddIndex("type", "type")
-	db.Model(eventModel).AddIndex("event_index", "event_index")
-	db.Model(eventModel).AddIndex("event_id", "event_id")
-	db.Model(eventModel).AddIndex("module_id", "module_id")
-	db.Model(eventModel).AddUniqueIndex("event_idx", "event_index", "event_idx")
+	addIndex(db, extrinsicModel, "extrinsic_hash")
+	addIndex(db, extrinsicModel, "extrinsic_index")
+	addIndex(db, extrinsicModel, "block_num")
+	addIndex(db, extrinsicModel, "is_signed")
+	addIndex(db, extrinsicModel, "account_id")
+	addIndex(db, extrinsicModel, "call_module")
+	addIndex(db, extrinsicModel, "call_module_function")
 
-	db.Model(logModel).AddUniqueIndex("log_index", "log_index")
-	db.Model(logModel).AddIndex("block_num", "block_num")
+	addIndex(db, eventModel, "block_num")
+	addIndex(db, eventModel, "type")
+	addIndex(db, eventModel, "event_index")
+	addIndex(db, eventModel, "event_id")
+	addIndex(db, eventModel, "module_id")
+	addIndex(db, eventModel, "event_idx")
+
+	addIndex(db, logModel, "block_num")
+	addIndex(db, logModel, "log_index")
 }

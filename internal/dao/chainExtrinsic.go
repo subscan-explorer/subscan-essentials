@@ -3,10 +3,11 @@ package dao
 import (
 	"context"
 	"encoding/json"
+	"strings"
+
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/address"
-	"strings"
 )
 
 func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.ChainExtrinsic) error {
@@ -29,7 +30,7 @@ func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.C
 		IsSigned:           extrinsic.Signature != "",
 		Fee:                extrinsic.Fee,
 	}
-	query := txn.Create(&ce)
+	query := txn.Save(&ce)
 	if query.RowsAffected > 0 {
 		_ = d.IncrMetadata(c, "count_extrinsic", 1)
 		if ce.IsSigned {
@@ -46,7 +47,6 @@ func (d *Dao) DropExtrinsicNotFinalizedData(c context.Context, blockNum int, fin
 			_ = d.IncrMetadata(c, "count_extrinsic", -int(query.RowsAffected))
 			delExist = true
 		}
-
 	}
 	return delExist
 }
@@ -55,7 +55,7 @@ func (d *Dao) GetExtrinsicsByBlockNum(blockNum int) []model.ChainExtrinsicJson {
 	var extrinsics []model.ChainExtrinsic
 	query := d.db.Model(model.ChainExtrinsic{BlockNum: blockNum}).
 		Where("block_num = ?", blockNum).Order("id asc").Scan(&extrinsics)
-	if query == nil || query.RecordNotFound() {
+	if query == nil || RecordNotFound(query) {
 		return nil
 	}
 	var list []model.ChainExtrinsicJson
@@ -67,12 +67,12 @@ func (d *Dao) GetExtrinsicsByBlockNum(blockNum int) []model.ChainExtrinsicJson {
 
 func (d *Dao) GetExtrinsicList(c context.Context, page, row int, order string, queryWhere ...string) ([]model.ChainExtrinsic, int) {
 	var extrinsics []model.ChainExtrinsic
-	var count int
+	var count int64
 
 	blockNum, _ := d.GetFillBestBlockNum(context.TODO())
 	for index := blockNum / model.SplitTableBlockNum; index >= 0; index-- {
 		var tableData []model.ChainExtrinsic
-		var tableCount int
+		var tableCount int64
 		queryOrigin := d.db.Model(model.ChainExtrinsic{BlockNum: index * model.SplitTableBlockNum})
 		for _, w := range queryWhere {
 			queryOrigin = queryOrigin.Where(w)
@@ -88,8 +88,8 @@ func (d *Dao) GetExtrinsicList(c context.Context, page, row int, order string, q
 		if len(extrinsics) >= row {
 			continue
 		}
-		query := queryOrigin.Order("block_num desc").Offset(page*row - preCount).Limit(row - len(extrinsics)).Scan(&tableData)
-		if query == nil || query.Error != nil || query.RecordNotFound() {
+		query := queryOrigin.Order("block_num desc").Offset(page*row - int(preCount)).Limit(row - len(extrinsics)).Scan(&tableData)
+		if query == nil || query.Error != nil || RecordNotFound(query) {
 			continue
 		}
 		extrinsics = append(extrinsics, tableData...)
@@ -98,9 +98,9 @@ func (d *Dao) GetExtrinsicList(c context.Context, page, row int, order string, q
 
 	if len(queryWhere) == 0 {
 		m, _ := d.GetMetadata(c)
-		count = util.StringToInt(m["count_extrinsic"])
+		count = int64(util.StringToInt(m["count_extrinsic"]))
 	}
-	return extrinsics, count
+	return extrinsics, int(count)
 }
 
 func (d *Dao) GetExtrinsicsByHash(c context.Context, hash string) *model.ChainExtrinsic {
@@ -108,7 +108,7 @@ func (d *Dao) GetExtrinsicsByHash(c context.Context, hash string) *model.ChainEx
 	blockNum, _ := d.GetFillBestBlockNum(c)
 	for index := blockNum / (model.SplitTableBlockNum); index >= 0; index-- {
 		query := d.db.Model(model.ChainExtrinsic{BlockNum: index * model.SplitTableBlockNum}).Where("extrinsic_hash = ?", hash).Order("id asc").Limit(1).Scan(&extrinsic)
-		if query != nil && !query.RecordNotFound() {
+		if query != nil && !RecordNotFound(query) {
 			return &extrinsic
 		}
 	}
@@ -127,7 +127,7 @@ func (d *Dao) GetExtrinsicsDetailByIndex(c context.Context, index string) *model
 	indexArr := strings.Split(index, "-")
 	query := d.db.Model(model.ChainExtrinsic{BlockNum: util.StringToInt(indexArr[0])}).
 		Where("extrinsic_index = ?", index).Scan(&extrinsic)
-	if query == nil || query.RecordNotFound() {
+	if query == nil || RecordNotFound(query) {
 		return nil
 	}
 	return d.extrinsicsAsDetail(c, &extrinsic)

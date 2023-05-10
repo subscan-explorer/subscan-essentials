@@ -7,7 +7,7 @@ import (
 
 func (d *Dao) CreateRuntimeConstants(spec int, constants []model.RuntimeConstant) error {
 	for _, constant := range constants {
-		q := d.db.Create(&constant)
+		q := d.db.Save(&constant)
 		if q.RowsAffected == 0 {
 			return errors.New("create runtime constant failed")
 		}

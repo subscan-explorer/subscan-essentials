@@ -6,6 +6,7 @@ import (
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/util"
 	"github.com/shopspring/decimal"
+	"gorm.io/gorm"
 )
 
 // SplitTableBlockNum
@@ -13,17 +14,17 @@ var SplitTableBlockNum = 1000000
 
 type ChainBlock struct {
 	ID              uint   `gorm:"primary_key" json:"id"`
-	BlockNum        int    `json:"block_num"`
+	BlockNum        int    `gorm:"uniqueIndex" json:"block_num"`
 	BlockTimestamp  int    `json:"block_timestamp"`
-	Hash            string `sql:"default: null;size:100" json:"hash"`
-	ParentHash      string `sql:"default: null;size:100" json:"parent_hash"`
-	StateRoot       string `sql:"default: null;size:100" json:"state_root"`
-	ExtrinsicsRoot  string `sql:"default: null;size:100" json:"extrinsics_root"`
-	Logs            string `json:"logs" sql:"type:text;"`
-	Extrinsics      string `json:"extrinsics" sql:"type:MEDIUMTEXT;"`
+	Hash            string `gorm:"uniqueIndex;default: null;size:100" json:"hash"`
+	ParentHash      string `gorm:"default: null;size:100" json:"parent_hash"`
+	StateRoot       string `gorm:"default: null;size:100" json:"state_root"`
+	ExtrinsicsRoot  string `gorm:"default: null;size:100" json:"extrinsics_root"`
+	Logs            string `json:"logs" gorm:"type:text;"`
+	Extrinsics      string `json:"extrinsics" gorm:"type:MEDIUMTEXT;"`
 	EventCount      int    `json:"event_count"`
 	ExtrinsicsCount int    `json:"extrinsics_count"`
-	Event           string `json:"event" sql:"type:MEDIUMTEXT;"`
+	Event           string `json:"event" gorm:"type:MEDIUMTEXT;"`
 	SpecVersion     int    `json:"spec_version"`
 	Validator       string `json:"validator"`
 	CodecError      bool   `json:"codec_error"`
@@ -74,16 +75,16 @@ type ChainCall struct {
 }
 
 type ChainEvent struct {
-	ID            uint        `gorm:"primary_key" json:"-"`
-	EventIndex    string      `sql:"default: null;size:100;" json:"event_index"`
-	BlockNum      int         `json:"block_num" `
+	ID            int         `gorm:"primary_key" json:"-"`
+	EventIndex    string      `gorm:"index:event_idx,unique;index:event_index;default: null;size:100;" json:"event_index"`
+	BlockNum      int         `gorm:"index" json:"block_num" `
 	ExtrinsicIdx  int         `json:"extrinsic_idx"`
-	Type          string      `json:"-"`
-	ModuleId      string      `json:"module_id" `
-	EventId       string      `json:"event_id" `
-	Params        interface{} `json:"params" sql:"type:text;" `
-	ExtrinsicHash string      `json:"extrinsic_hash" sql:"default: null" `
-	EventIdx      int         `json:"event_idx"`
+	Type          string      `gorm:"index" json:"-"`
+	ModuleId      string      `gorm:"index" json:"module_id" `
+	EventId       string      `gorm:"index" json:"event_id" `
+	Params        interface{} `json:"params" gorm:"type:text;" `
+	ExtrinsicHash string      `json:"extrinsic_hash" gorm:"default: null" `
+	EventIdx      int         `gorm:"index:event_idx,unique" json:"event_idx"`
 }
 
 func (c ChainEvent) TableName() string {
@@ -106,24 +107,25 @@ func (c *ChainEvent) AsPlugin() *storage.Event {
 }
 
 type ChainExtrinsic struct {
+	gorm.Model
 	ID                 uint            `gorm:"primary_key"`
-	ExtrinsicIndex     string          `json:"extrinsic_index" sql:"default: null;size:100"`
-	BlockNum           int             `json:"block_num" `
+	ExtrinsicIndex     string          `gorm:"uniqueIndex;default: null;size:100" json:"extrinsic_index"`
+	BlockNum           int             `gorm:"index" json:"block_num" `
 	BlockTimestamp     int             `json:"block_timestamp"`
 	ExtrinsicLength    string          `json:"extrinsic_length"`
 	VersionInfo        string          `json:"version_info"`
 	CallCode           string          `json:"call_code"`
-	CallModuleFunction string          `json:"call_module_function"  sql:"size:100"`
-	CallModule         string          `json:"call_module"  sql:"size:100"`
-	Params             interface{}     `json:"params" sql:"type:MEDIUMTEXT;" `
-	AccountId          string          `json:"account_id"`
+	CallModuleFunction string          `gorm:"index;size:100" json:"call_module_function"`
+	CallModule         string          `gorm:"index;size:100" json:"call_module"`
+	Params             interface{}     `json:"params" gorm:"type:MEDIUMTEXT;" `
+	AccountId          string          `gorm:"index:account_id" json:"account_id"`
 	Signature          string          `json:"signature"`
 	Nonce              int             `json:"nonce"`
 	Era                string          `json:"era"`
-	ExtrinsicHash      string          `json:"extrinsic_hash" sql:"default: null" `
-	IsSigned           bool            `json:"is_signed"`
+	ExtrinsicHash      string          `gorm:"index;default: null" json:"extrinsic_hash"`
+	IsSigned           bool            `gorm:"index:account_id;index" json:"is_signed"`
 	Success            bool            `json:"success"`
-	Fee                decimal.Decimal `json:"fee" sql:"type:decimal(30,0);"`
+	Fee                decimal.Decimal `json:"fee" gorm:"type:decimal(30,0);"`
 	BatchIndex         int             `json:"-" gorm:"-"`
 }
 
@@ -153,7 +155,7 @@ func (c *ChainExtrinsic) AsPlugin() *storage.Extrinsic {
 type RuntimeVersion struct {
 	Id          int    `json:"-"`
 	Name        string `json:"-"`
-	SpecVersion int    `json:"spec_version"`
+	SpecVersion int    `gorm:"uniqueIndex" json:"spec_version"`
 	Modules     string `json:"modules"  sql:"type:TEXT;"`
 	RawData     string `json:"-" sql:"type:MEDIUMTEXT;"`
 }
@@ -169,10 +171,10 @@ type RuntimeConstant struct {
 
 type ChainLog struct {
 	ID        uint   `gorm:"primary_key"`
-	BlockNum  int    `json:"block_num" `
-	LogIndex  string `json:"log_index" sql:"default: null;size:100"`
+	BlockNum  int    `gorm:"index" json:"block_num" `
+	LogIndex  string `gorm:"index;default: null;size:100" json:"log_index"`
 	LogType   string `json:"log_type" `
-	Data      string `json:"data" sql:"type:text;"`
+	Data      string `json:"data" gorm:"type:text;"`
 	Finalized bool   `json:"finalized"`
 }
 
