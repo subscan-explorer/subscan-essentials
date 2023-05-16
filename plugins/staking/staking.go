@@ -221,15 +221,9 @@ func eraStakerKey(key, scaleType string) EraStakerKey {
 	keyBytes = keyBytes[32:]
 	// era is xx64 concat, so first 64 bits / 8 bytes are the hash, then the next 4 bytes are the era
 	keyBytes = keyBytes[8:]
-	/*
-				m := types.ScaleDecoder{}
-		m.Init(scaleBytes.ScaleBytes{Data: util.HexToBytes(raw)}, option)
-		return StateStorage(util.InterfaceToString(m.ProcessAndUpdateData(decodeType))), nil
-
-	*/
-	decoder := scale.ScaleDecoder{}
 	eraBytes := keyBytes[:4]
 	keyBytes = keyBytes[4:]
+	decoder := scale.ScaleDecoder{}
 	decoder.Init(scaleBytes.ScaleBytes{Data: eraBytes}, nil)
 	eraRaw := decoder.ProcessAndUpdateData("U32")
 	era := eraRaw.(uint32)
@@ -407,6 +401,29 @@ func (a *Staking) ProcessEvent(block *scanModel.ChainBlock, event *scanModel.Cha
 		if err := dao.NewValidatorPrefs(a.d, account, commission, prefs.Blocked, uint32(block.BlockNum)); err != nil {
 			return err
 		}
+	case "nominationpools.paidout":
+		args, err := GetEventArgs(event.Params)
+		if err != nil {
+			return err
+		}
+		if len(args) < 3 {
+			return fmt.Errorf("nominationpools.paidout: not enough arguments. got %d, expected at least 3", len(args))
+		}
+		member, err := CastUnnamedArg[address.SS58Address](args[0])
+		if err != nil {
+			return err
+		}
+		poolId, err := CastUnnamedArg[uint32](args[1])
+		if err != nil {
+			return err
+		}
+		amount, err := CastUnnamedArg[decimal.Decimal](args[2])
+		if err != nil {
+			return err
+		}
+		if err := dao.NewPoolPayout(a.d, member, amount, poolId, event, block, extrinsic.ExtrinsicIndex); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -421,7 +438,7 @@ func (a *Staking) SubscribeCall() []string {
 }
 
 func (a *Staking) SubscribeEvent() []string {
-	return []string{"staking"}
+	return []string{"staking", "nominationpools"}
 }
 
 func (a *Staking) Version() string {
@@ -445,6 +462,7 @@ func (a *Staking) UiConf() *plugin.UiConfig {
 
 func (a *Staking) Migrate() {
 	_ = a.d.AutoMigration(&model.Payout{})
+	_ = a.d.AutoMigration(&model.PoolPayout{})
 	_ = a.d.AutoMigration(&model.ValidatorPrefs{})
 	_ = a.d.AutoMigration(&model.EraInfo{})
 }

@@ -9,7 +9,7 @@ import (
 type Payout struct {
 	ID             uint                `gorm:"primary_key" json:"-"`
 	Account        address.SS58Address `gorm:"index;default: null;size:100" json:"account"`
-	Amount         decimal.Decimal     `sql:"type:decimal(30,0);" json:"amount"`
+	Amount         decimal.Decimal     `gorm:"type:decimal(30,0);" json:"amount"`
 	Era            uint32              `gorm:"index" json:"era"`
 	Stash          address.SS58Address `gorm:"index;default: null;size:100" json:"stash"`
 	ValidatorStash address.SS58Address `gorm:"index" sql:"default: null;size:100" json:"validator_stash"`
@@ -20,6 +20,18 @@ type Payout struct {
 	ExtrinsicIndex string              `json:"extrinsic_index"`
 	EventIndex     string              `json:"event_index"`
 	Claimed        bool                `gorm:"index" json:"-"`
+}
+
+type PoolPayout struct {
+	ID             uint                `gorm:"primary_key" json:"-"`
+	Account        address.SS58Address `gorm:"index;default: null;size:100" json:"account"`
+	Amount         decimal.Decimal     `gorm:"type:decimal(30,0);" json:"amount"`
+	PoolId         uint32              `gorm:"index" json:"pool_id"`
+	ModuleId       string              `json:"module_id"`
+	EventId        string              `json:"event_id"`
+	ExtrinsicIndex string              `json:"extrinsic_index"`
+	EventIndex     string              `json:"event_index"`
+	BlockTimestamp uint64              `gorm:"index" json:"block_timestamp"`
 }
 
 type ValidatorPrefs struct {

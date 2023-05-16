@@ -73,3 +73,16 @@ func GetLatestEra(db storage.DB) uint32 {
 	db.FindBy(&payout, map[string]interface{}{}, &opt)
 	return payout.Era
 }
+
+func NewPoolPayout(db storage.DB, addressSS58 address.SS58Address, amount decimal.Decimal, poolId uint32, event *scanModel.ChainEvent, block *scanModel.ChainBlock, extrinsicIndex string) error {
+	slog.Info("NewPoolPayout", "account", addressSS58, "amount", amount)
+
+	_ = db.Create(&model.PoolPayout{Account: addressSS58, Amount: amount, PoolId: poolId, BlockTimestamp: uint64(block.BlockTimestamp), ModuleId: event.ModuleId, EventId: event.EventId, EventIndex: event.EventIndex, ExtrinsicIndex: extrinsicIndex})
+	return nil
+}
+
+func GetPoolPayoutList(db storage.DB, page, row int, addressSS58 address.SS58Address) ([]model.PoolPayout, int) {
+	var poolPayouts []model.PoolPayout
+	db.Query(model.PoolPayout{}).Where("account = ?", addressSS58.String()).Order("block_timestamp DESC").Limit(row).Offset((page - 1) * row).Find(&poolPayouts)
+	return poolPayouts, len(poolPayouts)
+}
