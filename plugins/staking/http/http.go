@@ -21,7 +21,7 @@ var svc *service.Service
 
 func Router(s *service.Service) []router.Http {
 	svc = s
-	return []router.Http{{Router: "eraStat", Handle: eraStat}, {Router: "rewardsSlashes", Handle: rewardsSlashes}}
+	return []router.Http{{Router: "eraStat", Handle: eraStat}, {Router: "rewardsSlashes", Handle: rewardsSlashes}, {Router: "poolRewards", Handle: poolRewards}}
 }
 
 type AddressReq struct {
@@ -74,6 +74,7 @@ func eraStat(c *gin.Context) {
 	p := new(AddressReq)
 	if err := validator.Validate(r.Body, p); err != nil {
 		toJson(w, 10001, nil, err)
+		return
 	}
 
 	addressSS58 := address.SS58Address(p.Address)
@@ -92,6 +93,25 @@ func eraStat(c *gin.Context) {
 
 	toJson(w, 0, map[string]interface{}{
 		"list": eraStats, "count": len(eraStats),
+	}, nil)
+}
+
+func poolRewards(c *gin.Context) {
+	w := c.Writer
+	r := c.Request
+	p := new(AddressReq)
+	if err := validator.Validate(r.Body, p); err != nil {
+		toJson(w, 10001, nil, err)
+		return
+	}
+
+	addressSS58 := address.SS58Address(p.Address)
+	list, _ := dao.GetPoolPayoutList(svc.Storage(), p.Page, p.Row, addressSS58)
+
+	slog.Debug("PoolRewards", "page", p.Page, "row", p.Row, "address", p.Address, "found", len(list))
+
+	toJson(w, 0, map[string]interface{}{
+		"list": list, "count": len(list),
 	}, nil)
 }
 
