@@ -1,13 +1,19 @@
 package dao
 
 import (
+	"sync"
+
 	"github.com/itering/subscan/model"
 	"github.com/itering/substrate-api-rpc/metadata"
 )
 
+var mutex sync.Mutex
+
 func (d *Dao) CreateRuntimeVersion(name string, specVersion int) int64 {
 	var versions []model.RuntimeVersion
-	d.db.Select("id").Where("spec_version = ?", specVersion).Limit(1).Find(&versions)
+	mutex.Lock()
+	defer mutex.Unlock()
+	d.db.Select("id, spec_version").Where("spec_version = ?", specVersion).Limit(1).Find(&versions)
 	if len(versions) > 0 {
 		return 0
 	}
