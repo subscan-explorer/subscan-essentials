@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -69,5 +68,5 @@ func (s *Service) initSubRuntimeLatest() {
 
 // read custom registry from local or remote
 func readTypeRegistry() ([]byte, error) {
-	return ioutil.ReadFile(fmt.Sprintf(util.ConfDir+"/source/%s.json", util.NetworkNode))
+	return os.ReadFile(fmt.Sprintf(util.ConfDir+"/source/%s.json", util.NetworkNode))
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/itering/subscan/plugins/storage"
 	"github.com/itering/subscan/util"
 	"github.com/shopspring/decimal"
-	"gorm.io/gorm"
 )
 
 // SplitTableBlockNum
@@ -107,7 +106,6 @@ func (c *ChainEvent) AsPlugin() *storage.Event {
 }
 
 type ChainExtrinsic struct {
-	gorm.Model
 	ID                 uint            `gorm:"primary_key"`
 	ExtrinsicIndex     string          `gorm:"uniqueIndex;default: null;size:100" json:"extrinsic_index"`
 	BlockNum           int             `gorm:"index" json:"block_num" `

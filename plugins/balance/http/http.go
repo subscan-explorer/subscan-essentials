@@ -10,14 +10,12 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	svc *service.Service
-)
+var svc *service.Service
 
 func Router(s *service.Service) []router.Http {
 	svc = s
 	return []router.Http{
-		{"accounts", accounts},
+		{Router: "accounts", Handle: accounts},
 	}
 }
 
