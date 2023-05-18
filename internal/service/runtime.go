@@ -44,10 +44,17 @@ func (s *Service) regRuntimeVersion(name string, spec int, hash ...string) error
 }
 
 func (s *Service) regCodecMetadata(hash ...string) string {
-	if coded, err := rpc.GetMetadataByHash(nil, hash...); err == nil {
-		return coded
+	count := 0
+	const maxRetry = 5
+	var coded string
+	var err error
+	for coded, err = rpc.GetMetadataByHash(nil, hash...); err != nil && count < maxRetry; coded, err = rpc.GetMetadataByHash(nil, hash...) {
+		slog.Error("get runtime metadata error", "error", err)
 	}
-	return ""
+	if err != nil && count >= maxRetry {
+		return ""
+	}
+	return coded
 }
 
 func (s *Service) createRuntimeConstants(spec int, runtime *metadata.Instant) {
