@@ -93,6 +93,29 @@ func (c ChainEvent) TableName() string {
 	return fmt.Sprintf("chain_events_%d", c.BlockNum/SplitTableBlockNum)
 }
 
+type AsPlugin[P any] interface {
+	AsPlugin() P
+}
+
+func MapAsPlugin[P interface{ *Pte }, T interface {
+	AsPlugin[P]
+	*Tp
+}, Tp any, Pte any](arr []Tp,
+) []Pte {
+	return mapFunc(arr, func(item Tp) Pte {
+		var t T = &item
+		return *t.AsPlugin()
+	})
+}
+
+func mapFunc[T any, R any](arr []T, f func(T) R) []R {
+	mapped := make([]R, len(arr))
+	for i, item := range arr {
+		mapped[i] = f(item)
+	}
+	return mapped
+}
+
 func (c *ChainEvent) AsPlugin() *storage.Event {
 	return &storage.Event{
 		BlockNum:      c.BlockNum,
@@ -102,6 +125,30 @@ func (c *ChainEvent) AsPlugin() *storage.Event {
 		Params:        []byte(util.ToString(c.Params)),
 		ExtrinsicHash: c.ExtrinsicHash,
 		EventIdx:      c.EventIdx,
+		EventIndex:    c.EventIndex,
+	}
+}
+
+func (c *CallArg) AsPlugin() *storage.CallArg {
+	return &storage.CallArg{
+		Name:  c.Name,
+		Type:  c.Type,
+		Value: c.Value,
+	}
+}
+
+var _ AsPlugin[*storage.CallArg] = (*CallArg)(nil)
+
+func (c *ChainCall) AsPlugin() *storage.Call {
+	return &storage.Call{
+		BlockNum:       c.BlockNum,
+		CallIdx:        c.CallIdx,
+		BlockTimestamp: c.BlockTimestamp,
+		ExtrinsicHash:  c.ExtrinsicHash,
+		ModuleId:       c.ModuleId,
+		CallId:         c.CallId,
+		Params:         MapAsPlugin[*storage.CallArg](c.Params),
+		Events:         MapAsPlugin[*storage.Event](c.Events),
 	}
 }
 

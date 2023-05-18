@@ -49,7 +49,7 @@ func (a *Staking) InitHttp() []router.Http {
 	return http.Router(srv)
 }
 
-func (a *Staking) ProcessExtrinsic(block *scanModel.ChainBlock, extrinsic *scanModel.ChainExtrinsic, events []scanModel.ChainEvent) error {
+func (a *Staking) ProcessExtrinsic(block *storage.Block, extrinsic *storage.Extrinsic, events []storage.Event) error {
 	slog.Debug("staking process extrinsic: %+v", extrinsic)
 	return nil
 }
@@ -139,8 +139,8 @@ func switchName(a, b string) string {
 	return fmt.Sprintf("%s.%s", strings.ToLower(a), strings.ToLower(b))
 }
 
-func (a *Staking) ProcessCall(block *scanModel.ChainBlock, call *scanModel.ChainCall, events []scanModel.ChainEvent, extrinsic *scanModel.ChainExtrinsic) error {
-	slog.Info("staking process call", "call", call)
+func (a *Staking) ProcessCall(block *storage.Block, call *storage.Call, events []storage.Event, extrinsic *storage.Extrinsic) error {
+	slog.Debug("staking process call", "call", call)
 
 	if call == nil {
 		return nil
@@ -347,7 +347,7 @@ type ValidatorPrefs struct {
 	Blocked    bool    `json:"blocked"`
 }
 
-func (a *Staking) ProcessEvent(block *scanModel.ChainBlock, event *scanModel.ChainEvent, fee decimal.Decimal, extrinsic *scanModel.ChainExtrinsic) error {
+func (a *Staking) ProcessEvent(block *storage.Block, event *storage.Event, fee decimal.Decimal, extrinsic *storage.Extrinsic) error {
 	name := switchName(event.ModuleId, event.EventId)
 	switch name {
 	case "staking.erapaid":

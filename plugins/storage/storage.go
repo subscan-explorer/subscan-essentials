@@ -82,6 +82,7 @@ type Event struct {
 	Params        []byte `json:"params"`
 	ExtrinsicHash string `json:"extrinsic_hash"`
 	EventIdx      int    `json:"event_idx"`
+	EventIndex    string `json:"event_index"`
 }
 
 type ExtrinsicParam struct {
@@ -93,4 +94,29 @@ type ExtrinsicParam struct {
 type EventParam struct {
 	Type  string      `json:"type"`
 	Value interface{} `json:"value"`
+}
+
+type CallArg struct {
+	Name  string      `json:"name"`
+	Type  string      `json:"type"`
+	Value interface{} `json:"value"`
+}
+
+func (a CallArg) GetName() string {
+	return a.Name
+}
+
+func (a CallArg) GetValue() interface{} {
+	return a.Value
+}
+
+type Call struct {
+	BlockNum       int       `json:"block_num"`
+	CallIdx        int       `json:"call_idx"`
+	BlockTimestamp int       `json:"block_timestamp"`
+	ExtrinsicHash  string    `json:"extrinsic_hash"`
+	ModuleId       string    `json:"module_id"`
+	CallId         string    `json:"call_id"`
+	Params         []CallArg `json:"params" sql:"type:text;"`
+	Events         []Event   `json:"events"`
 }
