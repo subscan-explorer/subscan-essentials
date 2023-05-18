@@ -7,7 +7,6 @@ import (
 
 	subscanPlugin "github.com/itering/subscan-plugin"
 	"github.com/itering/subscan/internal/dao"
-	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/plugins/router"
 	"github.com/itering/subscan/plugins/staking"
 	"github.com/itering/subscan/plugins/storage"
@@ -23,12 +22,12 @@ type Plugin interface {
 	InitHttp() []router.Http
 
 	// Receive Extrinsic data when subscribe extrinsic dispatch
-	ProcessExtrinsic(*model.ChainBlock, *model.ChainExtrinsic, []model.ChainEvent) error
+	ProcessExtrinsic(*storage.Block, *storage.Extrinsic, []storage.Event) error
 
 	// Receive Extrinsic data when subscribe extrinsic dispatch
-	ProcessEvent(*model.ChainBlock, *model.ChainEvent, decimal.Decimal, *model.ChainExtrinsic) error
+	ProcessEvent(*storage.Block, *storage.Event, decimal.Decimal, *storage.Extrinsic) error
 
-	ProcessCall(*model.ChainBlock, *model.ChainCall, []model.ChainEvent, *model.ChainExtrinsic) error
+	ProcessCall(*storage.Block, *storage.Call, []storage.Event, *storage.Extrinsic) error
 
 	// Mysql tables schema auto migrate
 	Migrate()
@@ -78,7 +77,7 @@ func register(name string, f interface{}) {
 	slog.Debug("Now registered plugins: %v", RegisteredPlugins)
 }
 
-func registerNative(p interface{}) {
+func registerNative(p Plugin) {
 	register(reflect.ValueOf(p).Type().Elem().Name(), p)
 }
 
