@@ -1,14 +1,14 @@
 package dao
 
 import (
-	"encoding/json"
-	"errors"
+	"fmt"
 
 	"github.com/itering/subscan/plugins/staking/model"
 	"github.com/itering/subscan/plugins/storage"
 	"github.com/itering/subscan/util/address"
 	"github.com/shopspring/decimal"
 	"golang.org/x/exp/slog"
+	"gorm.io/gorm"
 )
 
 type CommissionHistoryRecord struct {
@@ -19,60 +19,35 @@ type CommissionHistoryRecord struct {
 type CommissionHistory []CommissionHistoryRecord
 
 func NewValidatorPrefs(db storage.DB, addressSS58 address.SS58Address, commission decimal.Decimal, blockedNomination bool, blockNumber uint32) error {
-	slog.Info("NewValidatorPrefs", "account", addressSS58, "commission", commission, "blockedNomination", blockedNomination)
+	var info model.EraInfo
+	res := db.Query(&model.EraInfo{}).Select("era, start_block").Where("start_block <= ?", blockNumber).Order("start_block DESC").Limit(1).Find(&info)
+	if res.Error != nil {
+		slog.Error("NewValidatorPrefs", "account", addressSS58, "commission", commission, "blockedNomination", blockedNomination, "blockNumber", blockNumber, "error", res.Error)
+		return res.Error
+	}
+	slog.Warn("NewValidatorPrefs", "account", addressSS58, "commission", commission, "blockedNomination", blockedNomination, "era", info.Era, "blockNumber", blockNumber)
 	var maybe []model.ValidatorPrefs
 	opt := storage.Option{PluginPrefix: "staking"}
 	db.FindBy(&maybe, map[string]interface{}{"account": addressSS58}, &opt)
-	if len(maybe) == 1 {
-		prefs := maybe[0]
-		prefs.Commission = commission
-		prefs.BlockedNomination = blockedNomination
-		var history CommissionHistory
-		if err := json.Unmarshal([]byte(prefs.CommissionHistory), &history); err != nil {
-			return err
-		}
-		history = append(history, CommissionHistoryRecord{
-			StartBlock: blockNumber,
-			NewValue:   commission,
-		})
-		ch, err := json.Marshal(history)
-		if err != nil {
-			return err
-		}
-		prefs.CommissionHistory = string(ch)
-		if err := db.Update(&prefs, map[string]interface{}{"ID": prefs.ID}, map[string]interface{}{
-			"commission":         prefs.Commission,
-			"blocked_nomination": prefs.BlockedNomination,
-			"commission_history": prefs.CommissionHistory,
-		}); err != nil {
-			return err
-		}
-	} else {
-		var history CommissionHistory
-		history = append(history, CommissionHistoryRecord{
-			StartBlock: blockNumber,
-			NewValue:   commission,
-		})
-		commissionHistory, err := json.Marshal(history)
-		if err != nil {
-			return err
-		}
-
-		if err := db.Create(&model.ValidatorPrefs{Account: addressSS58, Commission: commission, BlockedNomination: blockedNomination, CommissionHistory: string(commissionHistory)}); err != nil {
-			return err
-		}
+	if len(maybe) > 0 {
+		slog.Warn("NewValidatorPrefs", "account", addressSS58, "commission", commission, "blockedNomination", blockedNomination, "era", info.Era, "maybe", maybe[0])
+		existing := maybe[0]
+		existing.Commission = commission
+		existing.BlockedNomination = blockedNomination
+		return db.Query(&model.ValidatorPrefs{}).Save(&existing).Error
+	}
+	if err := db.Create(&model.ValidatorPrefs{Account: addressSS58, Commission: commission, BlockedNomination: blockedNomination, Era: info.Era}); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-var ErrNotFound = errors.New("model not found")
-
-func GetValidatorPrefs(db storage.DB, validatorAddressSS58 string) (model.ValidatorPrefs, error) {
+func GetValidatorPrefs(db storage.DB, validatorAddressSS58 string, era uint32) (model.ValidatorPrefs, error) {
 	var prefs model.ValidatorPrefs
-	opt := storage.Option{PluginPrefix: "staking", PageSize: 1}
-	if count, _ := db.FindBy(&prefs, map[string]interface{}{"account": validatorAddressSS58}, &opt); count == 0 {
-		return prefs, ErrNotFound
+	res := db.Query(&prefs).Select("*").Where("account = ? AND era <= ?", validatorAddressSS58, era).Order("era DESC").Limit(1).Find(&prefs)
+	if res.Error == gorm.ErrRecordNotFound {
+		return prefs, fmt.Errorf("validator prefs model not found for %s %d", validatorAddressSS58, era)
 	}
 	return prefs, nil
 }

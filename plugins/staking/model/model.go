@@ -39,7 +39,7 @@ type ValidatorPrefs struct {
 	Account           address.SS58Address `gorm:"index;unique;default: null;size:100" json:"account"`
 	Commission        decimal.Decimal     `sql:"type:decimal(12,11);" json:"commission"`
 	BlockedNomination bool                `json:"blocked_nomination"`
-	CommissionHistory string              `gorm:"type:text;" json:"commission_history"`
+	Era               uint32              `gorm:"index"`
 }
 
 type EraInfo struct {
@@ -52,6 +52,8 @@ type EraInfo struct {
 	ValidatorPoints  datatypes.JSONType[map[address.SS58Address]uint32]
 	ValidatorRewards datatypes.JSONType[map[address.SS58Address]decimal.Decimal]
 	StakerRewards    datatypes.JSONType[map[address.SS58Address]decimal.Decimal]
+	StartBlock       uint `gorm:"index"`
+	EndBlock         uint `gorm:"index"`
 }
 
 type EraStake struct {
