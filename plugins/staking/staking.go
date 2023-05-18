@@ -10,7 +10,6 @@ import (
 	"github.com/itering/scale.go/types/scaleBytes"
 	plugin "github.com/itering/subscan-plugin"
 	internalDao "github.com/itering/subscan/internal/dao"
-	scanModel "github.com/itering/subscan/model"
 	"github.com/itering/subscan/plugins/router"
 	"github.com/itering/subscan/plugins/staking/dao"
 	"github.com/itering/subscan/plugins/staking/http"
