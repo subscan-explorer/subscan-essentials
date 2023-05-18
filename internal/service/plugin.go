@@ -4,6 +4,7 @@ import (
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/plugins"
+	"github.com/itering/subscan/plugins/storage"
 	"github.com/shopspring/decimal"
 	"golang.org/x/exp/slog"
 )
@@ -35,7 +36,7 @@ func pluginRegister(ds *dao.DbStorage, dd *dao.Dao) {
 // after event created, emit event data to subscribe plugins
 func (s *Service) emitEvent(block *model.ChainBlock, event *model.ChainEvent, fee decimal.Decimal, extrinsic *model.ChainExtrinsic) {
 	for _, plugin := range subscribeEvent[event.ModuleId] {
-		if err := plugin.ProcessEvent(block, event, fee, extrinsic); err != nil {
+		if err := plugin.ProcessEvent(block.AsPlugin(), event.AsPlugin(), fee, extrinsic.AsPlugin()); err != nil {
 			slog.Error("plugin.ProcessEvent failed", "error", err)
 		}
 	}
@@ -46,17 +47,17 @@ func (s *Service) emitExtrinsic(block *model.ChainBlock, extrinsic *model.ChainE
 	block.BlockTimestamp = extrinsic.BlockTimestamp
 
 	for _, plugin := range subscribeExtrinsic[extrinsic.CallModule] {
-		if err := plugin.ProcessExtrinsic(block, extrinsic, events); err != nil {
+		if err := plugin.ProcessExtrinsic(block.AsPlugin(), extrinsic.AsPlugin(), model.MapAsPlugin[*storage.Event](events)); err != nil {
 			slog.Error("plugin.ProcessExtrinsic failed", "error", err)
 		}
 	}
 }
 
 func (s *Service) emitCall(block *model.ChainBlock, call *model.ChainCall, events []model.ChainEvent, extrinsic *model.ChainExtrinsic) {
-	slog.Info("emit call", "subscribeCall", subscribeCall)
+	slog.Debug("emit call", "subscribeCall", subscribeCall)
 	for _, plugin := range subscribeCall[call.ModuleId] {
-		slog.Info("calling plugin.ProcessCall", "plugin", plugin)
-		if err := plugin.ProcessCall(block, call, events, extrinsic); err != nil {
+		slog.Debug("calling plugin.ProcessCall", "plugin", plugin)
+		if err := plugin.ProcessCall(block.AsPlugin(), call.AsPlugin(), model.MapAsPlugin[*storage.Event](events), extrinsic.AsPlugin()); err != nil {
 			slog.Error("plugin.ProcessCall failed", "error", err)
 		}
 	}
