@@ -3,7 +3,6 @@ package dao
 import (
 	"errors"
 
-	scanModel "github.com/itering/subscan/model"
 	"github.com/itering/subscan/plugins/staking/model"
 	"github.com/itering/subscan/plugins/storage"
 	"github.com/itering/subscan/util/address"
@@ -11,18 +10,18 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-func NewClaimedPayout(db storage.DB, addressHex string, validatorAccountSs58 string, amount decimal.Decimal, era uint32, event *scanModel.ChainEvent, block *scanModel.ChainBlock, extrinsicIndex string) error {
+func NewClaimedPayout(db storage.DB, addressHex string, validatorAccountSs58 string, amount decimal.Decimal, era uint32, event *storage.Event, block *storage.Block, extrinsicIndex string) error {
 	accountId := address.SS58AddressFromHex(addressHex)
-	slog.Info("NewClaimedPayout", "account", accountId, "validator", validatorAccountSs58, "amount", amount, "eventIndex", event.EventIndex)
+	slog.Debug("NewClaimedPayout", "account", accountId, "validator", validatorAccountSs58, "amount", amount, "eventIndex", event.EventIndex)
 	opt := storage.Option{PluginPrefix: "staking"}
 	var unclaimedPayout []model.Payout
-	db.FindBy(&unclaimedPayout, map[string]interface{}{"account": accountId, "era": era}, &opt)
+	db.FindBy(&unclaimedPayout, map[string]interface{}{"account": accountId, "era": era, "validator_stash": validatorAccountSs58}, &opt)
 	if len(unclaimedPayout) == 1 {
 		payout := unclaimedPayout[0]
 		if !payout.Amount.Equal(amount) {
 			// FIXME: this shouldn't actually happen, but I can't figure out what problem with the calculation is (at least
 			// not before the deadline)
-			slog.Error("Found unexpected amount of unclaimed payouts", "unclaimedPayout", unclaimedPayout, "amount", amount)
+			slog.Warn("Found unexpected amount of unclaimed payouts", "unclaimedPayout", unclaimedPayout, "amount", amount, "blockNum", block.BlockNum)
 		}
 
 		payout.BlockTimestamp = uint64(block.BlockTimestamp)
@@ -44,7 +43,7 @@ func NewClaimedPayout(db storage.DB, addressHex string, validatorAccountSs58 str
 			return err
 		}
 	} else {
-		slog.Error("Found unexpected number of unclaimed payouts", "unclaimedPayout", unclaimedPayout, "amount", amount, "era", era, "account", accountId)
+		slog.Error("Found unexpected number of unclaimed payouts", "len", len(unclaimedPayout), "unclaimedPayout", unclaimedPayout, "amount", amount, "era", era, "account", accountId)
 		return errors.New("found unexpected number of unclaimed payouts")
 	}
 
@@ -52,7 +51,7 @@ func NewClaimedPayout(db storage.DB, addressHex string, validatorAccountSs58 str
 }
 
 func NewUnclaimedPayout(db storage.DB, addressSS58 address.SS58Address, validatorAccountSs58 address.SS58Address, amount decimal.Decimal, era uint32) error {
-	slog.Info("NewUnclaimedPayout", "account", addressSS58, "validator", validatorAccountSs58, "amount", amount)
+	slog.Debug("NewUnclaimedPayout", "account", addressSS58, "validator", validatorAccountSs58, "amount", amount, "era", era)
 	_ = db.Create(&model.Payout{Account: addressSS58, Amount: amount, Stash: addressSS58, ValidatorStash: validatorAccountSs58, Era: era})
 	return nil
 }
@@ -74,8 +73,8 @@ func GetLatestEra(db storage.DB) uint32 {
 	return payout.Era
 }
 
-func NewPoolPayout(db storage.DB, addressSS58 address.SS58Address, amount decimal.Decimal, poolId uint32, event *scanModel.ChainEvent, block *scanModel.ChainBlock, extrinsicIndex string) error {
-	slog.Info("NewPoolPayout", "account", addressSS58, "amount", amount)
+func NewPoolPayout(db storage.DB, addressSS58 address.SS58Address, amount decimal.Decimal, poolId uint32, event *storage.Event, block *storage.Block, extrinsicIndex string) error {
+	slog.Debug("NewPoolPayout", "account", addressSS58, "amount", amount)
 
 	_ = db.Create(&model.PoolPayout{Account: addressSS58, Amount: amount, PoolId: poolId, BlockTimestamp: uint64(block.BlockTimestamp), ModuleId: event.ModuleId, EventId: event.EventId, EventIndex: event.EventIndex, ExtrinsicIndex: extrinsicIndex})
 	return nil
