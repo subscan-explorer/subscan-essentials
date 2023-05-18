@@ -30,6 +30,8 @@ services:
     command: ["start","substrate"]
     networks:
       - app_net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 networks:
   app_net:
