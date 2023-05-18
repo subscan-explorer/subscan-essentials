@@ -2,6 +2,9 @@ package util
 
 import (
 	"os"
+	"strings"
+
+	"github.com/itering/subscan/util/projectpath"
 )
 
 var (
@@ -13,7 +16,7 @@ var (
 	WSEndPoint                = GetEnv("CHAIN_WS_ENDPOINT", "ws://127.0.0.1:9944")
 	NetworkNode               = GetEnv("NETWORK_NODE", "polkadot")
 	IsProduction              = os.Getenv("DEPLOY_ENV") == "prod"
-	ConfDir                   = GetEnv("CONF_DIR", "../configs")
+	ConfDir                   = GetEnv("CONF_DIR", strings.Join([]string{projectpath.Root, "configs"}, "/"))
 )
 
 func GetEnv(key, defaultValue string) string {

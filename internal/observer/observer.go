@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/itering/subscan/internal/service"
+	"github.com/itering/subscan/util"
+	"github.com/itering/substrate-api-rpc/pkg/recws"
 	"golang.org/x/exp/slog"
 )
 
@@ -22,8 +24,9 @@ func Run(dt string) {
 	for {
 		switch dt {
 		case "substrate":
-
-			go srv.Subscribe(stop)
+			conn := &recws.RecConn{KeepAliveTimeout: 5 * time.Second, WriteTimeout: time.Second * 5, ReadTimeout: 10 * time.Second}
+			conn.Dial(util.WSEndPoint, nil)
+			go srv.Subscribe(conn, stop)
 			slog.Debug("Connected to substrate node")
 		default:
 			log.Fatalf("no such daemon component: %s", dt)
