@@ -54,7 +54,7 @@ func (s *Service) createExtrinsic(c context.Context,
 		}
 
 		if err = s.dao.CreateExtrinsic(c, txn, &extrinsic); err == nil {
-			go s.emitExtrinsic(block, &extrinsic, eventMap[extrinsic.ExtrinsicIndex])
+			s.emitExtrinsic(block, &extrinsic, eventMap[extrinsic.ExtrinsicIndex])
 		} else {
 			return 0, 0, nil, nil, err
 		}
@@ -151,7 +151,7 @@ func (s *Service) handleCalls(block *model.ChainBlock, extrinsic *model.ChainExt
 				Events:         callEvents,
 				Params:         call.Params,
 			}
-			slog.Info("emitting call", "call", chainCall)
+			slog.Debug("emitting call", "call", chainCall)
 			s.emitCall(block, chainCall, callEvents, extrinsic)
 		}
 	}
