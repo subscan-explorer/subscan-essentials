@@ -146,7 +146,7 @@ func (a *Staking) ProcessCall(block *storage.Block, call *storage.Call, events [
 	}
 
 	name := switchName(call.ModuleId, call.CallId)
-	slog.Info("staking process call", "name", name)
+	slog.Debug("staking process call", "name", name)
 	switch name {
 	case "staking.payout_stakers":
 		validator, err := CastArg[address.SS58Address](call.Params[0], "validator_stash")
@@ -178,7 +178,7 @@ func (a *Staking) ProcessCall(block *storage.Block, call *storage.Call, events [
 				dao.NewClaimedPayout(a.d, address, string(validator), amount, era, &e, block, extrinsic.ExtrinsicIndex)
 			}
 		}
-		slog.Info("staking.payout_stakers", "validator", validator)
+		slog.Debug("staking.payout_stakers", "validator", validator)
 	}
 
 	return nil
@@ -316,22 +316,28 @@ func (a *Staking) getEraInfo(era uint32, blockHash string, totalRewards decimal.
 	stakerRewards := make(map[address.SS58Address]decimal.Decimal)
 	totalPoints := decimal.NewFromInt(int64(eraPoints.Total))
 	for v, points := range validatorPoints {
-		prefs, err := dao.GetValidatorPrefs(a.d, v.String())
+		prefs, err := dao.GetValidatorPrefs(a.d, v.String(), era)
 		if err != nil {
 			return bad, err
 		}
-		share := decimal.NewFromInt(int64(points)).Div(totalPoints).Round(9)
-		slog.Debug("getEraInfo", "share", share, "totalRewards", totalRewards)
+		share, err := util.PerBillFromRational(decimal.NewFromInt(int64(points)), totalPoints)
+		if err != nil {
+			return bad, err
+		}
+		slog.Debug("updateEraInfo", "share", share, "totalRewards", totalRewards)
 
-		validatorRewards[v] = totalRewards.Mul(share).Round(0)
-		validatorCuts[v] = validatorRewards[v].Mul(prefs.Commission.Round(9)).Round(0)
+		validatorRewards[v] = share.Mul(totalRewards)
+		validatorCuts[v] = validatorRewards[v].Mul(prefs.Commission.Round(9))
 	}
 	for _, stake := range stakes {
 		totalRewardForValidator := validatorRewards[stake.Validator]
 		cut := validatorCuts[stake.Validator]
 		afterCut := totalRewardForValidator.Sub(cut)
-		share := stake.Amount.Div(stake.ValidatorTotal).Round(9)
-		stakerReward := afterCut.Mul(share).Round(0)
+		share, err := util.PerBillFromRational(stake.Amount, stake.ValidatorTotal)
+		if err != nil {
+			return bad, err
+		}
+		stakerReward := share.Mul(afterCut)
 		if stake.Staker == stake.Validator {
 			// validators take their cut
 			stakerReward = stakerReward.Add(cut)
@@ -348,10 +354,14 @@ type ValidatorPrefs struct {
 
 func (a *Staking) ProcessEvent(block *storage.Block, event *storage.Event, fee decimal.Decimal, extrinsic *storage.Extrinsic) error {
 	name := switchName(event.ModuleId, event.EventId)
+	slog.Debug("process event", "module", event.ModuleId, "event", event.EventId, "block", block.Hash, "name", name, "event", fmt.Sprintf("%+v", event))
 	switch name {
 	case "staking.erapaid":
+		slog.Debug("process event before get args", "event", fmt.Sprintf("%+v", event))
 		args, err := GetEventArgs(event.Params)
+		slog.Debug("process event after get args", "event", fmt.Sprintf("%+v", event))
 		if len(args) < 2 {
+			slog.Error("staking.erapaid: not enough arguments", "len", len(args), "args", args, "name", name, "event", fmt.Sprintf("%+v", event), "block", block.Hash)
 			return fmt.Errorf("staking.erapaid: not enough arguments. got %d, expected at least 2", len(args))
 		}
 		if err != nil {
@@ -365,18 +375,34 @@ func (a *Staking) ProcessEvent(block *storage.Block, event *storage.Event, fee d
 		if err != nil {
 			return err
 		}
+		if era == 1 {
+			eraInfo, err := dao.FindEraInfo(a.d, 0)
+			if err != nil {
+				slog.Error("error while completing era 0", "error", err)
+				return err
+			}
+			if err = dao.CompleteEraInfo(a.d, eraInfo); err != nil {
+				slog.Error("error while completing era 0", "error", err)
+				return err
+			}
+		}
 		eraInfo, err := a.getEraInfo(era, block.Hash, reward)
-		dao.NewEraInfo(a.d, eraInfo)
 		if err != nil {
 			return err
 		}
+		eraInfo.EndBlock = uint(block.BlockNum)
+		dao.CompleteEraInfo(a.d, eraInfo)
 		for _, stake := range eraInfo.Stakes {
 			rewardAmount := eraInfo.StakerRewards.Data()[stake.Staker]
 			if err := dao.NewUnclaimedPayout(a.d, stake.Staker, stake.Validator, rewardAmount, era); err != nil {
 				slog.Error("failed to create new unclaimed payout", "error", err, "staker", stake.Staker.String(), "validator", stake.Validator.String(), "amount", rewardAmount.String(), "era", era)
 			}
 		}
-		slog.Info("staking.erapaid", "era", era, "reward", reward, "eraInfo", fmt.Sprintf("%+v", eraInfo))
+		slog.Debug("staking.erapaid", "era", era, "reward", reward, "eraInfo", fmt.Sprintf("%+v", eraInfo))
+		if err = dao.StartEraInfo(a.d, era+1, uint(block.BlockNum)); err != nil {
+			return err
+		}
+		slog.Debug("new era", "era", era, "block", block.BlockNum)
 	case "staking.validatorprefsset":
 		args, err := GetEventArgs(event.Params)
 		if err != nil {
@@ -385,7 +411,7 @@ func (a *Staking) ProcessEvent(block *storage.Block, event *storage.Event, fee d
 		if len(args) < 2 {
 			return fmt.Errorf("staking.validatorprefsset: not enough arguments. got %d, expected at least 2", len(args))
 		}
-		slog.Info("staking.validatorprefsset", "args", args)
+		slog.Debug("staking.validatorprefsset", "args", args)
 		account, err := CastUnnamedArg[address.SS58Address](args[0])
 		if err != nil {
 			return err
@@ -394,7 +420,7 @@ func (a *Staking) ProcessEvent(block *storage.Block, event *storage.Event, fee d
 		if err != nil {
 			return err
 		}
-		slog.Info("staking.validatorprefsset", "account", account, "prefs", prefs)
+		slog.Info("staking.validatorprefsset", "account", account, "prefs", prefs, "blockNum", block.BlockNum)
 		// the commission is in parts per billion
 		commission := decimal.NewFromFloat(prefs.Commission).Div(decimal.NewFromInt(1_000_000_000))
 		if err := dao.NewValidatorPrefs(a.d, account, commission, prefs.Blocked, uint32(block.BlockNum)); err != nil {
@@ -464,4 +490,6 @@ func (a *Staking) Migrate() {
 	_ = a.d.AutoMigration(&model.PoolPayout{})
 	_ = a.d.AutoMigration(&model.ValidatorPrefs{})
 	_ = a.d.AutoMigration(&model.EraInfo{})
+
+	a.d.Create(&model.EraInfo{Era: 0, StartBlock: 0})
 }

@@ -1,13 +1,34 @@
 package dao
 
 import (
+	"errors"
+
 	"github.com/itering/subscan/plugins/staking/model"
 	"github.com/itering/subscan/plugins/storage"
 	"github.com/itering/subscan/util/address"
+	"golang.org/x/exp/slog"
 )
 
-func NewEraInfo(db storage.DB, info *model.EraInfo) error {
-	return db.Create(info)
+func StartEraInfo(db storage.DB, era uint32, blockNum uint) error {
+	return db.Create(&model.EraInfo{
+		Era:        era,
+		StartBlock: blockNum,
+	})
+}
+
+func CompleteEraInfo(db storage.DB, info *model.EraInfo) error {
+	d := db.Query(info).Save(info)
+	return d.Error
+}
+
+func FindEraInfo(db storage.DB, era uint32) (*model.EraInfo, error) {
+	var found []model.EraInfo
+	db.Query(&model.EraInfo{}).Select("*").Where("era = ?", era).Limit(1).Find(&found)
+	if len(found) == 0 {
+		slog.Error("EraInfo not found", "era", era)
+		return nil, errors.New("EraInfo not found")
+	}
+	return &found[0], nil
 }
 
 func GetEraInfoList(db storage.DB, page, row int) ([]model.EraInfo, int) {
