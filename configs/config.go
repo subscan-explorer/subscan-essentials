@@ -112,7 +112,10 @@ func (dc *Database) getEnvDSN() *url.URL {
 	dbPort := os.Getenv("MYSQL_PORT")
 
 	var user *url.Userinfo
-	if dbUser != "" && dbPass != "" {
+	if dbPass != "" {
+		if dbUser == "" {
+			dbUser = "root"
+		}
 		user = url.UserPassword(dbUser, dbPass)
 	} else {
 		user = url.User(dbUser)
