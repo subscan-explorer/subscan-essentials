@@ -11,7 +11,7 @@ services:
       # this db must exist
       MYSQL_DB: 'subscan'
       REDIS_ADDR: redis:6379
-      CHAIN_WS_ENDPOINT: 'wss://rpc.polkadot.io'
+      CHAIN_WS_ENDPOINT: 'ws://host.docker.internal:9944'
       # the types file used for the chain as:
       # configs/source/{NETWORK_NODE}.json
       NETWORK_NODE: 'polkadot'
@@ -21,6 +21,8 @@ services:
       - '4399:4399'
     networks:
       - app_net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   subscan-observer:
     environment:
       <<: *app_base
@@ -38,6 +40,8 @@ services:
       - '80:80'
     networks:
       - app_net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 networks:
   app_net:
