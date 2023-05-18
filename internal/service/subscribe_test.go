@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"strings"
-	"syscall"
 	"testing"
 
 	"github.com/gorilla/websocket"
@@ -59,9 +57,6 @@ func (t *TestConn) ReadMessage() (messageType int, message []byte, err error) {
 }
 
 func (t *TestConn) WriteMessage(messageType int, data []byte) error {
-	if strings.EqualFold(string(data), `{"id":3,"method":"chain_subscribeFinalizedHeads","params":[],"jsonrpc":"2.0"}`) {
-		_ = syscall.Kill(syscall.Getpid(), syscall.SIGINT)
-	}
 	wb := new(Buffer)
 	t.writer = wb
 	if _, err := t.writer.Write(data); err != nil {
@@ -96,7 +91,9 @@ func (t *TestConn) ReadJSON(v interface{}) error {
 }
 
 func TestService_Subscribe(t *testing.T) {
-	// tc := TestConn{}
+	tc := TestConn{}
+	tc.Connected = true
 	stop := make(chan struct{}, 2)
-	testSrv.Subscribe(stop)
+	stop <- struct{}{}
+	testSrv.Subscribe(&tc, stop)
 }

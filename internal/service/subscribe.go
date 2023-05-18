@@ -5,9 +5,8 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/itering/subscan/util"
-	"github.com/itering/substrate-api-rpc/pkg/recws"
 	"github.com/itering/substrate-api-rpc/rpc"
+	ws "github.com/itering/substrate-api-rpc/websocket"
 	"golang.org/x/exp/slog"
 )
 
@@ -23,9 +22,7 @@ func logError(msg string, err error) {
 	}
 }
 
-func (s *Service) Subscribe(stop chan struct{}) {
-	conn := &recws.RecConn{KeepAliveTimeout: 5 * time.Second, WriteTimeout: time.Second * 5, ReadTimeout: 10 * time.Second}
-	conn.Dial(util.WSEndPoint, nil)
+func (s *Service) Subscribe(conn ws.WsConn, stop chan struct{}) {
 	var err error
 
 	defer conn.Close()
@@ -34,6 +31,10 @@ func (s *Service) Subscribe(stop chan struct{}) {
 
 	dead := make(chan struct{}, 1)
 	reconnected := make(chan struct{}, 1)
+
+	defer close(done)
+	defer close(dead)
+	defer close(reconnected)
 
 	subscribeSrv := s.initSubscribeService(done)
 	go func() {
@@ -96,13 +97,11 @@ func (s *Service) Subscribe(stop chan struct{}) {
 				logError("system health get failed", err)
 			}
 		case <-stop:
-			close(done)
 			err = conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			if err != nil {
 				logError("write close failed", err)
 				return
 			}
-			conn.Close()
 			return
 		case <-dead:
 			slog.Warn("connection is dead, reconnecting...")
@@ -122,5 +121,4 @@ func (s *Service) Subscribe(stop chan struct{}) {
 			reconnected <- struct{}{}
 		}
 	}
-
 }

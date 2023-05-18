@@ -4,9 +4,8 @@ import (
 	"testing"
 
 	subscan_plugin "github.com/itering/subscan-plugin"
-	"github.com/itering/subscan-plugin/router"
 	internalDao "github.com/itering/subscan/internal/dao"
-	scanModel "github.com/itering/subscan/model"
+	"github.com/itering/subscan/plugins/router"
 	"github.com/itering/subscan/plugins/storage"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
@@ -18,15 +17,15 @@ func (a *TPlugin) InitDao(d storage.Dao, dd *internalDao.Dao) {}
 
 func (a *TPlugin) InitHttp() []router.Http { return nil }
 
-func (a *TPlugin) ProcessExtrinsic(block *scanModel.ChainBlock, extrinsic *scanModel.ChainExtrinsic, events []scanModel.ChainEvent) error {
+func (a *TPlugin) ProcessExtrinsic(block *storage.Block, extrinsic *storage.Extrinsic, events []storage.Event) error {
 	return nil
 }
 
-func (a *TPlugin) ProcessEvent(block *scanModel.ChainBlock, event *scanModel.ChainEvent, fee decimal.Decimal, extrinsic *scanModel.ChainExtrinsic) error {
+func (a *TPlugin) ProcessEvent(block *storage.Block, event *storage.Event, fee decimal.Decimal, extrinsic *storage.Extrinsic) error {
 	return nil
 }
 
-func (a *TPlugin) ProcessCall(block *scanModel.ChainBlock, call *scanModel.ChainCall, events []scanModel.ChainEvent, extrinsic *scanModel.ChainExtrinsic) error {
+func (a *TPlugin) ProcessCall(block *storage.Block, call *storage.Call, events []storage.Event, extrinsic *storage.Extrinsic) error {
 	return nil
 }
 
@@ -42,9 +41,10 @@ func (a *TPlugin) SubscribeCall() []string { return nil }
 
 func (a *TPlugin) UiConf() *subscan_plugin.UiConfig { return nil }
 
+var _ Plugin = &TPlugin{}
+
 func TestRegister(t *testing.T) {
 	register("test", &TPlugin{})
-	register("test2", nil)
 	register("test", &TPlugin{})
 	assert.NotNil(t, RegisteredPlugins["test"])
 	assert.Nil(t, RegisteredPlugins["test2"])
