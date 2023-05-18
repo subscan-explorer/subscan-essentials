@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/itering/subscan/configs"
@@ -18,12 +19,31 @@ import (
 	"golang.org/x/exp/slog"
 )
 
+func envLogLevel() slog.Level {
+	switch strings.TrimSpace(strings.ToLower(os.Getenv("GO_LOG"))) {
+	case "debug":
+		return slog.LevelDebug
+	case "info":
+		return slog.LevelInfo
+	case "warn":
+		return slog.LevelWarn
+	case "error":
+		return slog.LevelError
+	default:
+		return slog.LevelInfo
+	}
+}
+
+func initSlog() {
+	logger := slog.New(tint.Options{Level: envLogLevel()}.NewHandler(os.Stderr))
+	slog.SetDefault(logger)
+}
+
 func main() {
 	defer func() {
 		websocket.Close()
 	}()
-	logger := slog.New(tint.Options{Level: slog.LevelDebug}.NewHandler(os.Stderr))
-	slog.SetDefault(logger)
+	initSlog()
 	if err := setupApp().Run(os.Args); err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
