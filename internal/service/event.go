@@ -25,7 +25,7 @@ func (s *Service) AddEvent(
 
 		if err = s.dao.CreateEvent(txn, &event); err == nil {
 			ext := s.GetExtrinsicByHash(event.ExtrinsicHash)
-			go s.emitEvent(block, &event, feeMap[event.EventIndex], ext)
+			s.emitEvent(block, &event, feeMap[event.EventIndex], ext)
 		} else {
 			return 0, err
 		}
