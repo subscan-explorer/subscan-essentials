@@ -1,33 +1,29 @@
 package service
 
 import (
-	internalDao "github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/plugins/staking/dao"
 	"github.com/itering/subscan/plugins/staking/model"
 	"github.com/itering/subscan/plugins/storage"
 )
 
 type Service struct {
-	d  storage.Dao
-	Dd *internalDao.Dao
+	d storage.Dao
 }
 
 func (s *Service) Storage() storage.Dao {
 	return s.d
 }
 
-func (s *Service) Dao() *internalDao.Dao {
-	return s.Dd
-}
-
-func New(d storage.Dao, dd *internalDao.Dao) *Service {
+func New(d storage.Dao) *Service {
 	return &Service{
-		d:  d,
-		Dd: dd,
+		d: d,
 	}
 }
 
 func (s *Service) GetPayoutListJson(page, row int, address string, minEra uint32) ([]model.Payout, int) {
-	res, count := dao.GetPayoutList(s.d, page, row, address, minEra)
-	return res, count
+	return dao.GetPayoutList(s.d, page, row, address, minEra)
+}
+
+func (s *Service) GetRuntimeConstant(module, name string) *storage.RuntimeConstant {
+	return s.d.GetRuntimeConstant(module, name)
 }

@@ -45,21 +45,21 @@ func (d *Dao) SaveFillAlreadyFinalizedBlockNum(c context.Context, blockNum int) 
 	return
 }
 
-func (d *Dao) GetFillBestBlockNum(c context.Context) (num int, err error) {
+func (d *ReadOnlyDao) GetFillBestBlockNum(c context.Context) (num int, err error) {
 	conn, _ := d.redis.GetContext(c)
 	defer conn.Close()
 	num, err = redis.Int(conn.Do("GET", RedisFillAlreadyBlockNum))
 	return
 }
 
-func (d *Dao) GetFillFinalizedBlockNum(c context.Context) (num int, err error) {
+func (d *ReadOnlyDao) GetFillFinalizedBlockNum(c context.Context) (num int, err error) {
 	conn, _ := d.redis.GetContext(c)
 	defer conn.Close()
 	num, err = redis.Int(conn.Do("GET", RedisFillFinalizedBlockNum))
 	return
 }
 
-func (d *Dao) GetBlockList(page, row int) []model.ChainBlock {
+func (d *ReadOnlyDao) GetBlockList(page, row int) []model.ChainBlock {
 	var blocks []model.ChainBlock
 	blockNum, _ := d.GetFillBestBlockNum(context.TODO())
 	head := blockNum - page*row
@@ -94,7 +94,7 @@ func (d *Dao) GetBlockList(page, row int) []model.ChainBlock {
 	return blocks
 }
 
-func (d *Dao) GetBlockByHash(c context.Context, hash string) *model.ChainBlock {
+func (d *ReadOnlyDao) GetBlockByHash(c context.Context, hash string) *model.ChainBlock {
 	var block model.ChainBlock
 	blockNum, _ := d.GetBestBlockNum(context.TODO())
 	for index := int(blockNum / uint64(model.SplitTableBlockNum)); index >= 0; index-- {
@@ -106,7 +106,7 @@ func (d *Dao) GetBlockByHash(c context.Context, hash string) *model.ChainBlock {
 	return nil
 }
 
-func (d *Dao) GetBlockByNum(blockNum int) *model.ChainBlock {
+func (d *ReadOnlyDao) GetBlockByNum(blockNum int) *model.ChainBlock {
 	var block model.ChainBlock
 	query := d.db.Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num = ?", blockNum).Scan(&block)
 	if query == nil || query.Error != nil || RecordNotFound(query) {
@@ -115,7 +115,7 @@ func (d *Dao) GetBlockByNum(blockNum int) *model.ChainBlock {
 	return &block
 }
 
-func (d *Dao) BlockAsJson(c context.Context, block *model.ChainBlock) *model.ChainBlockJson {
+func (d *ReadOnlyDao) BlockAsJson(c context.Context, block *model.ChainBlock) *model.ChainBlockJson {
 	bj := model.ChainBlockJson{
 		BlockNum:        block.BlockNum,
 		BlockTimestamp:  block.BlockTimestamp,
@@ -153,7 +153,7 @@ func (d *Dao) UpdateEventAndExtrinsic(txn *GormDB, block *model.ChainBlock, even
 	return query.Error
 }
 
-func (d *Dao) GetNearBlock(blockNum int) *model.ChainBlock {
+func (d *ReadOnlyDao) GetNearBlock(blockNum int) *model.ChainBlock {
 	var block model.ChainBlock
 	query := d.db.Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num > ?", blockNum).Order("block_num desc").Scan(&block)
 	if query == nil || query.Error != nil || RecordNotFound(query) {
@@ -166,7 +166,7 @@ func (d *Dao) SetBlockFinalized(block *model.ChainBlock) {
 	d.db.Model(block).Updates(model.ChainBlock{Finalized: true})
 }
 
-func (d *Dao) BlocksReverseByNum(blockNums []int) map[int]model.ChainBlock {
+func (d *ReadOnlyDao) BlocksReverseByNum(blockNums []int) map[int]model.ChainBlock {
 	var blocks []model.ChainBlock
 	if len(blockNums) == 0 {
 		return nil
@@ -190,7 +190,7 @@ func (d *Dao) BlocksReverseByNum(blockNums []int) map[int]model.ChainBlock {
 	return toMap
 }
 
-func (d *Dao) GetBlockNumArr(start, end int) []int {
+func (d *ReadOnlyDao) GetBlockNumArr(start, end int) []int {
 	var blockNums []int
 	d.db.Model(model.ChainBlock{BlockNum: end}).Where("block_num BETWEEN ? AND ?", start, end).Order("block_num asc").Pluck("block_num", &blockNums)
 	return blockNums

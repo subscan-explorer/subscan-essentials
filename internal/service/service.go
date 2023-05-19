@@ -17,15 +17,20 @@ import (
 type Service struct {
 	dao           dao.IDao
 	pluginEmitter PluginEmitter
+	ReadOnlyService
 }
 
 // New  a service and return.
 func New(stop chan struct{}) (s *Service) {
+	d, dbStorage := dao.New(true)
+	pluginRegister(dbStorage)
+	return newWithDao(stop, d)
+}
+
+func newWithDao(stop chan struct{}, dao dao.IDao) *Service {
 	websocket.SetEndpoint(util.WSEndPoint)
-	d, dbStorage := dao.New()
-	s = &Service{dao: d}
+	s := &Service{dao: dao, ReadOnlyService: *readOnlyWithDao(dao)}
 	s.initSubRuntimeLatest()
-	pluginRegister(dbStorage, d)
 	s.pluginEmitter = NewPluginEmitter(stop)
 	return s
 }
@@ -39,7 +44,7 @@ func (s *Service) GetDao() dao.IDao {
 }
 
 // Close close the resource.
-func (s *Service) Close() {
+func (s *ReadOnlyService) Close() {
 	s.dao.Close()
 }
 

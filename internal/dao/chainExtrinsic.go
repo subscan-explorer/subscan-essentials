@@ -56,7 +56,7 @@ func (d *Dao) DropExtrinsicNotFinalizedData(c context.Context, blockNum int, fin
 	return delExist
 }
 
-func (d *Dao) GetExtrinsicsByBlockNum(blockNum int) []model.ChainExtrinsicJson {
+func (d *ReadOnlyDao) GetExtrinsicsByBlockNum(blockNum int) []model.ChainExtrinsicJson {
 	var extrinsics []model.ChainExtrinsic
 	query := d.db.Model(model.ChainExtrinsic{BlockNum: blockNum}).
 		Where("block_num = ?", blockNum).Order("id asc").Scan(&extrinsics)
@@ -70,7 +70,7 @@ func (d *Dao) GetExtrinsicsByBlockNum(blockNum int) []model.ChainExtrinsicJson {
 	return list
 }
 
-func (d *Dao) GetExtrinsicList(c context.Context, page, row int, order string, queryWhere ...string) ([]model.ChainExtrinsic, int) {
+func (d *ReadOnlyDao) GetExtrinsicList(c context.Context, page, row int, order string, queryWhere ...string) ([]model.ChainExtrinsic, int) {
 	var extrinsics []model.ChainExtrinsic
 	var count int64
 
@@ -108,7 +108,7 @@ func (d *Dao) GetExtrinsicList(c context.Context, page, row int, order string, q
 	return extrinsics, int(count)
 }
 
-func (d *Dao) GetExtrinsicsByHash(c context.Context, hash string) *model.ChainExtrinsic {
+func (d *ReadOnlyDao) GetExtrinsicsByHash(c context.Context, hash string) *model.ChainExtrinsic {
 	var extrinsic model.ChainExtrinsic
 	blockNum, _ := d.GetFillBestBlockNum(c)
 	for index := blockNum / (model.SplitTableBlockNum); index >= 0; index-- {
@@ -123,14 +123,14 @@ func (d *Dao) GetExtrinsicsByHash(c context.Context, hash string) *model.ChainEx
 	return nil
 }
 
-func (d *Dao) GetExtrinsicsDetailByHash(c context.Context, hash string) *model.ExtrinsicDetail {
+func (d *ReadOnlyDao) GetExtrinsicsDetailByHash(c context.Context, hash string) *model.ExtrinsicDetail {
 	if extrinsic := d.GetExtrinsicsByHash(c, hash); extrinsic != nil {
 		return d.extrinsicsAsDetail(c, extrinsic)
 	}
 	return nil
 }
 
-func (d *Dao) GetExtrinsicsDetailByIndex(c context.Context, index string) *model.ExtrinsicDetail {
+func (d *ReadOnlyDao) GetExtrinsicsDetailByIndex(c context.Context, index string) *model.ExtrinsicDetail {
 	var extrinsics []model.ChainExtrinsic
 	indexArr := strings.Split(index, "-")
 	query := d.db.Model(model.ChainExtrinsic{BlockNum: util.StringToInt(indexArr[0])}).
@@ -148,7 +148,7 @@ func (d *Dao) GetExtrinsicsDetailByIndex(c context.Context, index string) *model
 	return d.extrinsicsAsDetail(c, &extrinsic)
 }
 
-func (d *Dao) extrinsicsAsDetail(c context.Context, e *model.ChainExtrinsic) *model.ExtrinsicDetail {
+func (d *ReadOnlyDao) extrinsicsAsDetail(c context.Context, e *model.ChainExtrinsic) *model.ExtrinsicDetail {
 	detail := model.ExtrinsicDetail{
 		BlockTimestamp:     e.BlockTimestamp,
 		ExtrinsicIndex:     e.ExtrinsicIndex,
@@ -178,7 +178,7 @@ func (d *Dao) extrinsicsAsDetail(c context.Context, e *model.ChainExtrinsic) *mo
 	return &detail
 }
 
-func (d *Dao) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsicJson {
+func (d *ReadOnlyDao) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsicJson {
 	ej := &model.ChainExtrinsicJson{
 		BlockNum:           e.BlockNum,
 		BlockTimestamp:     e.BlockTimestamp,

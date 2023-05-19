@@ -7,7 +7,6 @@ import (
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc/metadata"
-	"github.com/itering/substrate-api-rpc/websocket"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -85,7 +84,7 @@ func (m *MockDao) SetHeartBeatNow(context.Context, string) error {
 	return nil
 }
 
-func (m *MockDao) DaemonHeath(context.Context) map[string]bool {
+func (m *MockDao) DaemonHealth(context.Context) map[string]bool {
 	return nil
 }
 
@@ -287,10 +286,5 @@ func (m *MockDao) RuntimeVersionRecent() *model.RuntimeVersion {
 func init() {
 	stop := make(chan struct{})
 	d := &MockDao{}
-	testSrv = Service{
-		dao: d,
-	}
-	websocket.SetEndpoint(util.WSEndPoint)
-	testSrv.pluginEmitter = NewPluginEmitter(stop)
-	testSrv.initSubRuntimeLatest()
+	testSrv = *newWithDao(stop, d)
 }

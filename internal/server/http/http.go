@@ -15,10 +15,10 @@ import (
 	"github.com/itering/subscan/plugins"
 )
 
-var svc *service.Service
+var svc *service.ReadOnlyService
 
 // NewHTTPServer new a HTTP server.
-func NewHTTPServer(c *configs.Server, s *service.Service) *http.Server {
+func NewHTTPServer(c *configs.Server, s *service.ReadOnlyService) *http.Server {
 	opts := []http.ServerOption{
 		http.Middleware(
 			tracing.Server(),

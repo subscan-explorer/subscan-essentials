@@ -45,7 +45,7 @@ func (d *Dao) DropEventNotFinalizedData(blockNum int, finalized bool) bool {
 	return delExist
 }
 
-func (d *Dao) GetEventByBlockNum(blockNum int, where ...string) []model.ChainEventJson {
+func (d *ReadOnlyDao) GetEventByBlockNum(blockNum int, where ...string) []model.ChainEventJson {
 	var events []model.ChainEventJson
 	queryOrigin := d.db.Model(model.ChainEvent{BlockNum: blockNum}).Where("block_num = ?", blockNum)
 	for _, w := range where {
@@ -58,7 +58,7 @@ func (d *Dao) GetEventByBlockNum(blockNum int, where ...string) []model.ChainEve
 	return events
 }
 
-func (d *Dao) GetEventList(page, row int, order string, where ...string) ([]model.ChainEvent, int) {
+func (d *ReadOnlyDao) GetEventList(page, row int, order string, where ...string) ([]model.ChainEvent, int) {
 	var Events []model.ChainEvent
 
 	var count int64
@@ -92,7 +92,7 @@ func (d *Dao) GetEventList(page, row int, order string, where ...string) ([]mode
 	return Events, int(count)
 }
 
-func (d *Dao) GetEventsByIndex(extrinsicIndex string) []model.ChainEvent {
+func (d *ReadOnlyDao) GetEventsByIndex(extrinsicIndex string) []model.ChainEvent {
 	var Event []model.ChainEvent
 	indexArr := strings.Split(extrinsicIndex, "-")
 	query := d.db.Model(model.ChainEvent{BlockNum: util.StringToInt(indexArr[0])}).
@@ -103,7 +103,7 @@ func (d *Dao) GetEventsByIndex(extrinsicIndex string) []model.ChainEvent {
 	return Event
 }
 
-func (d *Dao) GetEventByIdx(index string) *model.ChainEvent {
+func (d *ReadOnlyDao) GetEventByIdx(index string) *model.ChainEvent {
 	var Event model.ChainEvent
 	indexArr := strings.Split(index, "-")
 	if len(indexArr) < 2 {

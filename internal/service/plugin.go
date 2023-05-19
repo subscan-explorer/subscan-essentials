@@ -141,11 +141,11 @@ func (p *PluginEmitter) Run() {
 }
 
 // registered storage
-func pluginRegister(ds *dao.DbStorage, dd *dao.Dao) {
+func pluginRegister(ds *dao.DbStorage) {
 	for name, plugin := range plugins.RegisteredPlugins {
 		db := *ds
 		db.Prefix = name
-		plugin.InitDao(&db, dd)
+		plugin.InitDao(&db)
 		for _, moduleId := range plugin.SubscribeExtrinsic() {
 			subscribeExtrinsic[moduleId] = append(subscribeExtrinsic[moduleId], plugin)
 		}

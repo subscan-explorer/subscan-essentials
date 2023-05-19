@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	subscan_plugin "github.com/itering/subscan-plugin"
-	internalDao "github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/plugins/router"
 	"github.com/itering/subscan/plugins/storage"
 	"github.com/shopspring/decimal"
@@ -13,7 +12,7 @@ import (
 
 type TPlugin struct{}
 
-func (a *TPlugin) InitDao(d storage.Dao, dd *internalDao.Dao) {}
+func (a *TPlugin) InitDao(d storage.Dao) {}
 
 func (a *TPlugin) InitHttp() []router.Http { return nil }
 

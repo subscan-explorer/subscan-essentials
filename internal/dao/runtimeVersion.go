@@ -33,13 +33,13 @@ func (d *Dao) SetRuntimeData(specVersion int, modules string, rawData string) in
 	return query.RowsAffected
 }
 
-func (d *Dao) RuntimeVersionList() []model.RuntimeVersion {
+func (d *ReadOnlyDao) RuntimeVersionList() []model.RuntimeVersion {
 	var list []model.RuntimeVersion
 	d.db.Select("spec_version,modules").Model(model.RuntimeVersion{}).Find(&list)
 	return list
 }
 
-func (d *Dao) RuntimeVersionRecent() *model.RuntimeVersion {
+func (d *ReadOnlyDao) RuntimeVersionRecent() *model.RuntimeVersion {
 	var list []model.RuntimeVersion
 	_ = d.db.Select("spec_version,raw_data").Model(model.RuntimeVersion{}).Limit(1).Order("spec_version DESC").Find(&list)
 	if len(list) == 0 {
@@ -48,7 +48,7 @@ func (d *Dao) RuntimeVersionRecent() *model.RuntimeVersion {
 	return &list[0]
 }
 
-func (d *Dao) RuntimeVersionRaw(spec int) *metadata.RuntimeRaw {
+func (d *ReadOnlyDao) RuntimeVersionRaw(spec int) *metadata.RuntimeRaw {
 	var list []metadata.RuntimeRaw
 	d.db.Model(model.RuntimeVersion{}).
 		Select("spec_version as spec ,raw_data as raw").

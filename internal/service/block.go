@@ -169,7 +169,7 @@ func (s *Service) UpdateBlockData(conn websocket.WsConn, block *model.ChainBlock
 	return
 }
 
-func (s *Service) checkoutExtrinsicEvents(e []model.ChainEvent, blockNumInt int) map[string][]model.ChainEvent {
+func (s *ReadOnlyService) checkoutExtrinsicEvents(e []model.ChainEvent, blockNumInt int) map[string][]model.ChainEvent {
 	eventMap := make(map[string][]model.ChainEvent)
 	for _, event := range e {
 		extrinsicIndex := fmt.Sprintf("%d-%d", blockNumInt, event.ExtrinsicIdx)
@@ -178,7 +178,7 @@ func (s *Service) checkoutExtrinsicEvents(e []model.ChainEvent, blockNumInt int)
 	return eventMap
 }
 
-func (s *Service) GetCurrentRuntimeSpecVersion(blockNum int) int {
+func (s *ReadOnlyService) GetCurrentRuntimeSpecVersion(blockNum int) int {
 	if util.CurrentRuntimeSpecVersion != 0 {
 		return util.CurrentRuntimeSpecVersion
 	}
@@ -188,7 +188,7 @@ func (s *Service) GetCurrentRuntimeSpecVersion(blockNum int) int {
 	return -1
 }
 
-func (s *Service) GetExtrinsicList(page, row int, order string, query ...string) ([]*model.ChainExtrinsicJson, int) {
+func (s *ReadOnlyService) GetExtrinsicList(page, row int, order string, query ...string) ([]*model.ChainExtrinsicJson, int) {
 	c := context.TODO()
 	list, count := s.dao.GetExtrinsicList(c, page, row, order, query...)
 	var ejs []*model.ChainExtrinsicJson
@@ -198,7 +198,7 @@ func (s *Service) GetExtrinsicList(page, row int, order string, query ...string)
 	return ejs, count
 }
 
-func (s *Service) GetBlocksSampleByNums(page, row int) []model.SampleBlockJson {
+func (s *ReadOnlyService) GetBlocksSampleByNums(page, row int) []model.SampleBlockJson {
 	var blockJson []model.SampleBlockJson
 	blocks := s.dao.GetBlockList(page, row)
 	for _, block := range blocks {
@@ -208,22 +208,22 @@ func (s *Service) GetBlocksSampleByNums(page, row int) []model.SampleBlockJson {
 	return blockJson
 }
 
-func (s *Service) GetExtrinsicByIndex(index string) *model.ExtrinsicDetail {
+func (s *ReadOnlyService) GetExtrinsicByIndex(index string) *model.ExtrinsicDetail {
 	c := context.TODO()
 	return s.dao.GetExtrinsicsDetailByIndex(c, index)
 }
 
-func (s *Service) GetExtrinsicDetailByHash(hash string) *model.ExtrinsicDetail {
+func (s *ReadOnlyService) GetExtrinsicDetailByHash(hash string) *model.ExtrinsicDetail {
 	c := context.TODO()
 	return s.dao.GetExtrinsicsDetailByHash(c, hash)
 }
 
-func (s *Service) GetExtrinsicByHash(hash string) *model.ChainExtrinsic {
+func (s *ReadOnlyService) GetExtrinsicByHash(hash string) *model.ChainExtrinsic {
 	c := context.TODO()
 	return s.dao.GetExtrinsicsByHash(c, hash)
 }
 
-func (s *Service) GetBlockByHashJson(hash string) *model.ChainBlockJson {
+func (s *ReadOnlyService) GetBlockByHashJson(hash string) *model.ChainBlockJson {
 	c := context.TODO()
 	block := s.dao.GetBlockByHash(c, hash)
 	if block == nil {
@@ -232,11 +232,11 @@ func (s *Service) GetBlockByHashJson(hash string) *model.ChainBlockJson {
 	return s.dao.BlockAsJson(c, block)
 }
 
-func (s *Service) EventByIndex(index string) *model.ChainEvent {
+func (s *ReadOnlyService) EventByIndex(index string) *model.ChainEvent {
 	return s.dao.GetEventByIdx(index)
 }
 
-func (s *Service) GetBlockByNum(num int) *model.ChainBlockJson {
+func (s *ReadOnlyService) GetBlockByNum(num int) *model.ChainBlockJson {
 	c := context.TODO()
 	block := s.dao.GetBlockByNum(num)
 	if block == nil {
@@ -245,7 +245,7 @@ func (s *Service) GetBlockByNum(num int) *model.ChainBlockJson {
 	return s.dao.BlockAsJson(c, block)
 }
 
-func (s *Service) GetBlockByHash(hash string) *model.ChainBlock {
+func (s *ReadOnlyService) GetBlockByHash(hash string) *model.ChainBlock {
 	c := context.TODO()
 	block := s.dao.GetBlockByHash(c, hash)
 	if block == nil {
@@ -254,7 +254,7 @@ func (s *Service) GetBlockByHash(hash string) *model.ChainBlock {
 	return block
 }
 
-func (s *Service) BlockAsSampleJson(block *model.ChainBlock) *model.SampleBlockJson {
+func (s *ReadOnlyService) BlockAsSampleJson(block *model.ChainBlock) *model.SampleBlockJson {
 	b := model.SampleBlockJson{
 		BlockNum:        block.BlockNum,
 		BlockTimestamp:  block.BlockTimestamp,
@@ -267,11 +267,11 @@ func (s *Service) BlockAsSampleJson(block *model.ChainBlock) *model.SampleBlockJ
 	return &b
 }
 
-func (s *Service) GetCurrentBlockNum(c context.Context) (uint64, error) {
+func (s *ReadOnlyService) GetCurrentBlockNum(c context.Context) (uint64, error) {
 	return s.dao.GetBestBlockNum(c)
 }
 
-func (s *Service) ValidatorsList(conn websocket.WsConn, hash string) (validatorList []string) {
+func (s *ReadOnlyService) ValidatorsList(conn websocket.WsConn, hash string) (validatorList []string) {
 	// validatorsRaw, _ := rpc.ReadStorage(conn, "Session", "Validators", hash)
 	// for _, addr := range validatorsRaw.ToStringSlice() {
 	// 	validatorList = append(validatorList, util.TrimHex(addr))

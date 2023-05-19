@@ -16,19 +16,22 @@ var DaemonAction = []string{"substrate"}
 type Dao struct {
 	db    *gorm.DB
 	redis *redis.Pool
+	ReadOnlyDao
 }
 
 // New new a dao and return.
-func New() (dao *Dao, storage *DbStorage) {
+func New(migrate bool) (IDao, *DbStorage) {
 	db := newDb()
 
-	dao = &Dao{
-		db:    db,
-		redis: newCachePool(configs.Boot.Redis.Addr, ""),
+	pool := newCachePool(configs.Boot.Redis.Addr, "")
+	dao := &Dao{
+		db:          db,
+		redis:       pool,
+		ReadOnlyDao: readOnlyWithDb(db, pool),
 	}
 	dao.Migration()
-	storage = &DbStorage{db: db}
-	return
+	storage := &DbStorage{db: db, dao: dao}
+	return dao, storage
 }
 
 func newCachePool(host, password string) *redis.Pool {
@@ -68,7 +71,7 @@ func newCachePool(host, password string) *redis.Pool {
 }
 
 // Close close the resource.
-func (d *Dao) Close() {
+func (d *ReadOnlyDao) Close() {
 	if d.redis != nil {
 		_ = d.redis.Close()
 	}
@@ -77,7 +80,7 @@ func (d *Dao) Close() {
 }
 
 // Ping ping the resource.
-func (d *Dao) Ping(ctx context.Context) (err error) {
+func (d *ReadOnlyDao) Ping(ctx context.Context) (err error) {
 	if err = d.pingRedis(ctx); err != nil {
 		return
 	}
@@ -85,7 +88,7 @@ func (d *Dao) Ping(ctx context.Context) (err error) {
 	return
 }
 
-func (d *Dao) GetModelTableName(model interface{}) string {
+func (d *ReadOnlyDao) GetModelTableName(model interface{}) string {
 	stmt := &gorm.Statement{DB: d.db}
 	stmt.Parse(model)
 	return stmt.Schema.Table

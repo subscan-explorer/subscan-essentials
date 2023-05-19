@@ -37,20 +37,20 @@ func (d *Dao) IncrMetadata(c context.Context, filed string, incrNum int) (err er
 	return
 }
 
-func (d *Dao) GetMetadata(c context.Context) (ms map[string]string, err error) {
+func (d *ReadOnlyDao) GetMetadata(c context.Context) (ms map[string]string, err error) {
 	conn, _ := d.redis.GetContext(c)
 	defer conn.Close()
 	ms, err = redis.StringMap(conn.Do("HGETALL", RedisMetadataKey))
 	return
 }
 
-func (d *Dao) GetBestBlockNum(c context.Context) (uint64, error) {
+func (d *ReadOnlyDao) GetBestBlockNum(c context.Context) (uint64, error) {
 	conn, _ := d.redis.GetContext(c)
 	defer conn.Close()
 	return redis.Uint64(conn.Do("HGET", RedisMetadataKey, "blockNum"))
 }
 
-func (d *Dao) GetFinalizedBlockNum(c context.Context) (uint64, error) {
+func (d *ReadOnlyDao) GetFinalizedBlockNum(c context.Context) (uint64, error) {
 	conn, _ := d.redis.GetContext(c)
 	defer conn.Close()
 	return redis.Uint64(conn.Do("HGET", RedisMetadataKey, "finalized_blockNum"))
