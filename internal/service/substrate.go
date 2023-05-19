@@ -133,13 +133,11 @@ func (s *SubscribeService) subscribeFetchBlock() {
 			if lastNum == 0 {
 				startBlock = lastNum
 			}
-
 			for i := startBlock; i <= int(newHead-FinalizedWaitingBlockCount); i++ {
 				wg.Add(1)
-				if err := s.FillBlockData(nil, i, true); err != nil {
+				err := p.Invoke(BlockFinalized{BlockNum: i, Finalized: true})
+				if err != nil {
 					logError("ChainGetBlockHash get", err)
-				} else {
-					s.SetHeartBeat(fmt.Sprintf("%s:heartBeat:%s", util.NetworkNode, "substrate"))
 				}
 			}
 			wg.Wait()
