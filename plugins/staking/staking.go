@@ -257,7 +257,7 @@ func (a *Staking) getEraInfo(era uint32, blockHash string, totalRewards decimal.
 	eraEnc := scale.Encode("U32", era)
 	keys, scaleType, err := util.ReadKeysPaged(nil, blockHash, "Staking", "ErasStakersClipped", eraEnc)
 	if err != nil {
-		return bad, err
+		return bad, fmt.Errorf("failed to get era stakers: %w", err)
 	}
 	totalStakeRes := util.StartReadStorage(nil, "Staking", "ErasTotalStake", blockHash, eraEnc)
 	pointsRes := util.StartReadStorage(nil, "Staking", "ErasRewardPoints", blockHash, eraEnc)
@@ -265,7 +265,7 @@ func (a *Staking) getEraInfo(era uint32, blockHash string, totalRewards decimal.
 		k := eraStakerKey(key, scaleType)
 		response, err := util.ReadStorageByKey(nil, k.StorageKey, blockHash)
 		if err != nil {
-			return bad, err
+			return bad, fmt.Errorf("failed to read storage key %s: %w", k.StorageKey.EncodeKey, err)
 		}
 		exposure := &StakeExposure{}
 		err = json.Unmarshal([]byte(response.ToString()), exposure)
@@ -292,12 +292,12 @@ func (a *Staking) getEraInfo(era uint32, blockHash string, totalRewards decimal.
 	}
 	totalStakeRaw, err := totalStakeRes.Wait()
 	if err != nil {
-		return bad, err
+		return bad, fmt.Errorf("failed to get total stake: %w", err)
 	}
 	totalStake := totalStakeRaw.ToDecimal()
 	pointsRaw, err := pointsRes.Wait()
 	if err != nil {
-		return bad, err
+		return bad, fmt.Errorf("failed to get points: %w", err)
 	}
 	eraPoints := &EraPoints{}
 	slog.Debug("getEraInfo", "pointsRaw", pointsRaw.ToString())
