@@ -122,7 +122,7 @@ func (c *ChainEvent) AsPlugin() *storage.Event {
 		ExtrinsicIdx:  c.ExtrinsicIdx,
 		ModuleId:      c.ModuleId,
 		EventId:       c.EventId,
-		Params:        []byte(util.ToString(c.Params)),
+		Params:        util.ToString(c.Params),
 		ExtrinsicHash: c.ExtrinsicHash,
 		EventIdx:      c.EventIdx,
 		EventIndex:    c.EventIndex,

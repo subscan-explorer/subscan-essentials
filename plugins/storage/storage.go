@@ -79,7 +79,7 @@ type Event struct {
 	ExtrinsicIdx  int    `json:"extrinsic_idx"`
 	ModuleId      string `json:"module_id"`
 	EventId       string `json:"event_id"`
-	Params        []byte `json:"params"`
+	Params        string `json:"params"`
 	ExtrinsicHash string `json:"extrinsic_hash"`
 	EventIdx      int    `json:"event_idx"`
 	EventIndex    string `json:"event_index"`
