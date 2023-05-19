@@ -9,9 +9,9 @@ require (
 	github.com/gomodule/redigo v1.8.9
 	github.com/gorilla/websocket v1.5.0
 	github.com/huandu/xstrings v1.4.0
-	github.com/itering/scale.go v1.6.0
+	github.com/itering/scale.go v1.5.9
 	github.com/itering/subscan-plugin v0.2.3
-	github.com/itering/substrate-api-rpc v0.5.0
+	github.com/itering/substrate-api-rpc v0.4.17
 	github.com/lmittmann/tint v0.3.3
 	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/panjf2000/ants/v2 v2.7.4
@@ -28,10 +28,8 @@ require (
 )
 
 require (
-	github.com/ChainSafe/go-schnorrkel v1.0.0 // indirect
 	github.com/bytedance/sonic v1.8.8 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
-	github.com/cosmos/go-bip39 v1.0.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
@@ -47,8 +45,6 @@ require (
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
-	github.com/gtank/merlin v0.1.1 // indirect
-	github.com/gtank/ristretto255 v0.1.2 // indirect
 	github.com/imdario/mergo v0.3.15 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
@@ -57,7 +53,6 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
-	github.com/mimoo/StrobeGo v0.0.0-20220103164710-9a04d6ca976b // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.7 // indirect
