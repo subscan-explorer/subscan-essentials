@@ -1,4 +1,4 @@
-FROM golang:1.17.10 as builder
+FROM golang:1.20.4 as builder
 
 WORKDIR /subscan
 
