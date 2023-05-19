@@ -12,11 +12,11 @@ import (
 
 var runtimeSpecs []int
 
-func (s *Service) SubstrateRuntimeList() []model.RuntimeVersion {
+func (s *ReadOnlyService) SubstrateRuntimeList() []model.RuntimeVersion {
 	return s.dao.RuntimeVersionList()
 }
 
-func (s *Service) SubstrateRuntimeInfo(spec int) *metadata.Instant {
+func (s *ReadOnlyService) SubstrateRuntimeInfo(spec int) *metadata.Instant {
 	if metadataInstant, ok := metadata.RuntimeMetadata[spec]; ok {
 		return metadataInstant
 	}
@@ -95,4 +95,8 @@ func (s *Service) getMetadataInstant(spec int, hash string) *metadata.Instant {
 		metadataInstant = metadata.Process(raw)
 	}
 	return metadataInstant
+}
+
+func (s *ReadOnlyService) GetRuntimeConstant(moduleName string, constantName string) *model.RuntimeConstant {
+	return s.dao.GetRuntimeConstantLatest(moduleName, constantName)
 }

@@ -2,12 +2,13 @@ package service
 
 import (
 	"context"
+
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/itering/subscan/util"
 )
 
 // Ping ping the resource.
-func (s *Service) Ping(ctx context.Context, e *empty.Empty) (*empty.Empty, error) {
+func (s *ReadOnlyService) Ping(ctx context.Context, e *empty.Empty) (*empty.Empty, error) {
 	return &empty.Empty{}, s.dao.Ping(ctx)
 }
 
@@ -16,11 +17,11 @@ func (s *Service) SetHeartBeat(action string) {
 	_ = s.dao.SetHeartBeatNow(ctx, action)
 }
 
-func (s *Service) DaemonHealth(ctx context.Context) map[string]bool {
-	return s.dao.DaemonHeath(ctx)
+func (s *ReadOnlyService) DaemonHealth(ctx context.Context) map[string]bool {
+	return s.dao.DaemonHealth(ctx)
 }
 
-func (s *Service) Metadata() (map[string]string, error) {
+func (s *ReadOnlyService) Metadata() (map[string]string, error) {
 	c := context.TODO()
 	m, err := s.dao.GetMetadata(c)
 	m["networkNode"] = util.NetworkNode

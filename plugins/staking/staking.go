@@ -9,7 +9,6 @@ import (
 	scale "github.com/itering/scale.go/types"
 	"github.com/itering/scale.go/types/scaleBytes"
 	plugin "github.com/itering/subscan-plugin"
-	internalDao "github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/plugins/router"
 	"github.com/itering/subscan/plugins/staking/dao"
 	"github.com/itering/subscan/plugins/staking/http"
@@ -27,18 +26,16 @@ import (
 var srv *service.Service
 
 type Staking struct {
-	d  storage.Dao
-	dd *internalDao.Dao
+	d storage.Dao
 }
 
 func New() *Staking {
 	return &Staking{}
 }
 
-func (a *Staking) InitDao(d storage.Dao, dd *internalDao.Dao) {
-	srv = service.New(d, dd)
+func (a *Staking) InitDao(d storage.Dao) {
+	srv = service.New(d)
 	a.d = d
-	a.dd = dd
 	slog.Debug("staking init dao")
 	a.Migrate()
 }

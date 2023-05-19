@@ -22,7 +22,7 @@ func (d *Dao) DropLogsNotFinalizedData(blockNum int, finalized bool) bool {
 	return delExist
 }
 
-func (d *Dao) GetLogsByIndex(index string) *model.ChainLogJson {
+func (d *ReadOnlyDao) GetLogsByIndex(index string) *model.ChainLogJson {
 	var Log model.ChainLogJson
 	indexArr := strings.Split(index, "-")
 	query := d.db.Model(model.ChainLog{BlockNum: util.StringToInt(indexArr[0])}).Where("log_index = ?", index).Scan(&Log)
@@ -32,7 +32,7 @@ func (d *Dao) GetLogsByIndex(index string) *model.ChainLogJson {
 	return &Log
 }
 
-func (d *Dao) GetLogByBlockNum(blockNum int) []model.ChainLogJson {
+func (d *ReadOnlyDao) GetLogByBlockNum(blockNum int) []model.ChainLogJson {
 	var logs []model.ChainLogJson
 	query := d.db.Model(&model.ChainLog{BlockNum: blockNum}).
 		Where("block_num =?", blockNum).Order("id asc").Scan(&logs)

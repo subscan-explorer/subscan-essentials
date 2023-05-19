@@ -90,7 +90,8 @@ func init() {
 	util.ConfDir = "../../configs"
 	configs.Init()
 
-	testDao, _ = New()
+	td, _ := New(true)
+	testDao = td.(*Dao)
 	var tables []string
 	db := testDao.db
 	err := db.Raw("show tables;").Pluck("Tables_in_subscan_test", &tables).Error

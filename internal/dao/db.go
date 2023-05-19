@@ -21,6 +21,7 @@ import (
 type DbStorage struct {
 	db     *gorm.DB
 	Prefix string
+	dao    IReadOnlyDao
 }
 
 func (d *DbStorage) SetPrefix(prefix string) {
@@ -45,6 +46,10 @@ func (d *DbStorage) GetModelTableName(model interface{}) string {
 	stmt := &gorm.Statement{DB: d.db}
 	stmt.Parse(model)
 	return stmt.Schema.Table
+}
+
+func (d *DbStorage) GetRuntimeConstant(moduleName, constantName string) *storage.RuntimeConstant {
+	return d.dao.GetRuntimeConstantLatest(moduleName, constantName).AsPlugin()
 }
 
 func (d *DbStorage) checkProtected(model interface{}) error {

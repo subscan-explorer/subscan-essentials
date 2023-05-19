@@ -15,7 +15,7 @@ func (d *Dao) CreateRuntimeConstants(spec int, constants []model.RuntimeConstant
 	return nil
 }
 
-func (d *Dao) GetRuntimeConstantLatest(moduleName string, constantName string) *model.RuntimeConstant {
+func (d *ReadOnlyDao) GetRuntimeConstantLatest(moduleName string, constantName string) *model.RuntimeConstant {
 	var constants []model.RuntimeConstant
 	d.db.Where("module_name = ? AND constant_name = ?", moduleName, constantName).Order("spec_version DESC").Limit(1).Find(&constants)
 	if len(constants) == 0 {

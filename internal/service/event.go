@@ -34,7 +34,7 @@ func (s *Service) AddEvent(
 	return eventCount, err
 }
 
-func (s *Service) RenderEvents(page, row int, order string, where ...string) ([]model.ChainEventJson, int) {
+func (s *ReadOnlyService) RenderEvents(page, row int, order string, where ...string) ([]model.ChainEventJson, int) {
 	var (
 		result    []model.ChainEventJson
 		blockNums []int

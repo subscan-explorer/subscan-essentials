@@ -69,7 +69,7 @@ type ChainCall struct {
 	ExtrinsicHash  string       `json:"extrinsic_hash"`
 	ModuleId       string       `json:"module_id"`
 	CallId         string       `json:"call_id"`
-	Params         []CallArg    `json:"params" sql:"type:text;"`
+	Params         []CallArg    `json:"params" gorm:"type:text;"`
 	Events         []ChainEvent `json:"events"`
 }
 
@@ -201,8 +201,8 @@ type RuntimeVersion struct {
 	Id          int    `json:"-"`
 	Name        string `json:"-"`
 	SpecVersion int    `gorm:"uniqueIndex" json:"spec_version"`
-	Modules     string `json:"modules"  sql:"type:TEXT;"`
-	RawData     string `json:"-" sql:"type:MEDIUMTEXT;"`
+	Modules     string `json:"modules"  gorm:"type:TEXT;"`
+	RawData     string `json:"-" gorm:"type:MEDIUMTEXT;"`
 }
 
 type RuntimeConstant struct {
@@ -212,6 +212,16 @@ type RuntimeConstant struct {
 	ConstantName string `gorm:"index" json:"constant_name" sql:"type:varchar(100);"`
 	Type         string `json:"type" sql:"type:varchar(100);"`
 	Value        string `json:"value" sql:"type:MEDIUMTEXT;"`
+}
+
+func (c *RuntimeConstant) AsPlugin() *storage.RuntimeConstant {
+	return &storage.RuntimeConstant{
+		SpecVersion:  c.SpecVersion,
+		ModuleName:   c.ModuleName,
+		ConstantName: c.ConstantName,
+		Type:         c.Type,
+		Value:        c.Value,
+	}
 }
 
 type ChainLog struct {

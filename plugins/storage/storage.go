@@ -16,6 +16,8 @@ type Dao interface {
 
 	// Plugin set prefix
 	SetPrefix(string)
+
+	GetRuntimeConstant(moduleName string, constantName string) *RuntimeConstant
 }
 
 type Option struct {
@@ -48,6 +50,14 @@ type DB interface {
 	Update(model interface{}, query interface{}, attr map[string]interface{}) error
 	// Delete one or more record
 	Delete(model interface{}, query interface{}) error
+}
+
+type RuntimeConstant struct {
+	SpecVersion  int    `json:"spec_version"`
+	ModuleName   string `json:"module_name"`
+	ConstantName string `json:"constant_name"`
+	Type         string `json:"type"`
+	Value        string `json:"value"`
 }
 
 type Block struct {

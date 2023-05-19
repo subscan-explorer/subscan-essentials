@@ -10,7 +10,7 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-func (d *Dao) pingRedis(ctx context.Context) (err error) {
+func (d *ReadOnlyDao) pingRedis(ctx context.Context) (err error) {
 	conn, _ := d.redis.GetContext(ctx)
 	defer conn.Close()
 	if _, err = conn.Do("SET", "ping", "pong"); err != nil {
@@ -23,7 +23,7 @@ func (d *Dao) SetHeartBeatNow(c context.Context, action string) error {
 	return d.setCache(c, action, time.Now().Unix(), 300)
 }
 
-func (d *Dao) DaemonHeath(c context.Context) map[string]bool {
+func (d *ReadOnlyDao) DaemonHealth(c context.Context) map[string]bool {
 	conn, _ := d.redis.GetContext(c)
 	defer conn.Close()
 	status := map[string]bool{}

@@ -38,7 +38,7 @@ func rewardsSlashes(c *gin.Context) {
 		toJson(w, 10001, nil, err)
 		return
 	}
-	depthConstant := svc.Dao().GetRuntimeConstantLatest("Staking", "HistoryDepth")
+	depthConstant := svc.GetRuntimeConstant("Staking", "HistoryDepth")
 
 	if depthConstant == nil {
 		slog.Error("get runtime constant failed", "module", "Staking", "name", "HistoryDepth")
