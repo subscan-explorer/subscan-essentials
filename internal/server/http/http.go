@@ -1,6 +1,7 @@
 package http
 
 import (
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -38,6 +39,11 @@ func NewHTTPServer(c *configs.Server, s *service.Service) *http.Server {
 		opts = append(opts, http.Timeout(timeout))
 	}
 	engine := http.NewServer(opts...)
+	if os.Getenv("GIN_MODE") == "debug" {
+		gin.SetMode(gin.DebugMode)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	e := gin.New()
 	e.Use(gin.Recovery())
 	e.Use(middlewares.CORS())
