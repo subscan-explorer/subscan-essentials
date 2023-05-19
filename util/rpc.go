@@ -3,6 +3,7 @@ package util
 import (
 	"encoding/json"
 	"math/rand"
+	"time"
 
 	"github.com/itering/substrate-api-rpc/rpc"
 	rpcStorage "github.com/itering/substrate-api-rpc/storage"
@@ -27,7 +28,7 @@ func (f FutureResult[T]) Wait() (T, error) {
 func StartReadStorage(p websocket.WsConn, module, prefix string, hash string, arg ...string) (ch FutureResult[rpcStorage.StateStorage]) {
 	ch = make(chan Result[rpcStorage.StateStorage], 1)
 	go func() {
-		r, err := rpc.ReadStorage(p, module, prefix, hash, arg...)
+		r, err := ReadStorage(p, module, prefix, hash, arg...)
 		ch <- Result[rpcStorage.StateStorage]{r, err}
 		close(ch)
 	}()
@@ -48,14 +49,52 @@ func StateGetKeysPagedAt(id int, storageKey string, at string) []byte {
 func ReadKeysPaged(p websocket.WsConn, at, module, prefix string, args ...string) (r []string, scale string, err error) {
 	key := storageKey.EncodeStorageKey(module, prefix, args...)
 	slog.Debug("readkeys", "key", key)
-	v := &rpc.JsonRpcResult{}
-	if err = websocket.SendWsRequest(p, v, StateGetKeysPagedAt(rand.Intn(10000), util.AddHex(key.EncodeKey), at)); err != nil {
+	res, err := SendWsRequest(p, StateGetKeysPagedAt(rand.Intn(10000), util.AddHex(key.EncodeKey), at))
+	if err != nil {
 		return
 	}
-	if keys, err := v.ToInterfaces(); err == nil {
+	if keys, err := res.ToInterfaces(); err == nil {
 		for _, k := range keys {
 			r = append(r, k.(string))
 		}
 	}
 	return r, key.ScaleType, err
 }
+
+func ReadStorage(p websocket.WsConn, module, prefix string, hash string, arg ...string) (r rpcStorage.StateStorage, err error) {
+	key := storageKey.EncodeStorageKey(module, prefix, arg...)
+	res, err := SendWsRequest(p, rpc.StateGetStorage(rand.Intn(10000), util.AddHex(key.EncodeKey), hash))
+	if err != nil {
+		return
+	}
+	if dataHex, err := res.ToString(); err == nil {
+		if dataHex == "" {
+			return "", nil
+		}
+		return rpcStorage.Decode(dataHex, key.ScaleType, nil)
+	}
+	return r, err
+}
+
+func SendWsRequest(conn websocket.WsConn, action []byte) (rpc.JsonRpcResult, error) {
+	return WithRetriesAndTimeout(time.Second*5, 5, func() (rpc.JsonRpcResult, error) {
+		v := &rpc.JsonRpcResult{}
+		e := websocket.SendWsRequest(conn, v, action)
+		return *v, e
+	})
+}
+
+func ReadStorageByKey(p websocket.WsConn, key storageKey.StorageKey, hash string) (r rpcStorage.StateStorage, err error) {
+	res, err := SendWsRequest(p, rpc.StateGetStorage(rand.Intn(10000), key.EncodeKey, hash))
+	if err != nil {
+		return
+	}
+	if dataHex, err := res.ToString(); err == nil {
+		if dataHex == "" {
+			return rpcStorage.StateStorage(""), nil
+		}
+		return rpcStorage.Decode(dataHex, key.ScaleType, nil)
+	}
+	return
+}
+

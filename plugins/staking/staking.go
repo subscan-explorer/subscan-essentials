@@ -18,7 +18,6 @@ import (
 	"github.com/itering/subscan/plugins/storage"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/address"
-	"github.com/itering/substrate-api-rpc/rpc"
 	"github.com/itering/substrate-api-rpc/storageKey"
 	"github.com/shopspring/decimal"
 	"golang.org/x/exp/slog"
@@ -264,7 +263,7 @@ func (a *Staking) getEraInfo(era uint32, blockHash string, totalRewards decimal.
 	pointsRes := util.StartReadStorage(nil, "Staking", "ErasRewardPoints", blockHash, eraEnc)
 	for _, key := range keys {
 		k := eraStakerKey(key, scaleType)
-		response, err := rpc.ReadStorageByKey(nil, k.StorageKey, blockHash)
+		response, err := util.ReadStorageByKey(nil, k.StorageKey, blockHash)
 		if err != nil {
 			return bad, err
 		}

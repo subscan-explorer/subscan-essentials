@@ -162,38 +162,46 @@ func (s *Service) FillBlockData(conn websocket.WsConn, blockNum int, finalized b
 		return nil
 	}
 
-	v := &rpc.JsonRpcResult{}
-
+	slog.Debug("Sending request for block", "Number", blockNum, "Finalized", finalized)
 	// Block Hash
-	if err = websocket.SendWsRequest(conn, v, rpc.ChainGetBlockHash(wsBlockHash, blockNum)); err != nil {
-		return fmt.Errorf("websocket send error: %v", err)
+	res, err := util.SendWsRequest(conn, rpc.ChainGetBlockHash(wsBlockHash, blockNum))
+	if err != nil {
+		e := fmt.Errorf("ChainGetBlockHash get error %v", err)
+		slog.Error("fillblockdata fail", "error", e)
+		return e
 	}
-	blockHash, err := v.ToString()
+
+	blockHash, err := res.ToString()
 	if err != nil || blockHash == "" {
-		return fmt.Errorf("ChainGetBlockHash get error %v", err)
+		e := fmt.Errorf("ChainGetBlockHash get error %v", err)
+		slog.Error("fillblockdata fail", "error", e)
+		return e
 	}
 	slog.Info("Got new block", "Number", blockNum, "Hash", blockHash)
 
 	// block
-	if err = websocket.SendWsRequest(conn, v, rpc.ChainGetBlock(wsBlock, blockHash)); err != nil {
+	res, err = util.SendWsRequest(conn, rpc.ChainGetBlock(wsBlock, blockHash))
+	if err != nil {
 		return fmt.Errorf("websocket send error: %v", err)
 	}
-	rpcBlock := v.ToBlock()
+	rpcBlock := res.ToBlock()
 
 	// event
-	if err = websocket.SendWsRequest(conn, v, rpc.StateGetStorage(wsEvent, util.EventStorageKey, blockHash)); err != nil {
+	res, err = util.SendWsRequest(conn, rpc.StateGetStorage(wsEvent, util.EventStorageKey, blockHash))
+	if err != nil {
 		return fmt.Errorf("websocket send error: %v", err)
 	}
-	event, _ := v.ToString()
+	event, _ := res.ToString()
 
 	// runtime
-	if err = websocket.SendWsRequest(conn, v, rpc.ChainGetRuntimeVersion(wsSpec, blockHash)); err != nil {
+	res, err = util.SendWsRequest(conn, rpc.ChainGetRuntimeVersion(wsSpec, blockHash))
+	if err != nil {
 		return fmt.Errorf("websocket send error: %v", err)
 	}
 
 	var specVersion int
 
-	if r := v.ToRuntimeVersion(); r == nil {
+	if r := res.ToRuntimeVersion(); r == nil {
 		specVersion = s.GetCurrentRuntimeSpecVersion(blockNum)
 	} else {
 		specVersion = r.SpecVersion
