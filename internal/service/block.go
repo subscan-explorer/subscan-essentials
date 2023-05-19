@@ -9,13 +9,13 @@ import (
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/address"
 	"github.com/itering/substrate-api-rpc"
-	"github.com/itering/substrate-api-rpc/rpc"
+	rpcModel "github.com/itering/substrate-api-rpc/model"
 	"github.com/itering/substrate-api-rpc/storage"
 	"github.com/itering/substrate-api-rpc/websocket"
 	"golang.org/x/exp/slog"
 )
 
-func (s *Service) CreateChainBlock(conn websocket.WsConn, hash string, block *rpc.Block, event string, spec int, finalized bool) (err error) {
+func (s *Service) CreateChainBlock(conn websocket.WsConn, hash string, block *rpcModel.Block, event string, spec int, finalized bool) (err error) {
 	var (
 		decodeExtrinsics []map[string]interface{}
 		decodeEvent      interface{}

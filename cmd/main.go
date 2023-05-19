@@ -35,7 +35,7 @@ func envLogLevel() slog.Level {
 }
 
 func initSlog() {
-	logger := slog.New(tint.Options{Level: envLogLevel()}.NewHandler(os.Stderr))
+	logger := slog.New(tint.NewHandler(os.Stderr, &tint.Options{Level: envLogLevel()}))
 	slog.SetDefault(logger)
 }
 
@@ -98,7 +98,7 @@ func setupApp() *cli.App {
 func run() {
 	stop := make(chan struct{}, 2)
 	svc := service.New(stop)
-	
+
 	httpSrv := http.NewHTTPServer(configs.Boot.Server, svc)
 	defer func() {
 		// Micro services

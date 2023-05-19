@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/itering/subscan/util"
+	rpcModel "github.com/itering/substrate-api-rpc/model"
 	"github.com/itering/substrate-api-rpc/rpc"
 	"github.com/itering/substrate-api-rpc/websocket"
 	"github.com/panjf2000/ants/v2"
@@ -61,7 +62,7 @@ func (s *SubscribeService) parser(message []byte) (err error) {
 		}
 	}
 
-	var j rpc.JsonRpcResult
+	var j rpcModel.JsonRpcResult
 	if err = json.Unmarshal(message, &j); err != nil {
 		return err
 	}
