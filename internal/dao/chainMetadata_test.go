@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/garyburd/redigo/redis"
+	"github.com/gomodule/redigo/redis"
 	"github.com/itering/subscan/util"
 	"github.com/stretchr/testify/assert"
 )
