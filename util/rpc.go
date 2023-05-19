@@ -98,3 +98,18 @@ func ReadStorageByKey(p websocket.WsConn, key storageKey.StorageKey, hash string
 	return
 }
 
+type Properties struct {
+	Ss58Format    *int    `json:"ss58Format"`
+	TokenDecimals *int    `json:"tokenDecimals"`
+	TokenSymbol   *string `json:"tokenSymbol"`
+}
+
+func GetSystemProperties(p websocket.WsConn) (*Properties, error) {
+	var t Properties
+	res, err := SendWsRequest(p, rpc.SystemProperties(rand.Intn(1000)))
+	if err != nil {
+		return nil, err
+	}
+	err = res.ToAnyThing(&t)
+	return &t, err
+}
