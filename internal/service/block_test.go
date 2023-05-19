@@ -5,21 +5,21 @@ import (
 
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
-	rpcModel "github.com/itering/substrate-api-rpc/model"
+	"github.com/itering/substrate-api-rpc/rpc"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestService_CreateChainBlock(t *testing.T) {
 	hash := "0x2895f79f46105d24813c97558f06edaecf993fad2358dcaf86b813859edd697d"
 	event := "0x080000000000000080e36a0900000000020000000100000000000000000000000000020000"
-	block := rpcModel.Block{
+	block := rpc.Block{
 		Extrinsics: []string{"0x280402000b10449a7e7301", "0x1c0407005e8b4100"},
-		Header: rpcModel.ChainNewHeadResult{
+		Header: rpc.ChainNewHeadResult{
 			ExtrinsicsRoot: "0x5a9403235d77280ad129b44eebdbdea3127ada25dcbf540e6ce38a1f770ad86f",
 			Number:         "0x1062da",
 			ParentHash:     "0x42838e9a502c5ba1faa5de1f19bfe5464b3374df5c6f53152d0543363a900bb7",
 			StateRoot:      "0x8c9eec7854ab7cc1207a3eb9d54e272a07545b2c77dd2b99f3b85a642cd91a49",
-			Digest: rpcModel.ChainNewHeadLog{
+			Digest: rpc.ChainNewHeadLog{
 				Logs: []string{
 					"0x064241424534021b00000007b6d90f00000000",
 					"0x00904d4d5252708a1db71fe9eedba2439dab7209846247482fe486dc5e82ef76897f2e50a3a5",
