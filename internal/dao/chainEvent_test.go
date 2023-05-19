@@ -1,9 +1,10 @@
 package dao
 
 import (
+	"testing"
+
 	"github.com/itering/subscan/model"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestDao_CreateEvent(t *testing.T) {
@@ -23,8 +24,7 @@ func TestDao_DropEventNotFinalizedData(t *testing.T) {
 	assert.NoError(t, err)
 
 	testDao.DropEventNotFinalizedData(tempEvent.BlockNum, true)
-	assert.Equal(t, []model.ChainEventJson{}, testDao.GetEventByBlockNum(947688))
-
+	assert.Equal(t, []model.ChainEventJson(nil), testDao.GetEventByBlockNum(947688))
 }
 
 func TestDao_GetEventByBlockNum(t *testing.T) {

@@ -63,7 +63,7 @@ func NewPluginEmitter(stop chan struct{}) PluginEmitter {
 	return PluginEmitter{
 		pending:       cmap.New[perBlockInfo](),
 		stop:          stop,
-		blockComplete: make(chan uint32),
+		blockComplete: make(chan uint32, 100),
 	}
 }
 
@@ -167,9 +167,13 @@ func (s *Service) blockDone(block *model.ChainBlock) {
 func (s *Service) emitEvent(block *model.ChainBlock, event *model.ChainEvent, fee decimal.Decimal, extrinsic *model.ChainExtrinsic) {
 	pBlock := block.AsPlugin()
 	s.pluginEmitter.mutatePerBlock(pBlock, func(info *perBlockInfo) {
+		var ext *storage.Extrinsic
+		if extrinsic != nil {
+			ext = extrinsic.AsPlugin()
+		}
 		info.events = append(info.events, eventInfo{
 			block:     pBlock,
-			extrinsic: extrinsic.AsPlugin(),
+			extrinsic: ext,
 			event:     event.AsPlugin(),
 			fee:       fee,
 		})

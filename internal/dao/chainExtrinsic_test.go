@@ -58,7 +58,7 @@ func TestDao_GetExtrinsicsDetailByIndex(t *testing.T) {
 	util.AddressType = "1"
 	ctx := context.TODO()
 	extrinsic := testDao.GetExtrinsicsDetailByIndex(ctx, "947689-1")
-	assert.Equal(t, "7c6xGmL2NuZXcF2wt98ZxAf2QkHr7ALDDnb9puxR8p5VvEY", extrinsic.AccountId)
+	assert.Equal(t, "7c6xGmL2NuZXcF2wt98ZxAf2QkHr7ALDDnb9puxR8p5VvEY", extrinsic.AccountId.String())
 	assert.Equal(t, testSignedExtrinsic.Params, extrinsic.Params)
 }
 
