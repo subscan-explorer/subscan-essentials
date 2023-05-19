@@ -36,9 +36,7 @@ func Install(conf string) {
 			panic(err)
 		}
 		fmt.Println("Create database success!!!")
-
 	}()
-
 }
 
 func fileCopy(src, dst string) error {
@@ -63,7 +61,8 @@ func fileCopy(src, dst string) error {
 
 // CheckCompleteness Check blocks Completeness
 func CheckCompleteness() {
-	srv := service.New()
+	stop := make(chan struct{}, 2)
+	srv := service.New(stop)
 	defer srv.Close()
 
 	c := context.TODO()

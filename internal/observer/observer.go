@@ -19,7 +19,8 @@ var (
 )
 
 func Run(dt string) {
-	srv = service.New()
+	srv = service.New(stop)
+	srv.Run()
 	defer srv.Close()
 	for {
 		switch dt {
@@ -32,7 +33,7 @@ func Run(dt string) {
 			log.Fatalf("no such daemon component: %s", dt)
 		}
 		enableTermSignalHandler()
-		if _, ok := <-stop; ok {
+		if _, ok := <-stop; !ok {
 			time.Sleep(3 * time.Second)
 			break
 		}
@@ -44,6 +45,6 @@ func enableTermSignalHandler() {
 	signal.Notify(sigs, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
 	go func() {
 		slog.Info("Received signal, exiting...", "signal", <-sigs)
-		stop <- struct{}{}
+		close(stop)
 	}()
 }

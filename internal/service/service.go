@@ -19,7 +19,7 @@ type Service struct {
 }
 
 // New  a service and return.
-func New() (s *Service) {
+func New(stop chan struct{}) (s *Service) {
 	websocket.SetEndpoint(util.WSEndPoint)
 	d, dbStorage := dao.New()
 	s = &Service{dao: d}

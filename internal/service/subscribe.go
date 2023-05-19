@@ -27,43 +27,41 @@ func (s *Service) Subscribe(conn ws.WsConn, stop chan struct{}) {
 
 	defer conn.Close()
 
-	done := make(chan struct{})
-
 	dead := make(chan struct{}, 1)
 	reconnected := make(chan struct{}, 1)
 
-	defer close(done)
-	defer close(dead)
-	defer close(reconnected)
-
-	subscribeSrv := s.initSubscribeService(done)
+	subscribeSrv := s.initSubscribeService(stop)
 	go func() {
-		defer close(done)
 		defer close(dead)
 		defer close(reconnected)
 		waitForReconnect := false
 		for {
-			if !conn.IsConnected() {
-				continue
-			}
-			if waitForReconnect {
-				waitForReconnect = false
-				<-reconnected
-				time.Sleep(time.Second * 10)
-			}
-			if !conn.IsConnected() {
-				continue
-			}
-			_, message, err := conn.ReadMessage()
-			if err != nil {
-				logError("read failed", err)
-				if len(dead) == 0 {
-					dead <- struct{}{}
-					waitForReconnect = true
+			select {
+			case <-stop:
+				return
+			default:
+				if !conn.IsConnected() {
+					continue
 				}
-				continue
+				if waitForReconnect {
+					waitForReconnect = false
+					<-reconnected
+					time.Sleep(time.Second * 10)
+				}
+				if !conn.IsConnected() {
+					continue
+				}
+				_, message, err := conn.ReadMessage()
+				if err != nil {
+					logError("read failed", err)
+					if len(dead) == 0 {
+						dead <- struct{}{}
+						waitForReconnect = true
+					}
+					continue
+				}
+				_ = subscribeSrv.parser(message)
 			}
-			_ = subscribeSrv.parser(message)
 		}
 	}()
 
@@ -86,8 +84,6 @@ func (s *Service) Subscribe(conn ws.WsConn, stop chan struct{}) {
 
 	for {
 		select {
-		case <-done:
-			return
 		case <-ticker.C:
 			if !conn.IsConnected() {
 				slog.Debug("connection is not connected")
