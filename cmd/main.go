@@ -96,7 +96,9 @@ func setupApp() *cli.App {
 }
 
 func run() {
-	svc := service.New()
+	stop := make(chan struct{}, 2)
+	svc := service.New(stop)
+	
 	httpSrv := http.NewHTTPServer(configs.Boot.Server, svc)
 	defer func() {
 		// Micro services

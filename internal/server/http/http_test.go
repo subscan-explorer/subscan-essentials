@@ -18,7 +18,8 @@ import (
 func init() {
 	util.ConfDir = "../../../configs"
 	configs.Init()
-	svc = service.New()
+	stop := make(chan struct{}, 2)
+	svc = service.New(stop)
 }
 
 func testRequest(w *httptest.ResponseRecorder, req *http.Request) {
