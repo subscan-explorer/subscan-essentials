@@ -1,6 +1,7 @@
 package util
 
 import (
+	"sync"
 	"time"
 
 	"golang.org/x/exp/slog"
@@ -15,11 +16,14 @@ func WithRetriesAndTimeout[T any](timeout time.Duration, maxRetries uint, f func
 	var err error
 	var bad T
 	ch := make(chan result, 1)
-	defer close(ch)
+
+	var wg sync.WaitGroup
 	for i := uint(0); i < maxRetries; i++ {
+		wg.Add(1)
 		go func() {
 			val, err := f()
 			ch <- result{val, err}
+			wg.Done()
 		}()
 		select {
 		case res := <-ch:
@@ -35,6 +39,11 @@ func WithRetriesAndTimeout[T any](timeout time.Duration, maxRetries uint, f func
 			continue
 		}
 	}
+
+	defer func() {
+		wg.Wait()
+		close(ch)
+	}()
 
 	return bad, err
 }
