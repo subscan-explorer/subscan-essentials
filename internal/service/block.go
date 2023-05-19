@@ -92,6 +92,9 @@ func (s *Service) CreateChainBlock(conn websocket.WsConn, hash string, block *rp
 	if err = s.dao.CreateBlock(txn, &cb); err == nil {
 		s.dao.DbCommit(txn)
 	}
+
+	s.blockDone(&cb)
+
 	return err
 }
 
@@ -161,6 +164,8 @@ func (s *Service) UpdateBlockData(conn websocket.WsConn, block *model.ChainBlock
 	}
 
 	s.dao.DbCommit(txn)
+
+	s.blockDone(block)
 	return
 }
 

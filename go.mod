@@ -14,6 +14,7 @@ require (
 	github.com/itering/subscan-plugin v0.2.3
 	github.com/itering/substrate-api-rpc v0.4.17
 	github.com/lmittmann/tint v0.3.2
+	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/panjf2000/ants/v2 v2.4.0
 	github.com/pkg/errors v0.9.1
 	github.com/shopspring/decimal v1.3.1

@@ -15,7 +15,8 @@ import (
 
 // Service
 type Service struct {
-	dao dao.IDao
+	dao           dao.IDao
+	pluginEmitter PluginEmitter
 }
 
 // New  a service and return.
@@ -25,7 +26,12 @@ func New(stop chan struct{}) (s *Service) {
 	s = &Service{dao: d}
 	s.initSubRuntimeLatest()
 	pluginRegister(dbStorage, d)
+	s.pluginEmitter = NewPluginEmitter(stop)
 	return s
+}
+
+func (s *Service) Run() {
+	s.pluginEmitter.Run()
 }
 
 func (s *Service) GetDao() dao.IDao {
