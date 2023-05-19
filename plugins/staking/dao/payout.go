@@ -19,8 +19,6 @@ func NewClaimedPayout(db storage.DB, addressHex string, validatorAccountSs58 str
 	if len(unclaimedPayout) == 1 {
 		payout := unclaimedPayout[0]
 		if !payout.Amount.Equal(amount) {
-			// FIXME: this shouldn't actually happen, but I can't figure out what problem with the calculation is (at least
-			// not before the deadline)
 			slog.Warn("Found unexpected amount of unclaimed payouts", "unclaimedPayout", unclaimedPayout, "amount", amount, "blockNum", block.BlockNum)
 		}
 
