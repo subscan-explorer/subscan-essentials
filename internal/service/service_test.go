@@ -285,10 +285,12 @@ func (m *MockDao) RuntimeVersionRecent() *model.RuntimeVersion {
 }
 
 func init() {
+	stop := make(chan struct{})
 	d := &MockDao{}
 	testSrv = Service{
 		dao: d,
 	}
 	websocket.SetEndpoint(util.WSEndPoint)
+	testSrv.pluginEmitter = NewPluginEmitter(stop)
 	testSrv.initSubRuntimeLatest()
 }

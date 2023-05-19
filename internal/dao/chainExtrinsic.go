@@ -112,8 +112,11 @@ func (d *Dao) GetExtrinsicsByHash(c context.Context, hash string) *model.ChainEx
 	var extrinsic model.ChainExtrinsic
 	blockNum, _ := d.GetFillBestBlockNum(c)
 	for index := blockNum / (model.SplitTableBlockNum); index >= 0; index-- {
-		query := d.db.Model(model.ChainExtrinsic{BlockNum: index * model.SplitTableBlockNum}).Where("extrinsic_hash = ?", hash).Order("id asc").Limit(1).Scan(&extrinsic)
+		query := d.db.Model(model.ChainExtrinsic{BlockNum: index * model.SplitTableBlockNum}).Select("*").Where("extrinsic_hash = ?", hash).Order("id asc").Limit(1).Scan(&extrinsic)
 		if query != nil && !RecordNotFound(query) {
+			if extrinsic.Params != nil {
+				extrinsic.Params = *(extrinsic.Params.(*interface{}))
+			}
 			return &extrinsic
 		}
 	}
@@ -128,12 +131,19 @@ func (d *Dao) GetExtrinsicsDetailByHash(c context.Context, hash string) *model.E
 }
 
 func (d *Dao) GetExtrinsicsDetailByIndex(c context.Context, index string) *model.ExtrinsicDetail {
-	var extrinsic model.ChainExtrinsic
+	var extrinsics []model.ChainExtrinsic
 	indexArr := strings.Split(index, "-")
 	query := d.db.Model(model.ChainExtrinsic{BlockNum: util.StringToInt(indexArr[0])}).
-		Where("extrinsic_index = ?", index).Scan(&extrinsic)
-	if query == nil || RecordNotFound(query) {
+		Select("*").
+		Where("extrinsic_index = ?", index).
+		Limit(1).
+		Find(&extrinsics)
+	if query == nil || query.Error != nil || len(extrinsics) == 0 {
 		return nil
+	}
+	extrinsic := extrinsics[0]
+	if extrinsic.Params != nil {
+		extrinsic.Params = *(extrinsic.Params.(*interface{}))
 	}
 	return d.extrinsicsAsDetail(c, &extrinsic)
 }
