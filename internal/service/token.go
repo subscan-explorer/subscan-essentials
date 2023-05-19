@@ -1,10 +1,10 @@
 package service
 
 import (
-	"github.com/itering/subscan/util"
-	"github.com/itering/substrate-api-rpc/rpc"
-	"github.com/itering/substrate-api-rpc/websocket"
 	"sync"
+
+	"github.com/itering/subscan/util"
+	"github.com/itering/substrate-api-rpc/websocket"
 )
 
 var onceToken sync.Once
@@ -13,9 +13,13 @@ var onceToken sync.Once
 func (s *Service) unknownToken() {
 	websocket.SetEndpoint(util.WSEndPoint)
 	onceToken.Do(func() {
-		if p, _ := rpc.GetSystemProperties(nil); p != nil {
-			util.AddressType = util.IntToString(p.Ss58Format)
-			util.BalanceAccuracy = util.IntToString(p.TokenDecimals)
+		if p, _ := util.GetSystemProperties(nil); p != nil {
+			if p.Ss58Format != nil {
+				util.AddressType = util.IntToString(*p.Ss58Format)
+			}
+			if p.TokenDecimals != nil {
+				util.BalanceAccuracy = util.IntToString(*p.TokenDecimals)
+			}
 		}
 	})
 }
