@@ -51,8 +51,6 @@ var RegisteredPlugins = make(map[string]PluginFactory)
 
 // register local plugin
 func init() {
-	// registerNative(balance.New())
-	// registerNative(system.New())
 	registerNative(staking.New())
 }
 
