@@ -1,0 +1,16 @@
+.idea
+.mypy_cache
+cmd/cmd
+cmd/subscan
+configs/config.yaml
+log/*
+!log/.gitkeep
+node_modules
+target
+*.so
+data
+tmp
+.vscode
+.github
+ui
+*.png

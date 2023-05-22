@@ -2,7 +2,7 @@ version: "2.4"
 
 services:
   mysql:
-    image: mysql:5.7
+    image: mysql:8.0.33
     restart: always
     environment:
       # Name of the db created on start up
