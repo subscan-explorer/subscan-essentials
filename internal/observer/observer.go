@@ -25,7 +25,7 @@ func Run(dt string) {
 	for {
 		switch dt {
 		case "substrate":
-			conn := &recws.RecConn{KeepAliveTimeout: 5 * time.Second, WriteTimeout: time.Second * 5, ReadTimeout: 10 * time.Second}
+			conn := &recws.RecConn{KeepAliveTimeout: 5 * time.Second, WriteTimeout: time.Second * 5, ReadTimeout: 60 * time.Second}
 			conn.Dial(util.WSEndPoint, nil)
 			go srv.Subscribe(conn, stop)
 			slog.Debug("Connected to substrate node")
