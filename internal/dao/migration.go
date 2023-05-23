@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/itering/subscan/model"
+	"golang.org/x/exp/slog"
 	"gorm.io/gorm"
 )
 
@@ -41,7 +42,9 @@ func (d *Dao) InternalTables(blockNum int) (models []interface{}) {
 
 func addIndex(db *gorm.DB, model interface{}, indexName string) {
 	if !db.Migrator().HasIndex(model, indexName) {
-		db.Migrator().CreateIndex(model, indexName)
+		if err := db.Migrator().CreateIndex(model, indexName); err != nil {
+			slog.Error("failed to add index", "indexName", indexName, "err", err, "model", model)
+		}
 	}
 }
 
