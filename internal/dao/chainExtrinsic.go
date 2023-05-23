@@ -45,17 +45,6 @@ func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.C
 	return d.checkDBError(query.Error)
 }
 
-func (d *Dao) DropExtrinsicNotFinalizedData(c context.Context, blockNum int, finalized bool) bool {
-	delExist := false
-	if finalized {
-		if query := d.db.Where("block_num = ?", blockNum).Delete(model.ChainExtrinsic{BlockNum: blockNum}); query.RowsAffected > 0 {
-			_ = d.IncrMetadata(c, "count_extrinsic", -int(query.RowsAffected))
-			delExist = true
-		}
-	}
-	return delExist
-}
-
 func (d *ReadOnlyDao) GetExtrinsicsByBlockNum(blockNum int) []model.ChainExtrinsicJson {
 	var extrinsics []model.ChainExtrinsic
 	query := d.db.Model(model.ChainExtrinsic{BlockNum: blockNum}).

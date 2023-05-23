@@ -159,10 +159,6 @@ func (m *MockDao) CreateEvent(txn *dao.GormDB, event *model.ChainEvent) error {
 	return nil
 }
 
-func (m *MockDao) DropEventNotFinalizedData(blockNum int, finalized bool) bool {
-	return false
-}
-
 func (m *MockDao) GetEventByBlockNum(blockNum int, where ...string) []model.ChainEventJson {
 	return nil
 }
@@ -181,10 +177,6 @@ func (m *MockDao) GetEventByIdx(index string) *model.ChainEvent {
 
 func (m *MockDao) CreateExtrinsic(c context.Context, txn *dao.GormDB, extrinsic *model.ChainExtrinsic) error {
 	return nil
-}
-
-func (m *MockDao) DropExtrinsicNotFinalizedData(c context.Context, blockNum int, finalized bool) bool {
-	return true
 }
 
 func (m *MockDao) GetExtrinsicsByBlockNum(blockNum int) []model.ChainExtrinsicJson {

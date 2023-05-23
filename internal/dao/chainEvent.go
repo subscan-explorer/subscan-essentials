@@ -36,15 +36,6 @@ func (d *Dao) CreateEvent(txn *GormDB, event *model.ChainEvent) error {
 	return d.checkDBError(query.Error)
 }
 
-func (d *Dao) DropEventNotFinalizedData(blockNum int, finalized bool) bool {
-	var delExist bool
-	if finalized {
-		query := d.db.Where("block_num = ?", blockNum).Delete(model.ChainEvent{BlockNum: blockNum})
-		delExist = query.RowsAffected > 0
-	}
-	return delExist
-}
-
 func (d *ReadOnlyDao) GetEventByBlockNum(blockNum int, where ...string) []model.ChainEventJson {
 	var events []model.ChainEventJson
 	queryOrigin := d.db.Model(model.ChainEvent{BlockNum: blockNum}).Where("block_num = ?", blockNum)
