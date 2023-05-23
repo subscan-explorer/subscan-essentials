@@ -44,7 +44,9 @@ func (d *DbStorage) SpecialMetadata(spec int) string {
 
 func (d *DbStorage) GetModelTableName(model interface{}) string {
 	stmt := &gorm.Statement{DB: d.db}
-	stmt.Parse(model)
+	if err := stmt.Parse(model); err != nil {
+		panic(fmt.Sprintf("get model table name error: %v", err))
+	}
 	return stmt.Schema.Table
 }
 

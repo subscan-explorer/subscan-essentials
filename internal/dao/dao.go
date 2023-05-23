@@ -2,6 +2,7 @@ package dao
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
@@ -90,7 +91,9 @@ func (d *ReadOnlyDao) Ping(ctx context.Context) (err error) {
 
 func (d *ReadOnlyDao) GetModelTableName(model interface{}) string {
 	stmt := &gorm.Statement{DB: d.db}
-	stmt.Parse(model)
+	if err := stmt.Parse(model); err != nil {
+		panic(fmt.Sprintf("get model table name error: %v", err))
+	}
 	return stmt.Schema.Table
 }
 
