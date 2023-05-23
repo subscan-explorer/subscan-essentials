@@ -13,7 +13,7 @@ import (
 // CreateBlock, mysql db transaction
 // Check if you need to create a new table(block, extrinsic, event, log ) after created
 func (d *Dao) CreateBlock(txn *GormDB, cb *model.ChainBlock) (err error) {
-	query := txn.Save(cb)
+	query := txn.Create(cb)
 	if !d.db.Migrator().HasTable(model.ChainBlock{BlockNum: cb.BlockNum + model.SplitTableBlockNum}) {
 		go func() {
 			_ = d.db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
