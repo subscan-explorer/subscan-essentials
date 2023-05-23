@@ -11,12 +11,15 @@ import (
 )
 
 func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.ChainExtrinsic) error {
-	var existing []model.ChainExtrinsic
-	_ = d.db.Select("id").Where("extrinsic_index = ?", extrinsic.ExtrinsicIndex).Limit(1).Find(&existing)
-	if len(existing) > 0 {
-		extrinsic.ID = existing[0].ID
+	existing, err := findOne[model.ChainExtrinsic](&d.ReadOnlyDao, "id", where("extrinsic_index = ?", extrinsic.ExtrinsicIndex), nil)
+	if err != nil {
+		return err
+	}
+	if existing != nil {
+		extrinsic.ID = existing.ID
 	}
 	ce := model.ChainExtrinsic{
+		ID:                 extrinsic.ID,
 		BlockTimestamp:     extrinsic.BlockTimestamp,
 		ExtrinsicIndex:     extrinsic.ExtrinsicIndex,
 		BlockNum:           extrinsic.BlockNum,

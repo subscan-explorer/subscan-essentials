@@ -10,14 +10,12 @@ import (
 var mutex sync.Mutex
 
 func (d *Dao) CreateRuntimeVersion(name string, specVersion int) int64 {
-	var versions []model.RuntimeVersion
 	mutex.Lock()
 	defer mutex.Unlock()
-	d.db.Select("id, spec_version").Where("spec_version = ?", specVersion).Limit(1).Find(&versions)
-	if len(versions) > 0 {
+	version, _ := findOne[model.RuntimeVersion](&d.ReadOnlyDao, "id, spec_version", where("spec_version = ?", specVersion), nil)
+	if version != nil {
 		return 0
 	}
-
 	query := d.db.Create(&model.RuntimeVersion{
 		Name:        name,
 		SpecVersion: specVersion,
@@ -45,7 +43,8 @@ func (d *ReadOnlyDao) RuntimeVersionRecent() *model.RuntimeVersion {
 	if len(list) == 0 {
 		return nil
 	}
-	return &list[0]
+	version, _ := findOne[model.RuntimeVersion](d, "spec_version,raw_data", whereClauses{}, "spec_version DESC")
+	return version
 }
 
 func (d *ReadOnlyDao) RuntimeVersionRaw(spec int) *metadata.RuntimeRaw {

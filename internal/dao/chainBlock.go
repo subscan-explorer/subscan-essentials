@@ -107,12 +107,8 @@ func (d *ReadOnlyDao) GetBlockByHash(c context.Context, hash string) *model.Chai
 }
 
 func (d *ReadOnlyDao) GetBlockByNum(blockNum int) *model.ChainBlock {
-	var block model.ChainBlock
-	query := d.db.Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num = ?", blockNum).Scan(&block)
-	if query == nil || query.Error != nil || RecordNotFound(query) {
-		return nil
-	}
-	return &block
+	res, _ := findOne[model.ChainBlock](d, "*", where("block_num = ?", blockNum), nil)
+	return res
 }
 
 func (d *ReadOnlyDao) BlockAsJson(c context.Context, block *model.ChainBlock) *model.ChainBlockJson {
