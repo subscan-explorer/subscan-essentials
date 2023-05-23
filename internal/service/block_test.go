@@ -32,22 +32,6 @@ func TestService_CreateChainBlock(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestService_UpdateBlockData(t *testing.T) {
-	block := model.ChainBlock{
-		BlockNum:       1073882,
-		BlockTimestamp: 1595556906,
-		Hash:           "0x2895f79f46105d24813c97558f06edaecf993fad2358dcaf86b813859edd697d",
-		ParentHash:     "0x42838e9a502c5ba1faa5de1f19bfe5464b3374df5c6f53152d0543363a900bb7",
-		StateRoot:      "0x8c9eec7854ab7cc1207a3eb9d54e272a07545b2c77dd2b99f3b85a642cd91a49",
-		ExtrinsicsRoot: "0x5a9403235d77280ad129b44eebdbdea3127ada25dcbf540e6ce38a1f770ad86f",
-		Logs:           `["0x064241424534021b00000007b6d90f00000000","0x00904d4d5252708a1db71fe9eedba2439dab7209846247482fe486dc5e82ef76897f2e50a3a5","0x05424142450101aed0a28294d357326d3b199cd06f23a43cd44412cc9450286252bb75c47fad17a4e9a7e19fde1cb90d668b2bbc769faea28f63bffc53a28c8f5a9d817bf07b83"]`,
-		Extrinsics:     `["0x280402000b10449a7e7301","0x1c0407005e8b4100"]`,
-		Event:          "0x080000000000000080e36a0900000000020000000100000000000000000000000000020000",
-	}
-	err := testSrv.UpdateBlockData(nil, &block, true)
-	assert.NoError(t, err)
-}
-
 func TestService_checkoutExtrinsicEvents(t *testing.T) {
 	event1 := model.ChainEvent{BlockNum: 107388, ExtrinsicIdx: 1}
 	event2 := model.ChainEvent{BlockNum: 107388, ExtrinsicIdx: 2}

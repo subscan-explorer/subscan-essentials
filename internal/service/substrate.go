@@ -164,11 +164,6 @@ const (
 )
 
 func (s *Service) FillBlockData(conn websocket.WsConn, blockNum int, finalized bool) (err error) {
-	block := s.dao.GetBlockByNum(blockNum)
-	if block != nil && block.Finalized && !block.CodecError {
-		return nil
-	}
-
 	slog.Debug("Sending request for block", "Number", blockNum, "Finalized", finalized)
 	// Block Hash
 	res, err := util.SendWsRequest(conn, rpc.ChainGetBlockHash(wsBlockHash, blockNum))
@@ -228,19 +223,6 @@ func (s *Service) FillBlockData(conn websocket.WsConn, blockNum int, finalized b
 			_ = s.dao.SaveFillAlreadyFinalizedBlockNum(context.TODO(), blockNum)
 		}
 	}
-	// refresh finalized info for update
-	// if block != nil {
-	// 	// Confirm data, only set block Finalized, refresh all block data
-	// 	block.ExtrinsicsRoot = rpcBlock.Block.Header.ExtrinsicsRoot
-	// 	block.Hash = blockHash
-	// 	block.ParentHash = rpcBlock.Block.Header.ParentHash
-	// 	block.StateRoot = rpcBlock.Block.Header.StateRoot
-	// 	block.Extrinsics = util.ToString(rpcBlock.Block.Extrinsics)
-	// 	block.Logs = util.ToString(rpcBlock.Block.Header.Digest.Logs)
-	// 	block.Event = event
-	// 	_ = s.UpdateBlockData(conn, block, finalized)
-	// 	return
-	// }
 	// for Create
 	if err = s.CreateChainBlock(conn, blockHash, &rpcBlock.Block, event, specVersion, finalized); err == nil {
 		_ = s.dao.SaveFillAlreadyBlockNum(context.TODO(), blockNum)

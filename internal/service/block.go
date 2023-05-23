@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/itering/subscan/model"
@@ -96,77 +95,6 @@ func (s *Service) CreateChainBlock(conn websocket.WsConn, hash string, block *rp
 	s.blockDone(&cb)
 
 	return err
-}
-
-func (s *Service) UpdateBlockData(conn websocket.WsConn, block *model.ChainBlock, finalized bool) (err error) {
-	c := context.TODO()
-
-	var (
-		decodeEvent      interface{}
-		encodeExtrinsics []string
-		decodeExtrinsics []map[string]interface{}
-	)
-
-	_ = json.Unmarshal([]byte(block.Extrinsics), &encodeExtrinsics)
-
-	spec := block.SpecVersion
-
-	metadataInstant := s.getMetadataInstant(spec, block.Hash)
-
-	// Event
-	decodeEvent, err = substrate.DecodeEvent(block.Event, metadataInstant, spec)
-	if err != nil {
-		fmt.Println("ERR: Decode Event get error ", err)
-		return
-	}
-
-	// Extrinsic
-	decodeExtrinsics, err = substrate.DecodeExtrinsic(encodeExtrinsics, metadataInstant, spec)
-	if err != nil {
-		fmt.Println("ERR: Decode Extrinsic get error ", err)
-		return
-	}
-
-	// Log
-	var rawList []string
-	_ = json.Unmarshal([]byte(block.Logs), &rawList)
-	logs, err := substrate.DecodeLogDigest(rawList)
-	if err != nil {
-		fmt.Println("ERR: Decode Logs get error ", err)
-		return
-	}
-
-	var e []model.ChainEvent
-	util.UnmarshalAny(&e, decodeEvent)
-	eventMap := s.checkoutExtrinsicEvents(e, block.BlockNum)
-
-	txn := s.dao.DbBegin()
-	defer s.dao.DbRollback(txn)
-
-	extrinsicsCount, blockTimestamp, extrinsicHash, extrinsicFee, err := s.createExtrinsic(c, txn, block, encodeExtrinsics, decodeExtrinsics, eventMap)
-	if err != nil {
-		return err
-	}
-	block.BlockTimestamp = blockTimestamp
-
-	eventCount, err := s.AddEvent(txn, block, e, extrinsicHash, extrinsicFee)
-	if err != nil {
-		return err
-	}
-
-	validator, err := s.EmitLog(txn, block.BlockNum, logs, finalized, s.ValidatorsList(conn, block.Hash))
-	if err != nil {
-		return err
-	}
-
-	if err = s.dao.UpdateEventAndExtrinsic(txn, block, eventCount, extrinsicsCount, blockTimestamp, validator, validator == "" && block.BlockNum != 0, finalized); err != nil {
-		return
-	}
-
-	s.dao.DbCommit(txn)
-
-	s.blockDone(block)
-	return
 }
 
 func (s *ReadOnlyService) checkoutExtrinsicEvents(e []model.ChainEvent, blockNumInt int) map[string][]model.ChainEvent {

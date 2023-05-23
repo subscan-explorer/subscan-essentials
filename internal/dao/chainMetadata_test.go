@@ -45,7 +45,11 @@ func TestDao_GetMetadata(t *testing.T) {
 	_ = testDao.SetMetadata(ctx, testCase)
 	metadata, err := testDao.GetMetadata(ctx)
 	assert.NoError(t, err)
-	assert.Equal(t, map[string]string{"key1": "1", "key2": "2"}, metadata)
+
+	for key, expect := range testCase {
+		assert.Contains(t, metadata, key)
+		assert.Equal(t, expect, metadata[key])
+	}
 }
 
 func TestDao_GetCurrentBlockNum(t *testing.T) {

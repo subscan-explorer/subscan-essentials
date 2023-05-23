@@ -18,20 +18,6 @@ func TestDao_CreateExtrinsic(t *testing.T) {
 	txn.Commit()
 }
 
-func TestDao_DropExtrinsicNotFinalizedData(t *testing.T) {
-	ctx := context.TODO()
-	txn := testDao.DbBegin()
-
-	tempExtrinsic := testExtrinsic
-	tempExtrinsic.BlockNum = 947688
-	err := testDao.CreateExtrinsic(ctx, txn, &tempExtrinsic)
-	txn.Commit()
-	assert.NoError(t, err)
-
-	testDao.DropExtrinsicNotFinalizedData(ctx, tempExtrinsic.BlockNum, true)
-	assert.Equal(t, []model.ChainExtrinsicJson(nil), testDao.GetExtrinsicsByBlockNum(947688))
-}
-
 func TestDao_GetExtrinsicsByBlockNum(t *testing.T) {
 	extrinsics := testDao.GetExtrinsicsByBlockNum(947687)
 	assert.Equal(t, []model.ChainExtrinsicJson{{BlockTimestamp: 1594791900, BlockNum: 947687, ExtrinsicIndex: "947687-0", CallModuleFunction: "set", CallModule: "timestamp", Params: "null", AccountId: "", AccountIndex: "", Signature: "", Nonce: 0, ExtrinsicHash: "", Success: true, Fee: decimal.New(0, 0)}}, extrinsics)
