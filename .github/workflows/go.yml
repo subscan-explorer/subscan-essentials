@@ -28,7 +28,7 @@ jobs:
           - 6379:6379
 
       mysql:
-        image: mysql:5.7
+        image: mysql:8.0.33
         env:
           MYSQL_DATABASE: subscan_test
           MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
@@ -41,10 +41,10 @@ jobs:
         os: [ubuntu-latest]
     steps:
       # Set up golang env
-      - name: Set up GO 1.17
+      - name: Set up GO 1.20
         uses: actions/setup-go@v1
         with:
-          go-version: 1.17
+          go-version: 1.20
         id: go
       # Checkout Go module directory
       - name: Check out code into the Go module directory
