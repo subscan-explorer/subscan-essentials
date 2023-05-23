@@ -109,7 +109,7 @@ func findOne[T any](d *ReadOnlyDao, sel string, where whereClauses, orderBy inte
 		sel = "*"
 	}
 
-	tx := d.db.Debug().Select(sel).Where(where.query, where.args...).Limit(1)
+	tx := d.db.Select(sel).Where(where.query, where.args...).Limit(1)
 	if orderBy != nil {
 		tx = tx.Order(orderBy)
 	}
