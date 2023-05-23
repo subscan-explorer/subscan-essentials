@@ -10,10 +10,12 @@ import (
 )
 
 func (d *Dao) CreateEvent(txn *GormDB, event *model.ChainEvent) error {
-	var existing []model.ChainEvent
-	_ = d.db.Select("id").Where("event_index = ?", event.EventIndex).Limit(1).Find(&existing)
-	if len(existing) > 0 {
-		event.ID = existing[0].ID
+	existing, err := findOne[model.ChainEvent](&d.ReadOnlyDao, "id", where("event_index = ?", event.EventIndex), nil)
+	if err != nil {
+		return err
+	}
+	if existing != nil {
+		event.ID = existing.ID
 	}
 	var incrCount int
 	extrinsicHash := util.AddHex(event.ExtrinsicHash)

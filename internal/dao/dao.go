@@ -93,3 +93,32 @@ func (d *ReadOnlyDao) GetModelTableName(model interface{}) string {
 	stmt.Parse(model)
 	return stmt.Schema.Table
 }
+
+func where(query string, args ...interface{}) whereClauses {
+	return whereClauses{query: query, args: args}
+}
+
+type whereClauses struct {
+	query string
+	args  []interface{}
+}
+
+func findOne[T any](d *ReadOnlyDao, sel string, where whereClauses, orderBy interface{}) (*T, error) {
+	var find []T
+	if sel == "" {
+		sel = "*"
+	}
+
+	tx := d.db.Debug().Select(sel).Where(where.query, where.args...).Limit(1)
+	if orderBy != nil {
+		tx = tx.Order(orderBy)
+	}
+	res := tx.Find(&find)
+	if res.Error != nil {
+		return nil, res.Error
+	}
+	if len(find) == 0 {
+		return nil, nil
+	}
+	return &find[0], nil
+}
