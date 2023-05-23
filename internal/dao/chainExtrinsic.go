@@ -11,15 +11,7 @@ import (
 )
 
 func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.ChainExtrinsic) error {
-	existing, err := findOne[model.ChainExtrinsic](&d.ReadOnlyDao, "id", where("extrinsic_index = ?", extrinsic.ExtrinsicIndex), nil)
-	if err != nil {
-		return err
-	}
-	if existing != nil {
-		extrinsic.ID = existing.ID
-	}
 	ce := model.ChainExtrinsic{
-		ID:                 extrinsic.ID,
 		BlockTimestamp:     extrinsic.BlockTimestamp,
 		ExtrinsicIndex:     extrinsic.ExtrinsicIndex,
 		BlockNum:           extrinsic.BlockNum,
@@ -38,7 +30,7 @@ func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.C
 		IsSigned:           extrinsic.Signature != "",
 		Fee:                extrinsic.Fee,
 	}
-	query := txn.Save(&ce)
+	query := txn.Create(&ce)
 	if query.RowsAffected > 0 {
 		_ = d.IncrMetadata(c, "count_extrinsic", 1)
 		if ce.IsSigned {
