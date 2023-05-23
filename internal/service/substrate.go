@@ -99,6 +99,13 @@ func (s *SubscribeService) parser(message []byte) (err error) {
 	return
 }
 
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
 func (s *SubscribeService) subscribeFetchBlock() {
 	var wg sync.WaitGroup
 	ctx := context.TODO()
@@ -120,6 +127,7 @@ func (s *SubscribeService) subscribeFetchBlock() {
 	}, ants.WithOptions(ants.Options{PanicHandler: func(c interface{}) {}}))
 
 	defer p.Release()
+	inProgressUpTo, _ := s.dao.GetFillFinalizedBlockNum(ctx)
 	for {
 		select {
 		case newHead := <-s.newFinHead:
@@ -129,9 +137,9 @@ func (s *SubscribeService) subscribeFetchBlock() {
 			}
 
 			lastNum, _ := s.dao.GetFillFinalizedBlockNum(ctx)
-			startBlock := lastNum + 1
-			if lastNum == 0 {
-				startBlock = lastNum
+			startBlock := max(inProgressUpTo, lastNum) + 1
+			if lastNum == 0 && inProgressUpTo == 0 {
+				startBlock = 0
 			}
 			for i := startBlock; i <= int(newHead-FinalizedWaitingBlockCount); i++ {
 				wg.Add(1)
@@ -140,6 +148,7 @@ func (s *SubscribeService) subscribeFetchBlock() {
 					logError("ChainGetBlockHash get", err)
 				}
 			}
+			inProgressUpTo = int(newHead - FinalizedWaitingBlockCount)
 			wg.Wait()
 		case <-s.done:
 			return
