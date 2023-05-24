@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/itering/subscan/internal/service"
-	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 )
 
@@ -80,10 +79,6 @@ func CheckCompleteness() {
 
 		if endBlockNum > latest {
 			break
-		}
-
-		if endBlockNum/model.SplitTableBlockNum != (repairedBlockNum+1)/model.SplitTableBlockNum {
-			endBlockNum = (endBlockNum/model.SplitTableBlockNum)*model.SplitTableBlockNum - 1
 		}
 
 		allFetchBlockNums := dao.GetBlockNumArr(repairedBlockNum, endBlockNum)
