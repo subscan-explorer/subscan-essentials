@@ -8,7 +8,6 @@ import (
 
 	scale "github.com/itering/scale.go/types"
 	"github.com/itering/scale.go/types/scaleBytes"
-	plugin "github.com/itering/subscan-plugin"
 	"github.com/itering/subscan/plugins/router"
 	"github.com/itering/subscan/plugins/staking/dao"
 	"github.com/itering/subscan/plugins/staking/http"
@@ -468,21 +467,6 @@ func (a *Staking) SubscribeEvent() []string {
 
 func (a *Staking) Version() string {
 	return "0.1"
-}
-
-func (a *Staking) UiConf() *plugin.UiConfig {
-	conf := new(plugin.UiConfig)
-	conf.Init()
-	conf.Body.Api.Method = "post"
-	conf.Body.Api.Url = "api/plugin/staking/accounts"
-	conf.Body.Api.Adaptor = fmt.Sprintf(conf.Body.Api.Adaptor, "list")
-	conf.Body.Columns = []plugin.UiColumns{
-		{Name: "address", Label: "address"},
-		{Name: "nonce", Label: "nonce"},
-		{Name: "Staking", Label: "Staking"},
-		{Name: "lock", Label: "lock"},
-	}
-	return conf
 }
 
 func (a *Staking) Migrate() {

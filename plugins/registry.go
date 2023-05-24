@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"strings"
 
-	subscanPlugin "github.com/itering/subscan-plugin"
 	"github.com/itering/subscan/plugins/router"
 	"github.com/itering/subscan/plugins/staking"
 	"github.com/itering/subscan/plugins/storage"
@@ -42,8 +41,6 @@ type Plugin interface {
 
 	// Plugins version
 	Version() string
-
-	UiConf() *subscanPlugin.UiConfig
 }
 type PluginFactory Plugin
 

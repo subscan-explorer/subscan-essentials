@@ -64,7 +64,6 @@ func initRouter(e *gin.Engine) {
 
 			// Plugin
 			s.POST("plugins", pluginList)
-			s.POST("plugins/ui", pluginUIConfig)
 		}
 		pluginRouter(g)
 	}

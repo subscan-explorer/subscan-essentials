@@ -10,7 +10,6 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/huandu/xstrings v1.4.0
 	github.com/itering/scale.go v1.5.9
-	github.com/itering/subscan-plugin v0.2.3
 	github.com/itering/substrate-api-rpc v0.4.17
 	github.com/knadh/koanf v1.5.0
 	github.com/lmittmann/tint v0.3.3

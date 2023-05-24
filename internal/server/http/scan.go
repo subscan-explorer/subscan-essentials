@@ -168,17 +168,3 @@ func runtimeMetadata(c *gin.Context) {
 func pluginList(c *gin.Context) {
 	util.ToJson(c, plugins.List(), nil)
 }
-
-func pluginUIConfig(c *gin.Context) {
-	p := new(struct {
-		Name string `json:"name" binding:"required"`
-	})
-	if err := c.MustBindWith(p, binding.JSON); err != nil {
-		return
-	}
-	if plugin, ok := plugins.RegisteredPlugins[p.Name]; ok {
-		util.ToJson(c, plugin.UiConf(), nil)
-		return
-	}
-	util.ToJson(c, nil, nil)
-}

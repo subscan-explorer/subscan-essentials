@@ -3,7 +3,6 @@ package plugins
 import (
 	"testing"
 
-	subscan_plugin "github.com/itering/subscan-plugin"
 	"github.com/itering/subscan/plugins/router"
 	"github.com/itering/subscan/plugins/storage"
 	"github.com/shopspring/decimal"
@@ -37,8 +36,6 @@ func (a *TPlugin) SubscribeExtrinsic() []string { return nil }
 func (a *TPlugin) SubscribeEvent() []string { return nil }
 
 func (a *TPlugin) SubscribeCall() []string { return nil }
-
-func (a *TPlugin) UiConf() *subscan_plugin.UiConfig { return nil }
 
 var _ Plugin = &TPlugin{}
 
