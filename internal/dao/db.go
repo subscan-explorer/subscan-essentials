@@ -51,7 +51,10 @@ func (d *DbStorage) GetModelTableName(model interface{}) string {
 }
 
 func (d *DbStorage) GetRuntimeConstant(moduleName, constantName string) *storage.RuntimeConstant {
-	return d.dao.GetRuntimeConstantLatest(moduleName, constantName).AsPlugin()
+	if res := d.dao.GetRuntimeConstantLatest(moduleName, constantName); res != nil {
+		return res.AsPlugin()
+	}
+	return nil
 }
 
 func (d *DbStorage) checkProtected(model interface{}) error {
