@@ -6,9 +6,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
-
-	xtime "github.com/itering/subscan/pkg/time"
-	"golang.org/x/exp/slog"
+	"time"
 
 	"github.com/itering/subscan/util"
 	"github.com/knadh/koanf"
@@ -41,14 +39,14 @@ type Database struct {
 }
 
 type Redis struct {
-	Proto        string         `json:"proto"`
-	Addr         string         `json:"addr"`
-	DbName       int            `json:"db_name"`
-	Password     string         `json:"password"`
-	Idle         int            `json:"idle"`
-	Active       int            `json:"active"`
-	ReadTimeout  xtime.Duration `json:"read_timeout"`
-	WriteTimeout xtime.Duration `json:"write_timeout"`
+	Proto        string        `json:"proto"`
+	Addr         string        `json:"addr"`
+	DbName       int           `json:"db_name"`
+	Password     string        `json:"password"`
+	Idle         int           `json:"idle"`
+	Active       int           `json:"active"`
+	ReadTimeout  time.Duration `json:"read_timeout"`
+	WriteTimeout time.Duration `json:"write_timeout"`
 }
 
 var Boot Bootstrap
@@ -69,8 +67,6 @@ func Init() {
 	if Boot.Database == nil || Boot.Redis == nil {
 		panic(fmt.Errorf("config.yaml not completed"))
 	}
-
-	slog.Info("config", "boot", fmt.Sprintf("%+v", Boot))
 
 	Boot.Database.mergeEnvironment()
 	Boot.Redis.mergeEnvironment()

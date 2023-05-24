@@ -6,9 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/itering/subscan/pkg/ecode"
-
 	"github.com/gin-gonic/gin"
+	"github.com/itering/subscan/util"
 	"github.com/pkg/errors"
 )
 
@@ -64,7 +63,7 @@ func toJson(c *gin.Context, data interface{}, err error) {
 		Message:     "Success",
 	}
 	if err != nil {
-		if ec, ok := errors.Cause(err).(ecode.Codes); ok {
+		if ec, ok := errors.Cause(err).(util.ErrorCode); ok {
 			j.Code = ec.Code()
 			j.Message = ec.Message()
 		} else {

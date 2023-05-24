@@ -4,11 +4,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/gin-contrib/timeout"
 	"github.com/gin-gonic/gin"
-	"github.com/go-kratos/kratos/v2/middleware/metrics"
-	"github.com/go-kratos/kratos/v2/middleware/tracing"
-	"github.com/go-kratos/kratos/v2/middleware/validate"
-	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/itering/subscan/configs"
 	middlewares "github.com/itering/subscan/internal/middleware"
 	"github.com/itering/subscan/internal/service"
@@ -18,27 +15,9 @@ import (
 var svc *service.ReadOnlyService
 
 // NewHTTPServer new a HTTP server.
-func NewHTTPServer(c *configs.Server, s *service.ReadOnlyService) *http.Server {
-	opts := []http.ServerOption{
-		http.Middleware(
-			tracing.Server(),
-			metrics.Server(),
-			validate.Validator(),
-		),
-	}
-
+func NewHTTPServer(c *configs.Server, s *service.ReadOnlyService) *gin.Engine {
 	svc = s
-	if c.Http.Network != "" {
-		opts = append(opts, http.Network(c.Http.Network))
-	}
-	if c.Http.Addr != "" {
-		opts = append(opts, http.Address(c.Http.Addr))
-	}
-	if c.Http.Timeout != "" {
-		timeout, _ := time.ParseDuration(c.Http.Timeout)
-		opts = append(opts, http.Timeout(timeout))
-	}
-	engine := http.NewServer(opts...)
+
 	if os.Getenv("GIN_MODE") == "debug" {
 		gin.SetMode(gin.DebugMode)
 	} else {
@@ -47,9 +26,15 @@ func NewHTTPServer(c *configs.Server, s *service.ReadOnlyService) *http.Server {
 	e := gin.New()
 	e.Use(gin.Recovery())
 	e.Use(middlewares.CORS())
-	defer engine.HandlePrefix("/", e)
+	if c.Http.Timeout != "" {
+		timeoutLen, _ := time.ParseDuration(c.Http.Timeout)
+		e.Use(timeout.New(timeout.WithTimeout(timeoutLen), timeout.WithHandler(func(c *gin.Context) {
+			c.Next()
+		})))
+	}
+	e.Use(gin.Logger())
 	initRouter(e)
-	return engine
+	return e
 }
 
 func initRouter(e *gin.Engine) {

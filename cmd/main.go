@@ -6,7 +6,6 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/go-kratos/kratos/v2"
 	"github.com/itering/subscan/configs"
 	"github.com/itering/subscan/internal/observer"
 	"github.com/itering/subscan/internal/script"
@@ -104,8 +103,14 @@ func run() {
 		svc.Close()
 	}()
 
-	app := kratos.New(kratos.Metadata(map[string]string{}), kratos.Server(httpSrv))
-	if err := app.Run(); err != nil {
+	runIt := func() error {
+		if addr := configs.Boot.Server.Http.Addr; addr != "" {
+			return httpSrv.Run(addr)
+		} else {
+			return httpSrv.Run()
+		}
+	}
+	if err := runIt(); err != nil {
 		panic(err)
 	}
 }

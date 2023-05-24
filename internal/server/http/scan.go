@@ -18,8 +18,8 @@ func metadata(c *gin.Context) {
 
 func blocks(c *gin.Context) {
 	p := new(struct {
-		Row  int `json:"row" validate:"min=1,max=100"`
-		Page int `json:"page" validate:"min=0"`
+		Row  int `json:"row" binding:"min=1,max=100"`
+		Page int `json:"page" binding:"min=0"`
 	})
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
@@ -33,8 +33,8 @@ func blocks(c *gin.Context) {
 
 func block(c *gin.Context) {
 	p := new(struct {
-		BlockNum  int    `json:"block_num" validate:"omitempty,min=0"`
-		BlockHash string `json:"block_hash" validate:"omitempty,len=66"`
+		BlockNum  int    `json:"block_num" binding:"omitempty,min=0"`
+		BlockHash string `json:"block_hash" binding:"omitempty,len=66"`
 	})
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
@@ -48,12 +48,12 @@ func block(c *gin.Context) {
 
 func extrinsics(c *gin.Context) {
 	p := new(struct {
-		Row     int    `json:"row" validate:"min=1,max=100"`
-		Page    int    `json:"page" validate:"min=0"`
-		Signed  string `json:"signed" validate:"omitempty"`
-		Address string `json:"address" validate:"omitempty"`
-		Module  string `json:"module" validate:"omitempty"`
-		Call    string `json:"call" validate:"omitempty"`
+		Row     int    `json:"row" binding:"min=1,max=100"`
+		Page    int    `json:"page" binding:"min=0"`
+		Signed  string `json:"signed" binding:"omitempty"`
+		Address string `json:"address" binding:"omitempty"`
+		Module  string `json:"module" binding:"omitempty"`
+		Call    string `json:"call" binding:"omitempty"`
 	})
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
@@ -81,13 +81,12 @@ func extrinsics(c *gin.Context) {
 	toJson(c, map[string]interface{}{
 		"extrinsics": list, "count": count,
 	}, nil)
-
 }
 
 func extrinsic(c *gin.Context) {
 	p := new(struct {
-		ExtrinsicIndex string `json:"extrinsic_index" validate:"omitempty"`
-		Hash           string `json:"hash" validate:"omitempty,len=66"`
+		ExtrinsicIndex string `json:"extrinsic_index" binding:"omitempty"`
+		Hash           string `json:"hash" binding:"omitempty,len=66"`
 	})
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
@@ -105,10 +104,10 @@ func extrinsic(c *gin.Context) {
 
 func events(c *gin.Context) {
 	p := new(struct {
-		Row    int    `json:"row" validate:"min=1,max=100"`
-		Page   int    `json:"page" validate:"min=0"`
-		Module string `json:"module" validate:"omitempty"`
-		Call   string `json:"call" validate:"omitempty"`
+		Row    int    `json:"row" binding:"min=1,max=100"`
+		Page   int    `json:"page" binding:"min=0"`
+		Module string `json:"module" binding:"omitempty"`
+		Call   string `json:"call" binding:"omitempty"`
 	})
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
@@ -128,7 +127,7 @@ func events(c *gin.Context) {
 
 func checkSearchHash(c *gin.Context) {
 	p := new(struct {
-		Hash string `json:"hash" validate:"len=66"`
+		Hash string `json:"hash" binding:"len=66"`
 	})
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
@@ -164,7 +163,6 @@ func runtimeMetadata(c *gin.Context) {
 			"info": info.Metadata.Modules,
 		}, nil)
 	}
-
 }
 
 func pluginList(c *gin.Context) {
@@ -173,7 +171,7 @@ func pluginList(c *gin.Context) {
 
 func pluginUIConfig(c *gin.Context) {
 	p := new(struct {
-		Name string `json:"name" validate:"required"`
+		Name string `json:"name" binding:"required"`
 	})
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return

@@ -416,7 +416,7 @@ func (a *Staking) ProcessEvent(block *storage.Block, event *storage.Event, fee d
 		if err != nil {
 			return err
 		}
-		slog.Info("staking.validatorprefsset", "account", account, "prefs", prefs, "blockNum", block.BlockNum)
+		slog.Debug("staking.validatorprefsset", "account", account, "prefs", prefs, "blockNum", block.BlockNum)
 		// the commission is in parts per billion
 		commission := decimal.NewFromFloat(prefs.Commission).Div(decimal.NewFromInt(1_000_000_000))
 		if err := dao.NewValidatorPrefs(a.d, account, commission, prefs.Blocked, uint32(block.BlockNum)); err != nil {
