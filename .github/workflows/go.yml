@@ -77,7 +77,7 @@ jobs:
           REDIS_ADDR: localhost:6379
           NETWORK_NODE: polkadot
           MYSQL_HOST: 127.0.0.1
-          MYSQL_DB: test
+          MYSQL_DB: subscan_test
           TEST_MOD: true
 
   golangci:
