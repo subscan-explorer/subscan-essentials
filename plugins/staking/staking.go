@@ -171,7 +171,9 @@ func (a *Staking) ProcessCall(block *storage.Block, call *storage.Call, events [
 					return err
 				}
 				slog.Debug("staking.rewarded", "address", address, "amount", amount, "era", era, "event", e)
-				dao.NewClaimedPayout(a.d, address, string(validator), amount, era, &e, block, extrinsic.ExtrinsicIndex)
+				if err := dao.NewClaimedPayout(a.d, address, string(validator), amount, era, &e, block, extrinsic.ExtrinsicIndex); err != nil {
+					return err
+				}
 			}
 		}
 		slog.Debug("staking.payout_stakers", "validator", validator)
@@ -387,7 +389,9 @@ func (a *Staking) ProcessEvent(block *storage.Block, event *storage.Event, fee d
 			return err
 		}
 		eraInfo.EndBlock = uint(block.BlockNum)
-		dao.CompleteEraInfo(a.d, eraInfo)
+		if err := dao.CompleteEraInfo(a.d, eraInfo); err != nil {
+			return err
+		}
 		for _, stake := range eraInfo.Stakes {
 			rewardAmount := eraInfo.StakerRewards.Data()[stake.Staker]
 			if err := dao.NewUnclaimedPayout(a.d, stake.Staker, stake.Validator, rewardAmount, era); err != nil {
@@ -482,10 +486,20 @@ func (a *Staking) UiConf() *plugin.UiConfig {
 }
 
 func (a *Staking) Migrate() {
-	_ = a.d.AutoMigration(&model.Payout{})
-	_ = a.d.AutoMigration(&model.PoolPayout{})
-	_ = a.d.AutoMigration(&model.ValidatorPrefs{})
-	_ = a.d.AutoMigration(&model.EraInfo{})
+	if err := a.d.AutoMigration(&model.Payout{}); err != nil {
+		slog.Error("error while migrating payout", "error", err)
+	}
+	if err := a.d.AutoMigration(&model.PoolPayout{}); err != nil {
+		slog.Error("error while migrating pool payout", "error", err)
+	}
+	if err := a.d.AutoMigration(&model.ValidatorPrefs{}); err != nil {
+		slog.Error("error while migrating validator prefs", "error", err)
+	}
+	if err := a.d.AutoMigration(&model.EraInfo{}); err != nil {
+		slog.Error("error while migrating era info", "error", err)
+	}
 
-	a.d.Create(&model.EraInfo{Era: 0, StartBlock: 0})
+	if err := a.d.Create(&model.EraInfo{Era: 0, StartBlock: 0}); err != nil {
+		slog.Error("error while creating era 0 info", "error", err)
+	}
 }
