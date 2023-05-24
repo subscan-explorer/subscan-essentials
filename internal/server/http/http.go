@@ -4,10 +4,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/gin-contrib/timeout"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/itering/subscan/configs"
-	middlewares "github.com/itering/subscan/internal/middleware"
 	"github.com/itering/subscan/internal/service"
 	"github.com/itering/subscan/plugins"
 )
@@ -25,14 +24,14 @@ func NewHTTPServer(c *configs.Server, s *service.ReadOnlyService) *gin.Engine {
 	}
 	e := gin.New()
 	e.Use(gin.Recovery())
-	e.Use(middlewares.CORS())
-	if c.Http.Timeout != "" {
-		timeoutLen, _ := time.ParseDuration(c.Http.Timeout)
-		e.Use(timeout.New(timeout.WithTimeout(timeoutLen), timeout.WithHandler(func(c *gin.Context) {
-			c.Next()
-		})))
-	}
 	e.Use(gin.Logger())
+	e.Use(cors.New(cors.Config{
+		AllowAllOrigins: true,
+		AllowMethods:    []string{"GET", "POST", "OPTIONS", "PUT", "DELETE"},
+		MaxAge:          12 * time.Hour,
+		ExposeHeaders:   []string{"Content-Length"},
+		AllowHeaders:    []string{"Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization", "accept", "origin", "Cache-Control", "X-Requested-With"},
+	}))
 	initRouter(e)
 	return e
 }
