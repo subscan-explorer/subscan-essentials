@@ -8,10 +8,12 @@ import (
 	"strings"
 
 	xtime "github.com/itering/subscan/pkg/time"
+	"golang.org/x/exp/slog"
 
-	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/config/file"
 	"github.com/itering/subscan/util"
+	"github.com/knadh/koanf"
+	"github.com/knadh/koanf/parsers/yaml"
+	"github.com/knadh/koanf/providers/file"
 )
 
 type Bootstrap struct {
@@ -56,18 +58,19 @@ func Init() {
 	if !util.FileExists(configFilename) {
 		panic(fmt.Errorf("config file %s is not exists", configFilename))
 	}
-
-	c := config.New(config.WithSource(file.NewSource(configFilename)))
-	if err := c.Load(); err != nil {
-		panic(err)
+	conf := koanf.New(".")
+	if err := conf.Load(file.Provider(configFilename), yaml.Parser()); err != nil {
+		panic("load config file error: " + err.Error())
 	}
-	if err := c.Scan(&Boot); err != nil {
-		panic(err)
+	if err := conf.Unmarshal("", &Boot); err != nil {
+		panic("unmarshal config file error: " + err.Error())
 	}
 
 	if Boot.Database == nil || Boot.Redis == nil {
 		panic(fmt.Errorf("config.yaml not completed"))
 	}
+
+	slog.Info("config", "boot", fmt.Sprintf("%+v", Boot))
 
 	Boot.Database.mergeEnvironment()
 	Boot.Redis.mergeEnvironment()
@@ -95,7 +98,7 @@ func (dc *Database) mergeEnvironment() {
 		panic(err)
 	}
 
-	var dsnStr = dsn.String()
+	dsnStr := dsn.String()
 
 	// for gorm
 	if dsn.Scheme == "mysql" {
@@ -182,11 +185,11 @@ func getUserOfDSN(dsn *url.URL) string {
 	return user
 }
 
-func (_ *Database) mergeDefaultDSNs(a, b *url.URL) (*url.URL, error) {
+func (*Database) mergeDefaultDSNs(a, b *url.URL) (*url.URL, error) {
 	if a == nil && b == nil {
 		return nil, errors.New("must have least one is non-nil")
 	}
-	var emptyUrl = &url.URL{}
+	emptyUrl := &url.URL{}
 	if a == nil {
 		a = emptyUrl
 	}
@@ -233,7 +236,7 @@ func (rc *Redis) mergeEnvironment() {
 func ParseDSN(dsn string) (*url.URL, error) {
 	foundKey := false
 	extendScheme := ""
-	var start, end = 0, 0
+	start, end := 0, 0
 	for i := len(dsn) - 1; i >= 0; i-- {
 		if dsn[i] == '@' {
 			foundKey = true
