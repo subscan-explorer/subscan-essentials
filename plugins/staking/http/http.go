@@ -25,9 +25,9 @@ func Router(s *service.Service) []router.Http {
 }
 
 type AddressReq struct {
-	Row     int    `json:"row" validate:"min=1,max=5000"`
-	Page    int    `json:"page" validate:"min=0"`
-	Address string `json:"address" validate:"required"`
+	Row     int    `json:"row" binding:"min=1,max=5000"`
+	Page    int    `json:"page" binding:"min=0"`
+	Address string `json:"address" binding:"required"`
 }
 
 func rewardsSlashes(c *gin.Context) {
