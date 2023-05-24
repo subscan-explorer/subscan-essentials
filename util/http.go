@@ -1,4 +1,4 @@
-package http
+package util
 
 import (
 	"context"
@@ -7,9 +7,15 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/itering/subscan/util"
 	"github.com/pkg/errors"
 )
+
+type JsonResult struct {
+	Code        int         `json:"code"`
+	Message     string      `json:"message"`
+	GeneratedAt int64       `json:"generated_at"`
+	Data        interface{} `json:"data,omitempty"`
+}
 
 type J struct {
 	Code        int         `json:"code"`
@@ -20,16 +26,8 @@ type J struct {
 
 var jsonContentType = []string{"application/json; charset=utf-8"}
 
-// Render (JSON) writes data with custom ContentType.
-func (r J) Render(w http.ResponseWriter) (err error) {
-	if err = WriteJSON(w, r); err != nil {
-		panic(err)
-	}
-	return
-}
-
 // WriteContentType (JSON) writes JSON ContentType.
-func (r J) WriteContentType(w http.ResponseWriter) {
+func (r JsonResult) WriteContentType(w http.ResponseWriter) {
 	writeContentType(w, jsonContentType)
 }
 
@@ -51,19 +49,27 @@ func writeContentType(w http.ResponseWriter, value []string) {
 	}
 }
 
-func toJson(c *gin.Context, data interface{}, err error) {
+// Render (JSON) writes data with custom ContentType.
+func (r JsonResult) Render(w http.ResponseWriter) (err error) {
+	if err = WriteJSON(w, r); err != nil {
+		panic(err)
+	}
+	return
+}
+
+func ToJson(c *gin.Context, data interface{}, err error) {
 	if ctxErr := c.Request.Context().Err(); ctxErr != nil && ctxErr == context.DeadlineExceeded {
 		c.AbortWithStatus(500)
-		c.Render(0, J{Code: 500, GeneratedAt: time.Now().Unix(), Message: ctxErr.Error()})
+		c.Render(0, JsonResult{Code: 500, GeneratedAt: time.Now().Unix(), Message: ctxErr.Error()})
 		return
 	}
-	j := J{
+	j := JsonResult{
 		Data:        data,
 		GeneratedAt: time.Now().Unix(),
 		Message:     "Success",
 	}
 	if err != nil {
-		if ec, ok := errors.Cause(err).(util.ErrorCode); ok {
+		if ec, ok := errors.Cause(err).(ErrorCode); ok {
 			j.Code = ec.Code()
 			j.Message = ec.Message()
 		} else {

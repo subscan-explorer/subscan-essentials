@@ -1,9 +1,6 @@
 package http
 
 import (
-	"encoding/json"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	scale "github.com/itering/scale.go/types"
 	"github.com/itering/scale.go/types/scaleBytes"
@@ -31,18 +28,16 @@ type AddressReq struct {
 }
 
 func rewardsSlashes(c *gin.Context) {
-	w := c.Writer
 	r := c.Request
 	p := new(AddressReq)
-	if err := validator.Validate(r.Body, p); err != nil {
-		toJson(w, 10001, nil, err)
-		return
+	if err := c.BindJSON(r); err != nil {
+		util.ToJson(c, nil, util.ParamsError)
 	}
 	depthConstant := svc.GetRuntimeConstant("Staking", "HistoryDepth")
 
 	if depthConstant == nil {
 		slog.Error("get runtime constant failed", "module", "Staking", "name", "HistoryDepth")
-		toJson(w, 10001, nil, errors.New("get runtime constant failed"))
+		util.ToJson(c, nil, errors.New("get runtime constant failed"))
 		return
 	}
 
@@ -57,7 +52,7 @@ func rewardsSlashes(c *gin.Context) {
 
 	slog.Debug("RewardsSlashes", "page", p.Page, "row", p.Row, "address", p.Address, "found", len(list))
 
-	toJson(w, 0, map[string]interface{}{
+	util.ToJson(c, map[string]interface{}{
 		"list": list, "count": len(list),
 	}, nil)
 }
@@ -69,11 +64,10 @@ type EraStat struct {
 }
 
 func eraStat(c *gin.Context) {
-	w := c.Writer
 	r := c.Request
 	p := new(AddressReq)
 	if err := validator.Validate(r.Body, p); err != nil {
-		toJson(w, 10001, nil, err)
+		util.ToJson(c, nil, err)
 		return
 	}
 
@@ -91,17 +85,16 @@ func eraStat(c *gin.Context) {
 
 	slog.Debug("EraStat", "page", p.Page, "row", p.Row, "address", p.Address, "found", len(eraStats))
 
-	toJson(w, 0, map[string]interface{}{
+	util.ToJson(c, map[string]interface{}{
 		"list": eraStats, "count": len(eraStats),
 	}, nil)
 }
 
 func poolRewards(c *gin.Context) {
-	w := c.Writer
 	r := c.Request
 	p := new(AddressReq)
 	if err := validator.Validate(r.Body, p); err != nil {
-		toJson(w, 10001, nil, err)
+		util.ToJson(c, nil, err)
 		return
 	}
 
@@ -110,54 +103,7 @@ func poolRewards(c *gin.Context) {
 
 	slog.Debug("PoolRewards", "page", p.Page, "row", p.Row, "address", p.Address, "found", len(list))
 
-	toJson(w, 0, map[string]interface{}{
+	util.ToJson(c, map[string]interface{}{
 		"list": list, "count": len(list),
 	}, nil)
-}
-
-type J struct {
-	Code    int         `json:"code"`
-	Message string      `json:"message"`
-	TTL     int         `json:"ttl"`
-	Data    interface{} `json:"data,omitempty"`
-}
-
-func (j J) Render(w http.ResponseWriter) error {
-	header := w.Header()
-	if val := header["Content-Type"]; len(val) == 0 {
-		header["Content-Type"] = []string{"application/json; charset=utf-8"}
-		header["Access-Control-Allow-Origin"] = []string{"*"}
-	}
-	return nil
-}
-
-func (j J) WriteContentType(w http.ResponseWriter) {
-	var (
-		jsonBytes []byte
-		err       error
-	)
-	_ = j.Render(w)
-	if jsonBytes, err = json.Marshal(j); err != nil {
-		_ = errors.WithStack(err)
-		return
-	}
-	if _, err = w.Write(jsonBytes); err != nil {
-		_ = errors.WithStack(err)
-	}
-}
-
-func toJson(w http.ResponseWriter, code int, data interface{}, err error) {
-	j := J{
-		Message: "success",
-		TTL:     1,
-		Data:    data,
-	}
-	if err != nil {
-		j.Message = err.Error()
-	}
-	if code != 0 {
-		j.Code = code
-	}
-	j.WriteContentType(w)
-	_ = j.Render(w)
 }

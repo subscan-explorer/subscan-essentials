@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/itering/subscan/util"
 	"golang.org/x/exp/slog"
 )
 
@@ -16,10 +17,10 @@ func ping(ctx *gin.Context) {
 }
 
 func now(c *gin.Context) {
-	toJson(c, time.Now().Unix(), nil)
+	util.ToJson(c, time.Now().Unix(), nil)
 }
 
 func systemStatus(c *gin.Context) {
 	status := svc.DaemonHealth(c)
-	toJson(c, status, nil)
+	util.ToJson(c, status, nil)
 }

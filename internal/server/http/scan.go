@@ -13,7 +13,7 @@ import (
 
 func metadata(c *gin.Context) {
 	metadata, err := svc.Metadata()
-	toJson(c, metadata, err)
+	util.ToJson(c, metadata, err)
 }
 
 func blocks(c *gin.Context) {
@@ -26,7 +26,7 @@ func blocks(c *gin.Context) {
 	}
 	blockNum, err := svc.GetCurrentBlockNum(context.TODO())
 	blocks := svc.GetBlocksSampleByNums(p.Page, p.Row)
-	toJson(c, map[string]interface{}{
+	util.ToJson(c, map[string]interface{}{
 		"blocks": blocks, "count": blockNum,
 	}, err)
 }
@@ -40,9 +40,9 @@ func block(c *gin.Context) {
 		return
 	}
 	if p.BlockHash == "" {
-		toJson(c, svc.GetBlockByNum(p.BlockNum), nil)
+		util.ToJson(c, svc.GetBlockByNum(p.BlockNum), nil)
 	} else {
-		toJson(c, svc.GetBlockByHashJson(p.BlockHash), nil)
+		util.ToJson(c, svc.GetBlockByHashJson(p.BlockHash), nil)
 	}
 }
 
@@ -72,13 +72,13 @@ func extrinsics(c *gin.Context) {
 	if p.Address != "" {
 		account := ss58.Decode(p.Address, util.StringToInt(util.AddressType))
 		if account == "" {
-			toJson(c, nil, util.InvalidAccountAddress)
+			util.ToJson(c, nil, util.InvalidAccountAddress)
 			return
 		}
 		query = append(query, fmt.Sprintf("is_signed = 1 and account_id = '%s'", account))
 	}
 	list, count := svc.GetExtrinsicList(p.Page, p.Row, "desc", query...)
-	toJson(c, map[string]interface{}{
+	util.ToJson(c, map[string]interface{}{
 		"extrinsics": list, "count": count,
 	}, nil)
 }
@@ -92,13 +92,13 @@ func extrinsic(c *gin.Context) {
 		return
 	}
 	if p.ExtrinsicIndex == "" && p.Hash == "" {
-		toJson(c, nil, util.ParamsError)
+		util.ToJson(c, nil, util.ParamsError)
 		return
 	}
 	if p.ExtrinsicIndex != "" {
-		toJson(c, svc.GetExtrinsicByIndex(p.ExtrinsicIndex), nil)
+		util.ToJson(c, svc.GetExtrinsicByIndex(p.ExtrinsicIndex), nil)
 	} else {
-		toJson(c, svc.GetExtrinsicDetailByHash(p.Hash), nil)
+		util.ToJson(c, svc.GetExtrinsicDetailByHash(p.Hash), nil)
 	}
 }
 
@@ -120,7 +120,7 @@ func events(c *gin.Context) {
 		query = append(query, fmt.Sprintf("event_id = '%s'", p.Call))
 	}
 	events, count := svc.RenderEvents(p.Page, p.Row, "desc", query...)
-	toJson(c, map[string]interface{}{
+	util.ToJson(c, map[string]interface{}{
 		"events": events, "count": count,
 	}, nil)
 }
@@ -133,18 +133,18 @@ func checkSearchHash(c *gin.Context) {
 		return
 	}
 	if block := svc.GetBlockByHash(p.Hash); block != nil {
-		toJson(c, map[string]string{"hash_type": "block"}, nil)
+		util.ToJson(c, map[string]string{"hash_type": "block"}, nil)
 		return
 	}
 	if extrinsic := svc.GetExtrinsicByHash(p.Hash); extrinsic != nil {
-		toJson(c, map[string]string{"hash_type": "extrinsic"}, nil)
+		util.ToJson(c, map[string]string{"hash_type": "extrinsic"}, nil)
 		return
 	}
-	toJson(c, nil, util.RecordNotFound)
+	util.ToJson(c, nil, util.RecordNotFound)
 }
 
 func runtimeList(c *gin.Context) {
-	toJson(c, map[string]interface{}{
+	util.ToJson(c, map[string]interface{}{
 		"list": svc.SubstrateRuntimeList(),
 	}, nil)
 }
@@ -157,16 +157,16 @@ func runtimeMetadata(c *gin.Context) {
 		return
 	}
 	if info := svc.SubstrateRuntimeInfo(p.Spec); info == nil {
-		toJson(c, map[string]interface{}{"info": nil}, nil)
+		util.ToJson(c, map[string]interface{}{"info": nil}, nil)
 	} else {
-		toJson(c, map[string]interface{}{
+		util.ToJson(c, map[string]interface{}{
 			"info": info.Metadata.Modules,
 		}, nil)
 	}
 }
 
 func pluginList(c *gin.Context) {
-	toJson(c, plugins.List(), nil)
+	util.ToJson(c, plugins.List(), nil)
 }
 
 func pluginUIConfig(c *gin.Context) {
@@ -177,8 +177,8 @@ func pluginUIConfig(c *gin.Context) {
 		return
 	}
 	if plugin, ok := plugins.RegisteredPlugins[p.Name]; ok {
-		toJson(c, plugin.UiConf(), nil)
+		util.ToJson(c, plugin.UiConf(), nil)
 		return
 	}
-	toJson(c, nil, nil)
+	util.ToJson(c, nil, nil)
 }
