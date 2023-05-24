@@ -9,7 +9,6 @@ import (
 	"github.com/itering/subscan/plugins/staking/service"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/address"
-	"github.com/itering/subscan/util/validator"
 	"github.com/pkg/errors"
 	"golang.org/x/exp/slog"
 )
@@ -28,9 +27,8 @@ type AddressReq struct {
 }
 
 func rewardsSlashes(c *gin.Context) {
-	r := c.Request
 	p := new(AddressReq)
-	if err := c.BindJSON(r); err != nil {
+	if err := c.BindJSON(p); err != nil {
 		util.ToJson(c, nil, util.ParamsError)
 	}
 	depthConstant := svc.GetRuntimeConstant("Staking", "HistoryDepth")
@@ -64,9 +62,8 @@ type EraStat struct {
 }
 
 func eraStat(c *gin.Context) {
-	r := c.Request
 	p := new(AddressReq)
-	if err := validator.Validate(r.Body, p); err != nil {
+	if err := c.BindJSON(p); err != nil {
 		util.ToJson(c, nil, err)
 		return
 	}
@@ -91,9 +88,8 @@ func eraStat(c *gin.Context) {
 }
 
 func poolRewards(c *gin.Context) {
-	r := c.Request
 	p := new(AddressReq)
-	if err := validator.Validate(r.Body, p); err != nil {
+	if err := c.BindJSON(p); err != nil {
 		util.ToJson(c, nil, err)
 		return
 	}
