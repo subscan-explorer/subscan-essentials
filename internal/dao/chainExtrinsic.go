@@ -3,6 +3,7 @@ package dao
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/itering/subscan/model"
@@ -56,54 +57,24 @@ func (d *ReadOnlyDao) GetExtrinsicsByBlockNum(blockNum int) []model.ChainExtrins
 
 func (d *ReadOnlyDao) GetExtrinsicList(c context.Context, page, row int, order string, queryWhere ...string) ([]model.ChainExtrinsic, int) {
 	var extrinsics []model.ChainExtrinsic
-	var count int64
-
-	blockNum, _ := d.GetFillBestBlockNum(context.TODO())
-	for index := blockNum / model.SplitTableBlockNum; index >= 0; index-- {
-		var tableData []model.ChainExtrinsic
-		var tableCount int64
-		queryOrigin := d.db.Model(model.ChainExtrinsic{BlockNum: index * model.SplitTableBlockNum})
-		for _, w := range queryWhere {
-			queryOrigin = queryOrigin.Where(w)
-		}
-
-		queryOrigin.Count(&tableCount)
-
-		if tableCount == 0 {
-			continue
-		}
-		preCount := count
-		count += tableCount
-		if len(extrinsics) >= row {
-			continue
-		}
-		query := queryOrigin.Order("block_num desc").Offset(page*row - int(preCount)).Limit(row - len(extrinsics)).Scan(&tableData)
-		if query == nil || query.Error != nil || RecordNotFound(query) {
-			continue
-		}
-		extrinsics = append(extrinsics, tableData...)
-
+	query := d.db.Model(&model.ChainExtrinsic{})
+	for _, w := range queryWhere {
+		query = query.Where(w)
 	}
-
-	if len(queryWhere) == 0 {
-		m, _ := d.GetMetadata(c)
-		count = int64(util.StringToInt(m["count_extrinsic"]))
-	}
-	return extrinsics, int(count)
+	query.Order(fmt.Sprintf("block_num %s", order)).Offset(page * row).Limit(row).Scan(&extrinsics)
+	return extrinsics, len(extrinsics)
 }
 
 func (d *ReadOnlyDao) GetExtrinsicsByHash(c context.Context, hash string) *model.ChainExtrinsic {
 	var extrinsic model.ChainExtrinsic
-	blockNum, _ := d.GetFillBestBlockNum(c)
-	for index := blockNum / (model.SplitTableBlockNum); index >= 0; index-- {
-		query := d.db.Model(model.ChainExtrinsic{BlockNum: index * model.SplitTableBlockNum}).Select("*").Where("extrinsic_hash = ?", hash).Order("id asc").Limit(1).Scan(&extrinsic)
-		if query != nil && !RecordNotFound(query) {
-			if extrinsic.Params != nil {
-				extrinsic.Params = *(extrinsic.Params.(*interface{}))
-			}
-			return &extrinsic
-		}
+	query := d.db.Model(&model.ChainExtrinsic{}).Select("*").Where("extrinsic_hash = ?", hash).Order("id asc").Limit(1).Scan(&extrinsic)
+	if extrinsic.Params != nil {
+		extrinsic.Params = *(extrinsic.Params.(*interface{}))
 	}
+	if query != nil && !RecordNotFound(query) {
+		return &extrinsic
+	}
+
 	return nil
 }
 

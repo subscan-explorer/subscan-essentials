@@ -45,37 +45,14 @@ func (d *ReadOnlyDao) GetEventByBlockNum(blockNum int, where ...string) []model.
 }
 
 func (d *ReadOnlyDao) GetEventList(page, row int, order string, where ...string) ([]model.ChainEvent, int) {
-	var Events []model.ChainEvent
-
-	var count int64
-
-	blockNum, _ := d.GetFillBestBlockNum(context.TODO())
-	for index := blockNum / model.SplitTableBlockNum; index >= 0; index-- {
-		var tableData []model.ChainEvent
-		var tableCount int64
-		queryOrigin := d.db.Model(model.ChainEvent{BlockNum: index * model.SplitTableBlockNum})
-		for _, w := range where {
-			queryOrigin = queryOrigin.Where(w)
-		}
-
-		queryOrigin.Count(&tableCount)
-
-		if tableCount == 0 {
-			continue
-		}
-		preCount := count
-		count += tableCount
-		if len(Events) >= row {
-			continue
-		}
-		query := queryOrigin.Order(fmt.Sprintf("block_num %s", order)).Offset(page*row - int(preCount)).Limit(row - len(Events)).Scan(&tableData)
-		if query == nil || query.Error != nil || RecordNotFound(query) {
-			continue
-		}
-		Events = append(Events, tableData...)
-
+	var events []model.ChainEvent
+	q := d.db.Model(&model.ChainEvent{})
+	for _, w := range where {
+		q = q.Where(w)
 	}
-	return Events, int(count)
+	q.Order(fmt.Sprintf("block_num %s", order)).Offset(page * row).Limit(row).Scan(&events)
+
+	return events, len(events)
 }
 
 func (d *ReadOnlyDao) GetEventsByIndex(extrinsicIndex string) []model.ChainEvent {

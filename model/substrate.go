@@ -1,15 +1,10 @@
 package model
 
 import (
-	"fmt"
-
 	"github.com/itering/subscan/plugins/storage"
 	"github.com/itering/subscan/util"
 	"github.com/shopspring/decimal"
 )
-
-// SplitTableBlockNum
-var SplitTableBlockNum = 1000000
 
 type ChainBlock struct {
 	ID              uint   `gorm:"primary_key" json:"id"`
@@ -28,13 +23,6 @@ type ChainBlock struct {
 	Validator       string `json:"validator"`
 	CodecError      bool   `json:"codec_error"`
 	Finalized       bool   `json:"finalized"`
-}
-
-func (c ChainBlock) TableName() string {
-	if c.BlockNum/SplitTableBlockNum == 0 {
-		return "chain_blocks"
-	}
-	return fmt.Sprintf("chain_blocks_%d", c.BlockNum/SplitTableBlockNum)
 }
 
 func (c *ChainBlock) AsPlugin() *storage.Block {
@@ -84,13 +72,6 @@ type ChainEvent struct {
 	Params        interface{} `json:"params" gorm:"type:text;" `
 	ExtrinsicHash string      `json:"extrinsic_hash" gorm:"default: null" `
 	EventIdx      int         `gorm:"index:event_idx,unique" json:"event_idx"`
-}
-
-func (c ChainEvent) TableName() string {
-	if c.BlockNum/SplitTableBlockNum == 0 {
-		return "chain_events"
-	}
-	return fmt.Sprintf("chain_events_%d", c.BlockNum/SplitTableBlockNum)
 }
 
 type AsPlugin[P any] interface {
@@ -174,13 +155,6 @@ type ChainExtrinsic struct {
 	BatchIndex         int             `json:"-" gorm:"-"`
 }
 
-func (c ChainExtrinsic) TableName() string {
-	if c.BlockNum/SplitTableBlockNum == 0 {
-		return "chain_extrinsics"
-	}
-	return fmt.Sprintf("chain_extrinsics_%d", c.BlockNum/SplitTableBlockNum)
-}
-
 func (c *ChainExtrinsic) AsPlugin() *storage.Extrinsic {
 	return &storage.Extrinsic{
 		ExtrinsicIndex:     c.ExtrinsicIndex,
@@ -231,13 +205,6 @@ type ChainLog struct {
 	LogType   string `json:"log_type" `
 	Data      string `json:"data" gorm:"type:text;"`
 	Finalized bool   `json:"finalized"`
-}
-
-func (c ChainLog) TableName() string {
-	if c.BlockNum/SplitTableBlockNum == 0 {
-		return "chain_logs"
-	}
-	return fmt.Sprintf("chain_logs_%d", c.BlockNum/SplitTableBlockNum)
 }
 
 type ExtrinsicParam struct {

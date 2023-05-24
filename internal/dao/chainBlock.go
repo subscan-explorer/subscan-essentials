@@ -2,7 +2,6 @@ package dao
 
 import (
 	"context"
-	"fmt"
 	"sort"
 
 	"github.com/gomodule/redigo/redis"
@@ -11,16 +10,8 @@ import (
 )
 
 // CreateBlock, mysql db transaction
-// Check if you need to create a new table(block, extrinsic, event, log ) after created
 func (d *Dao) CreateBlock(txn *GormDB, cb *model.ChainBlock) (err error) {
 	query := txn.Create(cb)
-	if !d.db.Migrator().HasTable(model.ChainBlock{BlockNum: cb.BlockNum + model.SplitTableBlockNum}) {
-		go func() {
-			_ = d.db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
-				d.InternalTables(cb.BlockNum + model.SplitTableBlockNum)...)
-			d.AddIndex(cb.BlockNum + model.SplitTableBlockNum)
-		}()
-	}
 	return query.Error
 }
 
@@ -72,36 +63,18 @@ func (d *ReadOnlyDao) GetBlockList(page, row int) []model.ChainBlock {
 	}
 
 	d.db.Model(model.ChainBlock{BlockNum: head}).
-		Joins(fmt.Sprintf("JOIN (SELECT id,block_num from %s where block_num BETWEEN %d and %d order by block_num desc ) as t on %s.id=t.id",
-			model.ChainBlock{BlockNum: head}.TableName(),
-			end, head,
-			model.ChainBlock{BlockNum: head}.TableName(),
-		)).
+		Select("id", "block_num").
+		Where("block_num BETWEEN ? AND ?", end, head).
 		Order("block_num desc").Scan(&blocks)
-
-	if head/model.SplitTableBlockNum != end/model.SplitTableBlockNum {
-		var endBlocks []model.ChainBlock
-		d.db.Model(model.ChainBlock{BlockNum: blockNum - model.SplitTableBlockNum}).
-			Joins(fmt.Sprintf("JOIN (SELECT id,block_num from %s order by block_num desc limit %d) as t on %s.id=t.id",
-				model.ChainBlock{BlockNum: blockNum - model.SplitTableBlockNum}.TableName(),
-				row-(head%model.SplitTableBlockNum+1),
-				model.ChainBlock{BlockNum: blockNum - model.SplitTableBlockNum}.TableName(),
-			)).
-			Order("block_num desc").Scan(&endBlocks)
-		blocks = append(blocks, endBlocks...)
-	}
 
 	return blocks
 }
 
 func (d *ReadOnlyDao) GetBlockByHash(c context.Context, hash string) *model.ChainBlock {
 	var block model.ChainBlock
-	blockNum, _ := d.GetBestBlockNum(context.TODO())
-	for index := int(blockNum / uint64(model.SplitTableBlockNum)); index >= 0; index-- {
-		query := d.db.Model(&model.ChainBlock{BlockNum: index * model.SplitTableBlockNum}).Where("hash = ?", hash).Scan(&block)
-		if query != nil && !RecordNotFound(query) {
-			return &block
-		}
+	query := d.db.Model(&block).Where("hash = ?", hash).Scan(&block)
+	if query != nil && !RecordNotFound(query) {
+		return &block
 	}
 	return nil
 }
@@ -163,19 +136,15 @@ func (d *Dao) SetBlockFinalized(block *model.ChainBlock) {
 }
 
 func (d *ReadOnlyDao) BlocksReverseByNum(blockNums []int) map[int]model.ChainBlock {
-	var blocks []model.ChainBlock
 	if len(blockNums) == 0 {
 		return nil
 	}
 	sort.Ints(blockNums)
-	lastNum := blockNums[len(blockNums)-1]
-	for index := lastNum / model.SplitTableBlockNum; index >= 0; index-- {
-		var tableData []model.ChainBlock
-		query := d.db.Model(model.ChainBlock{BlockNum: index * model.SplitTableBlockNum}).Where("block_num in (?)", blockNums).Scan(&tableData)
-		if query == nil || query.Error != nil || RecordNotFound(query) {
-			continue
-		}
-		blocks = append(blocks, tableData...)
+	var blocks []model.ChainBlock
+	query := d.db.Model(&model.ChainBlock{}).Where("block_num in (?)", blockNums).Scan(&blocks)
+
+	if query == nil || query.Error != nil || RecordNotFound(query) {
+		return nil
 	}
 
 	toMap := make(map[int]model.ChainBlock)
