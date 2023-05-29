@@ -1,4 +1,6 @@
 FROM golang:1.20.4-bullseye as builder
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get upgrade -y
 
 WORKDIR /subscan
 
@@ -9,6 +11,8 @@ WORKDIR /subscan/cmd
 RUN go build -o subscan
 
 FROM buildpack-deps:bullseye-scm
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get upgrade -y
 
 WORKDIR subscan
 COPY configs configs
