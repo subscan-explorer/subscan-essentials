@@ -6,9 +6,9 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/itering/subscan)](https://goreportcard.com/report/github.com/itering/subscan)
 ![subscan](https://github.com/itering/subscan/workflows/subscan/badge.svg)
 
-Subscan Essentials is a high-precision blockchain explorer scaffold project. 
-It supports substrate-based blockchain networks with developer-friendly interface, standard or custom module parsing capabilities. 
-It's developed by the Subscan team and used in subscan.io. 
+Subscan Essentials is a high-precision blockchain explorer scaffold project.
+It supports substrate-based blockchain networks with developer-friendly interface, standard or custom module parsing capabilities.
+It's developed by the Subscan team and used in subscan.io.
 Developers are free to use the codebase to extend functionalities and develop unique user experiences for their audiences.
 
 ## Contents
@@ -29,7 +29,7 @@ Developers are free to use the codebase to extend functionalities and develop un
 
 ## Feature
 
-1. Support Substrate network [custom](/custom_type.md) type registration 
+1. Support Substrate network [custom](/custom_type.md) type registration
 2. Support index Block, Extrinsic, Event, log
 3. More data can be indexed by custom [plugins](/plugins)
 4. [Gen](https://github.com/itering/subscan-plugin/tree/master/tools) tool can automatically generate plugin templates
@@ -105,7 +105,7 @@ Then click search button, result will be shown in the output section.
 
 ### Config
 
-#### Init config file 
+#### Init config file
 
 ```bash
 cp configs/config.yaml.example configs/config.yaml
@@ -147,7 +147,7 @@ cd cmd
 ./subscan
 ```
 
-- Help 
+- Help
 
 ```
 NAME:
@@ -177,7 +177,7 @@ GLOBAL OPTIONS:
 
 ### Docker
 
-Use [docker-compose](https://docs.docker.com/compose/) can start projects quickly 
+Use [docker-compose](https://docs.docker.com/compose/) can start projects quickly
 
 Create local network
 
@@ -221,6 +221,6 @@ GPL-3.0
 
 
 ## Resource
- 
+
 - [ITERING] https://github.com/itering
 - [Darwinia] https://github.com/darwinia-network/darwinia
