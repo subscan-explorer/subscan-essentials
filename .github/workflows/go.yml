@@ -41,10 +41,10 @@ jobs:
         os: [ubuntu-latest]
     steps:
       # Set up golang env
-      - name: Set up GO 1.20
+      - name: Set up GO 1.20.4
         uses: actions/setup-go@v1
         with:
-          go-version: 1.20
+          go-version: 1.20.4
         id: go
       # Checkout Go module directory
       - name: Check out code into the Go module directory
