@@ -52,7 +52,7 @@ jobs:
         uses: actions/checkout@v2
       # Cache Go Modules
       - name: Cache Go Modules
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         env:
           cache-name: cache-go-modules
         with:
