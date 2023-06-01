@@ -12,7 +12,7 @@ require (
 	github.com/itering/scale.go v1.5.9
 	github.com/itering/substrate-api-rpc v0.4.17
 	github.com/knadh/koanf v1.5.0
-	github.com/lmittmann/tint v0.3.3
+	github.com/lmittmann/tint v0.3.4
 	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/panjf2000/ants/v2 v2.7.4
 	github.com/pkg/errors v0.9.1
@@ -20,7 +20,7 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/urfave/cli v1.22.13
 	golang.org/x/crypto v0.9.0
-	golang.org/x/exp v0.0.0-20230519143937-03e91628a987
+	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1
 	gopkg.in/go-playground/validator.v9 v9.31.0
 	gorm.io/datatypes v1.2.0
 	gorm.io/driver/mysql v1.5.1
