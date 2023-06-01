@@ -75,10 +75,6 @@ jobs:
           cp configs/config.yaml.example configs/config.yaml
           go test -v ./...
         env:
-          REDIS_ADDR: localhost:6379
-          NETWORK_NODE: polkadot
-          MYSQL_HOST: 127.0.0.1
-          MYSQL_DB: subscan_test
           TEST_MOD: true
 
   golangci:
