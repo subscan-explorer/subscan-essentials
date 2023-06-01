@@ -19,11 +19,3 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-
-  - package-ecosystem: "npm"
-    directory: "/ui"
-    schedule:
-      interval: "monthly"
-    ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-patch"]
