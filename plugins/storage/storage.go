@@ -127,6 +127,6 @@ type Call struct {
 	ExtrinsicHash  string    `json:"extrinsic_hash"`
 	ModuleId       string    `json:"module_id"`
 	CallId         string    `json:"call_id"`
-	Params         []CallArg `json:"params" sql:"type:text;"`
+	Params         []CallArg `json:"params" gorm:"type:MEDIUMTEXT;"`
 	Events         []Event   `json:"events"`
 }

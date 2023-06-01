@@ -23,7 +23,7 @@ const (
 	ChainNewHead               = "chain_newHead"
 	ChainFinalizedHead         = "chain_finalizedHead"
 	StateStorage               = "state_storage"
-	BlockTime                  = 5
+	BlockTime                  = 15
 )
 
 type subscription struct {
@@ -114,7 +114,7 @@ func (s *SubscribeService) subscribeFetchBlock() {
 		Finalized bool `json:"finalized"`
 	}
 
-	p, _ := ants.NewPoolWithFunc(5, func(i interface{}) {
+	p, _ := ants.NewPoolWithFunc(50, func(i interface{}) {
 		blockNum := i.(BlockFinalized)
 		func(bf BlockFinalized) {
 			if err := s.FillBlockData(nil, bf.BlockNum, bf.Finalized); err != nil {
