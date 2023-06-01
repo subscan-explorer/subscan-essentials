@@ -25,5 +25,5 @@ func TestService_createExtrinsic(t *testing.T) {
 }
 
 func TestThing_mapInterfaceAsStruct(t *testing.T) {
-	
+
 }
