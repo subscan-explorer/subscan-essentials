@@ -4,11 +4,8 @@ RUN apt-get update && apt-get upgrade -y
 
 WORKDIR /subscan
 
-COPY go.mod go.sum ./
-RUN go mod download
-COPY . /subscan
-WORKDIR /subscan/cmd
-RUN go build -o subscan
+COPY . ./
+RUN ./build.sh build
 
 FROM buildpack-deps:bullseye-scm
 ENV DEBIAN_FRONTEND=noninteractive
