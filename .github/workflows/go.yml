@@ -73,9 +73,18 @@ jobs:
       - name: Tests
         run: |
           cp configs/config.yaml.example configs/config.yaml
-          go test -v ./...
+          go test -v -covermode=atomic -coverprofile=coverage.txt -coverpkg=$(go list ./... | tr "\n" ","_) ./...
         env:
           TEST_MOD: true
+
+      - uses: codecov/codecov-action@v3
+        if: env.CODECOV_TOKEN
+        with:
+          files: coverage.txt
+          fail_ci_if_error: true
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   golangci:
     name: Lint
