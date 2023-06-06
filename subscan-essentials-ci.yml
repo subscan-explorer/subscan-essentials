@@ -11,7 +11,7 @@ trigger:
 pr:
   - master
   - dev
-  
+
 pool:
   vmImage: ubuntu-latest
 
