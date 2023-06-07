@@ -18,7 +18,7 @@ services:
       WEB_HOST: 'http://subscan-api:4399'
       DEPLOY_ENV: 'prod'
     ports:
-      - '4399:4399'
+      - 4399:4399
     networks:
       - app_net
     extra_hosts:
