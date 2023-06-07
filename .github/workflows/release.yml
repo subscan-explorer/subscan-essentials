@@ -3,8 +3,6 @@ name: release
 
 on:
   push:
-    tags:
-      - "*"
     branches: [ master, dev ]
   pull_request:
     branches: [ master, dev ]
@@ -19,44 +17,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Figure out tag name
-        shell: bash
-        run: |
-          TAG_NAME=$(git describe --tag || echo -n 'devel')
-          echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_ENV"
-
       - name: Build docker image
         run: |
           docker-compose build
-          docker tag subscan/api:latest gluwa/subscan-api:${{ env.TAG_NAME }}
-          docker tag subscan/api:latest gluwa/subscan-api:latest
           docker images
-
-      - name: Push docker image
-        if: contains(github.event.ref, 'refs/tags/')
-        run: |
-          echo "${{ secrets.DOCKER_PUSH_PASSWORD }}" | docker login -u="${{ secrets.DOCKER_PUSH_USERNAME }}" --password-stdin
-          docker push gluwa/subscan-api:${{ env.TAG_NAME }}
-          docker push gluwa/subscan-api:latest
-          docker logout
-
-  publish-on-github:
-    if: contains(github.event.ref, 'refs/tags/')
-    runs-on: ubuntu-latest
-    needs:
-      - docker-build
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Figure out tag name
-        shell: bash
-        run: |
-          TAG_NAME=$(git describe --tag)
-          echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_ENV"
-
-      - name: Make the release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: ${{ env.TAG_NAME }}
