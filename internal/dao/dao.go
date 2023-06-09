@@ -24,7 +24,7 @@ type Dao struct {
 func New(migrate bool) (IDao, *DbStorage) {
 	db := newDb()
 
-	pool := newCachePool(configs.Boot.Redis.Addr, "")
+	pool := newCachePool(configs.Boot.Redis.Addr, configs.Boot.Redis.Password)
 	dao := &Dao{
 		db:          db,
 		redis:       pool,
@@ -41,7 +41,8 @@ func newCachePool(host, password string) *redis.Pool {
 		IdleTimeout: 240 * time.Second,
 		Dial: func() (redis.Conn, error) {
 			// the redis protocol should probably be made sett-able
-			c, err := redis.Dial("tcp", host, redis.DialReadTimeout(time.Millisecond*200), redis.DialConnectTimeout(time.Millisecond*200), redis.DialWriteTimeout(time.Millisecond*200))
+
+			c, err := redis.Dial("tcp", host, redis.DialUseTLS(true), redis.DialPassword(password), redis.DialReadTimeout(time.Millisecond*200), redis.DialConnectTimeout(time.Millisecond*200), redis.DialWriteTimeout(time.Millisecond*200))
 			if err != nil {
 				return nil, err
 			}
