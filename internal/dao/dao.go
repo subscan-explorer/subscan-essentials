@@ -35,6 +35,7 @@ func New(migrate bool) (IDao, *DbStorage) {
 	return dao, storage
 }
 
+/// Read and Write client created by the Observer instance
 func newCachePool(host, password string) *redis.Pool {
 	pool := &redis.Pool{
 		MaxIdle:     10,
