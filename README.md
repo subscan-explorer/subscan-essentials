@@ -1,3 +1,5 @@
+DEBUG
+
 # Subscan Essentials
 
 ![License: GPL](https://img.shields.io/badge/license-GPL-blue.svg)
