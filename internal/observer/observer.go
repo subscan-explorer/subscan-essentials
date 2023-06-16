@@ -34,7 +34,8 @@ func Run(dt string) {
 			log.Fatalf("no such daemon component: %s", dt)
 		}
 		enableTermSignalHandler()
-		runHealthCheck(configs.Boot.Health, stop)
+		health := newHealthCheckServer(configs.Boot.Health)
+		startHealthCheckServer(health, stop)
 		if _, ok := <-stop; !ok {
 			time.Sleep(3 * time.Second)
 			break

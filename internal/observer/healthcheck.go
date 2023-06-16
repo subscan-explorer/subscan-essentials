@@ -12,8 +12,11 @@ import (
 	"golang.org/x/exp/slog"
 )
 
-// NewHTTPServer new a HTTP server.
-func runHealthCheck(c *configs.Healthcheck, stop chan struct{}) {
+func newHealthCheckServer(c *configs.HealthCheck) *http.Server {
+	if c == nil {
+		panic("health check config is nil")
+	}
+
 	if os.Getenv("GIN_MODE") == "debug" {
 		gin.SetMode(gin.DebugMode)
 	} else {
@@ -40,8 +43,12 @@ func runHealthCheck(c *configs.Healthcheck, stop chan struct{}) {
 		Handler: e,
 	}
 
+	return srv
+}
+
+func startHealthCheckServer(srv *http.Server, stop chan struct{}) {
 	go func() {
-		slog.Info("Healthcheck server listening", "addr", c.Addr)
+		slog.Info("Healthcheck server listening", "addr", srv.Addr)
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			slog.Error("Healthcheck server error", "error", err)
 		}

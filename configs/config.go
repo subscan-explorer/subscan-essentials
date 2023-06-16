@@ -20,7 +20,7 @@ type Bootstrap struct {
 	Server   *Server      `json:"server,omitempty"`
 	Database *Database    `json:"database,omitempty"`
 	Redis    *Redis       `json:"redis,omitempty"`
-	Health   *Healthcheck `json:"health,omitempty"`
+	Health   *HealthCheck `json:"health,omitempty"`
 }
 
 type Server struct {
@@ -33,7 +33,7 @@ type ServerHttp struct {
 	Timeout string `json:"timeout,omitempty"`
 }
 
-type Healthcheck struct {
+type HealthCheck struct {
 	Addr string `json:"addr,omitempty"`
 }
 
@@ -89,7 +89,7 @@ func setVarDefaultValueStr(variable *string, defaultValue string) {
 
 func mergeHealthEnvironment() {
 	if Boot.Health == nil {
-		Boot.Health = &Healthcheck{}
+		Boot.Health = &HealthCheck{}
 	}
 	setVarDefaultValueStr(&Boot.Health.Addr, "0.0.0.0:80")
 
