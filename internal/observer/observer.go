@@ -7,6 +7,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/itering/subscan/configs"
 	"github.com/itering/subscan/internal/service"
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc/pkg/recws"
@@ -33,6 +34,7 @@ func Run(dt string) {
 			log.Fatalf("no such daemon component: %s", dt)
 		}
 		enableTermSignalHandler()
+		runHealthCheck(configs.Boot.Health, stop)
 		if _, ok := <-stop; !ok {
 			time.Sleep(3 * time.Second)
 			break

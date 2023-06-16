@@ -15,9 +15,10 @@ import (
 )
 
 type Bootstrap struct {
-	Server   *Server   `json:"server,omitempty"`
-	Database *Database `json:"database,omitempty"`
-	Redis    *Redis    `json:"redis,omitempty"`
+	Server   *Server      `json:"server,omitempty"`
+	Database *Database    `json:"database,omitempty"`
+	Redis    *Redis       `json:"redis,omitempty"`
+	Health   *Healthcheck `json:"health,omitempty"`
 }
 
 type Server struct {
@@ -28,6 +29,10 @@ type ServerHttp struct {
 	Network string `json:"network,omitempty"`
 	Addr    string `json:"addr,omitempty"`
 	Timeout string `json:"timeout,omitempty"`
+}
+
+type Healthcheck struct {
+	Addr string `json:"addr,omitempty"`
 }
 
 type Database struct {
@@ -68,6 +73,7 @@ func Init() {
 		panic(fmt.Errorf("config.yaml not completed"))
 	}
 
+	mergeHealthEnvironment()
 	Boot.Database.mergeEnvironment()
 	Boot.Redis.mergeEnvironment()
 }
@@ -75,6 +81,18 @@ func Init() {
 func setVarDefaultValueStr(variable *string, defaultValue string) {
 	if variable != nil && *variable == "" {
 		*variable = defaultValue
+	}
+}
+
+func mergeHealthEnvironment() {
+	if Boot.Health == nil {
+		Boot.Health = &Healthcheck{}
+	}
+	setVarDefaultValueStr(&Boot.Health.Addr, "0.0.0.0:80")
+
+	env := os.Getenv("HEALTHCHECK_ADDR")
+	if env != "" {
+		Boot.Health.Addr = strings.TrimSpace(env)
 	}
 }
 
