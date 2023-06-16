@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
+	"golang.org/x/exp/slog"
 )
 
 type Bootstrap struct {
@@ -52,6 +54,7 @@ type Redis struct {
 	Active       int           `json:"active"`
 	ReadTimeout  time.Duration `json:"read_timeout"`
 	WriteTimeout time.Duration `json:"write_timeout"`
+	UseInsecure  bool          `json:"use_insecure"`
 }
 
 var Boot Bootstrap
@@ -248,6 +251,14 @@ func (rc *Redis) mergeEnvironment() {
 	rc.Addr = redisHost
 	rc.DbName = util.StringToInt(util.GetEnv("REDIS_DATABASE", util.IntToString(rc.DbName)))
 	rc.Password = util.GetEnv("REDIS_PASSWORD", rc.Password)
+
+	useInsecure := util.GetEnv("REDIS_INSECURE", strconv.FormatBool(rc.UseInsecure))
+
+	parsed, err := strconv.ParseBool(useInsecure)
+	if err != nil {
+		slog.Error("Invalid value for REDIS_INSECURE", "error", err)
+	}
+	rc.UseInsecure = parsed
 }
 
 func ParseDSN(dsn string) (*url.URL, error) {
