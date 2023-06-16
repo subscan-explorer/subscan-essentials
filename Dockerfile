@@ -22,3 +22,4 @@ RUN mkdir -p /subscan/log
 
 ENTRYPOINT ["/subscan/cmd/subscan"]
 EXPOSE 4399
+EXPOSE 80

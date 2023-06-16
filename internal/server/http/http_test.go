@@ -43,7 +43,7 @@ var testCases = []struct {
 	{"/api/scan/extrinsic", strings.NewReader(`{"hash": "0xbadc6963e1add4d7a588e350d837579491d08bb270f02c56b3dd5f17018dee0c"}`), "POST"},
 	{"/api/scan/events", strings.NewReader(`{"row": 10, "page": 0}`), "POST"},
 	{"/api/scan/check_hash", strings.NewReader(`{"hash": "0xbadc6963e1add4d7a588e350d837579491d08bb270f02c56b3dd5f17018dee0c"}`), "POST"},
-	// {"/api/scan/runtime/metadata", strings.NewReader(`{"spec": 1}`), "POST"},
+	{"/api/scan/runtime/metadata", strings.NewReader(`{"spec": 1}`), "POST"},
 	{"/api/scan/runtime/list", nil, "POST"},
 	{"/api/now", nil, "POST"},
 	{"/api/system/status", nil, "GET"},
