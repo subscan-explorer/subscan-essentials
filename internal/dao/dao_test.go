@@ -89,6 +89,7 @@ var (
 func init() {
 	util.ConfDir = "../../configs"
 	configs.Init()
+	configs.Boot.Redis.UseInsecure = true
 
 	td, _ := New(true)
 	testDao = td.(*Dao)

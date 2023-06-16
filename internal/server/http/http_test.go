@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 
@@ -17,6 +18,7 @@ import (
 
 func init() {
 	util.ConfDir = "../../../configs"
+	os.Setenv("REDIS_INSECURE", "true")
 	configs.Init()
 	svc = service.NewReadOnly()
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -12,12 +13,14 @@ import (
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
+	"golang.org/x/exp/slog"
 )
 
 type Bootstrap struct {
-	Server   *Server   `json:"server,omitempty"`
-	Database *Database `json:"database,omitempty"`
-	Redis    *Redis    `json:"redis,omitempty"`
+	Server   *Server      `json:"server,omitempty"`
+	Database *Database    `json:"database,omitempty"`
+	Redis    *Redis       `json:"redis,omitempty"`
+	Health   *HealthCheck `json:"health,omitempty"`
 }
 
 type Server struct {
@@ -28,6 +31,10 @@ type ServerHttp struct {
 	Network string `json:"network,omitempty"`
 	Addr    string `json:"addr,omitempty"`
 	Timeout string `json:"timeout,omitempty"`
+}
+
+type HealthCheck struct {
+	Addr string `json:"addr,omitempty"`
 }
 
 type Database struct {
@@ -47,6 +54,7 @@ type Redis struct {
 	Active       int           `json:"active"`
 	ReadTimeout  time.Duration `json:"read_timeout"`
 	WriteTimeout time.Duration `json:"write_timeout"`
+	UseInsecure  bool          `json:"use_insecure"`
 }
 
 var Boot Bootstrap
@@ -68,6 +76,7 @@ func Init() {
 		panic(fmt.Errorf("config.yaml not completed"))
 	}
 
+	mergeHealthEnvironment()
 	Boot.Database.mergeEnvironment()
 	Boot.Redis.mergeEnvironment()
 }
@@ -75,6 +84,18 @@ func Init() {
 func setVarDefaultValueStr(variable *string, defaultValue string) {
 	if variable != nil && *variable == "" {
 		*variable = defaultValue
+	}
+}
+
+func mergeHealthEnvironment() {
+	if Boot.Health == nil {
+		Boot.Health = &HealthCheck{}
+	}
+	setVarDefaultValueStr(&Boot.Health.Addr, "0.0.0.0:80")
+
+	env := os.Getenv("HEALTHCHECK_ADDR")
+	if env != "" {
+		Boot.Health.Addr = strings.TrimSpace(env)
 	}
 }
 
@@ -230,6 +251,14 @@ func (rc *Redis) mergeEnvironment() {
 	rc.Addr = redisHost
 	rc.DbName = util.StringToInt(util.GetEnv("REDIS_DATABASE", util.IntToString(rc.DbName)))
 	rc.Password = util.GetEnv("REDIS_PASSWORD", rc.Password)
+
+	useInsecure := util.GetEnv("REDIS_INSECURE", strconv.FormatBool(rc.UseInsecure))
+
+	parsed, err := strconv.ParseBool(useInsecure)
+	if err != nil {
+		slog.Error("Invalid value for REDIS_INSECURE", "error", err)
+	}
+	rc.UseInsecure = parsed
 }
 
 func ParseDSN(dsn string) (*url.URL, error) {
