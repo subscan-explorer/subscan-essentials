@@ -52,7 +52,7 @@ func (s *Service) regRuntimeVersion(name string, spec int, hash ...string) error
 
 func (s *Service) regCodecMetadata(hash ...string) string {
 	count := 0
-	const maxRetry = 5
+	const maxRetry = 30
 	var coded string
 	var err error
 	for coded, err = rpc.GetMetadataByHash(nil, hash...); err != nil && count < maxRetry; coded, err = rpc.GetMetadataByHash(nil, hash...) {

@@ -77,7 +77,7 @@ func ReadStorage(p websocket.WsConn, module, prefix string, hash string, arg ...
 }
 
 func SendWsRequest(conn websocket.WsConn, action []byte) (rpc.JsonRpcResult, error) {
-	return WithRetriesAndTimeout(time.Second*5, 5, func() (rpc.JsonRpcResult, error) {
+	return WithRetriesAndTimeout(time.Second*5, 30, func() (rpc.JsonRpcResult, error) {
 		v := &rpc.JsonRpcResult{}
 		e := websocket.SendWsRequest(conn, v, action)
 		return *v, e

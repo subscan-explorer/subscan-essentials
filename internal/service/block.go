@@ -90,6 +90,8 @@ func (s *Service) CreateChainBlock(conn websocket.WsConn, hash string, block *rp
 
 	if err = s.dao.CreateBlock(txn, &cb); err == nil {
 		s.dao.DbCommit(txn)
+	} else {
+		slog.Error("Create block error", "number", blockNum, "spec", spec, "err", err)
 	}
 
 	s.blockDone(&cb)
