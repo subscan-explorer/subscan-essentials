@@ -1,6 +1,9 @@
 package util
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestMapToStruct(t *testing.T) {
 	type Birthday struct {
@@ -75,5 +78,29 @@ func TestMapToStruct2(t *testing.T) {
 	}
 	if ret != want {
 		t.Errorf("got %v, want %v", ret, want)
+	}
+}
+
+func TestMapStructWithNilSlice(t *testing.T) {
+	type Thing struct {
+		Name  string `json:"name"`
+		Stuff []int  `json:"stuff"`
+	}
+
+	input := map[string]interface{}{
+		"name":  "thing",
+		"stuff": nil,
+	}
+
+	res, err := MapInterfaceAsStruct[Thing](input)
+	if err != nil {
+		t.Error(err)
+	}
+	want := Thing{
+		Name:  "thing",
+		Stuff: []int{},
+	}
+	if !reflect.DeepEqual(res, want) {
+		t.Errorf("got %v, want %v", res, want)
 	}
 }
