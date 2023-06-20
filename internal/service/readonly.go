@@ -1,9 +1,15 @@
 package service
 
-import "github.com/itering/subscan/internal/dao"
+import (
+	"sync"
+
+	"github.com/itering/subscan/internal/dao"
+)
 
 type ReadOnlyService struct {
 	dao dao.IReadOnlyDao
+
+	metadataLock sync.RWMutex
 }
 
 func NewReadOnly() *ReadOnlyService {

@@ -17,9 +17,14 @@ func (s *ReadOnlyService) SubstrateRuntimeList() []model.RuntimeVersion {
 }
 
 func (s *ReadOnlyService) SubstrateRuntimeInfo(spec int) *metadata.Instant {
+	s.metadataLock.RLock()
 	if metadataInstant, ok := metadata.RuntimeMetadata[spec]; ok {
+		s.metadataLock.RUnlock()
 		return metadataInstant
 	}
+	s.metadataLock.RUnlock()
+	s.metadataLock.Lock()
+	defer s.metadataLock.Unlock()
 	runtime := metadata.Process(s.dao.RuntimeVersionRaw(spec))
 	if runtime == nil {
 		return metadata.Latest(nil)
@@ -32,6 +37,8 @@ func (s *Service) regRuntimeVersion(name string, spec int, hash ...string) error
 		return nil
 	}
 	if affected := s.dao.CreateRuntimeVersion(name, spec); affected > 0 {
+		s.metadataLock.Lock()
+		defer s.metadataLock.Unlock()
 		if coded := s.regCodecMetadata(hash...); coded != "" {
 			runtime := metadata.RegNewMetadataType(spec, coded)
 			s.setRuntimeData(spec, runtime, coded)
@@ -86,8 +93,12 @@ func (s *Service) setRuntimeData(spec int, runtime *metadata.Instant, rawData st
 }
 
 func (s *Service) getMetadataInstant(spec int, hash string) *metadata.Instant {
+	s.metadataLock.RLock()
 	metadataInstant, ok := metadata.RuntimeMetadata[spec]
+	s.metadataLock.RUnlock()
 	if !ok {
+		s.metadataLock.Lock()
+		defer s.metadataLock.Unlock()
 		raw := s.dao.RuntimeVersionRaw(spec)
 		if raw.Raw == "" {
 			raw.Raw = s.regCodecMetadata(hash)
