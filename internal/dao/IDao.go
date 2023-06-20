@@ -63,7 +63,7 @@ type IReadOnlyDao interface {
 	RuntimeVersionRaw(spec int) *metadata.RuntimeRaw
 	RuntimeVersionRecent() *model.RuntimeVersion
 	GetProcessedBlockNum(c context.Context) (num int, err error)
-
+	GetBlocksLaterThan(blockNum int) []model.ChainBlock
 	GetMissingBlockNums() []int
 	Close()
 }

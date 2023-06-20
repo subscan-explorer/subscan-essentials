@@ -61,11 +61,11 @@ type PluginEmitter struct {
 	pending       cmap.ConcurrentMap[string, perBlockInfo]
 	stop          chan struct{}
 	blockComplete chan uint32
-	dao           *dao.Dao
+	dao           dao.IDao
 	s             *Service
 }
 
-func NewPluginEmitter(stop chan struct{}, dao *dao.Dao, s *Service) PluginEmitter {
+func NewPluginEmitter(stop chan struct{}, dao dao.IDao, s *Service) PluginEmitter {
 	return PluginEmitter{
 		pending:       cmap.New[perBlockInfo](),
 		stop:          stop,

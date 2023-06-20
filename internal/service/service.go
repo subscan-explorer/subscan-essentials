@@ -31,7 +31,7 @@ func newWithDao(stop chan struct{}, d dao.IDao) *Service {
 	websocket.SetEndpoint(util.WSEndPoint)
 	s := &Service{dao: d, ReadOnlyService: *readOnlyWithDao(d)}
 	s.initSubRuntimeLatest()
-	s.pluginEmitter = NewPluginEmitter(stop, d.(*dao.Dao), s)
+	s.pluginEmitter = NewPluginEmitter(stop, d, s)
 	return s
 }
 
