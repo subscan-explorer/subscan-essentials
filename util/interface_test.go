@@ -1,8 +1,10 @@
 package util
 
 import (
-	"github.com/stretchr/testify/assert"
+	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFunc(t *testing.T) {
@@ -82,6 +84,20 @@ func TestToString(t *testing.T) {
 	}
 }
 
+func TestFromString(t *testing.T) {
+	cases := []interface{}{
+		"abc",
+		[]byte{97, 98, 99},
+		map[string]interface{}{"a": "b"},
+		[]interface{}{"a", "b", "c"},
+	}
+	for _, c := range cases {
+		v := reflect.New(reflect.TypeOf(c)).Elem().Interface()
+		FromString(ToString(c), &v)
+		assert.Equal(t, c, v)
+	}
+}
+
 func TestUnmarshalAny(t *testing.T) {
 	p := new(struct {
 		One int
@@ -105,5 +121,4 @@ func TestUnmarshalAny(t *testing.T) {
 		One int
 		Two int
 	}{31, 32}, p)
-
 }

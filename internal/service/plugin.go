@@ -1,7 +1,11 @@
 package service
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"strconv"
+	"strings"
 	"sync"
 
 	"github.com/itering/subscan/internal/dao"
@@ -57,13 +61,17 @@ type PluginEmitter struct {
 	pending       cmap.ConcurrentMap[string, perBlockInfo]
 	stop          chan struct{}
 	blockComplete chan uint32
+	dao           *dao.Dao
+	s             *Service
 }
 
-func NewPluginEmitter(stop chan struct{}) PluginEmitter {
+func NewPluginEmitter(stop chan struct{}, dao *dao.Dao, s *Service) PluginEmitter {
 	return PluginEmitter{
 		pending:       cmap.New[perBlockInfo](),
 		stop:          stop,
-		blockComplete: make(chan uint32, 100),
+		blockComplete: make(chan uint32, 1000000),
+		dao:           dao,
+		s:             s,
 	}
 }
 
@@ -80,10 +88,39 @@ func (p *PluginEmitter) mutatePerBlock(block *storage.Block, mutate func(*perBlo
 	})
 }
 
+func (p *PluginEmitter) noteBlock(block *model.ChainBlock) {
+	p.s.NoteChainBlock(block)
+}
+
+func getProcessStartBlock() int {
+	start := os.Getenv("PROCESS_START_BLOCK")
+	if start == "" {
+		return 0
+	}
+	parsed, err := strconv.ParseInt(strings.TrimSpace(start), 10, 32)
+	if err != nil {
+		slog.Error("getProcessStartBlock invalid value", "error", err)
+		return 0
+	}
+	return int(parsed)
+}
+
 func (p *PluginEmitter) Run() {
 	go func() {
-		currentBlock := int64(0)
 		slog.Debug("pluginEmitter start")
+		num, err := p.dao.GetProcessedBlockNum(context.TODO())
+		if err != nil {
+			slog.Warn("GetProcessedBlockNum failed", "error", err)
+			num = getProcessStartBlock()
+		}
+		currentBlock := int64(num)
+		catchUp := p.dao.GetBlocksLaterThan(int(currentBlock))
+		slog.Debug("pluginEmitter start", "currentBlock", currentBlock, "catchUp", len(catchUp))
+		// populate the `pending` map with the blocks we need to catch up on
+		for _, block := range catchUp {
+			p.noteBlock(&block)
+		}
+
 		for {
 			select {
 			case blockNum := <-p.blockComplete:
@@ -129,8 +166,12 @@ func (p *PluginEmitter) Run() {
 							next++
 							nextStr = fmt.Sprint(next)
 							wait.Wait()
+							currentBlock++
+							e := p.dao.SaveProcessedBlockNum(context.TODO(), int(currentBlock))
+							if e != nil {
+								slog.Error("SaveProcessedBlockNum failed", "error", e)
+							}
 						}
-						currentBlock = int64(next) - 1
 					}
 				}
 			case <-p.stop:
@@ -187,7 +228,7 @@ func (s *Service) emitExtrinsic(block *model.ChainBlock, extrinsic *model.ChainE
 	pBlock := block.AsPlugin()
 	s.pluginEmitter.mutatePerBlock(pBlock, func(info *perBlockInfo) {
 		info.extrinsics = append(info.extrinsics, extrinsicInfo{
-			block:     block.AsPlugin(),
+			block:     pBlock,
 			extrinsic: extrinsic.AsPlugin(),
 			events:    model.MapAsPlugin[*storage.Event](events),
 		})

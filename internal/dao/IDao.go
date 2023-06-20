@@ -26,6 +26,8 @@ type IDao interface {
 	SetRuntimeData(specVersion int, modules string, rawData string) int64
 	CreateRuntimeConstants(specVersion int, constants []model.RuntimeConstant) error
 
+	SaveProcessedBlockNum(c context.Context, blockNum int) error
+
 	IReadOnlyDao
 }
 
@@ -60,5 +62,8 @@ type IReadOnlyDao interface {
 	RuntimeVersionList() []model.RuntimeVersion
 	RuntimeVersionRaw(spec int) *metadata.RuntimeRaw
 	RuntimeVersionRecent() *model.RuntimeVersion
+	GetProcessedBlockNum(c context.Context) (num int, err error)
+
+	GetMissingBlockNums() []int
 	Close()
 }

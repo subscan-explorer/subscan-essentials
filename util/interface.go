@@ -39,6 +39,18 @@ func StringFromInterface(i interface{}) (string, error) {
 	return "", fmt.Errorf("error converting interface to string. value: %+v, type: %T", i, i)
 }
 
+func FromString(s string, out *interface{}) {
+	switch (*out).(type) {
+	case string:
+		*out = s
+	case []byte:
+		*out = []byte(s)
+	default:
+		bytes := []byte(s)
+		json.Unmarshal(bytes, out)
+	}
+}
+
 func ToString(i interface{}) string {
 	var val string
 	switch i := i.(type) {

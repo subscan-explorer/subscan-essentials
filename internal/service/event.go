@@ -34,6 +34,26 @@ func (s *Service) AddEvent(
 	return eventCount, err
 }
 
+func (s *Service) NoteEvent(
+	block *model.ChainBlock,
+	e []model.ChainEvent,
+	hashMap map[string]string,
+	feeMap map[string]decimal.Decimal,
+) (eventCount int, err error) {
+	for _, event := range e {
+		event.ModuleId = strings.ToLower(event.ModuleId)
+		event.ExtrinsicHash = hashMap[fmt.Sprintf("%d-%d", block.BlockNum, event.ExtrinsicIdx)]
+		event.EventIndex = fmt.Sprintf("%d-%d", block.BlockNum, event.ExtrinsicIdx)
+		event.BlockNum = block.BlockNum
+
+		ext := s.GetExtrinsicByHash(event.ExtrinsicHash)
+		s.emitEvent(block, &event, feeMap[event.EventIndex], ext)
+
+		eventCount++
+	}
+	return eventCount, err
+}
+
 func (s *ReadOnlyService) RenderEvents(page, row int, order string, where ...string) ([]model.ChainEventJson, int) {
 	var (
 		result    []model.ChainEventJson
