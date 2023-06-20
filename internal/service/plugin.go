@@ -89,7 +89,9 @@ func (p *PluginEmitter) mutatePerBlock(block *storage.Block, mutate func(*perBlo
 }
 
 func (p *PluginEmitter) noteBlock(block *model.ChainBlock) {
-	p.s.NoteChainBlock(block)
+	if err := p.s.NoteChainBlock(block); err != nil {
+		slog.Error("NoteChainBlock failed", "error", err)
+	}
 }
 
 func getProcessStartBlock() int {

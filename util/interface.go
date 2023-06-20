@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"runtime"
 	"strings"
+
+	"golang.org/x/exp/slog"
 )
 
 // Func
@@ -47,7 +49,10 @@ func FromString(s string, out *interface{}) {
 		*out = []byte(s)
 	default:
 		bytes := []byte(s)
-		json.Unmarshal(bytes, out)
+		err := json.Unmarshal(bytes, out)
+		if err != nil {
+			slog.Warn("error unmarshalling string to interface", "string", s, "error", err)
+		}
 	}
 }
 
