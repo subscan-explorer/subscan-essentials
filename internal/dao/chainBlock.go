@@ -198,7 +198,7 @@ func (d *ReadOnlyDao) GetMissingBlockNums() []int {
 	}
 	var res []Res
 	d.db.Raw(`
-		SELECT 
+		SELECT
 			CB.id,
 			CB.block_num,
 			CBII.id As previous_block_id,
@@ -206,10 +206,10 @@ func (d *ReadOnlyDao) GetMissingBlockNums() []int {
 		FROM
 			chain_blocks AS CB
 		LEFT JOIN
-			chain_blocks As CBII 
+			chain_blocks As CBII
 		ON
-			CBII.block_num = CB.block_num - 1 
-		WHERE 
+			CBII.block_num = CB.block_num - 1
+		WHERE
 			CBII.id IS NULL AND CB.block_num > 0;
 	`).Scan(&res)
 	var blockNums []int
