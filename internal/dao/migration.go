@@ -13,6 +13,12 @@ func (d *Dao) Migration() {
 		blockNum, _ = d.GetFillBestBlockNum(context.TODO())
 	}
 	_ = db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(d.InternalTables(blockNum)...)
+
+	count := int64(0)
+	db.Model(&model.LastProcessedBlock{}).Count(&count)
+	if count == 0 {
+		db.Model(&model.LastProcessedBlock{}).Create(&model.LastProcessedBlock{Number: 0})
+	}
 }
 
 func (d *Dao) InternalTables(blockNum int) (models []interface{}) {
@@ -24,6 +30,7 @@ func (d *Dao) InternalTables(blockNum int) (models []interface{}) {
 		model.ChainEvent{},
 		model.ChainExtrinsic{},
 		model.ChainLog{},
+		model.LastProcessedBlock{},
 	)
 
 	var tablesName []string

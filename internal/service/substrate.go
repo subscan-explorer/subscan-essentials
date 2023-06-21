@@ -38,7 +38,6 @@ var (
 
 type SubscribeService struct {
 	*Service
-	newHead    chan bool
 	newFinHead chan int
 	done       chan struct{}
 }
@@ -46,7 +45,6 @@ type SubscribeService struct {
 func (s *Service) initSubscribeService(done chan struct{}) *SubscribeService {
 	return &SubscribeService{
 		Service:    s,
-		newHead:    make(chan bool, 1),
 		newFinHead: make(chan int, 1),
 		done:       done,
 	}
@@ -86,6 +84,12 @@ func (s *SubscribeService) parser(message []byte) (err error) {
 		_ = s.updateChainMetadata(map[string]interface{}{"finalized_blockNum": util.HexToNumStr(r.Number)})
 		upgradeHealth(j.Method)
 		go func() {
+			select {
+			// if new finalized head before old has been received, consume the old one before sending to avoid blocking on send
+			case <-s.newFinHead:
+
+			default:
+			}
 			s.newFinHead <- int(num)
 			onceFinHead.Do(func() {
 				go s.subscribeFetchBlock()
@@ -106,15 +110,30 @@ func max(a, b int) int {
 	return b
 }
 
+type BlockFinalized struct {
+	BlockNum  int  `json:"block_num"`
+	Finalized bool `json:"finalized"`
+}
+
+func (s *SubscribeService) catchUp(pool *ants.PoolWithFunc, wg *sync.WaitGroup) {
+	missing := s.dao.GetMissingBlockNums()
+
+	for _, blockNum := range missing {
+		slog.Info("catchUp", "blockNum", blockNum)
+		wg.Add(1)
+		err := pool.Invoke(BlockFinalized{BlockNum: blockNum, Finalized: true})
+		if err != nil {
+			logError("ChainGetBlockHash get", err)
+		}
+	}
+	wg.Wait()
+}
+
 func (s *SubscribeService) subscribeFetchBlock() {
 	var wg sync.WaitGroup
 	ctx := context.TODO()
-	type BlockFinalized struct {
-		BlockNum  int  `json:"block_num"`
-		Finalized bool `json:"finalized"`
-	}
 
-	p, _ := ants.NewPoolWithFunc(50, func(i interface{}) {
+	p, _ := ants.NewPoolWithFunc(10, func(i interface{}) {
 		blockNum := i.(BlockFinalized)
 		func(bf BlockFinalized) {
 			if err := s.FillBlockData(nil, bf.BlockNum, bf.Finalized); err != nil {
@@ -124,10 +143,17 @@ func (s *SubscribeService) subscribeFetchBlock() {
 			}
 		}(blockNum)
 		wg.Done()
-	}, ants.WithOptions(ants.Options{PanicHandler: func(c interface{}) {}}))
+	}, ants.WithOptions(ants.Options{PanicHandler: func(c interface{}) {
+		slog.Error("subscribeFetchBlock", "panic", c)
+	}}))
 
 	defer p.Release()
+
+	s.catchUp(p, &wg)
+
 	inProgressUpTo, _ := s.dao.GetFillFinalizedBlockNum(ctx)
+	slog.Info("subscribeFetchBlock", "inProgressUpTo", inProgressUpTo)
+
 	for {
 		select {
 		case newHead := <-s.newFinHead:

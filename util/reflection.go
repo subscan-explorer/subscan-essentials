@@ -46,6 +46,12 @@ func mapInterfaceAsStruct(typ reflect.Type, iface interface{}) (reflect.Value, e
 	ret := reflect.New(typ).Elem()
 
 	recurse := func(field reflect.StructField, v interface{}) error {
+		if v == nil {
+			if field.Type.Kind() == reflect.Slice {
+				ret.FieldByIndex(field.Index).Set(reflect.MakeSlice(field.Type, 0, 0))
+			}
+			return nil
+		}
 		if field.Type.Kind() == reflect.Slice && reflect.TypeOf(v).AssignableTo(reflect.TypeOf([]interface{}{})) {
 			elem := field.Type.Elem()
 

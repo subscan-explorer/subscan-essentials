@@ -275,6 +275,22 @@ func (m *MockDao) RuntimeVersionRecent() *model.RuntimeVersion {
 	}
 }
 
+func (d *MockDao) SaveProcessedBlockNum(c context.Context, blockNum int) (err error) {
+	return nil
+}
+
+func (d *MockDao) GetProcessedBlockNum(c context.Context) (num int, err error) {
+	return 0, nil
+}
+
+func (d *MockDao) GetMissingBlockNums() []int {
+	return []int{}
+}
+
+func (d *MockDao) GetBlocksLaterThan(blockNum int) []model.ChainBlock {
+	return []model.ChainBlock{}
+}
+
 func init() {
 	stop := make(chan struct{})
 	d := &MockDao{}

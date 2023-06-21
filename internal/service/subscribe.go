@@ -41,6 +41,7 @@ func (s *Service) Subscribe(conn ws.WsConn, stop chan struct{}) {
 				return
 			default:
 				if !conn.IsConnected() {
+					time.Sleep(time.Second * 1)
 					continue
 				}
 				if waitForReconnect {
@@ -49,6 +50,7 @@ func (s *Service) Subscribe(conn ws.WsConn, stop chan struct{}) {
 					time.Sleep(time.Second * 10)
 				}
 				if !conn.IsConnected() {
+					time.Sleep(time.Second * 1)
 					continue
 				}
 				_, message, err := conn.ReadMessage()

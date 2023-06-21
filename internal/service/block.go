@@ -90,9 +90,65 @@ func (s *Service) CreateChainBlock(conn websocket.WsConn, hash string, block *rp
 
 	if err = s.dao.CreateBlock(txn, &cb); err == nil {
 		s.dao.DbCommit(txn)
+	} else {
+		slog.Error("Create block error", "number", blockNum, "spec", spec, "err", err)
 	}
 
 	s.blockDone(&cb)
+
+	return err
+}
+
+func (s *Service) NoteChainBlock(block *model.ChainBlock) (err error) {
+	var (
+		decodeExtrinsics []map[string]interface{}
+		decodeEvent      interface{}
+	)
+	c := context.TODO()
+
+	event := block.Event
+	spec := block.SpecVersion
+	blockNum := block.BlockNum
+	hash := block.Hash
+
+	metadataInstant := s.getMetadataInstant(spec, hash)
+
+	var extrinsicsRaw []string
+	var extrinsicsCasted interface{} = extrinsicsRaw
+	util.FromString(block.Extrinsics, &extrinsicsCasted)
+	for _, ext := range extrinsicsCasted.([]interface{}) {
+		extrinsicsRaw = append(extrinsicsRaw, ext.(string))
+	}
+
+	// Extrinsic
+	decodeExtrinsics, err = substrate.DecodeExtrinsic(extrinsicsRaw, metadataInstant, spec)
+	if err != nil {
+		slog.Error("%v", err)
+	}
+
+	// event
+	if err == nil {
+		decodeEvent, err = substrate.DecodeEvent(event, metadataInstant, spec)
+		if err != nil {
+			slog.Error("%v", err)
+		}
+	}
+
+	var e []model.ChainEvent
+	util.UnmarshalAny(&e, decodeEvent)
+
+	eventMap := s.checkoutExtrinsicEvents(e, blockNum)
+
+	_, _, extrinsicHash, extrinsicFee, err := s.noteExtrinsic(c, block, extrinsicsRaw, decodeExtrinsics, eventMap)
+	if err != nil {
+		return err
+	}
+	_, err = s.NoteEvent(block, e, extrinsicHash, extrinsicFee)
+	if err != nil {
+		return err
+	}
+
+	s.blockDone(block)
 
 	return err
 }

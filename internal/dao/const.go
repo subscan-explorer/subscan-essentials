@@ -4,4 +4,5 @@ var (
 	RedisMetadataKey           = redisKeyPrefix() + "metadata"
 	RedisFillAlreadyBlockNum   = redisKeyPrefix() + "FillAlreadyBlockNum"
 	RedisFillFinalizedBlockNum = redisKeyPrefix() + "FillFinalizedBlockNum"
+	RedisProcessedBlockNum     = redisKeyPrefix() + "ProcessedBlockNum"
 )

@@ -47,6 +47,13 @@ func (d *ReadOnlyDao) GetFillFinalizedBlockNum(c context.Context) (num int, err 
 	conn, _ := d.redis.GetContext(c)
 	defer conn.Close()
 	num, err = redis.Int(conn.Do("GET", RedisFillFinalizedBlockNum))
+	if err != nil {
+		nums := make([]int, 1)
+		d.db.Model(model.ChainBlock{}).Select("block_num").Order("block_num desc").Limit(1).Pluck("block_num", &nums)
+		if len(nums) > 0 {
+			num = nums[0]
+		}
+	}
 	return
 }
 
@@ -158,5 +165,63 @@ func (d *ReadOnlyDao) BlocksReverseByNum(blockNums []int) map[int]model.ChainBlo
 func (d *ReadOnlyDao) GetBlockNumArr(start, end int) []int {
 	var blockNums []int
 	d.db.Model(model.ChainBlock{BlockNum: end}).Where("block_num BETWEEN ? AND ?", start, end).Order("block_num asc").Pluck("block_num", &blockNums)
+	return blockNums
+}
+
+func (d *Dao) SaveProcessedBlockNum(c context.Context, blockNum int) (err error) {
+	conn, err := d.redis.GetContext(c)
+	if err != nil {
+		return
+	}
+	defer conn.Close()
+	if num, _ := redis.Int(conn.Do("GET", RedisProcessedBlockNum)); blockNum > num {
+		_, err = conn.Do("SET", RedisProcessedBlockNum, blockNum)
+	}
+	return
+}
+
+func (d *ReadOnlyDao) GetProcessedBlockNum(c context.Context) (num int, err error) {
+	conn, err := d.redis.GetContext(c)
+	if err != nil {
+		return
+	}
+	defer conn.Close()
+	num, err = redis.Int(conn.Do("GET", RedisProcessedBlockNum))
+	return
+}
+
+func (d *ReadOnlyDao) GetBlocksLaterThan(blockNum int) []model.ChainBlock {
+	var blocks []model.ChainBlock
+	d.db.Model(model.ChainBlock{BlockNum: blockNum}).Where("block_num >= ?", blockNum).Order("block_num asc").Scan(&blocks)
+	return blocks
+}
+
+func (d *ReadOnlyDao) GetMissingBlockNums() []int {
+	type Res struct {
+		Id               int
+		BlockNum         int
+		PreviousBlockId  int
+		PreviousBlockNum int
+	}
+	var res []Res
+	d.db.Raw(`
+		SELECT
+			CB.id,
+			CB.block_num,
+			CBII.id As previous_block_id,
+			CBII.block_num As previous_block_number
+		FROM
+			chain_blocks AS CB
+		LEFT JOIN
+			chain_blocks As CBII
+		ON
+			CBII.block_num = CB.block_num - 1
+		WHERE
+			CBII.id IS NULL AND CB.block_num > 0;
+	`).Scan(&res)
+	var blockNums []int
+	for _, r := range res {
+		blockNums = append(blockNums, r.BlockNum-1)
+	}
 	return blockNums
 }

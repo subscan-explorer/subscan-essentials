@@ -27,11 +27,11 @@ func New(stop chan struct{}) (s *Service) {
 	return newWithDao(stop, d)
 }
 
-func newWithDao(stop chan struct{}, dao dao.IDao) *Service {
+func newWithDao(stop chan struct{}, d dao.IDao) *Service {
 	websocket.SetEndpoint(util.WSEndPoint)
-	s := &Service{dao: dao, ReadOnlyService: *readOnlyWithDao(dao)}
+	s := &Service{dao: d, ReadOnlyService: *readOnlyWithDao(d)}
 	s.initSubRuntimeLatest()
-	s.pluginEmitter = NewPluginEmitter(stop)
+	s.pluginEmitter = NewPluginEmitter(stop, d, s)
 	return s
 }
 
@@ -49,6 +49,8 @@ func (s *ReadOnlyService) Close() {
 }
 
 func (s *Service) initSubRuntimeLatest() {
+	s.metadataLock.Lock()
+	defer s.metadataLock.Unlock()
 	// reg network custom type
 	defer func() {
 		go s.unknownToken()

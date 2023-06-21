@@ -64,6 +64,50 @@ func (s *Service) createExtrinsic(c context.Context,
 	return len(e), blockTimestamp, hash, extrinsicFee, err
 }
 
+func (s *Service) noteExtrinsic(c context.Context,
+	block *model.ChainBlock,
+	encodeExtrinsics []string,
+	decodeExtrinsics []map[string]interface{},
+	eventMap map[string][]model.ChainEvent,
+) (int, int, map[string]string, map[string]decimal.Decimal, error) {
+	var (
+		blockTimestamp int
+		e              []model.ChainExtrinsic
+		err            error
+	)
+	extrinsicFee := make(map[string]decimal.Decimal)
+
+	eb, _ := json.Marshal(decodeExtrinsics)
+	_ = json.Unmarshal(eb, &e)
+
+	hash := make(map[string]string)
+
+	for index, extrinsic := range e {
+		extrinsic.CallModule = strings.ToLower(extrinsic.CallModule)
+		extrinsic.BlockNum = block.BlockNum
+		extrinsic.ExtrinsicIndex = fmt.Sprintf("%d-%d", extrinsic.BlockNum, index)
+		extrinsic.Success = s.getExtrinsicSuccess(eventMap[extrinsic.ExtrinsicIndex])
+
+		if tp := s.getTimestamp(&extrinsic); tp > 0 {
+			blockTimestamp = tp
+		}
+		extrinsic.BlockTimestamp = blockTimestamp
+		if extrinsic.ExtrinsicHash != "" {
+
+			fee, _ := GetExtrinsicFee(nil, encodeExtrinsics[index])
+			extrinsic.Fee = fee
+
+			extrinsicFee[extrinsic.ExtrinsicIndex] = fee
+			hash[extrinsic.ExtrinsicIndex] = extrinsic.ExtrinsicHash
+		}
+
+		s.emitExtrinsic(block, &extrinsic, eventMap[extrinsic.ExtrinsicIndex])
+
+		s.handleCalls(block, &extrinsic, eventMap[extrinsic.ExtrinsicIndex], hash)
+	}
+	return len(e), blockTimestamp, hash, extrinsicFee, err
+}
+
 type Call TypedCall[[]model.CallArg]
 
 type TypedCall[T any] struct {
