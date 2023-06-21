@@ -38,7 +38,6 @@ var (
 
 type SubscribeService struct {
 	*Service
-	newHead    chan bool
 	newFinHead chan int
 	done       chan struct{}
 }
@@ -46,8 +45,7 @@ type SubscribeService struct {
 func (s *Service) initSubscribeService(done chan struct{}) *SubscribeService {
 	return &SubscribeService{
 		Service:    s,
-		newHead:    make(chan bool, 1000000),
-		newFinHead: make(chan int, 1000000),
+		newFinHead: make(chan int, 1),
 		done:       done,
 	}
 }
@@ -86,6 +84,12 @@ func (s *SubscribeService) parser(message []byte) (err error) {
 		_ = s.updateChainMetadata(map[string]interface{}{"finalized_blockNum": util.HexToNumStr(r.Number)})
 		upgradeHealth(j.Method)
 		go func() {
+			select {
+			// if new finalized head before old has been received, consume the old one before sending to avoid blocking on send
+			case <-s.newFinHead:
+
+			default:
+			}
 			s.newFinHead <- int(num)
 			onceFinHead.Do(func() {
 				go s.subscribeFetchBlock()
