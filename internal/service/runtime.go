@@ -100,6 +100,12 @@ func (s *Service) getMetadataInstant(spec int, hash string) *metadata.Instant {
 		s.metadataLock.Lock()
 		defer s.metadataLock.Unlock()
 		raw := s.dao.RuntimeVersionRaw(spec)
+		if raw == nil {
+			raw = &metadata.RuntimeRaw{
+				Spec: spec,
+				Raw:  "",
+			}
+		}
 		if raw.Raw == "" {
 			raw.Raw = s.regCodecMetadata(hash)
 		}
