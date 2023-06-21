@@ -47,6 +47,13 @@ func (d *ReadOnlyDao) GetFillFinalizedBlockNum(c context.Context) (num int, err 
 	conn, _ := d.redis.GetContext(c)
 	defer conn.Close()
 	num, err = redis.Int(conn.Do("GET", RedisFillFinalizedBlockNum))
+	if err != nil {
+		nums := make([]int, 1)
+		d.db.Model(model.ChainBlock{}).Select("block_num").Order("block_num desc").Limit(1).Pluck("block_num", &nums)
+		if len(nums) > 0 {
+			num = nums[0]
+		}
+	}
 	return
 }
 

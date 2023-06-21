@@ -94,7 +94,7 @@ func (p *PluginEmitter) noteBlock(block *model.ChainBlock) {
 	}
 }
 
-func getProcessStartBlock() int {
+func fallbackProcessStartBlock() int {
 	start := os.Getenv("PROCESS_START_BLOCK")
 	if start == "" {
 		return 0
@@ -107,14 +107,37 @@ func getProcessStartBlock() int {
 	return int(parsed)
 }
 
+func (p *PluginEmitter) latestProcessedFromDb() *model.LastProcessedBlock {
+	lastProcessed := model.LastProcessedBlock{}
+	tx := p.dao.DbBegin()
+
+	tx.Model(&lastProcessed).Select("id", "number").First(&lastProcessed)
+	p.dao.DbCommit(tx)
+	if lastProcessed.ID == 0 && lastProcessed.Number == 0 {
+		return nil
+	}
+	return &lastProcessed
+}
+
+func (p *PluginEmitter) getProcessStartBlock() int {
+	num, err := p.dao.GetProcessedBlockNum(context.TODO())
+	if err != nil {
+		slog.Warn("GetProcessedBlockNum failed", "error", err)
+		lastProcessed := p.latestProcessedFromDb()
+		slog.Debug("getProcessStartBlock", "lastProcessed", lastProcessed)
+		if lastProcessed != nil && lastProcessed.Number > 0 {
+			num = lastProcessed.Number
+		} else {
+			num = fallbackProcessStartBlock()
+		}
+	}
+	return num
+}
+
 func (p *PluginEmitter) Run() {
 	go func() {
 		slog.Debug("pluginEmitter start")
-		num, err := p.dao.GetProcessedBlockNum(context.TODO())
-		if err != nil {
-			slog.Warn("GetProcessedBlockNum failed", "error", err)
-			num = getProcessStartBlock()
-		}
+		num := p.getProcessStartBlock()
 		currentBlock := int64(num)
 		catchUp := p.dao.GetBlocksLaterThan(int(currentBlock))
 		slog.Debug("pluginEmitter start", "currentBlock", currentBlock, "catchUp", len(catchUp))
@@ -170,6 +193,11 @@ func (p *PluginEmitter) Run() {
 							wait.Wait()
 							currentBlock++
 							e := p.dao.SaveProcessedBlockNum(context.TODO(), int(currentBlock))
+							go func() {
+								tx := p.dao.DbBegin()
+								tx.Model(&model.LastProcessedBlock{}).Where("id = 1").Update("number", currentBlock)
+								p.dao.DbCommit(tx)
+							}()
 							if e != nil {
 								slog.Error("SaveProcessedBlockNum failed", "error", e)
 							}
