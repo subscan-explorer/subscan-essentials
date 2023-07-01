@@ -1,4 +1,4 @@
-FROM golang:1.20.4-bullseye as builder
+FROM golang:1.20.5-bullseye as builder
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get upgrade -y
 
