@@ -14,7 +14,7 @@ require (
 	github.com/knadh/koanf v1.5.0
 	github.com/lmittmann/tint v0.3.4
 	github.com/orcaman/concurrent-map/v2 v2.0.1
-	github.com/panjf2000/ants/v2 v2.7.4
+	github.com/panjf2000/ants/v2 v2.8.0
 	github.com/pkg/errors v0.9.1
 	github.com/shopspring/decimal v1.3.1
 	github.com/stretchr/testify v1.8.4
