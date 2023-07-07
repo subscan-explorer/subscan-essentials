@@ -6,10 +6,10 @@ services:
     image: subscan/api
     environment: &app_base
       MYSQL_HOST: mysql
-      MYSQL_PASS: 'helloload'
+      MYSQL_PASS: ''
       # Name of the database subscan will connect to and use
       # this db must exist
-      MYSQL_DB: 'subscan'
+      MYSQL_DB: 'subscan_test'
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_INSECURE: 'true'

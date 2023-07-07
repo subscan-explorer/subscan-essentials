@@ -6,8 +6,7 @@ services:
     restart: always
     environment:
       # Name of the db created on start up
-      MYSQL_DATABASE: subscan
-      MYSQL_ROOT_PASSWORD: helloload
+      MYSQL_DATABASE: subscan_test
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
     ports:
       - 3306:3306
