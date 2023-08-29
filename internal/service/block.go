@@ -148,8 +148,6 @@ func (s *Service) NoteChainBlock(block *model.ChainBlock) (err error) {
 		return err
 	}
 
-	s.blockDone(block)
-
 	return err
 }
 

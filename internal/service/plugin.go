@@ -134,6 +134,68 @@ func (p *PluginEmitter) getProcessStartBlock() int {
 	return num
 }
 
+func (p *PluginEmitter) handleBlock(currentBlock *int64, blockNum uint32) {
+	blockNumStr := fmt.Sprint(blockNum)
+	if info, ok := p.pending.Get(blockNumStr); ok {
+		info.ready = true
+		p.pending.Set(blockNumStr, info)
+		if next := uint32(*currentBlock + 1); blockNum == next {
+			var wait sync.WaitGroup
+			nextStr := fmt.Sprint(next)
+			for nextInfo, ok := p.pending.Get(nextStr); ok && nextInfo.ready; nextInfo, ok = p.pending.Get(nextStr) {
+				slog.Debug("pluginEmitter process block", "blockNum", nextInfo.block.BlockNum)
+				wait.Add(1)
+				go func() {
+					defer wait.Done()
+					for _, extrinsic := range nextInfo.extrinsics {
+						for _, plugin := range subscribeExtrinsic[extrinsic.extrinsic.CallModule] {
+							err := plugin.ProcessExtrinsic(extrinsic.block, extrinsic.extrinsic, extrinsic.events)
+							if err != nil {
+								slog.Error("ProcessExtrinsic failed", "error", err)
+							}
+						}
+					}
+					for _, event := range nextInfo.events {
+						for _, plugin := range subscribeEvent[event.event.ModuleId] {
+							err := plugin.ProcessEvent(event.block, event.event, event.fee, event.extrinsic)
+							if err != nil {
+								slog.Error("ProcessEvent failed", "error", err)
+							}
+						}
+					}
+					for _, call := range nextInfo.calls {
+						for _, plugin := range subscribeCall[call.call.ModuleId] {
+							err := plugin.ProcessCall(call.block, call.call, call.events, call.extrinsic)
+							if err != nil {
+								slog.Error("ProcessCall failed", "error", err)
+							}
+						}
+					}
+				}()
+				p.pending.Remove(nextStr)
+				next++
+				nextStr = fmt.Sprint(next)
+				wait.Wait()
+				*currentBlock += 1
+				e := p.dao.SaveProcessedBlockNum(context.TODO(), int(*currentBlock))
+				go func() {
+					tx := p.dao.DbBegin()
+					tx.Model(&model.LastProcessedBlock{}).Where("id = 1").Update("number", currentBlock)
+					p.dao.DbCommit(tx)
+				}()
+				if e != nil {
+					slog.Error("SaveProcessedBlockNum failed", "error", e)
+				}
+			}
+		}
+	} else {
+		slog.Debug("pluginEmitter probably catchUp block (block not in pending)", "blockNum", blockNum)
+		block := p.dao.GetBlockByNum(int(blockNum))
+		p.noteBlock(block)
+		p.handleBlock(currentBlock, blockNum)
+	}
+}
+
 func (p *PluginEmitter) Run() {
 	go func() {
 		slog.Debug("pluginEmitter start")
@@ -143,67 +205,14 @@ func (p *PluginEmitter) Run() {
 		slog.Debug("pluginEmitter start", "currentBlock", currentBlock, "catchUp", len(catchUp))
 		// populate the `pending` map with the blocks we need to catch up on
 		for _, block := range catchUp {
-			p.noteBlock(&block)
+			p.s.blockDone(&block)
 		}
 
 		for {
 			select {
 			case blockNum := <-p.blockComplete:
 				slog.Debug("pluginEmitter got block complete", "blockNum", blockNum, "currentBlock", currentBlock)
-				blockNumStr := fmt.Sprint(blockNum)
-				if info, ok := p.pending.Get(blockNumStr); ok {
-					info.ready = true
-					p.pending.Set(blockNumStr, info)
-					if next := uint32(currentBlock + 1); blockNum == next {
-						var wait sync.WaitGroup
-						nextStr := fmt.Sprint(next)
-						for nextInfo, ok := p.pending.Get(nextStr); ok && nextInfo.ready; nextInfo, ok = p.pending.Get(nextStr) {
-							slog.Debug("pluginEmitter process block", "blockNum", nextInfo.block.BlockNum)
-							wait.Add(1)
-							go func() {
-								defer wait.Done()
-								for _, extrinsic := range nextInfo.extrinsics {
-									for _, plugin := range subscribeExtrinsic[extrinsic.extrinsic.CallModule] {
-										err := plugin.ProcessExtrinsic(extrinsic.block, extrinsic.extrinsic, extrinsic.events)
-										if err != nil {
-											slog.Error("ProcessExtrinsic failed", "error", err)
-										}
-									}
-								}
-								for _, event := range nextInfo.events {
-									for _, plugin := range subscribeEvent[event.event.ModuleId] {
-										err := plugin.ProcessEvent(event.block, event.event, event.fee, event.extrinsic)
-										if err != nil {
-											slog.Error("ProcessEvent failed", "error", err)
-										}
-									}
-								}
-								for _, call := range nextInfo.calls {
-									for _, plugin := range subscribeCall[call.call.ModuleId] {
-										err := plugin.ProcessCall(call.block, call.call, call.events, call.extrinsic)
-										if err != nil {
-											slog.Error("ProcessCall failed", "error", err)
-										}
-									}
-								}
-							}()
-							p.pending.Remove(nextStr)
-							next++
-							nextStr = fmt.Sprint(next)
-							wait.Wait()
-							currentBlock++
-							e := p.dao.SaveProcessedBlockNum(context.TODO(), int(currentBlock))
-							go func() {
-								tx := p.dao.DbBegin()
-								tx.Model(&model.LastProcessedBlock{}).Where("id = 1").Update("number", currentBlock)
-								p.dao.DbCommit(tx)
-							}()
-							if e != nil {
-								slog.Error("SaveProcessedBlockNum failed", "error", e)
-							}
-						}
-					}
-				}
+				p.handleBlock(&currentBlock, blockNum)
 			case <-p.stop:
 				return
 			}
