@@ -11,7 +11,7 @@ services:
     ports:
       - 3306:3306
     volumes:
-      - ./data/mysql:/var/lib/mysql
+      - ./data/mysql:/var/lib/mysql:Z
     networks:
       - app_net
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
@@ -21,7 +21,7 @@ services:
     ports:
       - 6379:6379
     volumes:
-      - ./data/redis:/data
+      - ./data/redis:/data:Z
     networks:
       - app_net
 
