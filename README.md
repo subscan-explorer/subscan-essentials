@@ -8,7 +8,7 @@
 
 Subscan Essentials is a high-precision blockchain explorer scaffold project. 
 It supports substrate-based blockchain networks with developer-friendly interface, standard or custom module parsing capabilities. 
-It's developed by the Subscan team and used in subscan.io. 
+It's developed by the Subscan team and used in [subscan.io](https://www.subscan.io/). 
 Developers are free to use the codebase to extend functionalities and develop unique user experiences for their audiences.
 
 ## Contents
