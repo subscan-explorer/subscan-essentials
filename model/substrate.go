@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/util"
@@ -12,22 +13,23 @@ import (
 var SplitTableBlockNum = 1000000
 
 type ChainBlock struct {
-	ID              uint   `gorm:"primary_key" json:"id"`
-	BlockNum        int    `json:"block_num"`
-	BlockTimestamp  int    `json:"block_timestamp"`
-	Hash            string `sql:"default: null;size:100" json:"hash"`
-	ParentHash      string `sql:"default: null;size:100" json:"parent_hash"`
-	StateRoot       string `sql:"default: null;size:100" json:"state_root"`
-	ExtrinsicsRoot  string `sql:"default: null;size:100" json:"extrinsics_root"`
-	Logs            string `json:"logs" sql:"type:text;"`
-	Extrinsics      string `json:"extrinsics" sql:"type:MEDIUMTEXT;"`
-	EventCount      int    `json:"event_count"`
-	ExtrinsicsCount int    `json:"extrinsics_count"`
-	Event           string `json:"event" sql:"type:MEDIUMTEXT;"`
-	SpecVersion     int    `json:"spec_version"`
-	Validator       string `json:"validator"`
-	CodecError      bool   `json:"codec_error"`
-	Finalized       bool   `json:"finalized"`
+	ID              uint      `gorm:"primary_key" json:"id"`
+	BlockNum        int       `json:"block_num"`
+	BlockTimestamp  int       `json:"block_timestamp"`
+	Hash            string    `sql:"default: null;size:100" json:"hash"`
+	ParentHash      string    `sql:"default: null;size:100" json:"parent_hash"`
+	StateRoot       string    `sql:"default: null;size:100" json:"state_root"`
+	ExtrinsicsRoot  string    `sql:"default: null;size:100" json:"extrinsics_root"`
+	Logs            string    `json:"logs" sql:"type:text;"`
+	Extrinsics      string    `json:"extrinsics" sql:"type:MEDIUMTEXT;"`
+	EventCount      int       `json:"event_count"`
+	ExtrinsicsCount int       `json:"extrinsics_count"`
+	Event           string    `json:"event" sql:"type:MEDIUMTEXT;"`
+	SpecVersion     int       `json:"spec_version"`
+	Validator       string    `json:"validator"`
+	CodecError      bool      `json:"codec_error"`
+	Finalized       bool      `json:"finalized"`
+	CreatedAt       time.Time `json:"created_at"`
 }
 
 func (c ChainBlock) TableName() string {
