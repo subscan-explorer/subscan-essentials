@@ -137,19 +137,11 @@ func (dc *Database) getEnvDSN() *url.URL {
 
 func (dc *Database) getYamlDSN() (*url.URL, error) {
 	var (
-		isTaskMode = os.Getenv("TASK_MOD") == "true"
-		isTestMode = os.Getenv("TEST_MOD") == "true"
-		err        error
-		dsn        *url.URL
+		err error
+		dsn *url.URL
 	)
 
-	if isTaskMode {
-		dsn, err = ParseDSN(dc.Task)
-	} else if isTestMode {
-		dsn, err = ParseDSN(dc.Test)
-	} else {
-		dsn, err = ParseDSN(dc.Api)
-	}
+	dsn, err = ParseDSN(dc.Api)
 
 	if err != nil {
 		return nil, err
@@ -208,7 +200,7 @@ func (_ *Database) mergeDefaultDSNs(a, b *url.URL) (*url.URL, error) {
 	}
 	host := valueOrDefaultStr("127.0.0.1", a.Hostname(), b.Hostname())
 	port := valueOrDefaultStr("3306", a.Port(), b.Port())
-	dbPath := valueOrDefaultStr("subscan", getDBNameOfDSN(a), getDBNameOfDSN(b))
+	dbPath := valueOrDefaultStr("subscan-essentials", getDBNameOfDSN(a), getDBNameOfDSN(b))
 	query := valueOrDefaultStr("", a.RawQuery, b.RawQuery)
 	return &url.URL{
 		Scheme:   scheme,

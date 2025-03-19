@@ -3,20 +3,19 @@ package dao
 import (
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/plugins/system/model"
-	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc/metadata"
 	"strings"
 )
 
-func CreateExtrinsicError(db storage.DB, hash string, moduleError *model.MetadataModuleError) error {
+func CreateExtrinsicError(db storage.DB, extrinsicIndex string, moduleError *model.MetadataModuleError) error {
 	if moduleError == nil {
 		return nil
 	}
 	err := db.Create(&model.ExtrinsicError{
-		ExtrinsicHash: util.AddHex(hash),
-		Module:        moduleError.Module,
-		Name:          moduleError.Name,
-		Doc:           strings.Join(moduleError.Doc, ","),
+		ExtrinsicIndex: extrinsicIndex,
+		Module:         moduleError.Module,
+		Name:           moduleError.Name,
+		Doc:            strings.Join(moduleError.Doc, ","),
 	})
 	return err
 }

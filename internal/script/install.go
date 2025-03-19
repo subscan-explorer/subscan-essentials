@@ -15,10 +15,7 @@ import (
 func Install(conf string) {
 	// create database
 	// conf
-	_ = fileCopy(fmt.Sprintf("%s/http.toml.example", conf), fmt.Sprintf("%s/http.toml", conf))
-	_ = fileCopy(fmt.Sprintf("%s/mysql.toml.example", conf), fmt.Sprintf("%s/mysql.toml", conf))
-	_ = fileCopy(fmt.Sprintf("%s/redis.toml.example", conf), fmt.Sprintf("%s/redis.toml", conf))
-
+	_ = fileCopy(fmt.Sprintf("%s/config.yaml.example", conf), fmt.Sprintf("%s/config.yaml", conf))
 	func() {
 		dbHost := util.GetEnv("MYSQL_HOST", "127.0.0.1")
 		dbUser := util.GetEnv("MYSQL_USER", "root")
@@ -74,12 +71,12 @@ func CheckCompleteness() {
 		panic(err)
 	}
 
-	var thisRepairedBlock []int
-	repairedBlockNum := 0
+	var thisRepairedBlock []uint
+	var repairedBlockNum uint
 	for {
 		endBlockNum := repairedBlockNum + 300
 
-		if endBlockNum > latest {
+		if endBlockNum > uint(latest) {
 			break
 		}
 
@@ -90,11 +87,7 @@ func CheckCompleteness() {
 		allFetchBlockNums := dao.GetBlockNumArr(repairedBlockNum, endBlockNum)
 
 		for i := repairedBlockNum; i < endBlockNum; i++ {
-			if !util.IntInSlice(i, allFetchBlockNums) {
-				// err := srv.FillBlockData(nil, i, true)
-				// if err != nil {
-				// 	fmt.Println("FillBlockData get error", err)
-				// }
+			if !util.IntInSlice(int(i), allFetchBlockNums) {
 				thisRepairedBlock = append(thisRepairedBlock, i)
 			}
 		}

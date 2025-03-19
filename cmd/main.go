@@ -1,14 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"runtime"
 
 	"github.com/go-kratos/kratos/v2"
 	"github.com/itering/subscan/configs"
-	"github.com/itering/subscan/internal/observer"
-	"github.com/itering/subscan/internal/script"
 	"github.com/itering/subscan/internal/server/http"
 	"github.com/itering/subscan/internal/service"
 	"github.com/itering/substrate-api-rpc/websocket"
@@ -29,48 +28,22 @@ func setupApp() *cli.App {
 	app := cli.NewApp()
 	app.Name = "SUBSCAN"
 	app.Usage = "SUBSCAN Backend Service, use -h get help"
-	app.Version = "1.1"
-	app.Action = func(*cli.Context) error { run(); return nil }
+	app.Version = "2.0"
 	app.Description = "SubScan Backend Service, substrate blockchain explorer"
-	app.Flags = []cli.Flag{
-		cli.StringFlag{Name: "conf", Value: "../configs"},
-	}
+	app.Flags = []cli.Flag{cli.StringFlag{Name: "conf", Value: "../configs"}}
 	app.Before = func(context *cli.Context) error {
 		configs.Init()
 		runtime.GOMAXPROCS(runtime.NumCPU())
 		return nil
 	}
-	app.Commands = []cli.Command{
-		{
-			Name:  "start",
-			Usage: "Start one worker, E.g substrate",
-			Action: func(c *cli.Context) error {
-				observer.Run(c.Args().Get(0))
-				return nil
-			},
-		},
-		{
-			Name:  "install",
-			Usage: "Create database and create default conf file",
-			Action: func(c *cli.Context) error {
-				script.Install(c.Parent().String("conf"))
-				return nil
-			},
-		},
-		{
-			Name:  "CheckCompleteness",
-			Usage: "Create blocks completeness",
-			Action: func(c *cli.Context) error {
-				script.CheckCompleteness()
-				return nil
-			},
-		},
-	}
+	app.Commands = commands
+	app.Action = func(*cli.Context) error { run(); return nil }
 	return app
 }
 
 func run() {
 	svc := service.New()
+	svc.FillBlockData(context.TODO(), 25198996)
 	httpSrv := http.NewHTTPServer(configs.Boot.Server, svc)
 	defer func() {
 		// Micro services

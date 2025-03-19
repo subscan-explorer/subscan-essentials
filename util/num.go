@@ -95,3 +95,10 @@ func DecimalFromInterface(i interface{}) decimal.Decimal {
 	}
 	return decimal.Zero
 }
+
+func StringToUInt(s string) uint {
+	if i, err := strconv.ParseUint(s, 10, 64); err == nil {
+		return uint(i)
+	}
+	return 0
+}

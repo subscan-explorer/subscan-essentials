@@ -6,14 +6,9 @@ import (
 
 	"github.com/gomodule/redigo/redis"
 	"github.com/itering/subscan/configs"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
-var (
-	DaemonAction = []string{"substrate"}
-)
-
-// dao
 type Dao struct {
 	db    *gorm.DB
 	redis *redis.Pool
@@ -72,7 +67,7 @@ func (d *Dao) Close() {
 	if d.redis != nil {
 		_ = d.redis.Close()
 	}
-	_ = d.db.Close()
+	_ = d.db
 }
 
 // Ping ping the resource.

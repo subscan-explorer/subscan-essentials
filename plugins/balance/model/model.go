@@ -6,10 +6,10 @@ import (
 
 type Account struct {
 	ID      uint            `gorm:"primary_key" json:"-"`
-	Address string          `sql:"default: null;size:100" json:"address"`
+	Address string          `gorm:"default: null;size:100;index:address,unique" json:"address"`
 	Nonce   int             `json:"nonce"`
-	Balance decimal.Decimal `json:"balance" sql:"type:decimal(30,0);"`
-	Lock    decimal.Decimal `json:"lock" sql:"type:decimal(30,0);"`
+	Balance decimal.Decimal `json:"balance" gorm:"type:decimal(65,0);"`
+	Lock    decimal.Decimal `json:"lock" gorm:"type:decimal(65,0);"`
 }
 
 type AccountData struct {

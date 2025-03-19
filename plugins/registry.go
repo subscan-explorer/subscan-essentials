@@ -36,17 +36,3 @@ func register(name string, f interface{}) {
 func registerNative(p interface{}) {
 	register(reflect.ValueOf(p).Type().Elem().Name(), p)
 }
-
-type PluginInfo struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
-	Ui      bool   `json:"ui"`
-}
-
-func List() []PluginInfo {
-	plugins := make([]PluginInfo, 0, len(RegisteredPlugins))
-	for name, plugin := range RegisteredPlugins {
-		plugins = append(plugins, PluginInfo{Name: name, Version: plugin.Version(), Ui: plugin.UiConf() != nil})
-	}
-	return plugins
-}

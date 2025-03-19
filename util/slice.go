@@ -1,5 +1,7 @@
 package util
 
+import "sort"
+
 func StringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if b == a {
@@ -32,4 +34,8 @@ func ContinuousNums(start, count int, order string) (r []int) {
 		}
 	}
 	return
+}
+
+func SortUintSlice(s []uint) {
+	sort.Slice(s, func(i, j int) bool { return s[i] < s[j] })
 }

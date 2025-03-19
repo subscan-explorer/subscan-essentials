@@ -3,24 +3,28 @@ package dao
 import (
 	"context"
 	"fmt"
-	"sort"
-
 	"github.com/gomodule/redigo/redis"
 	"github.com/itering/subscan/model"
+	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/address"
 )
 
-// CreateBlock, mysql db transaction
-// Check if you need to create a new table(block, extrinsic, event, log ) after created
+// CreateBlock mysql db transaction
 func (d *Dao) CreateBlock(txn *GormDB, cb *model.ChainBlock) (err error) {
-	query := txn.Create(cb)
-	if !d.db.HasTable(model.ChainBlock{BlockNum: cb.BlockNum + model.SplitTableBlockNum}) {
-		go func() {
-			_ = d.db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
-				d.InternalTables(cb.BlockNum + model.SplitTableBlockNum)...)
-			d.AddIndex(cb.BlockNum + model.SplitTableBlockNum)
-		}()
+	query := txn.Scopes().Scopes(IgnoreDuplicate).Create(cb)
+
+	// Check if you need to create a new table(block, extrinsic, event, log) after created block
+	if maxTableBlockNum < cb.BlockNum+model.SplitTableBlockNum {
+		if !d.db.Migrator().HasTable(model.ChainBlock{BlockNum: cb.BlockNum + model.SplitTableBlockNum}) {
+			go func() {
+				_ = d.db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
+					d.InternalTables(cb.BlockNum + model.SplitTableBlockNum)...)
+				d.AddIndex(cb.BlockNum + model.SplitTableBlockNum)
+			}()
+		}
+		maxTableBlockNum = cb.BlockNum + model.SplitTableBlockNum
 	}
+
 	return query.Error
 }
 
@@ -59,9 +63,9 @@ func (d *Dao) GetFillFinalizedBlockNum(c context.Context) (num int, err error) {
 	return
 }
 
-func (d *Dao) GetBlockList(page, row int) []model.ChainBlock {
+func (d *Dao) GetBlockList(ctx context.Context, page, row int) []model.ChainBlock {
 	var blocks []model.ChainBlock
-	blockNum, _ := d.GetFillBestBlockNum(context.TODO())
+	blockNum, _ := d.GetFillBestBlockNum(ctx)
 	head := blockNum - page*row
 	if head < 0 {
 		return nil
@@ -70,22 +74,24 @@ func (d *Dao) GetBlockList(page, row int) []model.ChainBlock {
 	if end < 0 {
 		end = 0
 	}
-
-	d.db.Model(model.ChainBlock{BlockNum: head}).
+	bestNum := uint(blockNum)
+	headBlock := uint(head)
+	endBlock := uint(end)
+	d.db.Model(model.ChainBlock{BlockNum: headBlock}).
 		Joins(fmt.Sprintf("JOIN (SELECT id,block_num from %s where block_num BETWEEN %d and %d order by block_num desc ) as t on %s.id=t.id",
-			model.ChainBlock{BlockNum: head}.TableName(),
+			model.ChainBlock{BlockNum: headBlock}.TableName(),
 			end, head,
-			model.ChainBlock{BlockNum: head}.TableName(),
+			model.ChainBlock{BlockNum: headBlock}.TableName(),
 		)).
 		Order("block_num desc").Scan(&blocks)
 
-	if head/model.SplitTableBlockNum != end/model.SplitTableBlockNum {
+	if headBlock/model.SplitTableBlockNum != endBlock/model.SplitTableBlockNum {
 		var endBlocks []model.ChainBlock
-		d.db.Model(model.ChainBlock{BlockNum: blockNum - model.SplitTableBlockNum}).
+		d.db.Model(model.ChainBlock{BlockNum: bestNum - model.SplitTableBlockNum}).
 			Joins(fmt.Sprintf("JOIN (SELECT id,block_num from %s order by block_num desc limit %d) as t on %s.id=t.id",
-				model.ChainBlock{BlockNum: blockNum - model.SplitTableBlockNum}.TableName(),
-				row-(head%model.SplitTableBlockNum+1),
-				model.ChainBlock{BlockNum: blockNum - model.SplitTableBlockNum}.TableName(),
+				model.ChainBlock{BlockNum: bestNum - model.SplitTableBlockNum}.TableName(),
+				uint(row)-(headBlock%model.SplitTableBlockNum+1),
+				model.ChainBlock{BlockNum: bestNum - model.SplitTableBlockNum}.TableName(),
 			)).
 			Order("block_num desc").Scan(&endBlocks)
 		blocks = append(blocks, endBlocks...)
@@ -96,26 +102,26 @@ func (d *Dao) GetBlockList(page, row int) []model.ChainBlock {
 
 func (d *Dao) GetBlockByHash(c context.Context, hash string) *model.ChainBlock {
 	var block model.ChainBlock
-	blockNum, _ := d.GetBestBlockNum(context.TODO())
-	for index := int(blockNum / uint64(model.SplitTableBlockNum)); index >= 0; index-- {
+	blockNum, _ := d.GetBestBlockNum(c)
+	for index := uint(blockNum / uint64(model.SplitTableBlockNum)); index >= 0; index-- {
 		query := d.db.Model(&model.ChainBlock{BlockNum: index * model.SplitTableBlockNum}).Where("hash = ?", hash).Scan(&block)
-		if query != nil && !query.RecordNotFound() {
+		if query != nil && query.Error == nil {
 			return &block
 		}
 	}
 	return nil
 }
 
-func (d *Dao) GetBlockByNum(blockNum int) *model.ChainBlock {
+func (d *Dao) GetBlockByNum(ctx context.Context, blockNum uint) *model.ChainBlock {
 	var block model.ChainBlock
-	query := d.db.Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num = ?", blockNum).Scan(&block)
-	if query == nil || query.Error != nil || query.RecordNotFound() {
+	query := d.db.Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num = ?", blockNum).Find(&block)
+	if query == nil || query.Error != nil || query.Error == nil {
 		return nil
 	}
 	return &block
 }
 
-func (d *Dao) BlockAsJson(c context.Context, block *model.ChainBlock) *model.ChainBlockJson {
+func (d *Dao) BlockAsJson(_ context.Context, block *model.ChainBlock) *model.ChainBlockJson {
 	bj := model.ChainBlockJson{
 		BlockNum:        block.BlockNum,
 		BlockTimestamp:  block.BlockTimestamp,
@@ -128,14 +134,14 @@ func (d *Dao) BlockAsJson(c context.Context, block *model.ChainBlock) *model.Cha
 		Extrinsics:      d.GetExtrinsicsByBlockNum(block.BlockNum),
 		Events:          d.GetEventByBlockNum(block.BlockNum),
 		Logs:            d.GetLogByBlockNum(block.BlockNum),
-		Validator:       address.SS58Address(block.Validator),
+		Validator:       address.Encode(block.Validator),
 		Finalized:       block.Finalized,
 	}
 	return &bj
 }
 
 func (d *Dao) UpdateEventAndExtrinsic(txn *GormDB, block *model.ChainBlock, eventCount, extrinsicsCount, blockTimestamp int, validator string, codecError bool, finalized bool) error {
-	query := txn.Where("block_num = ?", block.BlockNum).Model(block).UpdateColumn(map[string]interface{}{
+	query := txn.Where("block_num = ?", block.BlockNum).Model(block).UpdateColumns(map[string]interface{}{
 		"event_count":      eventCount,
 		"extrinsics_count": extrinsicsCount,
 		"block_timestamp":  blockTimestamp,
@@ -145,44 +151,37 @@ func (d *Dao) UpdateEventAndExtrinsic(txn *GormDB, block *model.ChainBlock, even
 		"parent_hash":      block.ParentHash,
 		"state_root":       block.StateRoot,
 		"extrinsics_root":  block.ExtrinsicsRoot,
-		"extrinsics":       block.Extrinsics,
-		"event":            block.Event,
-		"logs":             block.Logs,
 		"finalized":        finalized,
 	})
 	return query.Error
 }
 
-func (d *Dao) GetNearBlock(blockNum int) *model.ChainBlock {
+func (d *Dao) GetNearBlock(blockNum uint) *model.ChainBlock {
 	var block model.ChainBlock
 	query := d.db.Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num > ?", blockNum).Order("block_num desc").Scan(&block)
-	if query == nil || query.Error != nil || query.RecordNotFound() {
+	if query == nil || query.Error != nil {
 		return nil
 	}
 	return &block
 }
 
-func (d *Dao) SetBlockFinalized(block *model.ChainBlock) {
-	d.db.Model(block).UpdateColumn(model.ChainBlock{Finalized: true})
-}
-
-func (d *Dao) BlocksReverseByNum(blockNums []int) map[int]model.ChainBlock {
+func (d *Dao) BlocksReverseByNum(blockNums []uint) map[uint]model.ChainBlock {
 	var blocks []model.ChainBlock
 	if len(blockNums) == 0 {
 		return nil
 	}
-	sort.Ints(blockNums)
+	util.SortUintSlice(blockNums)
 	lastNum := blockNums[len(blockNums)-1]
 	for index := lastNum / model.SplitTableBlockNum; index >= 0; index-- {
 		var tableData []model.ChainBlock
 		query := d.db.Model(model.ChainBlock{BlockNum: index * model.SplitTableBlockNum}).Where("block_num in (?)", blockNums).Scan(&tableData)
-		if query == nil || query.Error != nil || query.RecordNotFound() {
+		if query == nil || query.Error != nil {
 			continue
 		}
 		blocks = append(blocks, tableData...)
 	}
 
-	toMap := make(map[int]model.ChainBlock)
+	toMap := make(map[uint]model.ChainBlock)
 	for _, block := range blocks {
 		toMap[block.BlockNum] = block
 	}
@@ -190,7 +189,7 @@ func (d *Dao) BlocksReverseByNum(blockNums []int) map[int]model.ChainBlock {
 	return toMap
 }
 
-func (d *Dao) GetBlockNumArr(start, end int) []int {
+func (d *Dao) GetBlockNumArr(start, end uint) []int {
 	var blockNums []int
 	d.db.Model(model.ChainBlock{BlockNum: end}).Where("block_num BETWEEN ? AND ?", start, end).Order("block_num asc").Pluck("block_num", &blockNums)
 	return blockNums

@@ -40,7 +40,3 @@ func TestRegister(t *testing.T) {
 	assert.NotNil(t, RegisteredPlugins["test"])
 	assert.Nil(t, RegisteredPlugins["test2"])
 }
-
-func TestList(t *testing.T) {
-	assert.Equal(t, len(List()), len(RegisteredPlugins))
-}

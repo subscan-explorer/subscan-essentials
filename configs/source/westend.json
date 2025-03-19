@@ -1,4 +1,32 @@
 {
+  "ElectionResult#0-50": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "electedStashes",
+        "Vec<AccountId>"
+      ],
+      [
+        "exposures",
+        "Vec<(AccountId, Exposure)>"
+      ]
+    ]
+  },
+  "RoundSnapshot": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "voters",
+        "Vec<(AccountId, VoteWeight, Vec<AccountId>)>"
+      ],
+      [
+        "targets",
+        "Vec<AccountId>"
+      ]
+    ]
+  },
+  "VoteWeight": "u64",
+  "ValidatorIndex#9090-9100": "u32",
   "Address": "AccountId",
   "BlockNumber": "u32",
   "LeasePeriod": "BlockNumber",
@@ -82,5 +110,15 @@
       ]
     ]
   },
-  "AccountInfo#50-?": "AccountInfoWithTripleRefCount"
+  "AccountInfo#50-?": "AccountInfoWithTripleRefCount",
+  "AssetInstance": "AssetInstanceV0",
+  "MultiAsset": "MultiAssetV0",
+  "Xcm": "XcmV0",
+  "XcmOrder": "XcmOrderV0",
+  "MultiLocation": "MultiLocationV0",
+  "AssetInstance#9100-?": "AssetInstanceV1",
+  "MultiAsset#9100-?": "MultiAssetV1",
+  "Xcm#9100-?": "XcmV1",
+  "XcmOrder#9100-?": "XcmOrderV1",
+  "MultiLocation#9100-?": "MultiLocationV1"
 }

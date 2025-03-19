@@ -1,4 +1,4 @@
-FROM golang:1.17.10 as builder
+FROM golang:1.20.5 as builder
 
 WORKDIR /subscan
 
@@ -8,7 +8,7 @@ COPY . /subscan
 WORKDIR /subscan/cmd
 RUN go build -o subscan
 
-FROM buildpack-deps:buster-scm
+FROM buildpack-deps:trixie
 
 WORKDIR subscan
 COPY configs configs

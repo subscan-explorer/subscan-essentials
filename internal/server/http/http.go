@@ -4,9 +4,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-kratos/kratos/v2/middleware/metrics"
-	"github.com/go-kratos/kratos/v2/middleware/tracing"
-	"github.com/go-kratos/kratos/v2/middleware/validate"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/itering/subscan/configs"
 	"github.com/itering/subscan/internal/service"
@@ -19,14 +16,7 @@ var (
 
 // NewHTTPServer new a HTTP server.
 func NewHTTPServer(c *configs.Server, s *service.Service) *http.Server {
-	var opts = []http.ServerOption{
-		http.Middleware(
-			tracing.Server(),
-			metrics.Server(),
-			validate.Validator(),
-		),
-	}
-
+	var opts []http.ServerOption
 	svc = s
 	if c.Http.Network != "" {
 		opts = append(opts, http.Network(c.Http.Network))
@@ -39,10 +29,12 @@ func NewHTTPServer(c *configs.Server, s *service.Service) *http.Server {
 		opts = append(opts, http.Timeout(timeout))
 	}
 	engine := http.NewServer(opts...)
+
 	e := gin.New()
 	e.Use(gin.Recovery())
 	defer engine.HandlePrefix("/", e)
 	initRouter(e)
+
 	return engine
 }
 
@@ -51,30 +43,27 @@ func initRouter(e *gin.Engine) {
 	// internal
 	g := e.Group("/api")
 	{
-		g.GET("system/status", systemStatus)
 		g.POST("/now", now)
 		s := g.Group("/scan")
 		{
-			s.POST("metadata", metadata)
+			s.Any("metadata", metadataHandle)
+
 			// Block
-			s.POST("blocks", blocks)
-			s.POST("block", block)
+			s.POST("blocks", blocksHandle)
+			s.POST("block", blockHandle)
 
 			// Extrinsic
-			s.POST("extrinsics", extrinsics)
-			s.POST("extrinsic", extrinsic)
+			s.POST("extrinsics", extrinsicsHandle)
+			s.POST("extrinsic", extrinsicHandle)
 			// Event
-			s.POST("events", events)
+			s.POST("events", eventsHandle)
 
-			s.POST("check_hash", checkSearchHash)
+			s.POST("check_hash", checkSearchHashHandle)
 
 			// Runtime
-			s.POST("runtime/metadata", runtimeMetadata)
-			s.POST("runtime/list", runtimeList)
+			s.POST("runtime/metadata", runtimeMetadataHandle)
+			s.Any("runtime/list", runtimeListHandler)
 
-			// Plugin
-			s.POST("plugins", pluginList)
-			s.POST("plugins/ui", pluginUIConfig)
 		}
 		pluginRouter(g)
 	}

@@ -50,9 +50,6 @@ var (
 		ParentHash:     "0x14b8b808939e4930703403d74e73ff7829c18680dd434e851b200982af423dea",
 		StateRoot:      "0xd3adc9ed6f9e2df6a13a88a3628c01d7920fd709693120b3df75434aea3592a7",
 		ExtrinsicsRoot: "0xc99ede2068646be80f2957c21667a7669539bd105bd855af37c2166a1ba43e4a",
-		Logs:           `["0x0642414245b501010a000000fac3d70f000000009e335d221536deb53426c3f2529a14426a322463a844d527f8050c73f09c2d37bfe0d8f57a7b6c6e6cd6ef576d00bb97b5bcf8c87ec7a55670b03c0dfe823000d2d3bb5767274a282be5dd15f7e6ea333dc44c299f187dee4900fdf1a0b46003","0x00904d4d5252fbe5a48df0e2a689c92a630bcbb451d66e2ac0ea839096e2617c4fe1b22a635e","0x05424142450101ea06828ccb667fbaebdda98219e93700c24c6887b767680949fde8082a93673cf96bb377923751c892d37c78eaa5c8e6b453efbac656fbcac4a8b99a82287e89"]`,
-		Extrinsics:     `["0x280402000b603301517301"]`,
-		Event:          `0x040000000000000080e36a0900000000020000`,
 		SpecVersion:    3,
 		Validator:      "60e2feb892e672d5579ed10ecae0d162031fe5adc3692498ad262fb126a65732",
 		Finalized:      true,
@@ -85,10 +82,6 @@ func (m *MockDao) SetHeartBeatNow(context.Context, string) error {
 	return nil
 }
 
-func (m *MockDao) DaemonHeath(context.Context) map[string]bool {
-	return nil
-}
-
 func (m *MockDao) DbBegin() *dao.GormDB {
 	return &dao.GormDB{}
 }
@@ -105,15 +98,15 @@ func (m *MockDao) UpdateEventAndExtrinsic(*dao.GormDB, *model.ChainBlock, int, i
 	return nil
 }
 
-func (m *MockDao) GetNearBlock(blockNum int) *model.ChainBlock {
+func (m *MockDao) GetNearBlock(blockNum uint) *model.ChainBlock {
 	return &model.ChainBlock{BlockNum: blockNum, SpecVersion: 4}
 }
 
 func (m *MockDao) SetBlockFinalized(*model.ChainBlock) {
 }
 
-func (m *MockDao) BlocksReverseByNum(blockNums []int) map[int]model.ChainBlock {
-	return map[int]model.ChainBlock{testBlock.BlockNum: testBlock}
+func (m *MockDao) BlocksReverseByNum(_ []int) map[uint]model.ChainBlock {
+	return map[uint]model.ChainBlock{testBlock.BlockNum: testBlock}
 }
 
 func (m *MockDao) GetBlockByHash(context.Context, string) *model.ChainBlock {

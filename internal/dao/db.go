@@ -2,23 +2,22 @@ package dao
 
 import (
 	"database/sql"
-	"database/sql/driver"
+
 	"errors"
 	"fmt"
 	"log"
-	"os"
 	"reflect"
 	"strings"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/configs"
 	"github.com/itering/subscan/model"
 	"github.com/itering/substrate-api-rpc/websocket"
+	"gorm.io/driver/mysql"
 
 	"github.com/itering/subscan/util"
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
 type DbStorage struct {
@@ -38,14 +37,14 @@ var protectedTables []string
 
 func (d *DbStorage) SpecialMetadata(spec int) string {
 	var raw model.RuntimeVersion
-	if query := d.db.Where("spec_version = ?", spec).First(&raw); query.RecordNotFound() {
+	if query := d.db.Where("spec_version = ?", spec).First(&raw); query.Error != nil {
 		return ""
 	}
 	return raw.RawData
 }
 
 func (d *DbStorage) getModelTableName(model interface{}) string {
-	return d.db.Unscoped().NewScope(model).TableName()
+	return TableNameFromInterface(model, d.db)
 }
 
 func (d *DbStorage) checkProtected(model interface{}) error {
@@ -69,7 +68,7 @@ func (d *DbStorage) getPluginPrefixTableName(instant interface{}) string {
 }
 
 func (d *DbStorage) FindBy(record interface{}, query interface{}, option *storage.Option) (int, bool) {
-	var count int
+	var count int64
 	tx := d.db
 
 	// where
@@ -100,36 +99,33 @@ func (d *DbStorage) FindBy(record interface{}, query interface{}, option *storag
 	}
 
 	tx = tx.Find(record)
-	return count, errors.Is(tx.Error, gorm.ErrRecordNotFound)
+	return int(count), tx.Error != nil
 }
 
 func (d *DbStorage) AutoMigration(model interface{}) error {
 	if d.checkProtected(model) == nil {
-		tx := d.db.Table(d.getPluginPrefixTableName(model)).Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(model)
-		return tx.Error
+		return d.db.Table(d.getPluginPrefixTableName(model)).Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(model)
 	}
 	return nil
 }
 
 func (d *DbStorage) AddIndex(model interface{}, indexName string, columns ...string) error {
 	if d.checkProtected(model) == nil {
-		tx := d.db.Table(d.getPluginPrefixTableName(model)).AddIndex(indexName, columns...)
-		return tx.Error
+		return d.db.Table(d.getPluginPrefixTableName(model)).Migrator().CreateIndex(indexName, columns[0])
 	}
 	return nil
 }
 
 func (d *DbStorage) AddUniqueIndex(model interface{}, indexName string, columns ...string) error {
 	if d.checkProtected(model) == nil {
-		tx := d.db.Table(d.getPluginPrefixTableName(model)).AddUniqueIndex(indexName, columns...)
-		return tx.Error
+		return d.db.Table(d.getPluginPrefixTableName(model)).Migrator().CreateIndex(indexName, columns[0])
 	}
 	return nil
 }
 
 func (d *DbStorage) Create(record interface{}) error {
 	if err := d.checkProtected(record); err == nil {
-		tx := d.db.Table(d.getPluginPrefixTableName(record)).Create(record)
+		tx := d.db.Table(d.getPluginPrefixTableName(record)).Scopes(IgnoreDuplicate).Create(record)
 		return tx.Error
 	} else {
 		return err
@@ -201,31 +197,13 @@ func (d *Dao) DbBegin() *GormDB {
 // private funcs
 func newDb() (db *gorm.DB) {
 	var err error
-	if os.Getenv("TASK_MOD") == "true" {
-		db, err = gorm.Open("mysql", configs.Boot.Database.DSN)
-	} else if os.Getenv("TEST_MOD") == "true" {
-		db, err = gorm.Open("mysql", configs.Boot.Database.DSN)
-	} else {
-		db, err = gorm.Open("mysql", configs.Boot.Database.DSN)
-	}
+	db, err = gorm.Open(mysql.Open(configs.Boot.Database.DSN))
 	if err != nil {
 		panic(err)
 	}
-	db.DB().SetConnMaxLifetime(5 * time.Minute)
-	db.DB().SetMaxOpenConns(100)
-	db.DB().SetMaxIdleConns(10)
-	if util.IsProduction {
-		db.SetLogger(ormLog{})
-	}
-	if os.Getenv("TEST_MOD") != "true" {
-		db.LogMode(false)
-	}
+	sqldb, _ := db.DB()
+	sqldb.SetConnMaxLifetime(5 * time.Minute)
+	sqldb.SetMaxOpenConns(util.StringToInt(util.GetEnv("MAX_DB_CONN_COUNT", "200")))
+	sqldb.SetMaxIdleConns(10)
 	return db
-}
-
-func (d *Dao) checkDBError(err error) error {
-	if err == mysql.ErrInvalidConn || err == driver.ErrBadConn {
-		return err
-	}
-	return nil
 }

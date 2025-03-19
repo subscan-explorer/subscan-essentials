@@ -29,11 +29,11 @@ func pluginRegister(ds *dao.DbStorage) {
 }
 
 // after event created, emit event data to subscribe plugins
-func (s *Service) emitEvent(block *model.ChainBlock, event *model.ChainEvent, fee decimal.Decimal) {
+func (s *Service) emitEvent(block *model.ChainBlock, event *model.ChainEvent) {
 	pBlock := block.AsPlugin()
 	pEvent := event.AsPlugin()
 	for _, plugin := range subscribeEvent[event.ModuleId] {
-		_ = plugin.ProcessEvent(pBlock, pEvent, fee)
+		_ = plugin.ProcessEvent(pBlock, pEvent, decimal.Zero)
 	}
 
 }

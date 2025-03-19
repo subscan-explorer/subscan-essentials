@@ -1,33 +1,33 @@
 # API Document
 
-1.  [metadata](#metadata)
-1.  [blocks](#blocks)
-1.  [block](#block)
-1.  [extrinsics](#extrinsics)
-1.  [extrinsic](#extrinsic)
-1.  [events](#events)
-1.  [check_hash](#check-hash)
-1.  [runtime_list](#runtime-list)
-1.  [runtime_info](#runtime-info)
-1.  [plugin_list](#plugin-list)
-1.  [plugin_ui](#plugin-ui)
+1. [metadata](#metadata)
+2. [blocks](#blocks)
+3. [block](#block)
+4. [extrinsics](#extrinsics)
+5. [extrinsic](#extrinsic)
+6. [events](#events)
+7. [check_hash](#check-hash)
+8. [runtime_list](#runtime-list)
+9. [runtime_info](#runtime-info)
+10. [plugin_list](#plugin-list)
+11. [plugin_ui](#plugin-ui)
 
 
 ## Description
 
 ### Global Header 
 
-| Name          | Type   | Require |
-| ------------- | ------ | ------- |
+| Name         | Type             | Require |
+|--------------|------------------|---------|
 | Content-Type | application/json | yes     |
 
 
 #### List row&page
 
-| Name          | Type   | Desc |
-| ------------- | ------ | ------- |
-|row| int | min=1,max=100 defines how many results should be presented per page    |
-|page| int | min=0 defines which page should be shown   |
+| Name | Type | Desc                                                                |
+|------|------|---------------------------------------------------------------------|
+| row  | int  | min=1,max=100 defines how many results should be presented per page |
+| page | int  | min=0 defines which page should be shown                            |
 
 
 -----
@@ -66,10 +66,10 @@
 
 ### payload
 
-| Name          | Type   | Require |
-| ------------- | ------ | ------- |
-| row | int | yes     |
-| page| int | yes     |
+| Name | Type | Require |
+|------|------|---------|
+| row  | int  | yes     |
+| page | int  | yes     |
 
 ### Example Response
 

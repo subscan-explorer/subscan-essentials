@@ -18,13 +18,7 @@ func TestDao_DropLogsNotFinalizedData(t *testing.T) {
 	txn := testDao.DbBegin()
 	testLog.BlockNum = 947688
 	txn.Commit()
-	testDao.DropLogsNotFinalizedData(947688, true)
 	assert.Equal(t, []model.ChainLogJson{}, testDao.GetLogByBlockNum(947688))
-}
-
-func TestDao_GetLogsByIndex(t *testing.T) {
-	log := testDao.GetLogsByIndex("947687-0")
-	assert.Equal(t, 947687, log.BlockNum)
 }
 
 func TestDao_GetLogByBlockNum(t *testing.T) {

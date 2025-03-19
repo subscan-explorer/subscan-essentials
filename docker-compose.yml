@@ -7,11 +7,12 @@ services:
     environment: &app_base
       MYSQL_HOST: mysql
       MYSQL_PASS: 'helloload'
+      MYSQL_USER: 'root'
       # Name of the database subscan will connect to and use
       # this db must exist
       MYSQL_DB: 'subscan'
       REDIS_ADDR: redis:6379
-      CHAIN_WS_ENDPOINT: 'wss://rpc.polkadot.io'
+      CHAIN_WS_ENDPOINT: 'wss://polkadot.api.onfinality.io/public-ws'
       # the types file used for the chain as:
       # configs/source/{NETWORK_NODE}.json
       NETWORK_NODE: 'polkadot'
@@ -25,19 +26,10 @@ services:
     environment:
       <<: *app_base
     image: subscan/api
-    command: ["subscan","start","substrate"]
+    command: ["start","subscribe"]
     networks:
       - app_net
 
-  subscan-static:
-    build:
-      context: ./ui
-    environment:
-      NODE_ENV: 'production'
-    ports:
-      - '80:80'
-    networks:
-      - app_net
 
 networks:
   app_net:

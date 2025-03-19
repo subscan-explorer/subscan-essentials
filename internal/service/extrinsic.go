@@ -10,55 +10,35 @@ import (
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/address"
-	"github.com/shopspring/decimal"
 )
 
-func (s *Service) createExtrinsic(c context.Context,
+func (s *Service) createExtrinsic(ctx context.Context,
 	txn *dao.GormDB,
 	block *model.ChainBlock,
+	extrinsics []model.ChainExtrinsic,
 	encodeExtrinsics []string,
-	decodeExtrinsics []map[string]interface{},
 	eventMap map[string][]model.ChainEvent,
-) (int, int, map[string]string, map[string]decimal.Decimal, error) {
+) (err error) {
 
-	var (
-		blockTimestamp int
-		e              []model.ChainExtrinsic
-		err            error
-	)
-	extrinsicFee := make(map[string]decimal.Decimal)
-
-	eb, _ := json.Marshal(decodeExtrinsics)
-	_ = json.Unmarshal(eb, &e)
-
-	hash := make(map[string]string)
-
-	for index, extrinsic := range e {
-		extrinsic.CallModule = strings.ToLower(extrinsic.CallModule)
+	for index, extrinsic := range extrinsics {
 		extrinsic.BlockNum = block.BlockNum
 		extrinsic.ExtrinsicIndex = fmt.Sprintf("%d-%d", extrinsic.BlockNum, index)
+		extrinsic.ID = extrinsic.Id()
 		extrinsic.Success = s.getExtrinsicSuccess(eventMap[extrinsic.ExtrinsicIndex])
+		extrinsic.BlockTimestamp = block.BlockTimestamp
 
-		if tp := s.getTimestamp(&extrinsic); tp > 0 {
-			blockTimestamp = tp
-		}
-		extrinsic.BlockTimestamp = blockTimestamp
-		if extrinsic.ExtrinsicHash != "" {
-
-			fee, _ := GetExtrinsicFee(nil, encodeExtrinsics[index])
+		if extrinsic.IsSigned {
+			fee, _ := GetExtrinsicFee(encodeExtrinsics[index])
 			extrinsic.Fee = fee
-
-			extrinsicFee[extrinsic.ExtrinsicIndex] = fee
-			hash[extrinsic.ExtrinsicIndex] = extrinsic.ExtrinsicHash
 		}
 
-		if err = s.dao.CreateExtrinsic(c, txn, &extrinsic); err == nil {
+		if err = s.dao.CreateExtrinsic(ctx, txn, &extrinsic); err == nil {
 			go s.emitExtrinsic(block, &extrinsic, eventMap[extrinsic.ExtrinsicIndex])
 		} else {
-			return 0, 0, nil, nil, err
+			return err
 		}
 	}
-	return len(e), blockTimestamp, hash, extrinsicFee, err
+	return err
 }
 
 func (s *Service) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsicJson {
@@ -71,7 +51,7 @@ func (s *Service) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsi
 		CallModule:         e.CallModule,
 		CallModuleFunction: e.CallModuleFunction,
 		Params:             util.ToString(e.Params),
-		AccountId:          address.SS58Address(e.AccountId),
+		AccountId:          address.Encode(e.AccountId),
 		Signature:          e.Signature,
 		Nonce:              e.Nonce,
 		Fee:                e.Fee,
@@ -80,7 +60,7 @@ func (s *Service) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsi
 	if err := json.Unmarshal([]byte(ej.Params), &paramsInstant); err != nil {
 		for pi, param := range paramsInstant {
 			if paramsInstant[pi].Type == "Address" {
-				paramsInstant[pi].Value = address.SS58Address(param.Value.(string))
+				paramsInstant[pi].Value = address.Encode(param.Value.(string))
 			}
 		}
 		bp, _ := json.Marshal(paramsInstant)
@@ -95,7 +75,7 @@ func (s *Service) getTimestamp(extrinsic *model.ChainExtrinsic) (blockTimestamp 
 	}
 
 	var paramsInstant []model.ExtrinsicParam
-	util.UnmarshalAny(&paramsInstant, extrinsic.Params)
+	_ = util.UnmarshalAny(&paramsInstant, extrinsic.Params)
 
 	for _, p := range paramsInstant {
 		if p.Name == "now" {
@@ -107,6 +87,23 @@ func (s *Service) getTimestamp(extrinsic *model.ChainExtrinsic) (blockTimestamp 
 		}
 	}
 	return
+}
+
+func FindOutBlockTime(extrinsics []model.ChainExtrinsic) int {
+	for _, extrinsic := range extrinsics {
+		if strings.EqualFold(extrinsic.CallModule, "timestamp") {
+			params := model.ParsingExtrinsicParam(extrinsic.Params)
+			for _, p := range params {
+				if strings.EqualFold(p.Name, "now") {
+					if strings.EqualFold(p.Type, "compact<U64>") {
+						return int(util.Int64FromInterface(p.Value) / 1000)
+					}
+					return util.IntFromInterface(p.Value)
+				}
+			}
+		}
+	}
+	return 0
 }
 
 func (s *Service) getExtrinsicSuccess(e []model.ChainEvent) bool {

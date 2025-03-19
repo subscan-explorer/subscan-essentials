@@ -2,11 +2,8 @@ package service
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
-
-	"log"
 
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/util"
@@ -17,14 +14,15 @@ import (
 
 // Service
 type Service struct {
-	dao dao.IDao
+	dao       dao.IDao
+	dbStorage *dao.DbStorage
 }
 
 // New  a service and return.
 func New() (s *Service) {
 	websocket.SetEndpoint(util.WSEndPoint)
 	d, dbStorage := dao.New()
-	s = &Service{dao: d}
+	s = &Service{dao: d, dbStorage: dbStorage}
 	s.initSubRuntimeLatest()
 	pluginRegister(dbStorage)
 	return s
@@ -43,15 +41,8 @@ func (s *Service) initSubRuntimeLatest() {
 	// reg network custom type
 	defer func() {
 		go s.unknownToken()
-		if c, err := readTypeRegistry(); err == nil {
-			substrate.RegCustomTypes(c)
-			if unknown := metadata.Decoder.CheckRegistry(); len(unknown) > 0 {
-				log.Printf("Found unknown type %s", strings.Join(unknown, ", "))
-			}
-		} else {
-			if os.Getenv("TEST_MOD") != "true" {
-				panic(err)
-			}
+		if data, err := readTypeRegistry(); err == nil {
+			substrate.RegCustomTypes(data)
 		}
 	}()
 
@@ -70,5 +61,5 @@ func (s *Service) initSubRuntimeLatest() {
 
 // read custom registry from local or remote
 func readTypeRegistry() ([]byte, error) {
-	return ioutil.ReadFile(fmt.Sprintf(util.ConfDir+"/source/%s.json", util.NetworkNode))
+	return os.ReadFile(fmt.Sprintf(util.ConfDir+"/source/%s.json", util.NetworkNode))
 }

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/plugins/system/dao"
 	"github.com/itering/subscan/plugins/system/model"
@@ -37,7 +38,7 @@ func (s *Service) ExtrinsicFailed(spec int, event *storage.Event, paramEvent []s
 
 			if _, ok := dr["Error"]; ok {
 				_ = dao.CreateExtrinsicError(s.dao,
-					event.ExtrinsicHash,
+					genExtrinsicIndex(event),
 					dao.CheckExtrinsicError(spec, s.dao.SpecialMetadata(spec), util.IntFromInterface(dr["Module"]), util.IntFromInterface(dr["Error"])))
 
 			} else if _, ok := dr["Module"]; ok {
@@ -45,23 +46,27 @@ func (s *Service) ExtrinsicFailed(spec int, event *storage.Event, paramEvent []s
 				util.UnmarshalAny(&module, dr["Module"])
 
 				_ = dao.CreateExtrinsicError(s.dao,
-					event.ExtrinsicHash,
+					genExtrinsicIndex(event),
 					dao.CheckExtrinsicError(spec, s.dao.SpecialMetadata(spec), module.Index, module.Error))
 
 			} else if _, ok := dr["BadOrigin"]; ok {
-				_ = dao.CreateExtrinsicError(s.dao, event.ExtrinsicHash,
+				_ = dao.CreateExtrinsicError(s.dao, genExtrinsicIndex(event),
 					&model.MetadataModuleError{Name: "BadOrigin"})
 
 			} else if _, ok := dr["CannotLookup"]; ok {
-				_ = dao.CreateExtrinsicError(s.dao, event.ExtrinsicHash,
+				_ = dao.CreateExtrinsicError(s.dao, genExtrinsicIndex(event),
 					&model.MetadataModuleError{Name: "CannotLookup"})
 
 			} else if _, ok := dr["Other"]; ok {
-				_ = dao.CreateExtrinsicError(s.dao, event.ExtrinsicHash,
+				_ = dao.CreateExtrinsicError(s.dao, genExtrinsicIndex(event),
 					&model.MetadataModuleError{Name: "Other"})
 
 			}
 			break
 		}
 	}
+}
+
+func genExtrinsicIndex(event *storage.Event) string {
+	return fmt.Sprint(event.BlockNum, "-", event.ExtrinsicIdx)
 }

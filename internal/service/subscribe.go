@@ -1,7 +1,7 @@
 package service
 
 import (
-	"math/rand"
+	"context"
 	"time"
 
 	"log"
@@ -13,20 +13,19 @@ import (
 
 const (
 	runtimeVersion = iota + 1
-	newHeader
 	finalizeHeader
 )
 
-func (s *Service) Subscribe(conn ws.WsConn, stop chan struct{}) {
+func (s *Service) Subscribe(ctx context.Context, conn ws.WsConn) {
 	var err error
 
 	defer conn.Close()
 
-	done := make(chan struct{})
-
-	subscribeSrv := s.initSubscribeService(done)
+	subscribeSrv := s.initSubscribeService()
+	onceFinHead.Do(func() {
+		go subscribeSrv.subscribeFetchBlock(ctx)
+	})
 	go func() {
-		defer close(done)
 		for {
 			if !conn.IsConnected() {
 				continue
@@ -43,9 +42,6 @@ func (s *Service) Subscribe(conn ws.WsConn, stop chan struct{}) {
 	if err = conn.WriteMessage(websocket.TextMessage, rpc.ChainGetRuntimeVersion(runtimeVersion)); err != nil {
 		log.Printf("write: %s", err)
 	}
-	if err = conn.WriteMessage(websocket.TextMessage, rpc.ChainSubscribeNewHead(newHeader)); err != nil {
-		log.Printf("write: %s", err)
-	}
 	if err = conn.WriteMessage(websocket.TextMessage, rpc.ChainSubscribeFinalizedHeads(finalizeHeader)); err != nil {
 		log.Printf("write: %s", err)
 	}
@@ -55,14 +51,7 @@ func (s *Service) Subscribe(conn ws.WsConn, stop chan struct{}) {
 
 	for {
 		select {
-		case <-done:
-			return
-		case <-ticker.C:
-			if err := conn.WriteMessage(websocket.TextMessage, rpc.SystemHealth(rand.Intn(100)+finalizeHeader)); err != nil {
-				log.Printf("SystemHealth get error: %v", err)
-			}
-		case <-stop:
-			close(done)
+		case <-ctx.Done():
 			err = conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 			if err != nil {
 				log.Printf("write close: %s", err)
@@ -72,5 +61,4 @@ func (s *Service) Subscribe(conn ws.WsConn, stop chan struct{}) {
 			return
 		}
 	}
-
 }

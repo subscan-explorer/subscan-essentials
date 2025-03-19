@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc/rpc"
@@ -66,7 +67,7 @@ func TestService_GetExtrinsicList(t *testing.T) {
 
 func TestService_GetBlocksSampleByNums(t *testing.T) {
 	util.AddressType = "42"
-	blocks := testSrv.GetBlocksSampleByNums(0, 10)
+	blocks := testSrv.GetBlocksSampleByNums(context.TODO(), 0, 10)
 	assert.Equal(t, []model.SampleBlockJson{{
 		BlockNum:       947687,
 		BlockTimestamp: 1594791900,

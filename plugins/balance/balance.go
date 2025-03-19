@@ -66,21 +66,9 @@ func (a *Balance) Version() string {
 }
 
 func (a *Balance) UiConf() *plugin.UiConfig {
-	conf := new(plugin.UiConfig)
-	conf.Init()
-	conf.Body.Api.Method = "post"
-	conf.Body.Api.Url = "api/plugin/balance/accounts"
-	conf.Body.Api.Adaptor = fmt.Sprintf(conf.Body.Api.Adaptor, "list")
-	conf.Body.Columns = []plugin.UiColumns{
-		{Name: "address", Label: "address"},
-		{Name: "nonce", Label: "nonce"},
-		{Name: "balance", Label: "balance"},
-		{Name: "lock", Label: "lock"},
-	}
-	return conf
+	return nil
 }
 
 func (a *Balance) Migrate() {
 	_ = a.d.AutoMigration(&model.Account{})
-	_ = a.d.AddUniqueIndex(&model.Account{}, "address", "address")
 }

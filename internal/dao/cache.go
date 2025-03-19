@@ -3,6 +3,7 @@ package dao
 import (
 	"context"
 	"encoding/json"
+	"github.com/itering/subscan/util"
 	"strconv"
 
 	"github.com/gomodule/redigo/redis"
@@ -60,6 +61,15 @@ func (d *Dao) getCacheInt64(c context.Context, key string) int64 {
 	return 0
 }
 
+func (d *Dao) GetCacheBytes(c context.Context, key string) []byte {
+	conn, _ := d.redis.GetContext(c)
+	defer conn.Close()
+	if cache, err := redis.Bytes(conn.Do("get", key)); err == nil {
+		return cache
+	}
+	return nil
+}
+
 func (d *Dao) delCache(c context.Context, key ...string) error {
 	if len(key) == 0 {
 		return nil
@@ -72,4 +82,19 @@ func (d *Dao) delCache(c context.Context, key ...string) error {
 	}
 	_, err := conn.Do("del", args...)
 	return err
+}
+
+// FetchCache try fetch a cache, do action if cache not exist
+// temp add opt params force
+func (d *Dao) FetchCache(c context.Context, key string, value interface{}, action func() error, ttl int, force ...bool) error {
+	if len(force) == 0 || !force[0] {
+		if b := d.GetCacheBytes(c, key); b != nil {
+			return util.UnmarshalAny(value, b)
+		}
+	}
+	if err := action(); err != nil {
+		return err
+	}
+	_ = d.setCache(c, key, value, ttl)
+	return nil
 }

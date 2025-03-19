@@ -1,63 +1,76 @@
 package http
 
 import (
-	"context"
+	"errors"
 	"fmt"
+	"github.com/itering/subscan/util/address"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"github.com/itering/subscan/plugins"
 	"github.com/itering/subscan/util"
-	"github.com/itering/subscan/util/ss58"
 )
 
-func metadata(c *gin.Context) {
-	metadata, err := svc.Metadata()
-	toJson(c, metadata, err)
+type Pagination struct {
+	Row  int `json:"row" binding:"min=1,max=100"`
+	Page int `json:"page" binding:"min=0"`
 }
 
-func blocks(c *gin.Context) {
+// metadataHandle get metadata info, include chain customer info, runtime info, etc.
+func metadataHandle(c *gin.Context) {
+	m, err := svc.Metadata(c.Request.Context())
+	toJson(c, m, err)
+}
+
+// blocksHandle  get blocks list
+func blocksHandle(c *gin.Context) {
 	p := new(struct {
-		Row  int `json:"row" validate:"min=1,max=100"`
-		Page int `json:"page" validate:"min=0"`
+		Pagination
 	})
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
 	}
-	blockNum, err := svc.GetCurrentBlockNum(context.TODO())
-	blocks := svc.GetBlocksSampleByNums(p.Page, p.Row)
+
+	ctx := c.Request.Context()
+	blockNum, err := svc.GetBestBlockNum(ctx)
+	list := svc.GetBlocksSampleByNums(ctx, p.Page, p.Row)
+
 	toJson(c, map[string]interface{}{
-		"blocks": blocks, "count": blockNum,
+		"blocks": list, "count": blockNum,
 	}, err)
 }
 
-func block(c *gin.Context) {
+// blockHandle get block info by block number or block hash
+func blockHandle(c *gin.Context) {
 	p := new(struct {
-		BlockNum  int    `json:"block_num" validate:"omitempty,min=0"`
-		BlockHash string `json:"block_hash" validate:"omitempty,len=66"`
+		BlockNum  uint   `json:"block_num" binding:"omitempty,min=0"`
+		BlockHash string `json:"block_hash" binding:"omitempty,len=66"`
 	})
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
 	}
+	ctx := c.Request.Context()
+
 	if p.BlockHash == "" {
-		toJson(c, svc.GetBlockByNum(p.BlockNum), nil)
+		toJson(c, svc.GetBlockByNum(ctx, p.BlockNum), nil)
 	} else {
-		toJson(c, svc.GetBlockByHashJson(p.BlockHash), nil)
+		toJson(c, svc.GetBlockByHashJson(ctx, p.BlockHash), nil)
 	}
 }
 
-func extrinsics(c *gin.Context) {
+// extrinsicsHandle handler get extrinsics list
+func extrinsicsHandle(c *gin.Context) {
 	p := new(struct {
-		Row     int    `json:"row" validate:"min=1,max=100"`
-		Page    int    `json:"page" validate:"min=0"`
-		Signed  string `json:"signed" validate:"omitempty"`
-		Address string `json:"address" validate:"omitempty"`
-		Module  string `json:"module" validate:"omitempty"`
-		Call    string `json:"call" validate:"omitempty"`
+		Pagination
+		Signed  string `json:"signed" binding:"omitempty"`
+		Address string `json:"address" binding:"omitempty"`
+		Module  string `json:"module" binding:"omitempty"`
+		Call    string `json:"call" binding:"omitempty"`
 	})
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
 	}
+	ctx := c.Request.Context()
+
 	var query []string
 	if p.Module != "" {
 		query = append(query, fmt.Sprintf("call_module = '%s'", p.Module))
@@ -69,118 +82,114 @@ func extrinsics(c *gin.Context) {
 	if p.Signed == "signed" {
 		query = append(query, "is_signed = 1")
 	}
+
 	if p.Address != "" {
-		account := ss58.Decode(p.Address, util.StringToInt(util.AddressType))
+		account := address.Decode(p.Address)
 		if account == "" {
 			toJson(c, nil, util.InvalidAccountAddress)
 			return
 		}
-		query = append(query, fmt.Sprintf("is_signed = 1 and account_id = '%s'", account))
+		query = append(query, fmt.Sprintf("account_id = '%s'", account))
 	}
-	list, count := svc.GetExtrinsicList(p.Page, p.Row, "desc", query...)
+
+	list, count := svc.GetExtrinsicList(ctx, p.Page, p.Row, query...)
 	toJson(c, map[string]interface{}{
 		"extrinsics": list, "count": count,
 	}, nil)
 
 }
 
-func extrinsic(c *gin.Context) {
+// extrinsicHandle handler get extrinsic info by extrinsic index or extrinsic hash
+func extrinsicHandle(c *gin.Context) {
 	p := new(struct {
-		ExtrinsicIndex string `json:"extrinsic_index" validate:"omitempty"`
-		Hash           string `json:"hash" validate:"omitempty,len=66"`
+		ExtrinsicIndex string `json:"extrinsic_index" binding:"omitempty"`
+		Hash           string `json:"hash" binding:"omitempty,len=66"`
 	})
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
 	}
 	if p.ExtrinsicIndex == "" && p.Hash == "" {
-		toJson(c, nil, util.ParamsError)
+		toJson(c, nil, errors.New("extrinsic_index or hash is required"))
 		return
 	}
+
+	ctx := c.Request.Context()
+
 	if p.ExtrinsicIndex != "" {
-		toJson(c, svc.GetExtrinsicByIndex(p.ExtrinsicIndex), nil)
+		toJson(c, svc.GetExtrinsicByIndex(ctx, p.ExtrinsicIndex), nil)
 	} else {
-		toJson(c, svc.GetExtrinsicDetailByHash(p.Hash), nil)
+		toJson(c, svc.GetExtrinsicDetailByHash(ctx, p.Hash), nil)
 	}
 }
 
-func events(c *gin.Context) {
+// eventsHandle handler get events list
+func eventsHandle(c *gin.Context) {
 	p := new(struct {
-		Row    int    `json:"row" validate:"min=1,max=100"`
-		Page   int    `json:"page" validate:"min=0"`
-		Module string `json:"module" validate:"omitempty"`
-		Call   string `json:"call" validate:"omitempty"`
+		Row    int    `json:"row" binding:"min=1,max=100"`
+		Page   int    `json:"page" binding:"min=0"`
+		Module string `json:"module" binding:"omitempty"`
+		Event  string `json:"event" binding:"omitempty"`
 	})
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
 	}
+	ctx := c.Request.Context()
+
 	var query []string
 	if p.Module != "" {
 		query = append(query, fmt.Sprintf("module_id = '%s'", p.Module))
 	}
-	if p.Call != "" {
-		query = append(query, fmt.Sprintf("event_id = '%s'", p.Call))
+	if p.Event != "" {
+		query = append(query, fmt.Sprintf("event_id = '%s'", p.Event))
 	}
-	events, count := svc.RenderEvents(p.Page, p.Row, "desc", query...)
-	toJson(c, map[string]interface{}{
-		"events": events, "count": count,
-	}, nil)
+
+	events, count := svc.EventsList(ctx, p.Page, p.Row, query...)
+	toJson(c, map[string]interface{}{"events": events, "count": count}, nil)
 }
 
-func checkSearchHash(c *gin.Context) {
+// checkSearchHashHandle handler check hash type, block or extrinsic or evm tx hash
+func checkSearchHashHandle(c *gin.Context) {
 	p := new(struct {
-		Hash string `json:"hash" validate:"len=66"`
+		Hash string `json:"hash" binding:"len=66"`
 	})
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
 	}
-	if block := svc.GetBlockByHash(p.Hash); block != nil {
+
+	ctx := c.Request.Context()
+
+	if data := svc.GetBlockByHash(ctx, p.Hash); data != nil {
 		toJson(c, map[string]string{"hash_type": "block"}, nil)
 		return
 	}
-	if extrinsic := svc.GetExtrinsicByHash(p.Hash); extrinsic != nil {
+	if data := svc.GetExtrinsicByHash(ctx, p.Hash); data != nil {
 		toJson(c, map[string]string{"hash_type": "extrinsic"}, nil)
 		return
 	}
+	// todo evm tx hash
 	toJson(c, nil, util.RecordNotFound)
 }
 
-func runtimeList(c *gin.Context) {
+// runtimeListHandler  get runtime list
+func runtimeListHandler(c *gin.Context) {
 	toJson(c, map[string]interface{}{
 		"list": svc.SubstrateRuntimeList(),
 	}, nil)
 }
 
-func runtimeMetadata(c *gin.Context) {
+// runtimeMetadataHandle get runtime metadata info by spec version
+func runtimeMetadataHandle(c *gin.Context) {
 	p := new(struct {
 		Spec int `json:"spec"`
 	})
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		return
 	}
-	if info := svc.SubstrateRuntimeInfo(p.Spec); info == nil {
-		toJson(c, map[string]interface{}{"info": nil}, nil)
-	} else {
-		toJson(c, map[string]interface{}{
-			"info": info.Metadata.Modules,
-		}, nil)
-	}
 
-}
-
-func pluginList(c *gin.Context) {
-	toJson(c, plugins.List(), nil)
-}
-
-func pluginUIConfig(c *gin.Context) {
-	p := new(struct {
-		Name string `json:"name" validate:"required"`
-	})
-	if err := c.MustBindWith(p, binding.JSON); err != nil {
+	if info := svc.SubstrateRuntimeInfo(p.Spec); info != nil {
+		toJson(c, map[string]interface{}{"info": info.Metadata.Modules}, nil)
 		return
 	}
-	if plugin, ok := plugins.RegisteredPlugins[p.Name]; ok {
-		toJson(c, plugin.UiConf(), nil)
-		return
-	}
-	toJson(c, nil, nil)
+
+	toJson(c, map[string]interface{}{"info": nil}, nil)
 }

@@ -10,10 +10,10 @@ server:
 database:
   api: "?writeTimeout=3s&parseTime=true&loc=Local&charset=utf8mb4,utf8"
   task: "?parseTime=true&loc=Local&charset=utf8mb4,utf8"
-  test: "mysql://root:@127.0.0.1:3306/subscan_test?parseTime=true&loc=Local&charset=utf8mb4,utf8"
+  test: "mysql://root:@mysql:3306/subscan?parseTime=true&loc=Local&charset=utf8mb4,utf8"
 redis:
   proto: tcp
-  addr: 127.0.0.1:6379
+  addr: redis:6379
   password:
   read_timeout: 1s
   write_timeout: 1s

@@ -1,4 +1,31 @@
 {
+  "ElectionResult#0-29": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "electedStashes",
+        "Vec<AccountId>"
+      ],
+      [
+        "exposures",
+        "Vec<(AccountId, Exposure)>"
+      ]
+    ]
+  },
+  "RoundSnapshot": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "voters",
+        "Vec<(AccountId, VoteWeight, Vec<AccountId>)>"
+      ],
+      [
+        "targets",
+        "Vec<AccountId>"
+      ]
+    ]
+  },
+  "VoteWeight": "u64",
   "Address": "AccountId",
   "BlockNumber": "U32",
   "LeasePeriod": "BlockNumber",
@@ -110,11 +137,11 @@
       ]
     ]
   },
-  "CompactAssignments#23-9000": "CompactAssignmentsLatest",
+  "CompactAssignments#23-?": "CompactAssignmentsLatest",
   "RefCount": "u32",
+  "RefCount#0-24": "U8",
   "Box<<T as Config>::Call>": "Call",
   "Box<<T as Config<I>>::Proposal>": "Proposal",
-  "AccountInfo": "AccountInfoWithProviders",
   "Address#28-?": "MultiAddress",
   "LookupSource#28-?": "MultiAddress",
   "Keys#28-29": {
@@ -148,6 +175,7 @@
   },
   "ValidatorPrefs#28-?": "ValidatorPrefsWithBlocked",
   "Keys#30-?": "SessionKeys6",
+  "AssetInstance": "AssetInstanceV0",
   "AccountInfo#30-?": "AccountInfoWithTripleRefCount",
-  "CompactAssignments#9010-?": "CompactAssignmentsWith24"
+  "AccountInfo#28-29": "AccountInfoWithProviders"
 }
