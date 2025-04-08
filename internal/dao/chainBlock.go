@@ -11,7 +11,7 @@ import (
 
 // CreateBlock mysql db transaction
 func (d *Dao) CreateBlock(txn *GormDB, cb *model.ChainBlock) (err error) {
-	query := txn.Scopes().Scopes(IgnoreDuplicate).Create(cb)
+	query := txn.Scopes().Scopes(model.IgnoreDuplicate).Create(cb)
 
 	// Check if you need to create a new table(block, extrinsic, event, log) after created block
 	if maxTableBlockNum < cb.BlockNum+model.SplitTableBlockNum {
@@ -29,7 +29,7 @@ func (d *Dao) CreateBlock(txn *GormDB, cb *model.ChainBlock) (err error) {
 }
 
 func (d *Dao) SaveFillAlreadyBlockNum(c context.Context, blockNum int) (err error) {
-	conn, _ := d.redis.GetContext(c)
+	conn, _ := d.redis.Redis().GetContext(c)
 	defer conn.Close()
 	if num, _ := redis.Int(conn.Do("GET", RedisFillAlreadyBlockNum)); blockNum > num {
 		_, err = conn.Do("SET", RedisFillAlreadyBlockNum, blockNum)
@@ -38,7 +38,7 @@ func (d *Dao) SaveFillAlreadyBlockNum(c context.Context, blockNum int) (err erro
 }
 
 func (d *Dao) SaveFillAlreadyFinalizedBlockNum(c context.Context, blockNum int) (err error) {
-	conn, _ := d.redis.GetContext(c)
+	conn, _ := d.redis.Redis().GetContext(c)
 	defer func() {
 		conn.Close()
 	}()
@@ -50,14 +50,14 @@ func (d *Dao) SaveFillAlreadyFinalizedBlockNum(c context.Context, blockNum int) 
 }
 
 func (d *Dao) GetFillBestBlockNum(c context.Context) (num int, err error) {
-	conn, _ := d.redis.GetContext(c)
+	conn, _ := d.redis.Redis().GetContext(c)
 	defer conn.Close()
 	num, err = redis.Int(conn.Do("GET", RedisFillAlreadyBlockNum))
 	return
 }
 
 func (d *Dao) GetFillFinalizedBlockNum(c context.Context) (num int, err error) {
-	conn, _ := d.redis.GetContext(c)
+	conn, _ := d.redis.Redis().GetContext(c)
 	defer conn.Close()
 	num, err = redis.Int(conn.Do("GET", RedisFillFinalizedBlockNum))
 	return
@@ -103,8 +103,8 @@ func (d *Dao) GetBlockList(ctx context.Context, page, row int) []model.ChainBloc
 func (d *Dao) GetBlockByHash(c context.Context, hash string) *model.ChainBlock {
 	var block model.ChainBlock
 	blockNum, _ := d.GetBestBlockNum(c)
-	for index := uint(blockNum / uint64(model.SplitTableBlockNum)); index >= 0; index-- {
-		query := d.db.Model(&model.ChainBlock{BlockNum: index * model.SplitTableBlockNum}).Where("hash = ?", hash).Scan(&block)
+	for index := int(blockNum / uint64(model.SplitTableBlockNum)); index >= 0; index-- {
+		query := d.db.Model(&model.ChainBlock{BlockNum: uint(index) * (model.SplitTableBlockNum)}).Where("hash = ?", hash).Scan(&block)
 		if query != nil && query.Error == nil {
 			return &block
 		}
@@ -114,8 +114,8 @@ func (d *Dao) GetBlockByHash(c context.Context, hash string) *model.ChainBlock {
 
 func (d *Dao) GetBlockByNum(ctx context.Context, blockNum uint) *model.ChainBlock {
 	var block model.ChainBlock
-	query := d.db.Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num = ?", blockNum).Find(&block)
-	if query == nil || query.Error != nil || query.Error == nil {
+	query := d.db.WithContext(ctx).Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num = ?", blockNum).Find(&block)
+	if query == nil || query.Error != nil {
 		return nil
 	}
 	return &block
@@ -172,9 +172,9 @@ func (d *Dao) BlocksReverseByNum(blockNums []uint) map[uint]model.ChainBlock {
 	}
 	util.SortUintSlice(blockNums)
 	lastNum := blockNums[len(blockNums)-1]
-	for index := lastNum / model.SplitTableBlockNum; index >= 0; index-- {
+	for index := int(lastNum / model.SplitTableBlockNum); index >= 0; index-- {
 		var tableData []model.ChainBlock
-		query := d.db.Model(model.ChainBlock{BlockNum: index * model.SplitTableBlockNum}).Where("block_num in (?)", blockNums).Scan(&tableData)
+		query := d.db.Model(model.ChainBlock{BlockNum: uint(index) * model.SplitTableBlockNum}).Where("block_num in (?)", blockNums).Scan(&tableData)
 		if query == nil || query.Error != nil {
 			continue
 		}

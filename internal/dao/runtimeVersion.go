@@ -6,7 +6,7 @@ import (
 )
 
 func (d *Dao) CreateRuntimeVersion(name string, specVersion int) int64 {
-	query := d.db.Scopes(IgnoreDuplicate).Create(&model.RuntimeVersion{
+	query := d.db.Scopes(model.IgnoreDuplicate).Create(&model.RuntimeVersion{
 		Name:        name,
 		SpecVersion: specVersion,
 	})
@@ -37,13 +37,13 @@ func (d *Dao) RuntimeVersionRecent() *model.RuntimeVersion {
 }
 
 func (d *Dao) RuntimeVersionRaw(spec int) *metadata.RuntimeRaw {
-	var one metadata.RuntimeRaw
-	query := d.db.Model(model.RuntimeVersion{}).
-		Select("spec_version as spec ,raw_data as raw").
-		Where("spec_version = ?", spec).
-		Scan(&one)
+	var one model.RuntimeVersion
+	query := d.db.Model(model.RuntimeVersion{}).Where("spec_version = ?", spec).First(&one)
 	if query.Error != nil {
 		return nil
 	}
-	return &one
+	return &metadata.RuntimeRaw{
+		Spec: one.SpecVersion,
+		Raw:  one.RawData,
+	}
 }

@@ -8,14 +8,14 @@ import (
 
 // Camel String
 func CamelString(s string) string {
-	return xstrings.ToCamelCase(s)
+	return xstrings.ToPascalCase(s)
 }
 
 func UpperCamel(s string) string {
 	if len(s) == 0 {
 		return ""
 	}
-	s = strings.ToUpper(string(s[0])) + string(s[1:])
+	s = strings.ToUpper(string(s[0])) + s[1:]
 	return s
 }
 
@@ -39,4 +39,11 @@ func StringsIntersection(a []string, b []string) []string {
 		}
 	}
 	return refresh
+}
+
+func IfEmptyElse(a, b string) string {
+	if strings.TrimSpace(a) == "" {
+		return b
+	}
+	return a
 }

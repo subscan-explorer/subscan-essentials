@@ -23,7 +23,7 @@ package util
 
 import (
 	"encoding/json"
-	"subscan/util/log"
+	"log"
 )
 
 type JSONRPCObject struct {
@@ -37,7 +37,7 @@ func (jrpc *JSONRPCObject) AsJsonString() string {
 	resultBytes, err := json.Marshal(jrpc)
 
 	if err != nil {
-		log.Error(err)
+		log.Printf(err.Error())
 		return ""
 	}
 	return string(resultBytes)

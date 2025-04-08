@@ -90,6 +90,7 @@ func (s *Service) CreateChainBlock(ctx context.Context, conn websocket.WsConn, h
 
 	if err = s.dao.CreateBlock(txn, &cb); err == nil {
 		s.dao.DbCommit(txn)
+		s.emitBlock(ctx, &cb)
 	}
 	return err
 }

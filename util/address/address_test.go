@@ -26,3 +26,30 @@ func Test_SS58Address(t *testing.T) {
 		assert.Equal(t, SS58Address(test.pk), test.address)
 	}
 }
+
+func TestVerifyEthereumAddress(t *testing.T) {
+	assert.True(t, VerifyEthereumAddress("0x3a370c6e4af506123c30e091a1cbfbc3728e1ec5"))
+	assert.True(t, VerifyEthereumAddress("3a370c6e4af506123c30e091a1cbfbc3728e1ec5"))
+	assert.False(t, VerifyEthereumAddress("0x3a370c6e4af506123c30e091a1cbfbc3728e1ec"))
+}
+
+func TestEncode(t *testing.T) {
+	assert.Equal(t, Encode("0x3a370c6e4af506123c30e091a1cbfbc3728e1ec5"), "0x3a370c6e4af506123c30e091a1cbfbc3728e1ec5")
+	assert.Equal(t, Encode("3a370c6e4af506123c30e091a1cbfbc3728e1ec5"), "0x3a370c6e4af506123c30e091a1cbfbc3728e1ec5")
+}
+
+func TestVerifySubstrateAddress(t *testing.T) {
+	assert.True(t, VerifySubstrateAddress("3a370c6e4af506123c30e091a1cbfbc3728e1ec5fc47d87457fbb0b504903260"))
+	assert.False(t, VerifySubstrateAddress("3a370c6e4af506123c30e091a1cbfbc3728e1ec5"))
+}
+
+func TestDecode(t *testing.T) {
+	assert.Equal(t, Decode("12KL8YptX9SuUCZGrsNrSRzp3zHNqbwLqmfN8vubtj1z1Bqv"), "3a370c6e4af506123c30e091a1cbfbc3728e1ec5fc47d87457fbb0b504903260")
+	assert.Equal(t, Decode("0x3a370c6e4af506123c30e091a1cbfbc3728e1ec5"), "0x3a370c6e4af506123c30e091a1cbfbc3728e1ec5")
+}
+
+func TestFormat(t *testing.T) {
+	assert.Equal(t, Format("3a370c6e4af506123c30e091a1cbfbc3728e1ec5fc47d87457fbb0b504903260"), "3a370c6e4af506123c30e091a1cbfbc3728e1ec5fc47d87457fbb0b504903260")
+	assert.Equal(t, Format("0x3a370c6e4af506123c30e091a1cbfbc3728e1ec5"), "0x3a370c6e4af506123c30e091a1cbfbc3728e1ec5")
+	assert.Equal(t, Format("3a370c6e4af506123c30e091a1cbfbc3728e1ec5"), "0x3a370c6e4af506123c30e091a1cbfbc3728e1ec5")
+}

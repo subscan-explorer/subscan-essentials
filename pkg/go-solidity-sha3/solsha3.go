@@ -5,9 +5,9 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"github.com/itering/scale.go/pkg/go-ethereum/crypto/sha3"
 	"math/big"
 	"reflect"
-	"subscan/pkg/go-ethereum/crypto/sha3"
 )
 
 // Lengths of hashes and addresses in bytes.

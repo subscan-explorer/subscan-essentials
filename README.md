@@ -4,7 +4,7 @@
 
 ![License: GPL](https://img.shields.io/badge/license-GPL-blue.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/itering/subscan)](https://goreportcard.com/report/github.com/itering/subscan)
-![subscan](https://github.com/itering/subscan/workflows/subscan/badge.svg)
+![subscan](https://github.com/subscan-explorer/subscan-essentials/workflows/subscan/badge.svg)
 
 Subscan Essentials is a high-precision blockchain explorer scaffold project. 
 It supports substrate-based blockchain networks with developer-friendly interface, standard or custom module parsing capabilities. 
@@ -30,7 +30,7 @@ Developers are free to use the codebase to extend functionalities and develop un
 ## Feature
 
 1. Support Substrate network [custom](/custom_type.md) type registration 
-2. Support index Block, Extrinsic, Event, log
+2. Support index Block, Extrinsic, Event, log, EVM data(block, transaction...)
 3. More data can be indexed by custom [plugins](/plugins)
 4. [Gen](https://github.com/itering/subscan-plugin/tree/master/tools) tool can automatically generate plugin templates
 5. Built-in default HTTP API [DOC](/docs/index.md)
@@ -42,66 +42,16 @@ Developers are free to use the codebase to extend functionalities and develop un
 
 * Linux / Mac OSX
 * Git
-* Golang 1.12.4+
+* Golang 1.23.0+
 * Redis 3.0.4+
-* MySQL 5.6+
-* Node 8.9.0+
+* MySQL 8.0+
 
 ### Install
 
 ```bash
 ./build.sh build
 
-//UI
-cd ui && yarn && yarn dev
 ```
-
-### UI
-
-The ui part is built with [nuxt.js](https://nuxtjs.org/) and [amis](https://github.com/baidu/amis)
-
-Demo: [blocks](/ui/plugins/blocks.js), refer to [amis docs](https://baidu.gitee.io/amis/docs/index) for further detail.
-
-[Online Demo](https://crab.demo.subscan.io/)
-
-Please change proxy target in nuxt.config.js to your server name in development.
-
-```js
-proxy: {
-   "/api": {
-      target: "https://your_server_name.com",
-      secure: false,
-      changeOrigin: true,
-      pathRewrite: {
-         "^/api": "/api"
-      }
-   },
-}
-```
-
-Please change browserBaseURL in nuxt.config.js to your server name in production.
-
-```js
-axios: {
-   proxy: process.env.NODE_ENV !== 'production',
-    browserBaseURL: process.env.NODE_ENV !== 'production' ? "" : "https://your_server_name.com"
-},
-```
-
-#### Example
-
-![ui_demo](./ui_demo.png)
-
-First choose a search type, and enter search content.
-Then click search button, result will be shown in the output section.
-
-#### Feature Supported
-
-- search block detail by block number or block hash
-- search extrinsic detail by extrinsic index or extrinsic hash
-- search runtime info by spec version
-- plugin (blocks, events)
-
 
 ### Config
 
@@ -135,10 +85,16 @@ cp configs/config.yaml.example configs/config.yaml
 
 **Make sure you have started redis and mysql**
 
-- Substrate Daemon
+- Subscribe
 ```bash
 cd cmd
-./subscan start substrate
+./subscan start subscribe
+```
+
+- Worker
+```bash
+cd cmd
+./subscan start worker
 ```
 
 - Api Server
@@ -151,27 +107,27 @@ cd cmd
 
 ```
 NAME:
-   SubScan - SubScan Backend Service, use -h get help
+   SUBSCAN - SUBSCAN Backend Service, use -h get help
 
 USAGE:
-   main [global options] command [command options] [arguments...]
+   cmd [global options] command [command options] [arguments...]
 
 VERSION:
-   1.0
+   2.0
 
 DESCRIPTION:
    SubScan Backend Service, substrate blockchain explorer
 
 COMMANDS:
-     start    Start one worker, E.g substrate
-     install  Create database and create default conf file
-     help, h  Shows a list of commands or help for one command
+   start              Start one worker, E.g. subscribe
+   install            Install default database and create default conf file
+   CheckCompleteness  Create blocks completeness
+   help, h            Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
    --conf value   (default: "../configs")
    --help, -h     show help
    --version, -v  print the version
-
 
 ```
 
@@ -201,13 +157,10 @@ docker-compose up -d
 ### Test
 
 
-**default test mysql database is subscan_test. Please CREATE it or change configs/mysql.toml**
+**default test mysql database is subscan_test. Please CREATE it or change configs/config.yaml**
 
 ```bash
 go test ./...
-
-//UI
-cd ui && yarn && yarn test
 ```
 
 
@@ -222,5 +175,5 @@ GPL-3.0
 
 ## Resource
  
-- [ITERING] https://github.com/itering
-- [Darwinia] https://github.com/darwinia-network/darwinia
+- [SUBSCAN] https://github.com/subscan-explorer
+- [Darwinia] https://github.com/darwinia-network

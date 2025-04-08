@@ -23,9 +23,9 @@ package utils
 
 import (
 	"encoding/hex"
+	"github.com/itering/subscan/pkg/go-web3/complex/types"
+	"github.com/itering/subscan/pkg/go-web3/providers"
 	"strings"
-	"subscan/pkg/go-web3/complex/types"
-	"subscan/pkg/go-web3/providers"
 )
 
 // Utils - The Utils Module

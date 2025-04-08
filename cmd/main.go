@@ -1,8 +1,9 @@
 package main
 
 import (
-	"context"
 	"fmt"
+	"github.com/itering/subscan/util/mq"
+	redisUtil "github.com/itering/subscan/util/redis"
 	"os"
 	"runtime"
 
@@ -33,7 +34,9 @@ func setupApp() *cli.App {
 	app.Flags = []cli.Flag{cli.StringFlag{Name: "conf", Value: "../configs"}}
 	app.Before = func(context *cli.Context) error {
 		configs.Init()
+		redisUtil.Init()
 		runtime.GOMAXPROCS(runtime.NumCPU())
+		mq.New()
 		return nil
 	}
 	app.Commands = commands
@@ -43,7 +46,6 @@ func setupApp() *cli.App {
 
 func run() {
 	svc := service.New()
-	svc.FillBlockData(context.TODO(), 25198996)
 	httpSrv := http.NewHTTPServer(configs.Boot.Server, svc)
 	defer func() {
 		// Micro services

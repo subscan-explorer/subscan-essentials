@@ -22,12 +22,13 @@
 package providers
 
 import (
+	"context"
 	"math/rand"
 
-	"subscan/pkg/go-web3/constants"
+	"github.com/itering/subscan/pkg/go-web3/constants"
 
+	"github.com/itering/subscan/pkg/go-web3/providers/util"
 	"golang.org/x/net/websocket"
-	"subscan/pkg/go-web3/providers/util"
 )
 
 type WebSocketProvider struct {
@@ -41,7 +42,7 @@ func NewWebSocketProvider(address string) *WebSocketProvider {
 	return provider
 }
 
-func (provider WebSocketProvider) SendRequest(v interface{}, method string, params interface{}) error {
+func (provider WebSocketProvider) SendRequest(ctx context.Context, v interface{}, method string, params interface{}) error {
 
 	bodyString := util.JSONRPCObject{Version: "2.0", Method: method, Params: params, ID: rand.Intn(100)}
 

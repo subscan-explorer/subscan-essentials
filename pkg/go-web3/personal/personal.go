@@ -23,8 +23,8 @@ package personal
 
 import (
 	"context"
-	"subscan/pkg/go-web3/dto"
-	"subscan/pkg/go-web3/providers"
+	"github.com/itering/subscan/pkg/go-web3/dto"
+	"github.com/itering/subscan/pkg/go-web3/providers"
 )
 
 // Personal - The Personal Module

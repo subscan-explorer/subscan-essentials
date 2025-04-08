@@ -1,8 +1,9 @@
 package balance
 
 import (
+	"context"
 	"fmt"
-	plugin "github.com/itering/subscan-plugin"
+	"github.com/itering/subscan-plugin"
 	"github.com/itering/subscan-plugin/router"
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/plugins/balance/dao"
@@ -19,6 +20,18 @@ var srv *service.Service
 type Balance struct {
 	d storage.Dao
 }
+
+func (a *Balance) ConsumptionQueue() []string {
+	return nil
+}
+
+func (a *Balance) Enable() bool {
+	return true
+}
+
+func (a *Balance) ProcessBlock(context.Context, *storage.Block) error { return nil }
+
+func (a *Balance) SetRedisPool(_ subscan_plugin.RedisPool) {}
 
 func New() *Balance {
 	return &Balance{}
@@ -38,7 +51,7 @@ func (a *Balance) ProcessExtrinsic(*storage.Block, *storage.Extrinsic, []storage
 	return nil
 }
 
-func (a *Balance) ProcessEvent(block *storage.Block, event *storage.Event, fee decimal.Decimal) error {
+func (a *Balance) ProcessEvent(_ *storage.Block, event *storage.Event, _ decimal.Decimal) error {
 	if event == nil {
 		return nil
 	}
@@ -65,10 +78,8 @@ func (a *Balance) Version() string {
 	return "0.1"
 }
 
-func (a *Balance) UiConf() *plugin.UiConfig {
-	return nil
-}
-
 func (a *Balance) Migrate() {
 	_ = a.d.AutoMigration(&model.Account{})
 }
+
+func (a *Balance) ExecWorker(context.Context, string, string, interface{}) error { return nil }

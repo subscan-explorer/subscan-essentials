@@ -10,7 +10,7 @@ import (
 )
 
 func (d *Dao) pingRedis(ctx context.Context) (err error) {
-	conn, _ := d.redis.GetContext(ctx)
+	conn, _ := d.redis.Redis().GetContext(ctx)
 	defer conn.Close()
 	if _, err = conn.Do("SET", "ping", "pong"); err != nil {
 		log.Printf("conn.Set(PING) error(%v)", err)
@@ -19,7 +19,7 @@ func (d *Dao) pingRedis(ctx context.Context) (err error) {
 }
 
 func (d *Dao) SetHeartBeatNow(c context.Context, action string) error {
-	return d.setCache(c, action, time.Now().Unix(), 300)
+	return d.redis.SetCache(c, action, time.Now().Unix(), 300)
 }
 
 // private funcs

@@ -21,11 +21,10 @@ var (
 		ExtrinsicIndex:     "947689-1",
 		BlockNum:           947689,
 		BlockTimestamp:     1594791900,
-		VersionInfo:        "04",
 		CallModuleFunction: "transfer",
 		CallModule:         "balances",
 		AccountId:          "242f0781faa44f34ddcbc9e731d0ddb51c97f5b58bb2202090a3a1c679fc4c63",
-		Params: util.ToString([]model.ExtrinsicParam{
+		Params: []model.ExtrinsicParam{
 			{
 				Name:  "dest",
 				Type:  "Address",
@@ -36,7 +35,7 @@ var (
 				Type:  "Compact<Balance>",
 				Value: "1000000000000000000",
 			},
-		}),
+		},
 		Success:       true,
 		ExtrinsicHash: "0x368f61800f8645f67d59baf0602b236ff47952097dcaef3aa026b50ddc8dcea0",
 		Signature:     "d46ec05eb03ef6904b36fd06fe7923d2a5bccf68ddb53573e821652dafd9644ae82e29c6dbe1519a5b7052c4647814f2987ad23b7c930ed7175726755e27898f",
@@ -60,7 +59,7 @@ var (
 		BlockNum:     947687,
 		ModuleId:     "imonline",
 		EventId:      "AllGood",
-		Params:       util.ToString([]interface{}{}),
+		Params:       model.EventParams{},
 		ExtrinsicIdx: 0,
 		EventIndex:   "947687-0",
 	}
@@ -70,7 +69,7 @@ type MockDao struct {
 	mock.Mock
 }
 
-func (m *MockDao) GetBlockNumArr(start, end int) []int {
+func (m *MockDao) GetBlockNumArr(start, end uint) []int {
 	return nil
 }
 
@@ -105,7 +104,7 @@ func (m *MockDao) GetNearBlock(blockNum uint) *model.ChainBlock {
 func (m *MockDao) SetBlockFinalized(*model.ChainBlock) {
 }
 
-func (m *MockDao) BlocksReverseByNum(_ []int) map[uint]model.ChainBlock {
+func (m *MockDao) BlocksReverseByNum(_ []uint) map[uint]model.ChainBlock {
 	return map[uint]model.ChainBlock{testBlock.BlockNum: testBlock}
 }
 
@@ -113,7 +112,7 @@ func (m *MockDao) GetBlockByHash(context.Context, string) *model.ChainBlock {
 	return nil
 }
 
-func (m *MockDao) GetBlockByNum(blockNum int) *model.ChainBlock {
+func (m *MockDao) GetBlockByNum(ctx context.Context, blockNum uint) *model.ChainBlock {
 	args := m.Called(blockNum)
 	if args.Get(0) == nil {
 		return nil
@@ -139,7 +138,7 @@ func (m *MockDao) GetFillFinalizedBlockNum(c context.Context) (num int, err erro
 	return args.Int(0), args.Error(1)
 }
 
-func (m *MockDao) GetBlockList(page, row int) []model.ChainBlock {
+func (m *MockDao) GetBlockList(ctx context.Context, page, row int) []model.ChainBlock {
 	return []model.ChainBlock{testBlock}
 }
 
@@ -155,12 +154,12 @@ func (m *MockDao) DropEventNotFinalizedData(blockNum int, finalized bool) bool {
 	return false
 }
 
-func (m *MockDao) GetEventByBlockNum(blockNum int, where ...string) []model.ChainEventJson {
+func (m *MockDao) GetEventByBlockNum(blockNum uint, where ...string) []model.ChainEventJson {
 
 	return nil
 }
 
-func (m *MockDao) GetEventList(page, row int, order string, where ...string) ([]model.ChainEvent, int) {
+func (m *MockDao) GetEventList(ctx context.Context, page, row int, order string, where ...string) ([]model.ChainEvent, int) {
 	return []model.ChainEvent{testEvent}, 1
 }
 
@@ -180,7 +179,7 @@ func (m *MockDao) DropExtrinsicNotFinalizedData(c context.Context, blockNum int,
 	return true
 }
 
-func (m *MockDao) GetExtrinsicsByBlockNum(blockNum int) []model.ChainExtrinsicJson {
+func (m *MockDao) GetExtrinsicsByBlockNum(blockNum uint) []model.ChainExtrinsicJson {
 	return nil
 }
 
@@ -213,7 +212,7 @@ func (m *MockDao) GetLogsByIndex(index string) *model.ChainLogJson {
 	return nil
 }
 
-func (m *MockDao) GetLogByBlockNum(blockNum int) []model.ChainLogJson {
+func (m *MockDao) GetLogByBlockNum(blockNum uint) []model.ChainLogJson {
 	return nil
 }
 
@@ -226,7 +225,7 @@ func (m *MockDao) IncrMetadata(c context.Context, filed string, incrNum int) (er
 }
 
 func (m *MockDao) GetMetadata(c context.Context) (ms map[string]string, err error) {
-	return nil, nil
+	return make(map[string]string), nil
 }
 
 func (m *MockDao) GetBestBlockNum(c context.Context) (uint64, error) {

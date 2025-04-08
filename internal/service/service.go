@@ -21,10 +21,10 @@ type Service struct {
 // New  a service and return.
 func New() (s *Service) {
 	websocket.SetEndpoint(util.WSEndPoint)
-	d, dbStorage := dao.New()
+	d, dbStorage, pool := dao.New()
 	s = &Service{dao: d, dbStorage: dbStorage}
 	s.initSubRuntimeLatest()
-	pluginRegister(dbStorage)
+	pluginRegister(dbStorage, pool)
 	return s
 }
 

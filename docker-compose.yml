@@ -16,7 +16,6 @@ services:
       # the types file used for the chain as:
       # configs/source/{NETWORK_NODE}.json
       NETWORK_NODE: 'polkadot'
-      WEB_HOST: 'http://subscan-api:4399'
       DEPLOY_ENV: 'prod'
     ports:
       - '4399:4399'
@@ -30,6 +29,13 @@ services:
     networks:
       - app_net
 
+  subscan-worker:
+    environment:
+      <<: *app_base
+    image: subscan/api
+    command: [ "start","worker" ]
+    networks:
+      - app_net
 
 networks:
   app_net:

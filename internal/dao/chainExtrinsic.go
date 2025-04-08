@@ -26,7 +26,7 @@ func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.C
 		IsSigned:           extrinsic.Signature != "",
 		Fee:                extrinsic.Fee,
 	}
-	query := txn.Scopes(IgnoreDuplicate).Create(&ce)
+	query := txn.Scopes(model.IgnoreDuplicate).Create(&ce)
 	if query.RowsAffected > 0 {
 		_ = d.IncrMetadata(c, "count_extrinsic", 1)
 		if ce.IsSigned {
@@ -55,10 +55,13 @@ func (d *Dao) GetExtrinsicList(c context.Context, page, row int, _ string, query
 	var count int64
 
 	blockNum, _ := d.GetFillBestBlockNum(context.TODO())
-	for index := uint(blockNum) / model.SplitTableBlockNum; index >= 0; index-- {
-		var tableData []model.ChainExtrinsic
-		var tableCount int64
-		queryOrigin := d.db.Model(model.ChainExtrinsic{BlockNum: index * model.SplitTableBlockNum})
+	for index := blockNum / int(model.SplitTableBlockNum); index >= 0; index-- {
+		var (
+			tableData  []model.ChainExtrinsic
+			tableCount int64
+		)
+
+		queryOrigin := d.db.Model(model.ChainExtrinsic{BlockNum: uint(index) * model.SplitTableBlockNum})
 		for _, w := range queryWhere {
 			queryOrigin = queryOrigin.Where(w)
 		}
@@ -78,9 +81,7 @@ func (d *Dao) GetExtrinsicList(c context.Context, page, row int, _ string, query
 			continue
 		}
 		extrinsics = append(extrinsics, tableData...)
-
 	}
-
 	if len(queryWhere) == 0 {
 		m, _ := d.GetMetadata(c)
 		count = int64(util.StringToInt(m["count_extrinsic"]))
@@ -91,8 +92,8 @@ func (d *Dao) GetExtrinsicList(c context.Context, page, row int, _ string, query
 func (d *Dao) GetExtrinsicsByHash(c context.Context, hash string) *model.ChainExtrinsic {
 	var extrinsic model.ChainExtrinsic
 	blockNum, _ := d.GetFillBestBlockNum(c)
-	for index := uint(blockNum) / (model.SplitTableBlockNum); index >= 0; index-- {
-		query := d.db.Model(model.ChainExtrinsic{BlockNum: index * model.SplitTableBlockNum}).Where("extrinsic_hash = ?", hash).Order("id asc").Limit(1).Scan(&extrinsic)
+	for index := blockNum / int(model.SplitTableBlockNum); index >= 0; index-- {
+		query := d.db.Model(model.ChainExtrinsic{BlockNum: uint(index) * model.SplitTableBlockNum}).Where("extrinsic_hash = ?", hash).Order("id asc").Limit(1).Scan(&extrinsic)
 		if query != nil && query.Error == nil {
 			return &extrinsic
 		}

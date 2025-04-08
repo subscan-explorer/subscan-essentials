@@ -22,8 +22,8 @@
 package block
 
 import (
+	"github.com/itering/subscan/pkg/go-web3/utils"
 	"math/big"
-	"subscan/pkg/go-web3/utils"
 )
 
 // NUMBER - An integer block number

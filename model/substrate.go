@@ -12,15 +12,15 @@ import (
 )
 
 const (
-	SplitTableBlockNum    uint = 1_000_000 // 1 million
 	IdGenerateCoefficient      = 100_000   // 100 thousand
+	SplitTableBlockNum    uint = 1_000_000 // 1 million
 )
 
 type ChainBlock struct {
 	ID              uint   `gorm:"primary_key" json:"id"`
 	BlockNum        uint   `json:"block_num" gorm:"index:block_num,unique"`
 	BlockTimestamp  int    `json:"block_timestamp"`
-	Hash            string `gorm:"default: null;size:100" json:"hash"`
+	Hash            string `gorm:"default: null;size:100;index:hash" json:"hash"`
 	ParentHash      string `gorm:"default: null;size:100" json:"parent_hash"`
 	StateRoot       string `gorm:"default: null;size:100" json:"state_root"`
 	ExtrinsicsRoot  string `gorm:"default: null;size:100" json:"extrinsics_root"`
@@ -72,38 +72,27 @@ func (c ChainEvent) Id() uint {
 	return c.BlockNum*IdGenerateCoefficient + c.EventIdx
 }
 
+func (c ChainEvent) ExtrinsicIndex() string {
+	return fmt.Sprintf("%d-%d", c.BlockNum, c.ExtrinsicIdx)
+}
+
+func (c *ChainEvent) AsPlugin() *storage.Event {
+	return &storage.Event{
+		BlockNum:     int(c.BlockNum),
+		ExtrinsicIdx: c.ExtrinsicIdx,
+		ModuleId:     c.ModuleId,
+		EventId:      c.EventId,
+		Params:       c.Params.Marshal(),
+		EventIdx:     int(c.EventIdx),
+	}
+}
+
 type EventParams []EventParam
 
-type ExtrinsicParams []ExtrinsicParam
-
-type LogData map[string]interface{}
-
-func (l *LogData) Scan(value interface{}) error {
-	switch v := value.(type) {
-	case []byte:
-		if len(v) == 0 {
-			return nil
-		}
-	case string:
-		if v == "" {
-			return nil
-		}
-	default:
-		return errors.New(fmt.Sprint("Failed to unmarshal JSONB value:", value))
-	}
-	var result LogData
-	err := util.UnmarshalAny(&result, value)
-	*l = result
-	return err
-}
-
-func (l LogData) Value() (driver.Value, error) {
-	return json.Marshal(l)
-}
-
-func (l LogData) Bytes() []byte {
-	b, _ := json.Marshal(l)
-	return b
+type EventParam struct {
+	Type     string      `json:"type"`
+	Value    interface{} `json:"value"`
+	TypeName string      `json:"type_name,omitempty"`
 }
 
 func (j EventParams) Value() (driver.Value, error) {
@@ -120,27 +109,6 @@ func (j EventParams) Marshal() []byte {
 
 func (j *EventParams) Scan(src interface{}) error { return json.Unmarshal(src.([]byte), j) }
 
-func (j ExtrinsicParams) Value() (driver.Value, error) {
-	if len(j) == 0 {
-		return nil, nil
-	}
-
-	return json.Marshal(j)
-}
-
-func (j *ExtrinsicParams) Scan(src interface{}) error { return json.Unmarshal(src.([]byte), j) }
-
-func (c *ChainEvent) AsPlugin() *storage.Event {
-	return &storage.Event{
-		BlockNum:     int(c.BlockNum),
-		ExtrinsicIdx: c.ExtrinsicIdx,
-		ModuleId:     c.ModuleId,
-		EventId:      c.EventId,
-		Params:       []byte(util.ToString(c.Params)),
-		EventIdx:     int(c.EventIdx),
-	}
-}
-
 type ChainExtrinsic struct {
 	ID                 uint   `gorm:"primary_key;autoIncrement:false"`
 	ExtrinsicIndex     string `json:"extrinsic_index" gorm:"default: null;size:255;index:extrinsic_index"`
@@ -154,10 +122,34 @@ type ChainExtrinsic struct {
 	Signature     string          `json:"signature"`
 	Nonce         int             `json:"nonce"`
 	Era           string          `json:"era"`
-	ExtrinsicHash string          `json:"extrinsic_hash" gorm:"default: null" `
+	ExtrinsicHash string          `json:"extrinsic_hash" gorm:"default: null;index:extrinsic_hash"`
 	IsSigned      bool            `json:"is_signed"`
 	Success       bool            `json:"success"`
 	Fee           decimal.Decimal `json:"fee" gorm:"type:decimal(65,0);"`
+}
+
+type ExtrinsicParams []ExtrinsicParam
+
+func (j ExtrinsicParams) Value() (driver.Value, error) {
+	if len(j) == 0 {
+		return nil, nil
+	}
+
+	return json.Marshal(j)
+}
+
+func (j *ExtrinsicParams) Scan(src interface{}) error { return json.Unmarshal(src.([]byte), j) }
+
+func (j *ExtrinsicParams) Marshal() []byte {
+	b, _ := json.Marshal(j)
+	return b
+}
+
+type ExtrinsicParam struct {
+	Name     string      `json:"name"`
+	Type     string      `json:"type"`
+	Value    interface{} `json:"value"`
+	TypeName string      `json:"type_name,omitempty"`
 }
 
 func ParsingExtrinsicParam(params interface{}) (param []ExtrinsicParam) {
@@ -181,7 +173,7 @@ func (c *ChainExtrinsic) AsPlugin() *storage.Extrinsic {
 		ExtrinsicIndex:     c.ExtrinsicIndex,
 		CallModule:         c.CallModule,
 		CallModuleFunction: c.CallModuleFunction,
-		Params:             []byte(util.ToString(c.Params)),
+		Params:             c.Params.Marshal(),
 		AccountId:          c.AccountId,
 		Signature:          c.Signature,
 		Nonce:              c.Nonce,
@@ -220,17 +212,34 @@ func (c ChainLog) Id() uint {
 	return ParseExtrinsicOrEventIndex(c.LogIndex).GenerateId()
 }
 
-type ExtrinsicParam struct {
-	Name     string      `json:"name"`
-	Type     string      `json:"type"`
-	Value    interface{} `json:"value"`
-	TypeName string      `json:"type_name,omitempty"`
+type LogData map[string]interface{}
+
+func (l *LogData) Scan(value interface{}) error {
+	switch v := value.(type) {
+	case []byte:
+		if len(v) == 0 {
+			return nil
+		}
+	case string:
+		if v == "" {
+			return nil
+		}
+	default:
+		return errors.New(fmt.Sprint("Failed to unmarshal JSONB value:", value))
+	}
+	var result LogData
+	err := util.UnmarshalAny(&result, value)
+	*l = result
+	return err
 }
 
-type EventParam struct {
-	Type     string      `json:"type"`
-	Value    interface{} `json:"value"`
-	TypeName string      `json:"type_name,omitempty"`
+func (l LogData) Value() (driver.Value, error) {
+	return json.Marshal(l)
+}
+
+func (l LogData) Bytes() []byte {
+	b, _ := json.Marshal(l)
+	return b
 }
 
 type ExtrinsicOrEventIndex struct {

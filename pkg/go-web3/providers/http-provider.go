@@ -33,8 +33,7 @@ import (
 
 	"encoding/json"
 
-	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
-	"subscan/pkg/go-web3/providers/util"
+	"github.com/itering/subscan/pkg/go-web3/providers/util"
 )
 
 type HTTPProvider struct {
@@ -74,17 +73,12 @@ func NewHTTPProviderWithClient(address string, timeout int32, secure bool, clien
 func (provider HTTPProvider) SendRequest(ctx context.Context, v interface{}, method string, params interface{}) (err error) {
 	bodyString := util.JSONRPCObject{Version: "2.0", Method: method, Params: params, ID: rand.Intn(1000000) + len(method)}
 	body := strings.NewReader(bodyString.AsJsonString())
-	span, subCtx := tracer.StartSpanFromContext(ctx, "web3.SendRequest", tracer.Tag("provider", "http"), tracer.Tag("NodeRole", "archive"))
-	defer func() {
-		span.Finish(tracer.WithError(err))
-	}()
-	span.SetTag("param", bodyString.AsJsonString())
 	var (
 		req  *http.Request
 		rsp  *http.Response
 		data []byte
 	)
-	if req, err = http.NewRequestWithContext(subCtx, http.MethodPost, provider.address, body); err != nil {
+	if req, err = http.NewRequestWithContext(ctx, http.MethodPost, provider.address, body); err != nil {
 		return
 	}
 	req.Header.Set("Content-Type", "application/json;charset=utf-8")
@@ -97,12 +91,9 @@ func (provider HTTPProvider) SendRequest(ctx context.Context, v interface{}, met
 		return
 	}
 	if rsp.StatusCode != 200 {
-		span.SetTag("http_status", rsp.StatusCode)
-		span.SetTag("response", data)
 		return errors.New(rsp.Status)
 	}
 	if err = json.Unmarshal(data, v); err != nil {
-		span.SetTag("response", data)
 		return
 	}
 	return

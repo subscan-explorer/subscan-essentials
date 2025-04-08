@@ -46,7 +46,7 @@ func initRouter(e *gin.Engine) {
 		g.POST("/now", now)
 		s := g.Group("/scan")
 		{
-			s.Any("metadata", metadataHandle)
+			s.POST("metadata", metadataHandle)
 
 			// Block
 			s.POST("blocks", blocksHandle)
@@ -62,7 +62,7 @@ func initRouter(e *gin.Engine) {
 
 			// Runtime
 			s.POST("runtime/metadata", runtimeMetadataHandle)
-			s.Any("runtime/list", runtimeListHandler)
+			s.POST("runtime/list", runtimeListHandler)
 
 		}
 		pluginRouter(g)

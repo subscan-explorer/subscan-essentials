@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"gopkg.in/go-playground/validator.v9"
 	"io"
-	"io/ioutil"
 )
 
 var validate = validator.New()
@@ -15,7 +14,7 @@ func Validate(data interface{}, model interface{}) (err error) {
 	case []byte:
 		b = v
 	case io.ReadCloser:
-		b, _ = ioutil.ReadAll(v)
+		b, _ = io.ReadAll(v)
 	default:
 		b, _ = json.Marshal(data)
 	}

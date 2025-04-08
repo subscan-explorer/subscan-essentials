@@ -29,7 +29,9 @@ var (
 
 type SubscribeService struct {
 	*Service
-	newFinHead chan bool
+	newFinHead        chan bool
+	lastBlock         int64
+	finalizedBlockNum int64
 }
 
 func (s *Service) initSubscribeService() *SubscribeService {
@@ -48,9 +50,8 @@ func (s *SubscribeService) parser(message []byte) (err error) {
 	case ChainFinalizedHead:
 		r := j.ToNewHead()
 		_ = s.updateChainMetadata(map[string]interface{}{"finalized_blockNum": util.HexToNumStr(r.Number)})
-		go func() {
-			s.newFinHead <- true
-		}()
+		s.finalizedBlockNum = util.U256(r.Number).Int64()
+		s.newFinHead <- true
 	case StateRuntimeVersion:
 		r := j.ToRuntimeVersion()
 		_ = s.regRuntimeVersion(r.ImplName, r.SpecVersion)
@@ -66,19 +67,21 @@ func (s *SubscribeService) subscribeFetchBlock(ctx context.Context) {
 	for {
 		select {
 		case <-s.newFinHead:
-			final, err := s.dao.GetFinalizedBlockNum(context.TODO())
-			if err != nil || final == 0 {
+
+			if s.finalizedBlockNum == 0 {
 				time.Sleep(BlockTime * time.Second)
 				return
 			}
 
 			lastNum, _ := s.dao.GetFillFinalizedBlockNum(ctx)
-			startBlock := lastNum + 1
-			if lastNum == 0 {
-				startBlock = lastNum
+			startBlock := int64(lastNum)
+			if s.lastBlock > 0 {
+				startBlock = s.lastBlock + 1
 			}
-			for i := startBlock; i <= int(final-FinalizedWaitingBlockCount); i++ {
-
+			for i := startBlock; i <= s.finalizedBlockNum-FinalizedWaitingBlockCount; i++ {
+				// mq.Instant.Publish("block", "block", map[string]interface{}{"block_num": i})
+				util.Logger().Info(fmt.Sprintf("Publish block num %d", i))
+				s.lastBlock = i
 			}
 		case <-ctx.Done():
 			return

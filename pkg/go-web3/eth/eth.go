@@ -24,13 +24,13 @@ package eth
 import (
 	"context"
 	"errors"
+	"github.com/itering/subscan/pkg/go-web3/complex/types"
+	"github.com/itering/subscan/pkg/go-web3/dto"
+	"github.com/itering/subscan/pkg/go-web3/eth/block"
+	"github.com/itering/subscan/pkg/go-web3/providers"
+	"github.com/itering/subscan/pkg/go-web3/utils"
 	"math/big"
 	"strings"
-	"subscan/pkg/go-web3/complex/types"
-	"subscan/pkg/go-web3/dto"
-	"subscan/pkg/go-web3/eth/block"
-	"subscan/pkg/go-web3/providers"
-	"subscan/pkg/go-web3/utils"
 )
 
 // Eth - The Eth Module

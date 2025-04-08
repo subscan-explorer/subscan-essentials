@@ -16,6 +16,9 @@ func (s *Service) Ping(ctx context.Context, _ *empty.Empty) (*empty.Empty, error
 
 func (s *Service) Metadata(ctx context.Context) (map[string]string, error) {
 	m, err := s.dao.GetMetadata(ctx)
+	if err != nil {
+		return nil, err
+	}
 	m["networkNode"] = util.NetworkNode
 	m["balanceAccuracy"] = util.BalanceAccuracy
 	m["addressType"] = util.AddressType

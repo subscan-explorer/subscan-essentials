@@ -2,12 +2,13 @@ package dao
 
 import (
 	"database/sql"
+	"gorm.io/gorm/logger"
+	"os"
 
 	"errors"
 	"fmt"
 	"log"
 	"reflect"
-	"strings"
 	"time"
 
 	"github.com/itering/subscan-plugin/storage"
@@ -23,6 +24,10 @@ import (
 type DbStorage struct {
 	db     *gorm.DB
 	Prefix string
+}
+
+func (d *DbStorage) GetDbInstance() any {
+	return d.db
 }
 
 func (d *DbStorage) SetPrefix(prefix string) {
@@ -61,7 +66,8 @@ func (d *DbStorage) RPCPool() *websocket.PoolConn {
 
 func (d *DbStorage) getPluginPrefixTableName(instant interface{}) string {
 	tableName := d.getModelTableName(instant)
-	if util.StringInSlice(tableName, protectedTables) {
+	_, implementTable := instant.(Tabler)
+	if util.StringInSlice(tableName, protectedTables) || implementTable {
 		return tableName
 	}
 	return fmt.Sprintf("%s_%s", d.GetPrefix(), tableName)
@@ -125,7 +131,7 @@ func (d *DbStorage) AddUniqueIndex(model interface{}, indexName string, columns 
 
 func (d *DbStorage) Create(record interface{}) error {
 	if err := d.checkProtected(record); err == nil {
-		tx := d.db.Table(d.getPluginPrefixTableName(record)).Scopes(IgnoreDuplicate).Create(record)
+		tx := d.db.Table(d.getPluginPrefixTableName(record)).Scopes(model.IgnoreDuplicate).Create(record)
 		return tx.Error
 	} else {
 		return err
@@ -148,13 +154,6 @@ func (d *DbStorage) Delete(model interface{}, query interface{}) error {
 	} else {
 		return err
 	}
-}
-
-// logs
-type ormLog struct{}
-
-func (l ormLog) Print(v ...interface{}) {
-	log.Printf(strings.Repeat("%v ", len(v)), v...)
 }
 
 // db
@@ -197,7 +196,20 @@ func (d *Dao) DbBegin() *GormDB {
 // private funcs
 func newDb() (db *gorm.DB) {
 	var err error
-	db, err = gorm.Open(mysql.Open(configs.Boot.Database.DSN))
+
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold:             time.Second,   // Slow SQL threshold
+			LogLevel:                  logger.Silent, // Log level
+			IgnoreRecordNotFoundError: true,          // Ignore ErrRecordNotFound error for logger
+			ParameterizedQueries:      false,         // Don't include params in the SQL log
+			Colorful:                  false,         // Disable color
+		},
+	)
+	db, err = gorm.Open(mysql.Open(configs.Boot.Database.DSN), &gorm.Config{
+		Logger: newLogger,
+	})
 	if err != nil {
 		panic(err)
 	}

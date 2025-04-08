@@ -1,7 +1,8 @@
 package plugins
 
 import (
-	subscan_plugin "github.com/itering/subscan-plugin"
+	"context"
+	"github.com/itering/subscan-plugin"
 	"github.com/itering/subscan-plugin/router"
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/shopspring/decimal"
@@ -10,6 +11,27 @@ import (
 )
 
 type TPlugin struct{}
+
+func (a *TPlugin) ProcessBlock(ctx context.Context, block *storage.Block) error {
+	return nil
+}
+
+func (a *TPlugin) SetRedisPool(pool subscan_plugin.RedisPool) {
+}
+
+func (a *TPlugin) Enable() bool {
+	return true
+}
+
+func (a *TPlugin) ConsumptionQueue() []string {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (a *TPlugin) ExecWorker(ctx context.Context, queue, class string, raw interface{}) error {
+	// TODO implement me
+	panic("implement me")
+}
 
 func (a *TPlugin) InitDao(d storage.Dao) {}
 
@@ -30,8 +52,6 @@ func (a *TPlugin) Version() string { return "0.1" }
 func (a *TPlugin) SubscribeExtrinsic() []string { return nil }
 
 func (a *TPlugin) SubscribeEvent() []string { return nil }
-
-func (a *TPlugin) UiConf() *subscan_plugin.UiConfig { return nil }
 
 func TestRegister(t *testing.T) {
 	register("test", &TPlugin{})

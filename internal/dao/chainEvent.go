@@ -20,7 +20,7 @@ func (d *Dao) CreateEvent(txn *GormDB, event *model.ChainEvent) error {
 		EventId:      event.EventId,
 		ExtrinsicIdx: event.ExtrinsicIdx,
 	}
-	query := txn.Scopes(IgnoreDuplicate).Create(&e)
+	query := txn.Scopes(model.IgnoreDuplicate).Create(&e)
 	if query.RowsAffected > 0 {
 		incrCount++
 		_ = d.IncrMetadata(context.TODO(), "count_event", incrCount)
@@ -47,10 +47,11 @@ func (d *Dao) GetEventList(ctx context.Context, page, row int, order string, whe
 	var count int64
 
 	blockNum, _ := d.GetFillBestBlockNum(context.TODO())
-	for index := uint(blockNum) / model.SplitTableBlockNum; index >= 0; index-- {
+	for index := blockNum / int(model.SplitTableBlockNum); index >= 0; index-- {
 		var tableData []model.ChainEvent
 		var tableCount int64
-		queryOrigin := d.db.Model(model.ChainEvent{BlockNum: index * model.SplitTableBlockNum})
+		fmt.Println("index", index)
+		queryOrigin := d.db.WithContext(ctx).Model(model.ChainEvent{BlockNum: uint(index) * model.SplitTableBlockNum})
 		for _, w := range where {
 			queryOrigin = queryOrigin.Where(w)
 		}
@@ -65,7 +66,7 @@ func (d *Dao) GetEventList(ctx context.Context, page, row int, order string, whe
 		if len(Events) >= row {
 			continue
 		}
-		query := queryOrigin.Order(fmt.Sprintf("block_num %s", order)).Offset(page*row - int(preCount)).Limit(row - len(Events)).Scan(&tableData)
+		query := queryOrigin.Order(fmt.Sprintf("id %s", order)).Offset(page*row - int(preCount)).Limit(row - len(Events)).Scan(&tableData)
 		if query == nil || query.Error != nil {
 			continue
 		}

@@ -34,7 +34,7 @@ func (s *Service) ExtrinsicFailed(spec int, event *storage.Event, paramEvent []s
 		if param.Type == "DispatchError" {
 
 			var dr map[string]interface{}
-			util.UnmarshalAny(&dr, param.Value)
+			_ = util.UnmarshalAny(&dr, param.Value)
 
 			if _, ok := dr["Error"]; ok {
 				_ = dao.CreateExtrinsicError(s.dao,
@@ -43,7 +43,7 @@ func (s *Service) ExtrinsicFailed(spec int, event *storage.Event, paramEvent []s
 
 			} else if _, ok := dr["Module"]; ok {
 				var module DispatchErrorModule
-				util.UnmarshalAny(&module, dr["Module"])
+				_ = util.UnmarshalAny(&module, dr["Module"])
 
 				_ = dao.CreateExtrinsicError(s.dao,
 					genExtrinsicIndex(event),

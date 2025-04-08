@@ -23,12 +23,12 @@ package web3
 
 import (
 	"context"
-	"subscan/pkg/go-web3/dto"
-	"subscan/pkg/go-web3/eth"
-	"subscan/pkg/go-web3/net"
-	"subscan/pkg/go-web3/personal"
-	"subscan/pkg/go-web3/providers"
-	"subscan/pkg/go-web3/utils"
+	"github.com/itering/subscan/pkg/go-web3/dto"
+	"github.com/itering/subscan/pkg/go-web3/eth"
+	"github.com/itering/subscan/pkg/go-web3/net"
+	"github.com/itering/subscan/pkg/go-web3/personal"
+	"github.com/itering/subscan/pkg/go-web3/providers"
+	"github.com/itering/subscan/pkg/go-web3/utils"
 )
 
 // Coin - Ethereum value unity value

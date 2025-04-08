@@ -96,7 +96,7 @@ func Test_DecimalFromInterface(t *testing.T) {
 		{1, decimal.New(1, 0)},
 		{-1, decimal.New(-1, 0)},
 		{"abc", decimal.Decimal{}},
-		{float64(1.1), decimal.NewFromFloat(1.1)},
+		{1.1, decimal.NewFromFloat(1.1)},
 		{uint64(2 >> 32), decimal.New(int64(2>>32), 0)},
 		{int64(2 >> 32), decimal.New(int64(2>>32), 0)},
 		{[]byte{}, decimal.Zero},
@@ -104,4 +104,18 @@ func Test_DecimalFromInterface(t *testing.T) {
 	for _, test := range testCase {
 		assert.Equal(t, test.r, DecimalFromInterface(test.i))
 	}
+}
+
+func Test_EvmU256Decoder(t *testing.T) {
+	tc := "0x000064a7b3b6e00d000000000000000000000000000000000000000000000000"
+	assert.Equal(t, EvmReverseU256Decoder(tc).String(), "1000000000000000000")
+}
+
+func TestFillMissedInt(t *testing.T) {
+	assert.Equal(t, FillMissedInt(0, 10, []int{0}), []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
+	assert.Equal(t, FillMissedInt(0, 10, nil), []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10})
+	assert.Equal(t, FillMissedInt(0, 10, []int{0, 3, 5}), []int{1, 2, 4, 6, 7, 8, 9, 10})
+	assert.Equal(t, FillMissedInt(0, 10, []int{5, 10}), []int{0, 1, 2, 3, 4, 6, 7, 8, 9})
+	assert.Equal(t, FillMissedInt(0, 10, []int{10}), []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9})
+	assert.Equal(t, FillMissedInt(0, 10, []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}), []int(nil))
 }

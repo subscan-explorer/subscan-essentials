@@ -48,20 +48,20 @@ type ChainExtrinsicJson struct {
 }
 
 type ExtrinsicDetail struct {
-	BlockTimestamp     int              `json:"block_timestamp"`
-	BlockNum           uint             `json:"block_num"`
-	ExtrinsicIndex     string           `json:"extrinsic_index"`
-	CallModuleFunction string           `json:"call_module_function"`
-	CallModule         string           `json:"call_module"`
-	AccountId          string           `json:"account_id"`
-	Signature          string           `json:"signature"`
-	Nonce              int              `json:"nonce"`
-	ExtrinsicHash      string           `json:"extrinsic_hash"`
-	Success            bool             `json:"success"`
-	Params             []ExtrinsicParam `json:"params"`
-	Event              *[]ChainEvent    `json:"event"`
-	Fee                decimal.Decimal  `json:"fee"`
-	Finalized          bool             `json:"finalized"`
+	BlockTimestamp     int             `json:"block_timestamp"`
+	BlockNum           uint            `json:"block_num"`
+	ExtrinsicIndex     string          `json:"extrinsic_index"`
+	CallModuleFunction string          `json:"call_module_function"`
+	CallModule         string          `json:"call_module"`
+	AccountId          string          `json:"account_id"`
+	Signature          string          `json:"signature"`
+	Nonce              int             `json:"nonce"`
+	ExtrinsicHash      string          `json:"extrinsic_hash"`
+	Success            bool            `json:"success"`
+	Params             ExtrinsicParams `json:"params"`
+	Event              *[]ChainEvent   `json:"event"`
+	Fee                decimal.Decimal `json:"fee"`
+	Finalized          bool            `json:"finalized"`
 }
 
 type ChainEventJson struct {

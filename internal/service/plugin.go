@@ -1,10 +1,12 @@
 package service
 
 import (
+	"context"
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/plugins"
+	redisDao "github.com/itering/subscan/share/redis"
 	"github.com/shopspring/decimal"
 )
 
@@ -14,11 +16,12 @@ var (
 )
 
 // registered storage
-func pluginRegister(ds *dao.DbStorage) {
+func pluginRegister(ds *dao.DbStorage, pool *redisDao.Dao) {
 	for name, plugin := range plugins.RegisteredPlugins {
 		db := *ds
 		db.Prefix = name
 		plugin.InitDao(&db)
+		plugin.SetRedisPool(pool)
 		for _, moduleId := range plugin.SubscribeExtrinsic() {
 			subscribeExtrinsic[moduleId] = append(subscribeExtrinsic[moduleId], plugin)
 		}
@@ -33,9 +36,20 @@ func (s *Service) emitEvent(block *model.ChainBlock, event *model.ChainEvent) {
 	pBlock := block.AsPlugin()
 	pEvent := event.AsPlugin()
 	for _, plugin := range subscribeEvent[event.ModuleId] {
-		_ = plugin.ProcessEvent(pBlock, pEvent, decimal.Zero)
+		if plugin.Enable() {
+			_ = plugin.ProcessEvent(pBlock, pEvent, decimal.Zero)
+		}
 	}
 
+}
+
+func (s *Service) emitBlock(ctx context.Context, block *model.ChainBlock) {
+	pBlock := block.AsPlugin()
+	for _, plugin := range plugins.RegisteredPlugins {
+		if plugin.Enable() {
+			_ = plugin.ProcessBlock(ctx, pBlock)
+		}
+	}
 }
 
 // after extrinsic created, emit extrinsic data to subscribe plugins
@@ -50,6 +64,8 @@ func (s *Service) emitExtrinsic(block *model.ChainBlock, extrinsic *model.ChainE
 	}
 
 	for _, plugin := range subscribeExtrinsic[extrinsic.CallModule] {
-		_ = plugin.ProcessExtrinsic(pBlock, pExtrinsic, pEvents)
+		if plugin.Enable() {
+			_ = plugin.ProcessExtrinsic(pBlock, pExtrinsic, pEvents)
+		}
 	}
 }

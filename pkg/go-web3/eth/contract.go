@@ -27,13 +27,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/huandu/xstrings"
+	"github.com/itering/subscan/pkg/go-web3/complex/types"
+	"github.com/itering/subscan/pkg/go-web3/dto"
+	"github.com/itering/subscan/pkg/go-web3/utils"
 	"math"
-	"strings"
-	"subscan/pkg/go-web3/complex/types"
-	"subscan/pkg/go-web3/dto"
-
 	"math/big"
-	"subscan/pkg/go-web3/utils"
+	"strings"
 )
 
 // Contract ...

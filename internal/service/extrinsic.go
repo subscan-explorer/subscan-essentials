@@ -69,26 +69,6 @@ func (s *Service) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsi
 	return ej
 }
 
-func (s *Service) getTimestamp(extrinsic *model.ChainExtrinsic) (blockTimestamp int) {
-	if extrinsic.CallModule != "timestamp" {
-		return
-	}
-
-	var paramsInstant []model.ExtrinsicParam
-	_ = util.UnmarshalAny(&paramsInstant, extrinsic.Params)
-
-	for _, p := range paramsInstant {
-		if p.Name == "now" {
-			if strings.EqualFold(p.Type, "compact<U64>") {
-				return int(util.Int64FromInterface(p.Value) / 1000)
-			}
-			extrinsic.BlockTimestamp = util.IntFromInterface(p.Value)
-			return extrinsic.BlockTimestamp
-		}
-	}
-	return
-}
-
 func FindOutBlockTime(extrinsics []model.ChainExtrinsic) int {
 	for _, extrinsic := range extrinsics {
 		if strings.EqualFold(extrinsic.CallModule, "timestamp") {

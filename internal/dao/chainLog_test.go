@@ -1,7 +1,6 @@
 package dao
 
 import (
-	"github.com/itering/subscan/model"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -12,13 +11,6 @@ func TestDao_CreateLog(t *testing.T) {
 	txn.Commit()
 	assert.NoError(t, err)
 
-}
-
-func TestDao_DropLogsNotFinalizedData(t *testing.T) {
-	txn := testDao.DbBegin()
-	testLog.BlockNum = 947688
-	txn.Commit()
-	assert.Equal(t, []model.ChainLogJson{}, testDao.GetLogByBlockNum(947688))
 }
 
 func TestDao_GetLogByBlockNum(t *testing.T) {

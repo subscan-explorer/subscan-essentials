@@ -9,8 +9,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/itering/substrate-api-rpc/pkg/recws"
-
 	"github.com/itering/subscan/internal/service"
 	"github.com/itering/subscan/util"
 )
@@ -29,11 +27,15 @@ func Run(dt string) {
 	switch dt {
 	case "subscribe":
 		wg.Add(1)
-		subscribeConn := &recws.RecConn{KeepAliveTimeout: 10 * time.Second, WriteTimeout: time.Second * 5, ReadTimeout: 10 * time.Second}
-		subscribeConn.Dial(util.WSEndPoint, nil)
 		go func() {
 			defer wg.Done()
-			srv.Subscribe(ctx, subscribeConn)
+			srv.Subscribe(ctx)
+		}()
+	case "worker":
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			Consumption()
 		}()
 	default:
 		panic(fmt.Sprintf("no such daemon component: %s", dt))

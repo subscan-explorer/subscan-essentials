@@ -23,9 +23,9 @@ package net
 
 import (
 	"context"
+	"github.com/itering/subscan/pkg/go-web3/dto"
+	"github.com/itering/subscan/pkg/go-web3/providers"
 	"math/big"
-	"subscan/pkg/go-web3/dto"
-	"subscan/pkg/go-web3/providers"
 )
 
 // Net - The Net Module

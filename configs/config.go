@@ -34,8 +34,6 @@ type Database struct {
 	Driver string `json:"-"` // Unused
 	DSN    string `json:"-"`
 	Api    string `json:"api"`
-	Task   string `json:"task"`
-	Test   string `json:"test"`
 }
 
 type Redis struct {
@@ -247,4 +245,17 @@ func ParseDSN(dsn string) (*url.URL, error) {
 	}
 
 	return url.Parse(dsn)
+}
+
+func EnvSandbox(fn func()) {
+	originEnvsBackup := os.Environ()
+	os.Clearenv()
+	defer func() {
+		os.Clearenv()
+		for _, s := range originEnvsBackup {
+			env := strings.SplitN(s, "=", 2)
+			_ = os.Setenv(env[0], env[1])
+		}
+	}()
+	fn()
 }

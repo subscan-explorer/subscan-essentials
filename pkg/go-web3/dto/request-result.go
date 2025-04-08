@@ -26,8 +26,8 @@ import (
 	"strconv"
 	"strings"
 
-	"subscan/pkg/go-web3/complex/types"
-	"subscan/pkg/go-web3/constants"
+	"github.com/itering/subscan/pkg/go-web3/complex/types"
+	"github.com/itering/subscan/pkg/go-web3/constants"
 
 	"encoding/json"
 	"fmt"
@@ -309,7 +309,7 @@ func (pointer *RequestResult) ToSyncingResponse() (*SyncingResponse, error) {
 		return nil, customerror.UNPARSEABLEINTERFACE
 	}
 
-	json.Unmarshal([]byte(marshal), syncingResponse)
+	_ = json.Unmarshal([]byte(marshal), syncingResponse)
 
 	return syncingResponse, nil
 

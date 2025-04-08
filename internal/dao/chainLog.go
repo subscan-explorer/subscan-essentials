@@ -5,7 +5,7 @@ import (
 )
 
 func (d *Dao) CreateLog(txn *GormDB, ce *model.ChainLog) error {
-	query := txn.Scopes(IgnoreDuplicate).Create(ce)
+	query := txn.Scopes(model.IgnoreDuplicate).Create(ce)
 	return query.Error
 }
 
