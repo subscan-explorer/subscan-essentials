@@ -45,7 +45,7 @@ func TestService_GetCurrentRuntimeSpecVersion(t *testing.T) {
 }
 
 func TestService_GetExtrinsicList(t *testing.T) {
-	_, count := testSrv.GetExtrinsicList(context.Background(), 0, 10, "desc")
+	_, count := testSrv.GetExtrinsicList(context.Background(), 0, 10)
 	assert.Equal(t, 1, count)
 }
 

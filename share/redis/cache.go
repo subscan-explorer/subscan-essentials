@@ -159,3 +159,26 @@ func (d *Dao) HmSetEx(c context.Context, key string, value interface{}, ttl int)
 	err = d.HmSet(c, key, value)
 	return err
 }
+
+func (d *Dao) SISMEMBER(c context.Context, key string, value interface{}) bool {
+	conn, _ := d.redis.GetContext(c)
+	defer conn.Close()
+	r, _ := redis.Int(conn.Do("SISMEMBER", key, value, c))
+	return r == 1
+}
+
+func (d *Dao) SAdd(c context.Context, key string, ttl int, value ...string) bool {
+	conn, _ := d.redis.GetContext(c)
+	defer conn.Close()
+	args := redis.Args{}.Add(key)
+	for _, v := range value {
+		args = args.Add(v)
+	}
+	_ = conn.Send("SADD", args...)
+	if ttl > 0 {
+		_ = conn.Send("EXPIRE", key, ttl)
+	}
+	conn.Flush()
+	r, _ := redis.Int(conn.Receive())
+	return r == 1
+}

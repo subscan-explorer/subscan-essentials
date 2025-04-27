@@ -68,7 +68,7 @@ func (s *Service) GetBestBlockNum(c context.Context) (uint64, error) {
 	return s.dao.GetBestBlockNum(c)
 }
 
-func (s *Service) GetExtrinsicList(ctx context.Context, page, row int, query ...string) ([]*model.ChainExtrinsicJson, int) {
+func (s *Service) GetExtrinsicList(ctx context.Context, page, row int, query ...model.Option) ([]*model.ChainExtrinsicJson, int) {
 	list, count := s.dao.GetExtrinsicList(ctx, page, row, "desc", query...)
 	var ejs []*model.ChainExtrinsicJson
 	for _, extrinsic := range list {
@@ -85,7 +85,7 @@ func (s *Service) GetExtrinsicDetailByHash(ctx context.Context, hash string) *mo
 	return s.dao.GetExtrinsicsDetailByHash(ctx, hash)
 }
 
-func (s *Service) EventsList(ctx context.Context, page, row int, where ...string) ([]model.ChainEventJson, int) {
+func (s *Service) EventsList(ctx context.Context, page, row int, where ...model.Option) ([]model.ChainEventJson, int) {
 	var (
 		result    []model.ChainEventJson
 		blockNums []uint

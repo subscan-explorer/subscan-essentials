@@ -33,6 +33,7 @@ type Contract struct {
 	EventIdentifiers  datatypes.JSON `json:"event_identifiers" gorm:"-"`
 	Deployer          string         `json:"deployer" gorm:"size:100"`
 	BlockNum          uint           `json:"block_num" gorm:"size:32"`
+	TxHash            string         `json:"tx_hash" gorm:"size:70"`
 	DeployAt          uint           `json:"deploy_at" gorm:"size:32"`
 	VerifyStatus      string         `json:"verify_status"  gorm:"size:32;index:verify_status"`
 	VerifyType        string         `json:"verify_type"  gorm:"size:100;default:SingleFile;"`
@@ -88,6 +89,7 @@ func (c *Contract) TableName() string {
 }
 
 func (c *Contract) AfterCreate(*gorm.DB) (err error) {
+	_ = TouchAccount(context.Background(), c.Address)
 	return nil
 }
 
@@ -148,7 +150,7 @@ func (c *Contract) afterVerify(ctx context.Context) {
 
 func setContractProxyImplementation(ctx context.Context, contractAddress, implementation string) {
 	if contract := GetContract(ctx, contractAddress); contract != nil && contract.ProxyImplementation != "" {
-		sg.db.Model(Contract{}).Where("address = ?", contractAddress).Update("proxy_implementation", implementation)
+		sg.db.Model(Contract{}).Debug().Where("address = ?", contractAddress).Update("proxy_implementation", implementation)
 	}
 }
 
@@ -181,7 +183,7 @@ func (t *Transaction) NewContract(ctx context.Context) error {
 		CreationCode:   t.InputData,
 		DeployAt:       t.BlockTimestamp,
 		BlockNum:       t.BlockNum,
-		Deployer:       t.From,
+		Deployer:       t.FromAddress,
 		ExtrinsicIndex: t.ExtrinsicIndex,
 		Precompile:     t.Precompile,
 	}
@@ -249,7 +251,7 @@ func ContractsByAddrList(ctx context.Context, addresses []string) (contracts []C
 }
 
 func ContractMethodList(ctx context.Context) (list []datatypes.JSON, err error) {
-	err = sg.db.Model(Contract{}).Not("verify_status = ''").Where("method_identifiers IS NOT NULL").Pluck("method_identifiers", &list).Error
+	err = sg.db.WithContext(ctx).Model(Contract{}).Not("verify_status = ''").Where("method_identifiers IS NOT NULL").Pluck("method_identifiers", &list).Error
 	return
 }
 
@@ -264,7 +266,7 @@ func ContractsByAddr(ctx context.Context, contracts string) (contract *Contract)
 	return
 }
 
-func findEventIdentifiers(ctx context.Context, abiRaw []byte) []byte {
+func findEventIdentifiers(_ context.Context, abiRaw []byte) []byte {
 	var abiValue abi.ABI
 	_ = abiValue.UnmarshalJSON(abiRaw)
 	eventIdentifiers := make(map[string]string)
@@ -275,7 +277,7 @@ func findEventIdentifiers(ctx context.Context, abiRaw []byte) []byte {
 	return EventIdentifiers
 }
 
-func FindAbiMethodIdentifiers(ctx context.Context, abiRaw []byte) []byte {
+func FindAbiMethodIdentifiers(_ context.Context, abiRaw []byte) []byte {
 	var abiValue abi.ABI
 	_ = abiValue.UnmarshalJSON(abiRaw)
 	methodsIdentifiers := make(map[string]string)
@@ -293,11 +295,10 @@ func FindAbiMethodIdentifiers(ctx context.Context, abiRaw []byte) []byte {
 
 func GetContract(ctx context.Context, address string) *Contract {
 	var contract Contract
-	if q := sg.db.Model(Contract{}).Where("address = ?", address).First(&contract); q.Error != nil {
+	if q := sg.db.WithContext(ctx).Model(Contract{}).Where("address = ?", address).First(&contract); q.Error != nil {
 		return nil
 	}
 	return &contract
-
 }
 
 func GetContractName(ctx context.Context, addresses []string) map[string]string {

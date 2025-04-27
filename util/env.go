@@ -13,11 +13,14 @@ var (
 	// BalanceAccuracy balance accuracy, default is 10(DOT)
 	BalanceAccuracy = GetEnv("SUBSTRATE_ACCURACY", "10")
 	// WSEndPoint chain rpc endpoint, default is wss://polkadot-rpc.dwellir.com
-	WSEndPoint = GetEnv("CHAIN_WS_ENDPOINT", "wss://polkadot-rpc.dwellir.com")
+	WSEndPoint = GetEnv("CHAIN_WS_ENDPOINT", "wss://moonbeam-rpc.dwellir.com")
 	// NetworkNode network node name, default is polkadot
-	NetworkNode = GetEnv("NETWORK_NODE", "polkadot")
+	NetworkNode = GetEnv("NETWORK_NODE", "moonbeam")
 	// ConfDir config directory, default is ../configs
 	ConfDir = GetEnv("CONF_DIR", "../configs")
+
+	// IsEvmChain is evm chain, address type is 0x h160
+	IsEvmChain = GetEnv("IS_EVM_CHAIN", "false") == "true"
 )
 
 // EventStorageKey state system.events storage key

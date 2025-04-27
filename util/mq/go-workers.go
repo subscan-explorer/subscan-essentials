@@ -19,6 +19,9 @@ func (g *GoWorker) Type() string {
 }
 
 func (g *GoWorker) Publish(queue, class string, args interface{}) error {
+	if g == nil {
+		return nil
+	}
 	if rateLimit(context.TODO(), queue, class, args) {
 		return nil
 	}

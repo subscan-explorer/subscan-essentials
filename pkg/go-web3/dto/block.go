@@ -45,6 +45,7 @@ type Block struct {
 	Transactions    []BlockTransaction `json:"transactions"`
 
 	TransactionsRoot string `json:"transactionsRoot"`
+	BaseFeePerGas    string `json:"baseFeePerGas"`
 }
 
 type BlockTransaction struct {

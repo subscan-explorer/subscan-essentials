@@ -41,7 +41,7 @@ func (d *Dao) GetEventByBlockNum(blockNum uint, where ...string) []model.ChainEv
 	return events
 }
 
-func (d *Dao) GetEventList(ctx context.Context, page, row int, order string, where ...string) ([]model.ChainEvent, int) {
+func (d *Dao) GetEventList(ctx context.Context, page, row int, order string, where ...model.Option) ([]model.ChainEvent, int) {
 	var Events []model.ChainEvent
 
 	var count int64
@@ -50,12 +50,8 @@ func (d *Dao) GetEventList(ctx context.Context, page, row int, order string, whe
 	for index := blockNum / int(model.SplitTableBlockNum); index >= 0; index-- {
 		var tableData []model.ChainEvent
 		var tableCount int64
-		fmt.Println("index", index)
 		queryOrigin := d.db.WithContext(ctx).Model(model.ChainEvent{BlockNum: uint(index) * model.SplitTableBlockNum})
-		for _, w := range where {
-			queryOrigin = queryOrigin.Where(w)
-		}
-
+		queryOrigin.Scopes(where...)
 		queryOrigin.Count(&tableCount)
 
 		if tableCount == 0 {

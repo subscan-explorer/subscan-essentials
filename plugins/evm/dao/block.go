@@ -14,8 +14,8 @@ import (
 )
 
 type EvmBlock struct {
-	BlockNum         uint            `json:"block_num" gorm:"size:64;index:block_num,unique"`
-	BlockHash        string          `json:"block_hash" gorm:"size:70;index:block_hash,unique"`
+	BlockNum         uint64          `json:"block_num" gorm:"size:64;index:block_num,unique"`
+	BlockHash        string          `json:"block_hash" gorm:"size:70;index:block_hash"`
 	ParentHash       string          `json:"parent_hash" gorm:"size:70"`
 	Sha3Uncles       string          `json:"sha3_uncles" gorm:"size:70"`
 	Author           string          `json:"author" gorm:"size:70"`
@@ -34,13 +34,14 @@ type EvmBlock struct {
 	Uncles           string          `json:"uncles" gorm:"size:255"`
 	BlockSize        decimal.Decimal `json:"block_size" gorm:"type:decimal(65);"`
 	TransactionCount int             `json:"transaction_count" gorm:"size:32"`
+	BaseFeePerGas    decimal.Decimal `json:"base_fee_per_gas" gorm:"type:decimal(65);"`
 }
 
 func (t *EvmBlock) TableName() string {
 	return "evm_blocks"
 }
 
-func (s *Storage) AddEvmBlock(ctx context.Context, blockNum uint, blockTimestamp uint, force bool) error {
+func (s *Storage) AddEvmBlock(ctx context.Context, blockNum uint, force bool) error {
 	if block := GetBlockByNum(ctx, int(blockNum)); block != nil && !force {
 		return nil
 	}
@@ -48,10 +49,10 @@ func (s *Storage) AddEvmBlock(ctx context.Context, blockNum uint, blockTimestamp
 	if err != nil {
 		return err
 	}
-	return s.ProcessBlock(ctx, blockNum, blockTimestamp, blockRaw)
+	return s.processBlock(ctx, uint64(blockNum), blockRaw)
 }
 
-func (s *Storage) ProcessBlock(ctx context.Context, blockNum uint, blockTimestamp uint, blockRaw *dto.Block) (err error) {
+func (s *Storage) processBlock(ctx context.Context, blockNum uint64, blockRaw *dto.Block) (err error) {
 	block := &EvmBlock{
 		BlockHash:        blockRaw.Hash,
 		ParentHash:       blockRaw.ParentHash,
@@ -73,8 +74,9 @@ func (s *Storage) ProcessBlock(ctx context.Context, blockNum uint, blockTimestam
 		Uncles:           util.ToString(blockRaw.Uncles),
 		BlockSize:        util.DecimalFromU256(blockRaw.Size),
 		TransactionCount: len(blockRaw.Transactions),
+		BaseFeePerGas:    util.DecimalFromU256(blockRaw.BaseFeePerGas),
 	}
-	hash2ExtrinsicIndex, err := findOutSubstrateExecutedEvent(ctx, blockNum, blockRaw)
+	hash2ExtrinsicIndex, err := findOutSubstrateExecutedEvent(ctx, uint(blockNum), blockRaw)
 	if err != nil {
 		return err
 	}
@@ -85,7 +87,7 @@ func (s *Storage) ProcessBlock(ctx context.Context, blockNum uint, blockTimestam
 		// override contract address
 		defer wg.Done()
 
-		if e := s.CreateTransactionByExecuted(ctx, blockTimestamp, &transaction, hash2ExtrinsicIndex[transaction.Hash]); e != nil {
+		if e := s.CreateTransactionByExecuted(ctx, block.Timestamp, &transaction, hash2ExtrinsicIndex[transaction.Hash]); e != nil {
 			err = e
 		}
 	})
@@ -131,7 +133,7 @@ func GetBlockByNums(ctx context.Context, start, end int) (list []EvmBlock) {
 }
 
 type SampleBlockJson struct {
-	BlockNum         uint            `json:"block_num" gorm:"size:64;index:block_num,unique"`
+	BlockNum         uint64          `json:"block_num" gorm:"size:64;index:block_num,unique"`
 	BlockHash        string          `json:"block_hash" gorm:"size:70;index:block_hash,unique"`
 	Author           string          `json:"author" gorm:"size:70"`
 	GasUsed          decimal.Decimal `json:"gas_used"  gorm:"type:decimal(65);"`
@@ -159,7 +161,7 @@ func GetBlocksSampleByNums(c context.Context, page, row int) ([]SampleBlockJson,
 
 func GetBlockList(c context.Context, page, row int) ([]EvmBlock, int) {
 	var blocks []EvmBlock
-	blockNum := int(LatestBlockNum(c))
+	blockNum := int(latestBlockNum(c))
 	if blockNum == 0 {
 		return nil, 0
 	}
@@ -182,11 +184,21 @@ func GetBlockList(c context.Context, page, row int) ([]EvmBlock, int) {
 	return blocks, blockNum
 }
 
-func LatestBlockNum(ctx context.Context) uint {
+func latestBlockNum(ctx context.Context) uint {
 	var block EvmBlock
-	q := sg.db.WithContext(ctx).Model(EvmBlock{}).Order("block_num desc").First(&block)
+	q := sg.db.WithContext(ctx).Model(EvmBlock{}).Last(&block)
 	if q.Error != nil {
 		return 0
 	}
-	return block.BlockNum
+	return uint(block.BlockNum)
+}
+
+func BlockNums2Blocks(ctx context.Context, blockNums []uint64) map[uint64]EvmBlock {
+	var blocks []EvmBlock
+	sg.db.WithContext(ctx).Model(EvmBlock{}).Where("block_num in ?", blockNums).Find(&blocks)
+	blockMap := make(map[uint64]EvmBlock)
+	for _, block := range blocks {
+		blockMap[block.BlockNum] = block
+	}
+	return blockMap
 }

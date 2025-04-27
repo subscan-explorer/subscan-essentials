@@ -23,8 +23,8 @@ type Transaction struct {
 	Hash           string          `json:"hash"  gorm:"primaryKey;autoIncrement:false;size:255"`
 	BlockNum       uint            `json:"block_num" gorm:"default: null;size:32;index:block_num" `
 	BlockTimestamp uint            `json:"block_timestamp" gorm:"size:32" `
-	From           string          `json:"from" gorm:"default: null;size:70"`
-	To             string          `json:"to" gorm:"default: null;size:70"`
+	FromAddress    string          `json:"from_address" gorm:"default: null;size:70;index:sender"`
+	ToAddress      string          `json:"to_address" gorm:"default: null;size:70"`
 	InputData      string          `json:"input_data" gorm:"type:string"`
 	Nonce          uint            `json:"nonce" gorm:"size:32" `
 	GasLimit       decimal.Decimal `json:"gas_limit" gorm:"default: 0;type:decimal(40);" `
@@ -44,6 +44,7 @@ type Transaction struct {
 	EffectiveGasPrice    decimal.Decimal `json:"effective_gas_price" gorm:"default: 0;type:decimal(40);" `
 	MaxPriorityFeePerGas decimal.Decimal `json:"max_priority_fee_per_gas" gorm:"default:-1;type:decimal(40)"`
 	MaxFeePerGas         decimal.Decimal `json:"max_fee_per_gas" gorm:"default:0;type:decimal(40)"`
+	CumulativeGasUsed    decimal.Decimal `json:"cumulative_gas_used" gorm:"default:0;type:decimal(40)"`
 	Precompile           uint            `json:"precompile" gorm:"-"`
 	TxnType              uint            `json:"txn_type" gorm:"size:32"`
 	TransactionIndex     uint64          `json:"transaction_index" gorm:"size:32"`
@@ -124,12 +125,12 @@ func (t *Transaction) TableName() string {
 func (t *Transaction) AfterCreate(txn *gorm.DB) (err error) {
 	ctx := txn.Statement.Context
 	// Increase Contract transaction count
-	if IsContract(ctx, t.To) {
-		incrContractTransactionCount(ctx, t.To)
+	if IsContract(ctx, t.ToAddress) {
+		incrContractTransactionCount(ctx, t.ToAddress)
 	} else {
 		// check to address is contract
-		if t.To != "" && util.TrimHex(t.InputData) != "" {
-			_ = sg.db.WithContext(ctx).Scopes(model.IgnoreDuplicate).Create(&Contract{Address: t.To})
+		if t.ToAddress != "" && util.TrimHex(t.InputData) != "" {
+			_ = sg.db.WithContext(ctx).Scopes(model.IgnoreDuplicate).Create(&Contract{Address: t.ToAddress})
 		}
 	}
 	// relate h160 address with account address
@@ -193,9 +194,9 @@ func (s *Storage) CreateTransactionByExecuted(ctx context.Context, blockTimestam
 	transaction.R = ethTransaction.R
 	transaction.V = uint(util.U256(ethTransaction.V).Uint64())
 	transaction.S = ethTransaction.S
-	transaction.From = ethTransaction.From
+	transaction.FromAddress = ethTransaction.From
 	transaction.Hash = ethTransaction.Hash
-	transaction.To = ethTransaction.To
+	transaction.ToAddress = ethTransaction.To
 	transaction.Contract = ethTransaction.Creates
 	transaction.MaxPriorityFeePerGas = util.DecimalFromU256(ethTransaction.MaxPriorityFeePerGas)
 	transaction.MaxFeePerGas = util.DecimalFromU256(ethTransaction.MaxFeePerGas)
@@ -238,6 +239,15 @@ func (s *Storage) CreateTransactionByExecuted(ctx context.Context, blockTimestam
 			BlockTimestamp:  transaction.BlockTimestamp,
 			BlockNum:        uint64(transaction.BlockNum),
 		}
+		if len(receipt.Topics) > 1 {
+			tr.Topic1 = receipt.Topics[1]
+		}
+		if len(receipt.Topics) > 2 {
+			tr.Topic2 = receipt.Topics[2]
+		}
+		if len(receipt.Topics) > 3 {
+			tr.Topic3 = receipt.Topics[3]
+		}
 		receipts = append(receipts, tr)
 	}
 	// receipt
@@ -249,6 +259,8 @@ func (s *Storage) CreateTransactionByExecuted(ctx context.Context, blockTimestam
 	if query.Error != nil {
 		return query.Error
 	}
+	_ = TouchAccount(ctx, transaction.FromAddress)
+	_ = TouchAccount(ctx, transaction.ToAddress)
 	return nil
 }
 
@@ -281,3 +293,19 @@ func (s *Storage) CreateTransactionByExecuted(ctx context.Context, blockTimestam
 // 	t.MaxFeePerGas = util.DecimalFromU256(ethTransaction.MaxFeePerGas)
 // 	return &t
 // }
+
+// Hash2Transaction get transactions map by hash, hash=>transaction
+func Hash2Transaction(ctx context.Context, hash []string) map[string]Transaction {
+	var transactions []Transaction
+	result := make(map[string]Transaction)
+
+	// Query transactions by hash
+	sg.db.WithContext(ctx).Where("hash IN ?", hash).Find(&transactions)
+
+	// Map transactions by hash
+	for _, t := range transactions {
+		result[t.Hash] = t
+	}
+
+	return result
+}

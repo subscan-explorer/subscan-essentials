@@ -154,5 +154,5 @@ func (metadataValue *CompilerJSONInput) VerifyFromJsonInput(_ context.Context, a
 		}
 		return &vr, nil
 	}
-	return nil, nil
+	return nil, errors.New("verify server disabled")
 }

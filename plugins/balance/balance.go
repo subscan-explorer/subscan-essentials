@@ -2,7 +2,6 @@ package balance
 
 import (
 	"context"
-	"fmt"
 	"github.com/itering/subscan-plugin"
 	"github.com/itering/subscan-plugin/router"
 	"github.com/itering/subscan-plugin/storage"
@@ -10,7 +9,6 @@ import (
 	"github.com/itering/subscan/plugins/balance/http"
 	"github.com/itering/subscan/plugins/balance/model"
 	"github.com/itering/subscan/plugins/balance/service"
-	"github.com/itering/subscan/util"
 	"github.com/shopspring/decimal"
 	"strings"
 )
@@ -55,12 +53,9 @@ func (a *Balance) ProcessEvent(_ *storage.Block, event *storage.Event, _ decimal
 	if event == nil {
 		return nil
 	}
-	var paramEvent []storage.EventParam
-	util.UnmarshalAny(&paramEvent, event.Params)
-
-	switch fmt.Sprintf("%s-%s", strings.ToLower(event.ModuleId), strings.ToLower(event.EventId)) {
-	case strings.ToLower("System-NewAccount"):
-		return dao.NewAccount(a.d, util.ToString(paramEvent[0].Value))
+	switch strings.ToLower(event.ModuleId) {
+	case strings.ToLower("System"):
+		return dao.EmitEvent(context.TODO(), a.d, event)
 	}
 
 	return nil
@@ -71,7 +66,7 @@ func (a *Balance) SubscribeExtrinsic() []string {
 }
 
 func (a *Balance) SubscribeEvent() []string {
-	return []string{"system"}
+	return []string{"balances"}
 }
 
 func (a *Balance) Version() string {

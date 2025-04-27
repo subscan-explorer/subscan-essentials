@@ -205,6 +205,7 @@ func (c *Token) CreateErc1155Transfer(ctx context.Context, _from, _to string, to
 			Value:      decimal.NewFromBigInt(value, 0),
 			TokenId:    tokenId.String(),
 			BatchIndex: uint(i),
+			Category:   TransferCategoryErc1155,
 		}
 		transfers = append(transfers, transfer)
 		tokenIdsStr = append(tokenIdsStr, tokenId.String())
@@ -219,8 +220,8 @@ func (c *Token) CreateErc1155Transfer(ctx context.Context, _from, _to string, to
 		c.incrTransferCount(ctx, int(q.RowsAffected))
 
 		if mq.Instant != nil {
-			_ = mq.Instant.Publish(Eip1155Token, "balance", []string{c.Contract, _from, strings.Join(tokenIdsStr, ",")})
-			_ = mq.Instant.Publish(Eip1155Token, "balance", []string{c.Contract, _to, strings.Join(tokenIdsStr, ",")})
+			_ = Publish(Eip1155Token, "balance", []string{c.Contract, _from, strings.Join(tokenIdsStr, ",")})
+			_ = Publish(Eip1155Token, "balance", []string{c.Contract, _to, strings.Join(tokenIdsStr, ",")})
 		}
 	}
 	return nil

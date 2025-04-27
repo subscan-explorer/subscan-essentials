@@ -6,10 +6,12 @@ import (
 	"github.com/itering/subscan-plugin/router"
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/plugins/evm/dao"
+	"github.com/itering/subscan/plugins/evm/http"
 	"github.com/itering/subscan/plugins/evm/workers"
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc/metadata"
 	"github.com/shopspring/decimal"
+	"gorm.io/gorm"
 )
 
 type EVM struct {
@@ -23,12 +25,12 @@ func (a *EVM) Enable() bool {
 }
 
 func (a *EVM) ProcessBlock(ctx context.Context, block *storage.Block) error {
-	return a.s.AddEvmBlock(ctx, uint(block.BlockNum), uint(block.BlockTimestamp), false)
+	return a.s.AddEvmBlock(ctx, uint(block.BlockNum), false)
 }
 
 func (a *EVM) SetRedisPool(pool subscan_plugin.RedisPool) {
 	if a.Enable() {
-		a.s = dao.Init(a.d, pool)
+		a.s = dao.Init(a.d.GetDbInstance().(*gorm.DB), pool)
 	}
 }
 
@@ -49,8 +51,7 @@ func (a *EVM) InitDao(d storage.Dao) {
 }
 
 func (a *EVM) InitHttp() []router.Http {
-	// return http.Router(srv)
-	return nil
+	return http.Router()
 }
 
 func (a *EVM) ProcessExtrinsic(*storage.Block, *storage.Extrinsic, []storage.Event) error {
@@ -80,15 +81,7 @@ func (a *EVM) ExecWorker(ctx context.Context, queue, class string, raw interface
 }
 
 func (a *EVM) Migrate() {
-	_ = a.d.AutoMigration(&dao.Transaction{})
-	_ = a.d.AutoMigration(&dao.TransactionReceipt{})
-	_ = a.d.AutoMigration(&dao.Contract{})
-	_ = a.d.AutoMigration(&dao.Token{})
-	_ = a.d.AutoMigration(&dao.TokenHolder{})
-	_ = a.d.AutoMigration(&dao.TokensTransfers{})
-	_ = a.d.AutoMigration(&dao.EvmBlock{})
-	_ = a.d.AutoMigration(&dao.Erc721Holders{})
-	_ = a.d.AutoMigration(&dao.AbiMapping{})
-	_ = a.d.AutoMigration(&dao.ERC1155Item{})
-	_ = a.d.AutoMigration(&dao.ERC1155Holder{})
+	for _, table := range a.s.Tables() {
+		_ = a.d.AutoMigration(table)
+	}
 }

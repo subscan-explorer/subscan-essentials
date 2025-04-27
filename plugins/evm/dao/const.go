@@ -9,17 +9,12 @@ var (
 	ContractCreationBytecodeKey = util.NetworkNode + ":" + "EvmContractCreationBytecode"
 	TransactionCount            = util.NetworkNode + ":" + "EvmTransactionCount"
 	TokenAddrKey                = util.NetworkNode + ":" + "EvmTokenAddr"
+	EvmAddressMemberKey         = util.NetworkNode + ":" + "EvmAddressMember"
 	Eip20Token                  = "erc20"
 	Eip721Token                 = "erc721"
 	Eip1155Token                = "erc1155"
-
-	TransactionQueue = "Transaction"
-	ConvictionClass  = "ConvictionVoting"
-	TraceQueue       = "Trace"
-
-	NullAddress = "0x0000000000000000000000000000000000000000"
-
-	Create = "CREATE"
+	NullAddress                 = "0x0000000000000000000000000000000000000000"
+	Create                      = "CREATE"
 )
 
 const (

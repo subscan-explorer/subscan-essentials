@@ -51,7 +51,7 @@ func ForUpdate() Option {
 	}
 }
 
-func Page(page, rows int) Option {
+func Offset(page, rows int) Option {
 	return WithLimit(page*rows, rows)
 }
 

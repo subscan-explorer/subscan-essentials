@@ -12,12 +12,16 @@ import (
 type TransactionReceipt struct {
 	Id              uint64 `json:"id" gorm:"primaryKey;autoIncrement:false" `
 	Topics          string `json:"topics" gorm:"type:TEXT" `
-	Address         string `json:"address" gorm:"size:100" `
-	TransactionHash string `json:"transaction_hash" gorm:"size:100" `
+	Address         string `json:"address" gorm:"size:70;index:address" `
+	TransactionHash string `json:"transaction_hash" gorm:"size:70" `
 	Index           int    `json:"index" gorm:"size:32"  `
 	Data            string `json:"data" gorm:"size:TEXT" `
-	MethodHash      string `json:"method_hash" gorm:"size:100"`
+	MethodHash      string `json:"method_hash" gorm:"size:70;index:method_hash"`
 	BlockTimestamp  uint   `json:"block_timestamp" gorm:"size:32"  `
+
+	Topic1 string `json:"topic1" gorm:"size:70"`
+	Topic2 string `json:"topic2" gorm:"size:70"`
+	Topic3 string `json:"topic3" gorm:"size:70"`
 
 	BlockNum         uint64 `json:"block_num"   index:"block_num"`
 	TransactionIndex uint64 `json:"transaction_index" gorm:"size:32"  `

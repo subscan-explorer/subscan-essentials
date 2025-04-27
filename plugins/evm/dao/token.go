@@ -180,6 +180,7 @@ func RefreshHolder(ctx context.Context, contract, address, category string) erro
 
 	q := sg.AddOrUpdateItem(ctx, &TokenHolder{Contract: contract, Holder: address, Balance: balance}, []string{"contract", "holder"}, "balance")
 	if q.RowsAffected == 1 || (q.RowsAffected == 2 && balance.IsZero()) {
+		_ = TouchAccount(context.Background(), address)
 		t.RefreshTokenHolder(ctx, TokenHolderCount(ctx, contract))
 	}
 	return q.Error
@@ -199,7 +200,18 @@ type TokensTransfers struct {
 	TokenId    string          `gorm:"default:null;size:255;index:token_id,length:50" json:"token_id"`
 	TransferId uint64          `gorm:"index:transfer_id;index:batch,unique;size:64" json:"transfer_id"`
 	BatchIndex uint            `gorm:"default:0;size:32;index:batch,unique" json:"batch_index"`
+	Category   int             `gorm:"default:0;size:32;index:category" json:"category"`
 }
+
+func (t *TokensTransfers) BlockNum() uint64 {
+	return t.TransferId / TransactionIdGenerateCoefficient / TxnReceiptLimit
+}
+
+const (
+	TransferCategoryErc20 = iota
+	TransferCategoryErc721
+	TransferCategoryErc1155
+)
 
 func (t *TokensTransfers) TableName() string {
 	return "evm_tokens_transfers"
@@ -242,12 +254,14 @@ func (t *TransactionReceipt) ProcessTokenTransfer(ctx context.Context, category 
 	switch category {
 	case Eip20Token:
 		transfer.Value = util.EvmU256Decoder(t.Data)
+		transfer.Category = TransferCategoryErc20
 	case Eip721Token:
 		var tokenIdRaw = t.Data // above token_id not indexed
 		if len(topics) == 4 {
 			tokenIdRaw = topics[3]
 		}
 		transfer.TokenId = util.U256(tokenIdRaw).String()
+		transfer.Category = TransferCategoryErc721
 	default:
 		// unsupported category
 		return nil
@@ -258,10 +272,10 @@ func (t *TransactionReceipt) ProcessTokenTransfer(ctx context.Context, category 
 
 		token.incrTransferCount(ctx, 1)
 		if mq.Instant != nil {
-			_ = mq.Instant.Publish(category, "balance", []string{token.Contract, transfer.Sender})
-			_ = mq.Instant.Publish(category, "balance", []string{token.Contract, transfer.Receiver})
+			_ = Publish(category, "balance", []string{token.Contract, transfer.Sender})
+			_ = Publish(category, "balance", []string{token.Contract, transfer.Receiver})
 			if transfer.TokenId != "" {
-				_ = mq.Instant.Publish(category, "holder", []string{token.Contract, transfer.TokenId})
+				_ = Publish(category, "holder", []string{token.Contract, transfer.TokenId})
 			}
 		}
 		return nil
@@ -300,4 +314,14 @@ type TokenTransferJson struct {
 	Name       string           `json:"name"`
 	Category   string           `json:"category"`
 	Price      decimal.Decimal  `json:"price"`
+}
+
+func ContractAddr2Token(ctx context.Context, addr []string) map[string]Token {
+	var tokens []Token
+	sg.db.WithContext(ctx).Model(Token{}).Where("contract in ?", addr).Find(&tokens)
+	var tokenMap = make(map[string]Token)
+	for _, v := range tokens {
+		tokenMap[v.Contract] = v
+	}
+	return tokenMap
 }

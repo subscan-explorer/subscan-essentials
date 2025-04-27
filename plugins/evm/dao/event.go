@@ -9,7 +9,6 @@ import (
 	"github.com/itering/subscan/plugins/evm/feature/erc721"
 	"github.com/itering/subscan/share/web3"
 	"github.com/itering/subscan/util"
-	"github.com/itering/subscan/util/mq"
 	"strings"
 )
 
@@ -29,12 +28,12 @@ func (t TransactionReceipt) EventProcess(ctx context.Context) error {
 		}
 		if token := GetTokenByContract(ctx, t.Address); token == nil || token.Category == "" {
 			if erc721.BaseVerify(ctx, web3.RPC, t.Address, BillionAddress(ctx), util.TrimHex(tokenId)) {
-				_ = mq.Instant.Publish(Eip721Token, "transfer", t)
+				_ = Publish(Eip721Token, "transfer", t)
 				return nil
 			}
-			_ = mq.Instant.Publish(Eip20Token, "transfer", t)
+			_ = Publish(Eip20Token, "transfer", t)
 		} else {
-			_ = mq.Instant.Publish(token.Category, "transfer", t)
+			_ = Publish(token.Category, "transfer", t)
 		}
 	// deposit or withdraw
 	case erc20.EventDeposit, erc20.EventWithdraw:
@@ -46,7 +45,7 @@ func (t TransactionReceipt) EventProcess(ctx context.Context) error {
 			return nil
 		}
 		address := util.AddHex(abi.DecodeAddress(log2[1]))
-		_ = mq.Instant.Publish("erc20", "balance", []string{t.Address, address})
+		_ = Publish("erc20", "balance", []string{t.Address, address})
 
 	// proxy
 	case delegateProxy.EventUpgraded:
@@ -58,10 +57,10 @@ func (t TransactionReceipt) EventProcess(ctx context.Context) error {
 		if token := GetTokenByContract(ctx, t.Address); token == nil {
 			erc1155token := erc1155.Init(web3.RPC, t.Address)
 			if result, _ := erc1155token.SupportsInterface(ctx); result {
-				return mq.Instant.Publish(Eip1155Token, Eip1155Token, t)
+				return Publish(Eip1155Token, Eip1155Token, t)
 			}
 		} else if token.Category == Eip1155Token {
-			_ = mq.Instant.Publish(token.Category, Eip1155Token, t)
+			_ = Publish(token.Category, Eip1155Token, t)
 		}
 	}
 	return nil

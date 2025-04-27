@@ -2,7 +2,7 @@ package http
 
 import (
 	"errors"
-	"fmt"
+	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util/address"
 
 	"github.com/gin-gonic/gin"
@@ -71,16 +71,16 @@ func extrinsicsHandle(c *gin.Context) {
 	}
 	ctx := c.Request.Context()
 
-	var query []string
+	var query []model.Option
 	if p.Module != "" {
-		query = append(query, fmt.Sprintf("call_module = '%s'", p.Module))
+		query = append(query, model.Where("call_module = ?", p.Module))
 	}
 	if p.Call != "" {
-		query = append(query, fmt.Sprintf("call_module_function = '%s'", p.Call))
+		query = append(query, model.Where("call_module_function = ?", p.Module))
 	}
 
 	if p.Signed == "signed" {
-		query = append(query, "is_signed = 1")
+		query = append(query, model.Where("is_signed = 1"))
 	}
 
 	if p.Address != "" {
@@ -89,7 +89,7 @@ func extrinsicsHandle(c *gin.Context) {
 			toJson(c, nil, util.InvalidAccountAddress)
 			return
 		}
-		query = append(query, fmt.Sprintf("account_id = '%s'", account))
+		query = append(query, model.Where("account_id = ?", account))
 	}
 
 	list, count := svc.GetExtrinsicList(ctx, p.Page, p.Row, query...)
@@ -135,12 +135,12 @@ func eventsHandle(c *gin.Context) {
 	}
 	ctx := c.Request.Context()
 
-	var query []string
+	var query []model.Option
 	if p.Module != "" {
-		query = append(query, fmt.Sprintf("module_id = '%s'", p.Module))
+		query = append(query, model.Where("module_id = ?", p.Module))
 	}
 	if p.Event != "" {
-		query = append(query, fmt.Sprintf("event_id = '%s'", p.Event))
+		query = append(query, model.Where("event_id = ?", p.Event))
 	}
 
 	events, count := svc.EventsList(ctx, p.Page, p.Row, query...)

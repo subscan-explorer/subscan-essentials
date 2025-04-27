@@ -50,7 +50,7 @@ func (d *Dao) GetExtrinsicsByBlockNum(blockNum uint) []model.ChainExtrinsicJson 
 	return list
 }
 
-func (d *Dao) GetExtrinsicList(c context.Context, page, row int, _ string, queryWhere ...string) ([]model.ChainExtrinsic, int) {
+func (d *Dao) GetExtrinsicList(c context.Context, page, row int, _ string, queryWhere ...model.Option) ([]model.ChainExtrinsic, int) {
 	var extrinsics []model.ChainExtrinsic
 	var count int64
 
@@ -62,10 +62,8 @@ func (d *Dao) GetExtrinsicList(c context.Context, page, row int, _ string, query
 		)
 
 		queryOrigin := d.db.Model(model.ChainExtrinsic{BlockNum: uint(index) * model.SplitTableBlockNum})
-		for _, w := range queryWhere {
-			queryOrigin = queryOrigin.Where(w)
-		}
 
+		queryOrigin.Scopes(queryWhere...)
 		queryOrigin.Count(&tableCount)
 
 		if tableCount == 0 {

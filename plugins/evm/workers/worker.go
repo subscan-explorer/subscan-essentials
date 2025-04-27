@@ -30,6 +30,7 @@ func Emit(ctx context.Context, queue, class string, raw interface{}) error {
 				return token.RefreshErc721Holders(ctx, args[1])
 			}
 		}
+
 	case dao.Eip1155Token:
 		switch class {
 		case "balance":

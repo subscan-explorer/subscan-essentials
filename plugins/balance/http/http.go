@@ -16,7 +16,7 @@ var (
 func Router(s *service.Service) []router.Http {
 	svc = s
 	return []router.Http{
-		{"accounts", accounts},
+		{"accounts", accounts, http.MethodPost},
 	}
 }
 

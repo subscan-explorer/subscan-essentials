@@ -1,0 +1,326 @@
+package dao
+
+import (
+	"context"
+	"fmt"
+	"github.com/itering/subscan/model"
+	balanceModel "github.com/itering/subscan/plugins/balance/model"
+	"github.com/itering/subscan/util"
+	"strings"
+)
+
+type ISrv interface {
+	API_GetLogs(ctx context.Context, opts ...model.Option) (res []EtherscanLogsRes)
+	API_GetAccounts(ctx context.Context, h160 []string) (map[string]balanceModel.Account, error)
+	API_Transactions(ctx context.Context, opts ...model.Option) (res []EtherscanTxnRes)
+	API_TokenEventRes(ctx context.Context, opts ...model.Option) []EtherscanTokenEventRes
+	API_ContractSourceCode(_ context.Context, c *Contract) *EtherscanContractSourceCodeRes
+	API_GetContractCreation(ctx context.Context, addresses []string) (res []EtherscanContractCreationRes)
+
+	ContractsByAddr(ctx context.Context, address string) (contract *Contract)
+	GetTransactionByHash(c context.Context, hash string) *Transaction
+}
+
+type ApiSrv struct{}
+
+type EtherscanLogsRes struct {
+	Address          string   `json:"address"`
+	Topics           []string `json:"topics"`
+	Data             string   `json:"data"`
+	BlockNumber      string   `json:"blockNumber"`
+	BlockHash        string   `json:"blockHash"`
+	Timestamp        string   `json:"timestamp"`
+	GasPrice         string   `json:"gasPrice"`
+	GasUsed          string   `json:"gasUsed"`
+	LogIndex         string   `json:"logIndex"`
+	TransactionHash  string   `json:"transactionHash"`
+	TransactionIndex string   `json:"transactionIndex"`
+}
+
+func (a *ApiSrv) API_GetLogs(ctx context.Context, opts ...model.Option) (res []EtherscanLogsRes) {
+	var list []TransactionReceipt
+	sg.db.WithContext(ctx).Scopes(opts...).Order("id desc").Find(&list)
+
+	var (
+		blockNums []uint64
+		hashes    []string
+	)
+	for _, v := range list {
+		blockNums = append(blockNums, v.BlockNum)
+		hashes = append(hashes, v.TransactionHash)
+	}
+
+	var blocks []EvmBlock
+	sg.db.WithContext(ctx).Select("block_num,block_hash").Model(&EvmBlock{}).Where("block_num in ?", blockNums).Find(&blocks)
+	var hashesMap = make(map[uint64]string)
+	for _, v := range blocks {
+		hashesMap[v.BlockNum] = v.BlockHash
+	}
+
+	var txns []Transaction
+	sg.db.WithContext(ctx).Select("hash,gas_price,gas_used").Model(&Transaction{}).Where("hash in ?", hashes).Find(&txns)
+	var txnsMap = make(map[string]Transaction)
+	for _, v := range txns {
+		txnsMap[v.Hash] = v
+	}
+
+	for _, v := range list {
+		res = append(res, EtherscanLogsRes{
+			Address:          v.Address,
+			Topics:           strings.Split(v.Topics, ","),
+			Data:             v.Data,
+			BlockNumber:      util.IntToHexNumber(v.BlockNum),
+			BlockHash:        hashesMap[v.BlockNum],
+			Timestamp:        util.IntToHexNumber(uint64(v.BlockTimestamp)),
+			GasPrice:         util.IntToHexNumber(uint64(txnsMap[v.TransactionHash].GasPrice.IntPart())),
+			GasUsed:          util.IntToHexNumber(uint64(txnsMap[v.TransactionHash].GasUsed.IntPart())),
+			LogIndex:         util.IntToHexNumber(uint64(v.Index)),
+			TransactionHash:  v.TransactionHash,
+			TransactionIndex: util.IntToHexNumber(v.TransactionIndex),
+		})
+	}
+	return
+}
+
+func (a *ApiSrv) API_GetAccounts(ctx context.Context, h160 []string) (map[string]balanceModel.Account, error) {
+	var addresses []string
+	var addr2H160 = make(map[string]string)
+
+	for _, v := range h160 {
+		addr := h160ToAccountIdByNetwork(ctx, v, util.NetworkNode)
+		if addr == "" {
+			return nil, fmt.Errorf("address %s not a valid address", v)
+		}
+		addresses = append(addresses, addr)
+		addr2H160[addr] = v
+	}
+	var accounts []balanceModel.Account
+	if err := sg.db.WithContext(ctx).Where("address in ? ", addresses).Find(&accounts).Error; err != nil {
+		return nil, err
+	}
+	var accountMap = make(map[string]balanceModel.Account)
+	for _, v := range accounts {
+		accountMap[addr2H160[v.Address]] = v
+	}
+	return accountMap, nil
+}
+
+type EtherscanTxnRes struct {
+	BlockNumber       string `json:"blockNumber"`
+	TimeStamp         string `json:"timeStamp"`
+	Hash              string `json:"hash"`
+	Nonce             string `json:"nonce"`
+	BlockHash         string `json:"blockHash"`
+	TransactionIndex  string `json:"transactionIndex"`
+	From              string `json:"from"`
+	To                string `json:"to"`
+	Value             string `json:"value"`
+	Gas               string `json:"gas"`
+	GasPrice          string `json:"gasPrice"`
+	IsError           string `json:"isError"`
+	TxreceiptStatus   string `json:"txreceipt_status"`
+	Input             string `json:"input"`
+	ContractAddress   string `json:"contractAddress"`
+	CumulativeGasUsed string `json:"cumulativeGasUsed"`
+	GasUsed           string `json:"gasUsed"`
+	Confirmations     string `json:"confirmations"`
+	MethodId          string `json:"methodId"`
+	FunctionName      string `json:"functionName"`
+}
+
+func (a *ApiSrv) API_Transactions(ctx context.Context, opts ...model.Option) (res []EtherscanTxnRes) {
+	var list []Transaction
+	sg.db.WithContext(ctx).Scopes(opts...).Find(&list)
+	lastBlock := latestBlockNum(ctx)
+	for _, v := range list {
+		var isErr = "0"
+		var txreceiptStatus = "1"
+		if !v.Success {
+			isErr = "1"
+			txreceiptStatus = "0"
+		}
+		var methodId string
+		// 0xa9059cbb
+		if len(v.InputData) > 10 {
+			methodId = v.InputData[:10]
+		}
+		res = append(res, EtherscanTxnRes{
+			BlockNumber:       fmt.Sprintf("%d", v.BlockNum),
+			TimeStamp:         fmt.Sprintf("%d", v.BlockTimestamp),
+			Hash:              v.Hash,
+			Nonce:             fmt.Sprintf("%d", v.Nonce),
+			BlockHash:         "",
+			TransactionIndex:  fmt.Sprintf("%d", v.TransactionIndex),
+			From:              v.FromAddress,
+			To:                v.ToAddress,
+			Value:             v.Value.String(),
+			Gas:               v.GasLimit.String(),
+			GasPrice:          v.GasPrice.String(),
+			IsError:           isErr,
+			TxreceiptStatus:   txreceiptStatus,
+			Input:             v.InputData,
+			ContractAddress:   v.Contract,
+			CumulativeGasUsed: v.CumulativeGasUsed.String(),
+			GasUsed:           v.GasUsed.String(),
+			Confirmations:     fmt.Sprintf("%d", lastBlock-v.BlockNum),
+			MethodId:          methodId,
+			FunctionName:      "", // todo
+		})
+	}
+	return
+}
+
+type EtherscanTokenEventRes struct {
+	BlockNumber       string `json:"blockNumber"`
+	TimeStamp         string `json:"timeStamp"`
+	Hash              string `json:"hash"`
+	Nonce             string `json:"nonce"`
+	BlockHash         string `json:"blockHash"`
+	From              string `json:"from"`
+	ContractAddress   string `json:"contractAddress"`
+	To                string `json:"to"`
+	TokenName         string `json:"tokenName"`
+	TokenSymbol       string `json:"tokenSymbol"`
+	TokenDecimal      string `json:"tokenDecimal"`
+	TransactionIndex  string `json:"transactionIndex"`
+	Gas               string `json:"gas"`
+	GasPrice          string `json:"gasPrice"`
+	GasUsed           string `json:"gasUsed"`
+	CumulativeGasUsed string `json:"cumulativeGasUsed"`
+	Confirmations     string `json:"confirmations"`
+
+	Value      string `json:"value,omitempty"`
+	TokenValue string `json:"tokenValue,omitempty"`
+	TokenID    string `json:"tokenID,omitempty"`
+}
+
+func (a *ApiSrv) API_TokenEventRes(ctx context.Context, opts ...model.Option) []EtherscanTokenEventRes {
+	var transfers []TokensTransfers
+	sg.db.WithContext(ctx).Scopes(opts...).Find(&transfers)
+	var res []EtherscanTokenEventRes
+	lastBlock := latestBlockNum(ctx)
+
+	var (
+		tokens []string
+		blocks []uint64
+		txs    []string
+	)
+	for _, v := range transfers {
+		tokens = append(tokens, v.Contract)
+		blocks = append(blocks, v.BlockNum())
+		txs = append(txs, v.Hash)
+	}
+
+	blockNums2Blocks := BlockNums2Blocks(ctx, blocks)
+	address2Tokens := ContractAddr2Token(ctx, tokens)
+	hash2Txn := Hash2Transaction(ctx, txs)
+
+	for _, transfer := range transfers {
+		txn := hash2Txn[transfer.Hash]
+		block := blockNums2Blocks[transfer.BlockNum()]
+		token := address2Tokens[transfer.Contract]
+		r := EtherscanTokenEventRes{
+			BlockNumber:       fmt.Sprintf("%d", transfer.BlockNum()),
+			TimeStamp:         fmt.Sprintf("%d", txn.BlockTimestamp),
+			Hash:              transfer.Hash,
+			Nonce:             fmt.Sprintf("%d", txn.Nonce),
+			BlockHash:         block.BlockHash,
+			From:              transfer.Sender,
+			ContractAddress:   transfer.Contract,
+			To:                transfer.Receiver,
+			TokenName:         token.Name,
+			TokenSymbol:       token.Symbol,
+			TokenDecimal:      fmt.Sprintf("%d", token.Decimals),
+			TransactionIndex:  fmt.Sprintf("%d", txn.TransactionIndex),
+			Gas:               txn.GasLimit.String(),
+			GasPrice:          txn.GasPrice.String(),
+			GasUsed:           txn.GasUsed.String(),
+			CumulativeGasUsed: txn.CumulativeGasUsed.String(),
+			Confirmations:     fmt.Sprintf("%d", uint64(lastBlock)-transfer.BlockNum()),
+		}
+		switch transfer.Category {
+		case TransferCategoryErc20:
+			r.Value = transfer.Value.String()
+		case TransferCategoryErc721:
+			r.TokenID = transfer.TokenId
+		case TransferCategoryErc1155:
+			r.TokenValue = transfer.Value.String()
+			r.TokenID = transfer.TokenId
+		}
+		res = append(res, r)
+	}
+	return res
+}
+
+type EtherscanContractSourceCodeRes struct {
+	SourceCode           string `json:"SourceCode"`
+	ABI                  string `json:"ABI"`
+	ContractName         string `json:"ContractName"`
+	CompilerVersion      string `json:"CompilerVersion"`
+	OptimizationUsed     string `json:"OptimizationUsed"`
+	Runs                 string `json:"Runs"`
+	ConstructorArguments string `json:"ConstructorArguments"`
+	EVMVersion           string `json:"EVMVersion"`
+	Library              string `json:"Library"`
+	LicenseType          string `json:"LicenseType"`
+	Proxy                string `json:"Proxy"`
+	Implementation       string `json:"Implementation"`
+	SwarmSource          string `json:"SwarmSource"`
+	SimilarMatch         string `json:"SimilarMatch"`
+}
+
+func (a *ApiSrv) API_ContractSourceCode(_ context.Context, c *Contract) *EtherscanContractSourceCodeRes {
+	res := &EtherscanContractSourceCodeRes{
+		SourceCode:       c.SourceCode,
+		ABI:              c.Abi.String(),
+		ContractName:     c.ContractName,
+		CompilerVersion:  c.CompilerVersion,
+		OptimizationUsed: "0",
+		Runs:             fmt.Sprintf("%d", c.OptimizationRuns),
+		EVMVersion:       c.EvmVersion,
+		Library:          c.ExternalLibraries.String(),
+		Proxy:            c.VerifyType,
+		// ConstructorArguments: "",
+		// LicenseType:          "",
+	}
+	if c.Optimize {
+		res.OptimizationUsed = "1"
+	}
+	return res
+}
+
+type EtherscanContractCreationRes struct {
+	ContractAddress string `json:"contractAddress"`
+	ContractCreator string `json:"contractCreator"`
+	TxHash          string `json:"txHash"`
+	BlockNumber     string `json:"blockNumber"`
+	Timestamp       string `json:"timestamp"`
+	// ContractFactory  string `json:"contractFactory"`
+	CreationBytecode string `json:"creationBytecode"`
+}
+
+func (a *ApiSrv) API_GetContractCreation(ctx context.Context, addresses []string) (res []EtherscanContractCreationRes) {
+	var contracts []Contract
+	sg.db.WithContext(ctx).Model(&Contract{}).Where("contract_address in ?", addresses).Find(&contracts)
+
+	for _, v := range contracts {
+		res = append(res, EtherscanContractCreationRes{
+			ContractAddress: v.Address,
+			ContractCreator: v.Deployer,
+			TxHash:          v.TxHash,
+			BlockNumber:     fmt.Sprintf("%d", v.BlockNum),
+			Timestamp:       fmt.Sprintf("%d", v.DeployAt),
+			// ContractFactory:  "",
+			CreationBytecode: v.CreationBytecode,
+		})
+	}
+	return
+}
+
+func (a *ApiSrv) ContractsByAddr(ctx context.Context, address string) (contract *Contract) {
+	return ContractsByAddr(ctx, address)
+}
+
+func (a *ApiSrv) GetTransactionByHash(c context.Context, hash string) *Transaction {
+	return GetTransactionByHash(c, hash)
+}

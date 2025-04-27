@@ -71,8 +71,11 @@ func initRouter(e *gin.Engine) {
 
 func pluginRouter(g *gin.RouterGroup) {
 	for name, plugin := range plugins.RegisteredPlugins {
+		if !plugin.Enable() {
+			continue
+		}
 		for _, r := range plugin.InitHttp() {
-			g.Group("plugin").Group(name).POST(r.Router, func(context *gin.Context) {
+			g.Group("plugin").Group(name).Handle(r.Method, r.Router, func(context *gin.Context) {
 				_ = r.Handle(context.Writer, context.Request)
 			})
 		}

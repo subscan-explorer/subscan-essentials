@@ -2,26 +2,23 @@ package dao
 
 import (
 	"context"
-	"fmt"
 	subscan_plugin "github.com/itering/subscan-plugin"
-	"github.com/itering/subscan-plugin/storage"
+	"github.com/itering/subscan/util/mq"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
 type Storage struct {
-	dao   storage.DB
 	db    *gorm.DB
 	redis subscan_plugin.RedisPool
 }
 
 var sg *Storage
 
-func Init(db storage.DB, redis subscan_plugin.RedisPool) *Storage {
+func Init(db *gorm.DB, redis subscan_plugin.RedisPool) *Storage {
 	if sg == nil {
 		sg = &Storage{
-			dao:   db,
-			db:    db.GetDbInstance().(*gorm.DB),
+			db:    db,
 			redis: redis,
 		}
 	}
@@ -34,7 +31,6 @@ func (s *Storage) AddOrUpdateItem(c context.Context, item interface{}, keys []st
 		keyFields = append(keyFields, clause.Column{Name: key})
 	}
 	if len(updates) > 0 {
-		fmt.Println(s.db == nil)
 		return s.db.WithContext(c).Clauses(clause.OnConflict{
 			Columns:   keyFields,
 			DoUpdates: clause.AssignmentColumns(updates),
@@ -44,4 +40,29 @@ func (s *Storage) AddOrUpdateItem(c context.Context, item interface{}, keys []st
 		Columns:   keyFields,
 		UpdateAll: true,
 	}).Create(item)
+}
+
+func (s *Storage) Tables() []interface{} {
+	return []interface{}{
+		&Transaction{},
+		&TransactionReceipt{},
+		&Contract{},
+		&Token{},
+		&TokenHolder{},
+		&TokensTransfers{},
+		&EvmBlock{},
+		&Erc721Holders{},
+		&AbiMapping{},
+		&ERC1155Item{},
+		&ERC1155Holder{},
+		&Account{},
+	}
+
+}
+
+func Publish(queue, class string, args interface{}) error {
+	if mq.Instant == nil {
+		return nil
+	}
+	return mq.Instant.Publish(queue, class, args)
 }

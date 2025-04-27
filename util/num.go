@@ -3,6 +3,7 @@ package util
 import (
 	"cmp"
 	"encoding/binary"
+	"fmt"
 	"math/big"
 	"sort"
 	"strconv"
@@ -265,4 +266,8 @@ func StringToUInt(s string) uint {
 		return uint(i)
 	}
 	return 0
+}
+
+func IntToHexNumber(i uint64) string {
+	return AddHex(fmt.Sprintf("%x", i))
 }
