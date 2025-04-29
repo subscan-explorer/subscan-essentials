@@ -71,7 +71,7 @@ func safeClose(c *websocket.Conn) {
 
 func reSubscribeFromChain() {
 	for {
-		setConn(nil) // 关闭旧连接
+		setConn(nil) // close old connection
 
 		newConn, _, err := websocket.DefaultDialer.Dial(util.WSEndPoint, nil)
 		if err != nil {

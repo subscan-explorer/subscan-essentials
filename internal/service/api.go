@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
@@ -64,8 +65,8 @@ func (s *Service) GetBlockByHash(ctx context.Context, hash string) *model.ChainB
 	return block
 }
 
-func (s *Service) GetBestBlockNum(c context.Context) (uint64, error) {
-	return s.dao.GetBestBlockNum(c)
+func (s *Service) GetFinalizedBlock(c context.Context) (uint64, error) {
+	return s.dao.GetFinalizedBlockNum(c)
 }
 
 func (s *Service) GetExtrinsicList(ctx context.Context, page, row int, query ...model.Option) ([]*model.ChainExtrinsicJson, int) {
@@ -99,13 +100,14 @@ func (s *Service) EventsList(ctx context.Context, page, row int, where ...model.
 
 	for _, event := range list {
 		ej := model.ChainEventJson{
-			ExtrinsicIdx: event.ExtrinsicIdx,
-			EventIndex:   event.EventIndex,
-			BlockNum:     event.BlockNum,
-			ModuleId:     event.ModuleId,
-			EventId:      event.EventId,
-			Params:       util.ToString(event.Params),
-			EventIdx:     event.EventIdx,
+			Id:             event.ID,
+			ExtrinsicIndex: event.ExtrinsicIndex,
+			BlockNum:       event.BlockNum,
+			ModuleId:       event.ModuleId,
+			EventId:        event.EventId,
+			Params:         event.Params,
+			EventIdx:       event.EventIdx,
+			EventIndex:     fmt.Sprintf("%d-%d", event.BlockNum, event.EventIdx),
 		}
 		if block, ok := blockMap[event.BlockNum]; ok {
 			ej.BlockTimestamp = block.BlockTimestamp

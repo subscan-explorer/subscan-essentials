@@ -182,3 +182,13 @@ func (d *Dao) SAdd(c context.Context, key string, ttl int, value ...string) bool
 	r, _ := redis.Int(conn.Receive())
 	return r == 1
 }
+
+func (d *Dao) HINCRBY(c context.Context, key string, field string, value int) (int, error) {
+	conn, _ := d.redis.GetContext(c)
+	defer conn.Close()
+	r, err := redis.Int(conn.Do("HINCRBY", key, field, value))
+	if err != nil {
+		return 0, err
+	}
+	return r, nil
+}

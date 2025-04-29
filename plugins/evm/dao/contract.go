@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/itering/subscan/model"
 	evmABI "github.com/itering/subscan/plugins/evm/abi"
 	evmContract "github.com/itering/subscan/plugins/evm/contract"
 	"github.com/itering/subscan/plugins/evm/feature/delegateProxy"
@@ -89,6 +90,7 @@ func (c *Contract) TableName() string {
 }
 
 func (c *Contract) AfterCreate(*gorm.DB) (err error) {
+	_, _ = sg.redis.HINCRBY(context.Background(), model.MetadataCacheKey(), "total_evm_contract", 1)
 	_ = TouchAccount(context.Background(), c.Address)
 	return nil
 }

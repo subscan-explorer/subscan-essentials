@@ -13,9 +13,9 @@ var (
 	// BalanceAccuracy balance accuracy, default is 10(DOT)
 	BalanceAccuracy = GetEnv("SUBSTRATE_ACCURACY", "10")
 	// WSEndPoint chain rpc endpoint, default is wss://polkadot-rpc.dwellir.com
-	WSEndPoint = GetEnv("CHAIN_WS_ENDPOINT", "wss://moonbeam-rpc.dwellir.com")
+	WSEndPoint = GetEnv("CHAIN_WS_ENDPOINT", "wss://westend-asset-hub-rpc.polkadot.io")
 	// NetworkNode network node name, default is polkadot
-	NetworkNode = GetEnv("NETWORK_NODE", "moonbeam")
+	NetworkNode = GetEnv("NETWORK_NODE", "assethub-westend")
 	// ConfDir config directory, default is ../configs
 	ConfDir = GetEnv("CONF_DIR", "../configs")
 

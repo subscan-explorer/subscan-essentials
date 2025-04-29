@@ -31,7 +31,6 @@ func accounts(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	list, count := svc.GetAccountListJson(p.Page, p.Row)
-
 	toJson(w, 0, map[string]interface{}{
 		"list": list, "count": count,
 	}, nil)

@@ -6,6 +6,7 @@ import (
 	"github.com/itering/subscan/model"
 	balanceModel "github.com/itering/subscan/plugins/balance/model"
 	"github.com/itering/subscan/util"
+	"github.com/shopspring/decimal"
 	"strings"
 )
 
@@ -19,6 +20,12 @@ type ISrv interface {
 
 	ContractsByAddr(ctx context.Context, address string) (contract *Contract)
 	GetTransactionByHash(c context.Context, hash string) *Transaction
+	Blocks(ctx context.Context, page int, row int) ([]EvmBlockJson, int)
+	BlockByNum(ctx context.Context, blockNum uint) *EvmBlock
+	BlockByHash(ctx context.Context, hash string) *EvmBlock
+	TransactionsJson(ctx context.Context, opts ...model.Option) []TransactionSampleJson
+	Accounts(ctx context.Context, page int, row int) ([]AccountsJson, int64)
+	Contracts(ctx context.Context, page int, row int) ([]ContractsJson, int64)
 }
 
 type ApiSrv struct{}
@@ -323,4 +330,92 @@ func (a *ApiSrv) ContractsByAddr(ctx context.Context, address string) (contract 
 
 func (a *ApiSrv) GetTransactionByHash(c context.Context, hash string) *Transaction {
 	return GetTransactionByHash(c, hash)
+}
+
+type EvmBlockJson struct {
+	BlockNum       uint   `json:"block_num"`
+	Miner          string `json:"miner"`
+	Transactions   int    `json:"transactions"`
+	BlockTimestamp uint   `json:"block_timestamp"`
+}
+
+func (a *ApiSrv) Blocks(ctx context.Context, page int, row int) ([]EvmBlockJson, int) {
+	list, count := GetBlockList(ctx, page, row)
+	var res []EvmBlockJson
+	for _, v := range list {
+		res = append(res, EvmBlockJson{
+			BlockNum:       uint(v.BlockNum),
+			Miner:          v.Miner,
+			Transactions:   v.TransactionCount,
+			BlockTimestamp: v.Timestamp,
+		})
+	}
+	return res, count
+}
+
+func (a *ApiSrv) BlockByNum(ctx context.Context, blockNum uint) *EvmBlock {
+	return GetBlockByNum(ctx, int(blockNum))
+}
+
+func (a *ApiSrv) BlockByHash(ctx context.Context, hash string) *EvmBlock {
+	return GetBlockByHash(ctx, hash)
+}
+
+type TransactionSampleJson struct {
+	Hash           string          `json:"hash"`
+	BlockNum       uint            `json:"block_num"`
+	BlockTimestamp uint            `json:"block_timestamp"`
+	FromAddress    string          `json:"from_address"`
+	ToAddress      string          `json:"to_address"`
+	Value          decimal.Decimal `json:"value"`
+}
+
+func (a *ApiSrv) TransactionsJson(ctx context.Context, opts ...model.Option) []TransactionSampleJson {
+	var list []Transaction
+	sg.db.WithContext(ctx).Scopes(opts...).Find(&list)
+	var res []TransactionSampleJson
+	for _, v := range list {
+		res = append(res, TransactionSampleJson{
+			Hash:           v.Hash,
+			BlockNum:       v.BlockNum,
+			BlockTimestamp: v.BlockTimestamp,
+			FromAddress:    v.FromAddress,
+			ToAddress:      v.ToAddress,
+			Value:          v.Value,
+		})
+	}
+	return res
+}
+
+type AccountsJson struct {
+	EvmAccount string          `json:"evm_account"`
+	Balance    decimal.Decimal `json:"balance"`
+}
+
+func (a *ApiSrv) Accounts(ctx context.Context, page int, row int) ([]AccountsJson, int64) {
+	var count int64
+	sg.db.WithContext(ctx).Model(&Account{}).Count(&count)
+	if count == 0 {
+		return nil, 0
+	}
+	var res []AccountsJson
+	sg.db.WithContext(ctx).Debug().Select("evm_account,balance").Model(&Account{}).Joins("left join balance_accounts on evm_accounts.address=balance_accounts.address").Order("balance desc").Limit(row).Offset((page - 1) * row).Scan(&res)
+	return res, count
+}
+
+type ContractsJson struct {
+	ContractName     string `json:"contract_name"`
+	Address          string `json:"address"`
+	TransactionCount int    `json:"transaction_count"`
+}
+
+func (a *ApiSrv) Contracts(ctx context.Context, page int, row int) ([]ContractsJson, int64) {
+	var count int64
+	sg.db.WithContext(ctx).Model(&Contract{}).Count(&count)
+	if count == 0 {
+		return nil, 0
+	}
+	var res []ContractsJson
+	sg.db.WithContext(ctx).Model(&Contract{}).Select("contract_name,address,transaction_count ").Limit(row).Offset((page - 1) * row).Scan(&res)
+	return res, count
 }

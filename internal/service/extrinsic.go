@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -26,14 +25,14 @@ func (s *Service) createExtrinsic(ctx context.Context,
 		extrinsic.ID = extrinsic.Id()
 		extrinsic.Success = s.getExtrinsicSuccess(eventMap[extrinsic.ExtrinsicIndex])
 		extrinsic.BlockTimestamp = block.BlockTimestamp
-
+		extrinsic.AccountId = address.Format(extrinsic.AccountId)
 		if extrinsic.IsSigned {
 			fee, _ := GetExtrinsicFee(encodeExtrinsics[index])
 			extrinsic.Fee = fee
 		}
 
 		if err = s.dao.CreateExtrinsic(ctx, txn, &extrinsic); err == nil {
-			go s.emitExtrinsic(block, &extrinsic, eventMap[extrinsic.ExtrinsicIndex])
+			go s.emitExtrinsic(ctx, block, &extrinsic, eventMap[extrinsic.ExtrinsicIndex])
 		} else {
 			return err
 		}
@@ -50,21 +49,11 @@ func (s *Service) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsi
 		Success:            e.Success,
 		CallModule:         e.CallModule,
 		CallModuleFunction: e.CallModuleFunction,
-		Params:             util.ToString(e.Params),
+		Params:             e.Params,
 		AccountId:          address.Encode(e.AccountId),
 		Signature:          e.Signature,
 		Nonce:              e.Nonce,
 		Fee:                e.Fee,
-	}
-	var paramsInstant []model.ExtrinsicParam
-	if err := json.Unmarshal([]byte(ej.Params), &paramsInstant); err != nil {
-		for pi, param := range paramsInstant {
-			if paramsInstant[pi].Type == "Address" {
-				paramsInstant[pi].Value = address.Encode(param.Value.(string))
-			}
-		}
-		bp, _ := json.Marshal(paramsInstant)
-		ej.Params = string(bp)
 	}
 	return ej
 }
@@ -89,7 +78,7 @@ func FindOutBlockTime(extrinsics []model.ChainExtrinsic) int {
 func (s *Service) getExtrinsicSuccess(e []model.ChainEvent) bool {
 	for _, event := range e {
 		if strings.EqualFold(event.ModuleId, "system") {
-			return strings.EqualFold(event.EventId, "ExtrinsicFailed")
+			return strings.EqualFold(event.EventId, "ExtrinsicSuccess")
 		}
 	}
 	return true

@@ -47,6 +47,7 @@ func initRouter(e *gin.Engine) {
 		s := g.Group("/scan")
 		{
 			s.POST("metadata", metadataHandle)
+			s.POST("token", tokenHandle)
 
 			// Block
 			s.POST("blocks", blocksHandle)

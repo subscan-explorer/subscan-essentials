@@ -53,7 +53,7 @@ func (s *Service) emitBlock(ctx context.Context, block *model.ChainBlock) {
 }
 
 // after extrinsic created, emit extrinsic data to subscribe plugins
-func (s *Service) emitExtrinsic(block *model.ChainBlock, extrinsic *model.ChainExtrinsic, events []model.ChainEvent) {
+func (s *Service) emitExtrinsic(_ context.Context, block *model.ChainBlock, extrinsic *model.ChainExtrinsic, events []model.ChainEvent) {
 	block.BlockTimestamp = extrinsic.BlockTimestamp
 	pBlock := block.AsPlugin()
 	pExtrinsic := extrinsic.AsPlugin()

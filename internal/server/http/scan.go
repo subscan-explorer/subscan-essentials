@@ -3,6 +3,7 @@ package http
 import (
 	"errors"
 	"github.com/itering/subscan/model"
+	"github.com/itering/subscan/share/token"
 	"github.com/itering/subscan/util/address"
 
 	"github.com/gin-gonic/gin"
@@ -21,6 +22,10 @@ func metadataHandle(c *gin.Context) {
 	toJson(c, m, err)
 }
 
+func tokenHandle(c *gin.Context) {
+	toJson(c, token.GetDefaultToken(), nil)
+}
+
 // blocksHandle  get blocks list
 func blocksHandle(c *gin.Context) {
 	p := new(struct {
@@ -31,7 +36,7 @@ func blocksHandle(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	blockNum, err := svc.GetBestBlockNum(ctx)
+	blockNum, err := svc.GetFinalizedBlock(ctx)
 	list := svc.GetBlocksSampleByNums(ctx, p.Page, p.Row)
 
 	toJson(c, map[string]interface{}{

@@ -11,16 +11,17 @@ import (
 func (d *Dao) CreateEvent(txn *GormDB, event *model.ChainEvent) error {
 	var incrCount int
 	e := model.ChainEvent{
-		ID:           event.Id(),
-		EventIndex:   event.EventIndex,
-		BlockNum:     event.BlockNum,
-		ModuleId:     event.ModuleId,
-		Params:       event.Params,
-		EventIdx:     event.EventIdx,
-		EventId:      event.EventId,
-		ExtrinsicIdx: event.ExtrinsicIdx,
+		ID:             event.Id(),
+		ExtrinsicIndex: fmt.Sprintf("%d-%d", event.BlockNum, event.ExtrinsicIdx),
+		BlockNum:       event.BlockNum,
+		ModuleId:       event.ModuleId,
+		Params:         event.Params,
+		EventIdx:       event.EventIdx,
+		EventId:        event.EventId,
+		ExtrinsicIdx:   event.ExtrinsicIdx,
+		Phase:          event.Phase,
 	}
-	query := txn.Scopes(model.IgnoreDuplicate).Create(&e)
+	query := txn.Scopes(d.TableNameFunc(&e), model.IgnoreDuplicate).Create(&e)
 	if query.RowsAffected > 0 {
 		incrCount++
 		_ = d.IncrMetadata(context.TODO(), "count_event", incrCount)
@@ -50,7 +51,7 @@ func (d *Dao) GetEventList(ctx context.Context, page, row int, order string, whe
 	for index := blockNum / int(model.SplitTableBlockNum); index >= 0; index-- {
 		var tableData []model.ChainEvent
 		var tableCount int64
-		queryOrigin := d.db.WithContext(ctx).Model(model.ChainEvent{BlockNum: uint(index) * model.SplitTableBlockNum})
+		queryOrigin := d.db.WithContext(ctx).Scopes(d.TableNameFunc(&model.ChainEvent{BlockNum: uint(index) * model.SplitTableBlockNum}))
 		queryOrigin.Scopes(where...)
 		queryOrigin.Count(&tableCount)
 

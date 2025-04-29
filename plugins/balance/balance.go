@@ -16,7 +16,8 @@ import (
 var srv *service.Service
 
 type Balance struct {
-	d storage.Dao
+	d    storage.Dao
+	pool subscan_plugin.RedisPool
 }
 
 func (a *Balance) ConsumptionQueue() []string {
@@ -29,14 +30,15 @@ func (a *Balance) Enable() bool {
 
 func (a *Balance) ProcessBlock(context.Context, *storage.Block) error { return nil }
 
-func (a *Balance) SetRedisPool(_ subscan_plugin.RedisPool) {}
+func (a *Balance) SetRedisPool(pool subscan_plugin.RedisPool) {
+	srv = service.New(a.d, pool)
+}
 
 func New() *Balance {
 	return &Balance{}
 }
 
 func (a *Balance) InitDao(d storage.Dao) {
-	srv = service.New(d)
 	a.d = d
 	a.Migrate()
 }
@@ -49,13 +51,13 @@ func (a *Balance) ProcessExtrinsic(*storage.Block, *storage.Extrinsic, []storage
 	return nil
 }
 
-func (a *Balance) ProcessEvent(_ *storage.Block, event *storage.Event, _ decimal.Decimal) error {
+func (a *Balance) ProcessEvent(block *storage.Block, event *storage.Event, _ decimal.Decimal) error {
 	if event == nil {
 		return nil
 	}
 	switch strings.ToLower(event.ModuleId) {
-	case strings.ToLower("System"):
-		return dao.EmitEvent(context.TODO(), a.d, event)
+	case strings.ToLower("Balances"):
+		return dao.EmitEvent(context.TODO(), &dao.Storage{Dao: a.d, Pool: a.pool}, event, block)
 	}
 
 	return nil
@@ -66,7 +68,7 @@ func (a *Balance) SubscribeExtrinsic() []string {
 }
 
 func (a *Balance) SubscribeEvent() []string {
-	return []string{"balances"}
+	return []string{"Balances"}
 }
 
 func (a *Balance) Version() string {

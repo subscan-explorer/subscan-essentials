@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/util/address"
 	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 	"strings"
@@ -51,14 +52,15 @@ func (c *ChainBlock) AsPlugin() *storage.Block {
 }
 
 type ChainEvent struct {
-	ID           uint        `gorm:"primary_key;autoIncrement:false" json:"-"`
-	EventIndex   string      `gorm:"default: null;size:100;" json:"event_index"`
-	BlockNum     uint        `json:"block_num"  gorm:"index:block_num"`
-	ExtrinsicIdx int         `json:"extrinsic_idx"`
-	ModuleId     string      `json:"module_id" gorm:"size:255;index:query_function"`
-	EventId      string      `json:"event_id" gorm:"size:255;index:query_function"`
-	Params       EventParams `json:"params" gorm:"type:json"`
-	EventIdx     uint        `json:"event_idx"`
+	ID             uint        `gorm:"primary_key;autoIncrement:false" json:"-"`
+	ExtrinsicIndex string      `gorm:"default: null;size:100;" json:"extrinsic_index"`
+	BlockNum       uint        `json:"block_num"  gorm:"index:block_num"`
+	ExtrinsicIdx   int         `json:"extrinsic_idx"`
+	ModuleId       string      `json:"module_id" gorm:"size:255;index:query_function"`
+	EventId        string      `json:"event_id" gorm:"size:255;index:query_function"`
+	Params         EventParams `json:"params" gorm:"type:json"`
+	EventIdx       uint        `json:"event_idx"`
+	Phase          int         `json:"phase" gorm:"size:8"`
 }
 
 func (c ChainEvent) TableName() string {
@@ -70,10 +72,6 @@ func (c ChainEvent) TableName() string {
 
 func (c ChainEvent) Id() uint {
 	return c.BlockNum*IdGenerateCoefficient + c.EventIdx
-}
-
-func (c ChainEvent) ExtrinsicIndex() string {
-	return fmt.Sprintf("%d-%d", c.BlockNum, c.ExtrinsicIdx)
 }
 
 func (c *ChainEvent) AsPlugin() *storage.Event {
@@ -270,4 +268,33 @@ func (e *ExtrinsicOrEventIndex) GenerateIndex() string {
 		return ""
 	}
 	return fmt.Sprintf("%d-%d", e.BlockNum, e.Index)
+}
+
+func CheckoutParamValueAddress(value interface{}) string {
+	switch a := value.(type) {
+	case string:
+		return address.Format(a)
+	// Id         AccountId
+	// Index      Compact<AccountIndex>
+	// Raw   	  Bytes
+	// Address32  H256
+	// Address20  H160
+	case map[string]interface{}: // multi address
+		if v, ok := a["Id"]; ok {
+			return address.Format(util.ToString(v))
+		}
+		if v, ok := a["Raw"]; ok {
+			return address.Format(util.ToString(v))
+		}
+		if v, ok := a["Address32"]; ok {
+			return address.Format(util.ToString(v))
+		}
+		if v, ok := a["Address20"]; ok {
+			return address.Format(util.ToString(v))
+		}
+		if v, ok := a["Eth"]; ok {
+			return address.Format(util.ToString(v))
+		}
+	}
+	return address.Format(util.ToString(value))
 }

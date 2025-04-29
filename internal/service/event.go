@@ -7,21 +7,16 @@ import (
 	"strings"
 )
 
-func (s *Service) AddEvent(
-	txn *dao.GormDB,
-	block *model.ChainBlock,
-	e []model.ChainEvent) (eventCount int, err error) {
-
-	for index, event := range e {
+func (s *Service) AddEvent(txn *dao.GormDB, block *model.ChainBlock, e []model.ChainEvent) (err error) {
+	for _, event := range e {
 		event.ModuleId = strings.ToLower(event.ModuleId)
-		event.EventIndex = fmt.Sprintf("%d-%d", block.BlockNum, index)
+		event.ExtrinsicIndex = fmt.Sprintf("%d-%d", block.BlockNum, event.ExtrinsicIdx)
 		event.BlockNum = block.BlockNum
 		if err = s.dao.CreateEvent(txn, &event); err == nil {
 			go s.emitEvent(block, &event)
 		} else {
-			return 0, err
+			return err
 		}
-		eventCount++
 	}
-	return eventCount, err
+	return err
 }

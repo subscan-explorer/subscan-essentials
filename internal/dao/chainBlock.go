@@ -11,7 +11,7 @@ import (
 
 // CreateBlock mysql db transaction
 func (d *Dao) CreateBlock(txn *GormDB, cb *model.ChainBlock) (err error) {
-	query := txn.Scopes().Scopes(model.IgnoreDuplicate).Create(cb)
+	query := txn.Scopes().Scopes(d.TableNameFunc(cb), model.IgnoreDuplicate).Create(cb)
 
 	// Check if you need to create a new table(block, extrinsic, event, log) after created block
 	if maxTableBlockNum < cb.BlockNum+model.SplitTableBlockNum {
@@ -77,8 +77,8 @@ func (d *Dao) GetBlockList(ctx context.Context, page, row int) []model.ChainBloc
 	bestNum := uint(blockNum)
 	headBlock := uint(head)
 	endBlock := uint(end)
-	d.db.Model(model.ChainBlock{BlockNum: headBlock}).
-		Joins(fmt.Sprintf("JOIN (SELECT id,block_num from %s where block_num BETWEEN %d and %d order by block_num desc ) as t on %s.id=t.id",
+	d.db.Scopes(model.TableNameFunc(model.ChainBlock{BlockNum: headBlock})).
+		Joins(fmt.Sprintf("JOIN (SELECT id from %s where block_num BETWEEN %d and %d order by block_num desc ) as t on %s.id=t.id",
 			model.ChainBlock{BlockNum: headBlock}.TableName(),
 			end, head,
 			model.ChainBlock{BlockNum: headBlock}.TableName(),
@@ -87,8 +87,8 @@ func (d *Dao) GetBlockList(ctx context.Context, page, row int) []model.ChainBloc
 
 	if headBlock/model.SplitTableBlockNum != endBlock/model.SplitTableBlockNum {
 		var endBlocks []model.ChainBlock
-		d.db.Model(model.ChainBlock{BlockNum: bestNum - model.SplitTableBlockNum}).
-			Joins(fmt.Sprintf("JOIN (SELECT id,block_num from %s order by block_num desc limit %d) as t on %s.id=t.id",
+		d.db.Scopes(model.TableNameFunc(model.ChainBlock{BlockNum: bestNum - model.SplitTableBlockNum})).
+			Joins(fmt.Sprintf("JOIN (SELECT id from %s order by block_num desc limit %d) as t on %s.id=t.id",
 				model.ChainBlock{BlockNum: bestNum - model.SplitTableBlockNum}.TableName(),
 				uint(row)-(headBlock%model.SplitTableBlockNum+1),
 				model.ChainBlock{BlockNum: bestNum - model.SplitTableBlockNum}.TableName(),

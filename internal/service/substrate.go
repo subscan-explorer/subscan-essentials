@@ -160,7 +160,7 @@ func (s *Service) FillBlockData(ctx context.Context, blockNum uint) (err error) 
 		_ = s.dao.SaveFillAlreadyFinalizedBlockNum(context.TODO(), int(blockNum))
 	}
 	// for Create
-	if err = s.CreateChainBlock(ctx, conn, blockHash, &rpcBlock.Block, event, specVersion); err == nil {
+	if err = s.CreateChainBlock(ctx, blockHash, &rpcBlock.Block, event, specVersion); err == nil {
 		_ = s.dao.SaveFillAlreadyBlockNum(ctx, int(blockNum))
 		setFinalized()
 	} else {

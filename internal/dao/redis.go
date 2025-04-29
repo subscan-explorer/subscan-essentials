@@ -5,8 +5,6 @@ import (
 	"time"
 
 	"log"
-
-	"github.com/itering/subscan/util"
 )
 
 func (d *Dao) pingRedis(ctx context.Context) (err error) {
@@ -23,6 +21,3 @@ func (d *Dao) SetHeartBeatNow(c context.Context, action string) error {
 }
 
 // private funcs
-func redisKeyPrefix() string {
-	return util.NetworkNode + ":"
-}

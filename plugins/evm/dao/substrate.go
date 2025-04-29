@@ -23,10 +23,10 @@ func findOutSubstrateExecutedEvent(ctx context.Context, blockNum uint, _ *dto.Bl
 			if strings.EqualFold(fmt.Sprintf("%s.%s", event.ModuleId, event.EventId), "ethereum.Executed") {
 				// [from, transaction_hash, ExitReason]
 				if len(event.Params) == 3 {
-					hash2ExtrinsicIndex[util.ToString(event.Params[1].Value)] = event.ExtrinsicIndex()
+					hash2ExtrinsicIndex[util.ToString(event.Params[1].Value)] = event.ExtrinsicIndex
 					// [from, to/contract_address, transaction_hash, ExitReason]
 				} else if len(event.Params) >= 4 {
-					hash2ExtrinsicIndex[util.ToString(event.Params[2].Value)] = event.ExtrinsicIndex()
+					hash2ExtrinsicIndex[util.ToString(event.Params[2].Value)] = event.ExtrinsicIndex
 				}
 			}
 		}

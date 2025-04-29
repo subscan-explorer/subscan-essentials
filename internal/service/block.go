@@ -3,23 +3,22 @@ package service
 import (
 	"context"
 	"fmt"
-	"log"
-
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc"
+	"github.com/itering/substrate-api-rpc/hasher"
 	smodel "github.com/itering/substrate-api-rpc/model"
 	"github.com/itering/substrate-api-rpc/rpc"
 	"github.com/itering/substrate-api-rpc/storage"
-	"github.com/itering/substrate-api-rpc/websocket"
 )
 
-func (s *Service) CreateChainBlock(ctx context.Context, conn websocket.WsConn, hash string, block *smodel.Block, event string, spec int) (err error) {
+func (s *Service) CreateChainBlock(ctx context.Context, hash string, block *smodel.Block, event string, spec int) (err error) {
 	var (
 		decodeExtrinsics []map[string]interface{}
 		decodeEvent      interface{}
 		logs             []storage.DecoderLog
 		validator        string
+		codecErr         error
 	)
 
 	blockNum := util.StringToUInt(util.HexToNumStr(block.Header.Number))
@@ -28,32 +27,30 @@ func (s *Service) CreateChainBlock(ctx context.Context, conn websocket.WsConn, h
 	// Extrinsic
 	decodeExtrinsics, err = substrate.DecodeExtrinsic(block.Extrinsics, metadataInstant, spec)
 	if err != nil {
-		log.Printf("%v", err)
+		codecErr = err
+		util.Logger().Error(err)
 	}
-
 	// event
-	if err == nil {
-		decodeEvent, err = substrate.DecodeEvent(event, metadataInstant, spec)
-		if err != nil {
-			log.Printf("%v", err)
-		}
+	decodeEvent, err = substrate.DecodeEvent(event, metadataInstant, spec)
+	if err != nil {
+		codecErr = err
+		util.Logger().Error(err)
 	}
 
 	// log
-	if err == nil {
-		logs, err = substrate.DecodeLogDigest(block.Header.Digest.Logs)
-		if err != nil {
-			log.Printf("%v", err)
-		}
+	logs, err = substrate.DecodeLogDigest(block.Header.Digest.Logs)
+	if err != nil {
+		codecErr = err
+		util.Logger().Error(err)
 	}
 
 	txn := s.dao.DbBegin()
 	defer s.dao.DbRollback(txn)
 
-	var e []model.ChainEvent
-	_ = util.UnmarshalAny(&e, decodeEvent)
+	var events []model.ChainEvent
+	_ = util.UnmarshalAny(&events, decodeEvent)
 
-	eventMap := s.checkoutExtrinsicEvents(e, blockNum)
+	eventMap := s.checkoutExtrinsicEvents(events, blockNum)
 
 	cb := model.ChainBlock{
 		ID:             blockNum,
@@ -68,25 +65,24 @@ func (s *Service) CreateChainBlock(ctx context.Context, conn websocket.WsConn, h
 
 	var extrinsics []model.ChainExtrinsic
 	_ = util.UnmarshalAny(&extrinsics, decodeExtrinsics)
-
+	extrinsics = s.fillExtrinsicHash(extrinsics, block.Extrinsics)
 	cb.BlockTimestamp = FindOutBlockTime(extrinsics)
 	err = s.createExtrinsic(ctx, txn, &cb, extrinsics, block.Extrinsics, eventMap)
 	if err != nil {
 		return err
 	}
 
-	eventCount, err := s.AddEvent(txn, &cb, e)
-	if err != nil {
+	if err = s.AddEvent(txn, &cb, events); err != nil {
 		return err
 	}
-	if validator, err = s.EmitLog(txn, blockNum, logs, true, s.ValidatorsList(conn, hash)); err != nil {
+	if validator, err = s.EmitLog(txn, blockNum, logs, true, s.ValidatorsList(hash)); err != nil {
 		return err
 	}
 
 	cb.Validator = validator
-	cb.CodecError = validator == "" && blockNum != 0
+	cb.CodecError = codecErr != nil
 	cb.ExtrinsicsCount = len(extrinsics)
-	cb.EventCount = eventCount
+	cb.EventCount = len(events)
 
 	if err = s.dao.CreateBlock(txn, &cb); err == nil {
 		s.dao.DbCommit(txn)
@@ -126,10 +122,19 @@ func (s *Service) EventByIndex(index string) *model.ChainEvent {
 	return s.dao.GetEventByIdx(index)
 }
 
-func (s *Service) ValidatorsList(conn websocket.WsConn, hash string) (validatorList []string) {
-	validatorsRaw, _ := rpc.ReadStorage(conn, "Session", "Validators", hash)
+func (s *Service) ValidatorsList(hash string) (validatorList []string) {
+	validatorsRaw, _ := rpc.ReadStorage(nil, "Session", "Validators", hash)
 	for _, addr := range validatorsRaw.ToStringSlice() {
 		validatorList = append(validatorList, util.TrimHex(addr))
 	}
 	return
+}
+
+func (s *Service) fillExtrinsicHash(extrinsicList []model.ChainExtrinsic, extrinsicRaws []string) []model.ChainExtrinsic {
+	for i, e := range extrinsicList {
+		if e.ExtrinsicHash == "" {
+			extrinsicList[i].ExtrinsicHash = util.AddHex(util.BytesToHex(hasher.HashByCryptoName(util.HexToBytes(extrinsicRaws[i]), "Blake2_256")))
+		}
+	}
+	return extrinsicList
 }

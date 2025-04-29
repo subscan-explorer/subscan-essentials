@@ -10,7 +10,7 @@ type J struct {
 	Code    int         `json:"code"`
 	Message string      `json:"message"`
 	TTL     int         `json:"ttl"`
-	Data    interface{} `json:"data"`
+	Data    interface{} `json:"data,omitempty"`
 }
 
 func (j J) Render(w http.ResponseWriter) error {

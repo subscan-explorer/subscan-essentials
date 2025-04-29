@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/itering/subscan/util"
 	"strings"
 
 	"gorm.io/gorm"
@@ -97,4 +98,12 @@ func TableNameFromInterface(c interface{}, db *gorm.DB) string {
 		tableName = stmt.Schema.Table
 	}
 	return tableName
+}
+
+func RedisKeyPrefix() string {
+	return util.NetworkNode + ":"
+}
+
+func MetadataCacheKey() string {
+	return RedisKeyPrefix() + "metadata"
 }

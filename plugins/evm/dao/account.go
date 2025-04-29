@@ -25,8 +25,12 @@ func TouchAccount(ctx context.Context, h160 string) error {
 		return nil
 	}
 	account := &Account{EvmAccount: h160, Address: addr}
-	if err := sg.db.WithContext(ctx).Debug().Scopes(model.IgnoreDuplicate).Create(account).Error; err != nil {
+	query := sg.db.WithContext(ctx).Scopes(model.IgnoreDuplicate).Create(account)
+	if err := query.Error; err != nil {
 		return err
+	}
+	if query.RowsAffected > 0 {
+		_, _ = sg.redis.HINCRBY(ctx, model.MetadataCacheKey(), "total_evm_account", 1)
 	}
 	return nil
 }

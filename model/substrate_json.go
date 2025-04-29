@@ -32,14 +32,14 @@ type SampleBlockJson struct {
 }
 
 type ChainExtrinsicJson struct {
+	Id                 uint            `json:"id"`
 	BlockTimestamp     int             `json:"block_timestamp"`
 	BlockNum           uint            `json:"block_num"`
 	ExtrinsicIndex     string          `json:"extrinsic_index"`
 	CallModuleFunction string          `json:"call_module_function"`
 	CallModule         string          `json:"call_module"`
-	Params             string          `json:"params"`
+	Params             ExtrinsicParams `json:"params"`
 	AccountId          string          `json:"account_id"`
-	AccountIndex       string          `json:"account_index"`
 	Signature          string          `json:"signature"`
 	Nonce              int             `json:"nonce"`
 	ExtrinsicHash      string          `json:"extrinsic_hash"`
@@ -65,14 +65,15 @@ type ExtrinsicDetail struct {
 }
 
 type ChainEventJson struct {
-	EventIndex     string `json:"event_index"`
-	BlockNum       uint   `json:"block_num"`
-	ExtrinsicIdx   int    `json:"extrinsic_idx"`
-	ModuleId       string `json:"module_id"`
-	EventId        string `json:"event_id"`
-	Params         string `json:"params"`
-	EventIdx       uint   `json:"event_idx"`
-	BlockTimestamp int    `json:"block_timestamp"`
+	Id             uint        `json:"id"`
+	EventIndex     string      `json:"event_index"`
+	ExtrinsicIndex string      `json:"extrinsic_index"`
+	BlockNum       uint        `json:"block_num"`
+	ModuleId       string      `json:"module_id"`
+	EventId        string      `json:"event_id"`
+	Params         EventParams `json:"params"`
+	EventIdx       uint        `json:"event_idx"`
+	BlockTimestamp int         `json:"block_timestamp"`
 }
 
 type ChainLogJson struct {

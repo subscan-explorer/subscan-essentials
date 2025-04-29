@@ -12,12 +12,13 @@ require (
 	github.com/ipfs/go-cid v0.5.0
 	github.com/itering/go-workers v1.2.4
 	github.com/itering/scale.go v1.9.16
-	github.com/itering/subscan-plugin v0.2.4
+	github.com/itering/subscan-plugin v0.2.5
 	github.com/itering/substrate-api-rpc v0.8.0
 	github.com/panjf2000/ants/v2 v2.11.2
 	github.com/pkg/errors v0.9.1
 	github.com/shopspring/decimal v1.4.0
 	github.com/stretchr/testify v1.10.0
+	github.com/swaggo/swag v1.16.4
 	github.com/urfave/cli v1.22.1
 	golang.org/x/crypto v0.36.0
 	golang.org/x/net v0.34.0
@@ -29,6 +30,9 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/KyleBanks/depth v1.2.1 // indirect
+	github.com/PuerkitoBio/purell v1.1.1 // indirect
+	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/bits-and-blooms/bitset v1.22.0 // indirect
 	github.com/consensys/bavard v0.1.30 // indirect
 	github.com/consensys/gnark-crypto v0.17.0 // indirect
@@ -37,8 +41,14 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
 	github.com/ethereum/go-verkle v0.2.2 // indirect
 	github.com/garyburd/redigo v1.6.2 // indirect
+	github.com/go-openapi/jsonpointer v0.19.5 // indirect
+	github.com/go-openapi/jsonreference v0.19.6 // indirect
+	github.com/go-openapi/spec v0.20.4 // indirect
+	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/holiman/uint256 v1.3.2 // indirect
 	github.com/jackc/pgx/v5 v5.6.0 // indirect
+	github.com/josharian/intern v1.0.0 // indirect
+	github.com/mailru/easyjson v0.7.6 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/mattn/go-sqlite3 v1.14.18 // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect
@@ -52,6 +62,8 @@ require (
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/supranational/blst v0.3.14 // indirect
+	golang.org/x/tools v0.29.0 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.1.6 // indirect
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
@@ -115,8 +127,4 @@ require (
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-)
-
-replace (
-	github.com/itering/subscan-plugin => /Users/sunbobin/blockchain/mine/subscan-plugin
 )

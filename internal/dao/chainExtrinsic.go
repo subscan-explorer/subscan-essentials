@@ -26,7 +26,7 @@ func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.C
 		IsSigned:           extrinsic.Signature != "",
 		Fee:                extrinsic.Fee,
 	}
-	query := txn.Scopes(model.IgnoreDuplicate).Create(&ce)
+	query := txn.Scopes(d.TableNameFunc(&ce), model.IgnoreDuplicate).Scopes(model.IgnoreDuplicate).Create(&ce)
 	if query.RowsAffected > 0 {
 		_ = d.IncrMetadata(c, "count_extrinsic", 1)
 		if ce.IsSigned {
@@ -61,7 +61,7 @@ func (d *Dao) GetExtrinsicList(c context.Context, page, row int, _ string, query
 			tableCount int64
 		)
 
-		queryOrigin := d.db.Model(model.ChainExtrinsic{BlockNum: uint(index) * model.SplitTableBlockNum})
+		queryOrigin := d.db.Scopes(d.TableNameFunc(&model.ChainExtrinsic{BlockNum: uint(index) * model.SplitTableBlockNum}))
 
 		queryOrigin.Scopes(queryWhere...)
 		queryOrigin.Count(&tableCount)
@@ -74,7 +74,7 @@ func (d *Dao) GetExtrinsicList(c context.Context, page, row int, _ string, query
 		if len(extrinsics) >= row {
 			continue
 		}
-		query := queryOrigin.Order("block_num desc").Offset(page*row - int(preCount)).Limit(row - len(extrinsics)).Scan(&tableData)
+		query := queryOrigin.Order("id desc").Offset(page*row - int(preCount)).Limit(row - len(extrinsics)).Scan(&tableData)
 		if query == nil || query.Error != nil {
 			continue
 		}
@@ -149,6 +149,7 @@ func (d *Dao) extrinsicsAsDetail(c context.Context, e *model.ChainExtrinsic) *mo
 
 func (d *Dao) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsicJson {
 	ej := &model.ChainExtrinsicJson{
+		Id:                 e.ID,
 		BlockNum:           e.BlockNum,
 		BlockTimestamp:     e.BlockTimestamp,
 		ExtrinsicIndex:     e.ExtrinsicIndex,
@@ -156,7 +157,7 @@ func (d *Dao) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsicJso
 		Success:            e.Success,
 		CallModule:         e.CallModule,
 		CallModuleFunction: e.CallModuleFunction,
-		Params:             util.ToString(e.Params),
+		Params:             e.Params,
 		AccountId:          address.Encode(e.AccountId),
 		Signature:          e.Signature,
 		Nonce:              e.Nonce,

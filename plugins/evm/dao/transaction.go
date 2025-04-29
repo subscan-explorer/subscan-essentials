@@ -32,9 +32,6 @@ type Transaction struct {
 	GasUsed        decimal.Decimal `json:"gas_used" gorm:"default: 0;type:decimal(40);" `
 	Contract       string          `json:"contract" gorm:"size:100"`
 	Success        bool            `json:"success"`
-	ErrorType      string          `json:"error_type" gorm:"size:100"`
-	ErrorMsg       string          `json:"error_msg" gorm:"size:100"`
-	TraceErrorMsg  string          `json:"trace_error_msg" gorm:"type:text"`
 	R              string          `json:"r" gorm:"size:100"`
 	S              string          `json:"s" gorm:"size:100"`
 	V              uint            `json:"v" gorm:"size:32"`
@@ -127,14 +124,8 @@ func (t *Transaction) AfterCreate(txn *gorm.DB) (err error) {
 	// Increase Contract transaction count
 	if IsContract(ctx, t.ToAddress) {
 		incrContractTransactionCount(ctx, t.ToAddress)
-	} else {
-		// check to address is contract
-		if t.ToAddress != "" && util.TrimHex(t.InputData) != "" {
-			_ = sg.db.WithContext(ctx).Scopes(model.IgnoreDuplicate).Create(&Contract{Address: t.ToAddress})
-		}
 	}
-	// relate h160 address with account address
-	// SetEvmAddressRelate(ctx, t.From, t.To)
+	_, _ = sg.redis.HINCRBY(context.Background(), model.MetadataCacheKey(), "total_transaction", 1)
 	return nil
 }
 

@@ -1,9 +1,11 @@
 package dao
 
+import "github.com/itering/subscan/model"
+
 var (
-	RedisMetadataKey           = redisKeyPrefix() + "metadata"
-	RedisFillAlreadyBlockNum   = redisKeyPrefix() + "FillAlreadyBlockNum"
-	RedisFillFinalizedBlockNum = redisKeyPrefix() + "FillFinalizedBlockNum"
+	RedisMetadataKey           = model.RedisKeyPrefix() + "metadata"
+	RedisFillAlreadyBlockNum   = model.RedisKeyPrefix() + "FillAlreadyBlockNum"
+	RedisFillFinalizedBlockNum = model.RedisKeyPrefix() + "FillFinalizedBlockNum"
 )
 
 // local cache value

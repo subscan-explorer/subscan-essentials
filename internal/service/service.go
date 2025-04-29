@@ -24,6 +24,7 @@ func New() (s *Service) {
 	d, dbStorage, pool := dao.New()
 	s = &Service{dao: d, dbStorage: dbStorage}
 	s.initSubRuntimeLatest()
+	s.unknownToken()
 	pluginRegister(dbStorage, pool)
 	return s
 }
@@ -40,7 +41,6 @@ func (s *Service) Close() {
 func (s *Service) initSubRuntimeLatest() {
 	// reg network custom type
 	defer func() {
-		go s.unknownToken()
 		if data, err := readTypeRegistry(); err == nil {
 			substrate.RegCustomTypes(data)
 		}

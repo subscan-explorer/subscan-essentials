@@ -55,13 +55,13 @@ var (
 	}
 
 	testEvent = model.ChainEvent{
-		EventIdx:     0,
-		BlockNum:     947687,
-		ModuleId:     "imonline",
-		EventId:      "AllGood",
-		Params:       model.EventParams{},
-		ExtrinsicIdx: 0,
-		EventIndex:   "947687-0",
+		EventIdx:       0,
+		BlockNum:       947687,
+		ModuleId:       "imonline",
+		EventId:        "AllGood",
+		Params:         model.EventParams{},
+		ExtrinsicIdx:   0,
+		ExtrinsicIndex: "947687-0",
 	}
 )
 
