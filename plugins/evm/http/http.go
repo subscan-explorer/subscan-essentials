@@ -23,7 +23,97 @@ func Router() []router.Http {
 
 		{"contract", contractHandle, http.MethodPost},
 		{"contracts", contractsHandle, http.MethodPost},
+
+		// token holder
+		{"token/holder", tokenHolderHandle, http.MethodPost},
+		{"tokens", tokenListHandle, http.MethodPost},
+		{"token/transfer", tokenTransferHandle, http.MethodPost},
+		{Router: "token/erc721/collectibles", Handle: collectiblesHandle, Method: http.MethodPost},
+		{Router: "account/tokens", Handle: accountTokensHandle, Method: http.MethodPost},
 	}
+}
+
+func accountTokensHandle(w http.ResponseWriter, r *http.Request) error {
+	p := new(struct {
+		Address string `json:"address" validate:"required,eth_addr"`
+	})
+	if err := validator.Validate(r.Body, p); err != nil {
+		toJson(w, 10001, nil, err)
+		return nil
+	}
+	tokens := srv.AccountTokens(r.Context(), p.Address)
+	toJson(w, 0, tokens, nil)
+	return nil
+}
+
+func collectiblesHandle(w http.ResponseWriter, r *http.Request) error {
+	p := new(struct {
+		Address  string `json:"address" validate:"omitempty,eth_addr"`
+		Contract string `json:"contract" validate:"omitempty,eth_addr"`
+		Page     int    `json:"page" validate:"min=0"`
+		Row      int    `json:"row" validate:"min=1,max=100"`
+	})
+	if err := validator.Validate(r.Body, p); err != nil {
+		toJson(w, 10001, nil, err)
+		return nil
+	}
+	if p.Address == "" && p.Contract == "" {
+		toJson(w, 10001, nil, fmt.Errorf("address or contract is required"))
+		return nil
+	}
+	collectibles, count := srv.Collectibles(r.Context(), p.Address, p.Contract, p.Page, p.Row)
+	toJson(w, 0, map[string]interface{}{"list": collectibles, "count": count}, nil)
+	return nil
+}
+
+func tokenListHandle(w http.ResponseWriter, r *http.Request) error {
+	p := new(struct {
+		Page     int    `json:"page" validate:"min=0"`
+		Row      int    `json:"row" validate:"min=1,max=100"`
+		Category string `json:"category" validate:"omitempty,oneof=erc20 erc721"`
+	})
+	if err := validator.Validate(r.Body, p); err != nil {
+		toJson(w, 10001, nil, err)
+		return nil
+	}
+	list, count := srv.TokenList(r.Context(), p.Category, p.Page, p.Row)
+	toJson(w, 0, map[string]interface{}{"list": list, "count": count}, nil)
+	return nil
+}
+
+func tokenTransferHandle(w http.ResponseWriter, r *http.Request) error {
+	p := new(struct {
+		TokenAddress string `json:"token_address" validate:"omitempty,eth_addr"`
+		Address      string `json:"address" validate:"omitempty,eth_addr"`
+		Page         int    `json:"page" validate:"min=0"`
+		Row          int    `json:"row" validate:"min=1,max=100"`
+	})
+	if err := validator.Validate(r.Body, p); err != nil {
+		toJson(w, 10001, nil, err)
+		return nil
+	}
+	if p.TokenAddress == "" && p.Address == "" {
+		toJson(w, 10001, nil, fmt.Errorf("token_address or address is required"))
+		return nil
+	}
+	transfers, count := srv.TokenTransfers(r.Context(), p.Address, p.TokenAddress, p.Page, p.Row)
+	toJson(w, 0, map[string]interface{}{"transfers": transfers, "count": count}, nil)
+	return nil
+}
+
+func tokenHolderHandle(w http.ResponseWriter, r *http.Request) error {
+	p := new(struct {
+		TokenAddress string `json:"token_address" validate:"required,eth_addr"`
+		Page         int    `json:"page" validate:"min=0"`
+		Row          int    `json:"row" validate:"min=1,max=100"`
+	})
+	if err := validator.Validate(r.Body, p); err != nil {
+		toJson(w, 10001, nil, err)
+		return nil
+	}
+	holders, count := srv.TokenHolders(r.Context(), p.TokenAddress, p.Page, p.Row)
+	toJson(w, 0, map[string]interface{}{"holders": holders, "count": count}, nil)
+	return nil
 }
 
 func blocksHandle(w http.ResponseWriter, r *http.Request) error {

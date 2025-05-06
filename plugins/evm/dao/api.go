@@ -26,6 +26,12 @@ type ISrv interface {
 	TransactionsJson(ctx context.Context, opts ...model.Option) []TransactionSampleJson
 	Accounts(ctx context.Context, page int, row int) ([]AccountsJson, int64)
 	Contracts(ctx context.Context, page int, row int) ([]ContractsJson, int64)
+
+	AccountTokens(ctx context.Context, address string) []AccountTokenJson
+	Collectibles(ctx context.Context, address string, contract string, page, row int) ([]Erc721Holders, int)
+	TokenList(ctx context.Context, category string, page, row int) ([]Token, int)
+	TokenTransfers(ctx context.Context, address, tokenAddress string, page, row int) ([]TokenTransferJson, int)
+	TokenHolders(ctx context.Context, address string, page int, row int) ([]TokenHolder, int)
 }
 
 type ApiSrv struct{}
@@ -407,6 +413,7 @@ type ContractsJson struct {
 	ContractName     string `json:"contract_name"`
 	Address          string `json:"address"`
 	TransactionCount int    `json:"transaction_count"`
+	VerifyStatus     string `json:"verify_status"`
 }
 
 func (a *ApiSrv) Contracts(ctx context.Context, page int, row int) ([]ContractsJson, int64) {
@@ -416,6 +423,112 @@ func (a *ApiSrv) Contracts(ctx context.Context, page int, row int) ([]ContractsJ
 		return nil, 0
 	}
 	var res []ContractsJson
-	sg.db.WithContext(ctx).Model(&Contract{}).Select("contract_name,address,transaction_count ").Limit(row).Offset((page - 1) * row).Scan(&res)
+	sg.db.WithContext(ctx).Model(&Contract{}).Select("contract_name,address,transaction_count,verify_status").Limit(row).Offset((page - 1) * row).Scan(&res)
 	return res, count
+}
+
+type AccountTokenJson struct {
+	TokenName   string          `json:"token_name"`
+	TokenSymbol string          `json:"token_symbol"`
+	Balance     decimal.Decimal `json:"balance"`
+	Decimals    uint            `json:"decimals"`
+	Category    string          `json:"category"`
+	Contract    string          `json:"contract"`
+}
+
+func (a *ApiSrv) AccountTokens(ctx context.Context, address string) []AccountTokenJson {
+	var tokens []string
+	var tokenHolders []TokenHolder
+
+	sg.db.WithContext(ctx).Model(&TokenHolder{}).Where("address = ?", address).Find(&tokenHolders)
+
+	for _, v := range tokenHolders {
+		tokens = append(tokens, v.Contract)
+	}
+
+	addr2Token := ContractAddr2Token(ctx, tokens)
+	var res []AccountTokenJson
+	for _, v := range tokenHolders {
+		token := addr2Token[v.Contract]
+		res = append(res, AccountTokenJson{
+			TokenName:   token.Name,
+			TokenSymbol: token.Symbol,
+			Balance:     v.Balance,
+			Decimals:    token.Decimals,
+			Category:    token.Category,
+			Contract:    v.Contract,
+		})
+	}
+	return res
+}
+
+func (a *ApiSrv) Collectibles(ctx context.Context, address string, contract string, page, row int) ([]Erc721Holders, int) {
+	var holders []Erc721Holders
+	q := sg.db.WithContext(ctx).Model(&Erc721Holders{})
+	if address != "" {
+		q.Where("holder = ?", address)
+	}
+	if contract != "" {
+		q.Where("contract = ?", contract)
+	}
+	var count int64
+	q.Count(&count)
+	q.Offset(page * row).Limit(row).Find(&holders)
+	return holders, int(count)
+}
+
+func (a *ApiSrv) TokenList(ctx context.Context, category string, page, row int) ([]Token, int) {
+	var tokens []Token
+	var count int64
+	query := sg.db.WithContext(ctx).Model(&Token{}).Where("category = ?", category)
+	query.Count(&count)
+	query.Offset(page * row).Limit(row).Find(&tokens)
+	return tokens, int(count)
+}
+
+func (a *ApiSrv) TokenTransfers(ctx context.Context, address, tokenAddress string, page, row int) ([]TokenTransferJson, int) {
+	var transfers []TokensTransfers
+	var count int64
+
+	query := sg.db.WithContext(ctx).Model(&TokensTransfers{})
+	if address != "" {
+		query.Where("sender = ? or receiver = ?", address, address)
+	}
+	if tokenAddress != "" {
+		query.Where("contract = ?", tokenAddress)
+	}
+	query.Count(&count)
+	query.Offset(page * row).Limit(row).Find(&transfers)
+
+	var res []TokenTransferJson
+	var tokensAddress []string
+	for _, v := range transfers {
+		tokensAddress = append(tokensAddress, v.Contract)
+	}
+	addr2Token := ContractAddr2Token(ctx, tokensAddress)
+	for index := range transfers {
+		transfer := transfers[index]
+		tj := TokenTransferJson{
+			ID:       transfer.TransferId,
+			Contract: transfer.Contract,
+			Hash:     transfer.Hash,
+			CreateAt: transfer.CreateAt,
+			From:     transfer.Sender,
+			To:       transfer.Receiver,
+			Value:    &transfer.Value,
+		}
+		if token, ok := addr2Token[transfer.Contract]; ok {
+			tj.Decimals = &token.Decimals
+			tj.Symbol = token.Symbol
+			tj.Name = token.Name
+			tj.Category = token.Category
+		}
+		res = append(res, tj)
+	}
+	return res, int(count)
+}
+
+func (a *ApiSrv) TokenHolders(ctx context.Context, address string, page int, row int) ([]TokenHolder, int) {
+	tokens, count := TokenHolders(ctx, address, page, row)
+	return tokens, int(count)
 }

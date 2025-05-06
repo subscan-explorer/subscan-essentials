@@ -5,6 +5,7 @@ import (
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/address"
+	"github.com/itering/substrate-api-rpc"
 	"strings"
 )
 
@@ -117,7 +118,7 @@ func (d *Dao) GetExtrinsicsDetailByIndex(c context.Context, index string) *model
 	return d.extrinsicsAsDetail(c, &extrinsic)
 }
 
-func (d *Dao) extrinsicsAsDetail(c context.Context, e *model.ChainExtrinsic) *model.ExtrinsicDetail {
+func (d *Dao) extrinsicsAsDetail(ctx context.Context, e *model.ChainExtrinsic) *model.ExtrinsicDetail {
 	detail := model.ExtrinsicDetail{
 		BlockTimestamp:     e.BlockTimestamp,
 		ExtrinsicIndex:     e.ExtrinsicIndex,
@@ -130,20 +131,9 @@ func (d *Dao) extrinsicsAsDetail(c context.Context, e *model.ChainExtrinsic) *mo
 		ExtrinsicHash:      e.ExtrinsicHash,
 		Success:            e.Success,
 		Fee:                e.Fee,
+		Finalized:          true,
 	}
-	_ = util.UnmarshalAny(&detail.Params, e.Params)
-
-	if block := d.GetBlockByNum(c, detail.BlockNum); block != nil {
-		detail.Finalized = block.Finalized
-	}
-
-	events := d.GetEventsByIndex(e.ExtrinsicIndex)
-	for k, event := range events {
-		events[k].Params = event.Params
-	}
-
-	detail.Event = &events
-
+	d.FindLifeTime(ctx, &detail, e.Era)
 	return &detail
 }
 
@@ -164,4 +154,16 @@ func (d *Dao) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsicJso
 		Fee:                e.Fee,
 	}
 	return ej
+}
+
+func (d *Dao) FindLifeTime(_ context.Context, detail *model.ExtrinsicDetail, era string) {
+	if detail.Signature == "" {
+		return
+	}
+	if mortal := substrate.DecodeMortal(era); mortal != nil {
+		detail.Lifetime = &model.Lifetime{
+			Birth: mortal.Birth(uint64(detail.BlockNum)),
+			Death: mortal.Death(uint64(detail.BlockNum)),
+		}
+	}
 }

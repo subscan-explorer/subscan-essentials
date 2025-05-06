@@ -1,13 +1,13 @@
 package http
 
 import (
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/itering/subscan/configs"
 	"github.com/itering/subscan/internal/service"
 	"github.com/itering/subscan/plugins"
+	customValidator "github.com/itering/subscan/util/validator"
+	"time"
 )
 
 var (
@@ -40,6 +40,7 @@ func NewHTTPServer(c *configs.Server, s *service.Service) *http.Server {
 
 func initRouter(e *gin.Engine) {
 	e.GET("ping", ping)
+	customValidator.RegisterCustomValidator()
 	// internal
 	g := e.Group("/api")
 	{

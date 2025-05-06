@@ -142,7 +142,7 @@ func (c *Token) mergeTokenInfo(txn *gorm.DB) (err error) {
 }
 
 type TokenHolder struct {
-	ID       uint            `gorm:"primaryKey;autoIncrement;size:32"`
+	ID       uint            `gorm:"primaryKey;autoIncrement;size:32" json:"-"`
 	Contract string          `json:"contract" gorm:"index:contract;index:contract_hold,unique;size:100"`
 	Holder   string          `json:"holder" gorm:"index:hold;index:contract_hold,unique;size:100" `
 	Balance  decimal.Decimal `json:"balance" gorm:"default: 0;type:decimal(65);"`
@@ -303,7 +303,6 @@ type TokenTransferJson struct {
 	Contract   string           `json:"contract"`
 	Hash       string           `json:"hash"`
 	CreateAt   uint             `json:"create_at"`
-	Index      uint             `json:"index"`
 	From       string           `json:"from"`
 	To         string           `json:"to" `
 	Value      *decimal.Decimal `json:"value,omitempty"`
@@ -313,7 +312,6 @@ type TokenTransferJson struct {
 	Symbol     string           `json:"symbol"`
 	Name       string           `json:"name"`
 	Category   string           `json:"category"`
-	Price      decimal.Decimal  `json:"price"`
 }
 
 func ContractAddr2Token(ctx context.Context, addr []string) map[string]Token {

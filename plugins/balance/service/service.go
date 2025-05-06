@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	subscan_plugin "github.com/itering/subscan-plugin"
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/plugins/balance/dao"
@@ -19,6 +20,15 @@ func (s *Service) GetAccountListJson(page, row int) ([]model.Account, int) {
 		list[i].Address = address.Format(list[i].Address)
 	}
 	return list, count
+}
+
+func (s *Service) GetAccountJson(ctx context.Context, addr string) *model.Account {
+	account := dao.GetAccountByAddress(ctx, s.d, addr)
+	if account == nil {
+		return nil
+	}
+	account.Address = address.Format(account.Address)
+	return account
 }
 
 func New(d storage.Dao, pool subscan_plugin.RedisPool) *Service {

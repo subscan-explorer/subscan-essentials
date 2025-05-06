@@ -9,7 +9,8 @@ type Account struct {
 	Address string          `gorm:"default: null;size:100;index:address,unique" json:"address"`
 	Nonce   int             `json:"nonce"`
 	Balance decimal.Decimal `json:"balance" gorm:"type:decimal(65,0);"`
-	Lock    decimal.Decimal `json:"lock" gorm:"type:decimal(65,0);"`
+	Locked  decimal.Decimal `json:"locked" gorm:"type:decimal(65,0);"`
+	Reserve decimal.Decimal `json:"reserve" gorm:"type:decimal(65,0);"`
 }
 
 type AccountData struct {

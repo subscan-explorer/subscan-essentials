@@ -16,11 +16,12 @@ var (
 func Router(s *service.Service) []router.Http {
 	svc = s
 	return []router.Http{
-		{"accounts", accounts, http.MethodPost},
+		{"accounts", accountsHandle, http.MethodPost},
+		{"account", accountHandle, http.MethodPost},
 	}
 }
 
-func accounts(w http.ResponseWriter, r *http.Request) error {
+func accountsHandle(w http.ResponseWriter, r *http.Request) error {
 	p := new(struct {
 		Row  int `json:"row" validate:"min=1,max=100"`
 		Page int `json:"page" validate:"min=0"`
@@ -34,6 +35,19 @@ func accounts(w http.ResponseWriter, r *http.Request) error {
 	toJson(w, 0, map[string]interface{}{
 		"list": list, "count": count,
 	}, nil)
+	return nil
+}
+
+func accountHandle(w http.ResponseWriter, r *http.Request) error {
+	p := new(struct {
+		Address string `json:"address" validate:"required,addr"`
+	})
+	if err := validator.Validate(r.Body, p); err != nil {
+		toJson(w, 10001, nil, err)
+		return nil
+	}
+	account := svc.GetAccountJson(r.Context(), p.Address)
+	toJson(w, 0, account, nil)
 	return nil
 }
 

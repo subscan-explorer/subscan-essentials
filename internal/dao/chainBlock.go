@@ -114,7 +114,7 @@ func (d *Dao) GetBlockByHash(c context.Context, hash string) *model.ChainBlock {
 
 func (d *Dao) GetBlockByNum(ctx context.Context, blockNum uint) *model.ChainBlock {
 	var block model.ChainBlock
-	query := d.db.WithContext(ctx).Model(&model.ChainBlock{BlockNum: blockNum}).Where("block_num = ?", blockNum).Find(&block)
+	query := d.db.WithContext(ctx).Scopes(model.TableNameFunc(&model.ChainBlock{BlockNum: blockNum})).Where("block_num = ?", blockNum).Find(&block)
 	if query == nil || query.Error != nil {
 		return nil
 	}
@@ -131,11 +131,9 @@ func (d *Dao) BlockAsJson(_ context.Context, block *model.ChainBlock) *model.Cha
 		EventCount:      block.EventCount,
 		ExtrinsicsCount: block.ExtrinsicsCount,
 		ExtrinsicsRoot:  block.ExtrinsicsRoot,
-		Extrinsics:      d.GetExtrinsicsByBlockNum(block.BlockNum),
-		Events:          d.GetEventByBlockNum(block.BlockNum),
-		Logs:            d.GetLogByBlockNum(block.BlockNum),
 		Validator:       address.Encode(block.Validator),
 		Finalized:       block.Finalized,
+		SpecVersion:     block.SpecVersion,
 	}
 	return &bj
 }

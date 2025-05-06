@@ -3,22 +3,17 @@ package model
 import "github.com/shopspring/decimal"
 
 type ChainBlockJson struct {
-	BlockNum          uint                 `json:"block_num"`
-	BlockTimestamp    int                  `json:"block_timestamp"`
-	Hash              string               `json:"hash"`
-	ParentHash        string               `json:"parent_hash"`
-	StateRoot         string               `json:"state_root"`
-	ExtrinsicsRoot    string               `json:"extrinsics_root"`
-	Extrinsics        []ChainExtrinsicJson `json:"extrinsics"`
-	Events            []ChainEventJson     `json:"events"`
-	Logs              []ChainLogJson       `json:"logs"`
-	EventCount        int                  `json:"event_count"`
-	ExtrinsicsCount   int                  `json:"extrinsics_count"`
-	SpecVersion       int                  `json:"spec_version"`
-	Validator         string               `json:"validator"`
-	ValidatorName     string               `json:"validator_name"`
-	ValidatorIndexIds string               `json:"validator_index_ids"`
-	Finalized         bool                 `json:"finalized"`
+	BlockNum        uint   `json:"block_num"`
+	BlockTimestamp  int    `json:"block_timestamp"`
+	Hash            string `json:"hash"`
+	ParentHash      string `json:"parent_hash"`
+	StateRoot       string `json:"state_root"`
+	ExtrinsicsRoot  string `json:"extrinsics_root"`
+	EventCount      int    `json:"event_count"`
+	ExtrinsicsCount int    `json:"extrinsics_count"`
+	SpecVersion     int    `json:"spec_version"`
+	Validator       string `json:"validator"`
+	Finalized       bool   `json:"finalized"`
 }
 
 type SampleBlockJson struct {
@@ -59,9 +54,14 @@ type ExtrinsicDetail struct {
 	ExtrinsicHash      string          `json:"extrinsic_hash"`
 	Success            bool            `json:"success"`
 	Params             ExtrinsicParams `json:"params"`
-	Event              *[]ChainEvent   `json:"event"`
 	Fee                decimal.Decimal `json:"fee"`
 	Finalized          bool            `json:"finalized"`
+	Lifetime           *Lifetime       `json:"lifetime"`
+}
+
+type Lifetime struct {
+	Birth uint64 `json:"birth"`
+	Death uint64 `json:"death"`
 }
 
 type ChainEventJson struct {

@@ -11,6 +11,51 @@ import (
 type MockServer struct {
 }
 
+func (m MockServer) AccountTokens(ctx context.Context, address string) []dao.AccountTokenJson {
+	return nil
+}
+
+func (m MockServer) Collectibles(ctx context.Context, address string, contract string, page, row int) ([]dao.Erc721Holders, int) {
+	return nil, 0
+}
+
+func (m MockServer) TokenList(ctx context.Context, category string, page, row int) ([]dao.Token, int) {
+	return nil, 0
+}
+
+func (m MockServer) TokenTransfers(ctx context.Context, address, tokenAddress string, page, row int) ([]dao.TokenTransferJson, int) {
+	return nil, 0
+}
+
+func (m MockServer) TokenHolders(ctx context.Context, address string, page int, row int) ([]dao.TokenHolder, int) {
+	return nil, 0
+}
+
+func (m MockServer) Blocks(ctx context.Context, page int, row int) ([]dao.EvmBlockJson, int) {
+	return nil, 0
+}
+
+func (m MockServer) BlockByNum(ctx context.Context, blockNum uint) *dao.EvmBlock {
+	return nil
+}
+
+func (m MockServer) BlockByHash(ctx context.Context, hash string) *dao.EvmBlock {
+	return nil
+}
+
+func (m MockServer) TransactionsJson(ctx context.Context, opts ...model.Option) []dao.TransactionSampleJson {
+	return nil
+}
+
+func (m MockServer) Accounts(ctx context.Context, page int, row int) ([]dao.AccountsJson, int64) {
+	return nil, 0
+}
+
+func (m MockServer) Contracts(ctx context.Context, page int, row int) ([]dao.ContractsJson, int64) {
+	// TODO implement me
+	panic("implement me")
+}
+
 func (m MockServer) GetTransactionByHash(_ context.Context, _ string) *dao.Transaction {
 	return &dao.Transaction{Hash: "0xdf03f7309487778643a40a7fc4a8224f8c984f7f1821d970458cabc51c6a59b6", Success: true}
 }
