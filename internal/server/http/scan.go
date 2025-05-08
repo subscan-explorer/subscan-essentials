@@ -73,7 +73,7 @@ type BlockParams struct {
 // @Accept json
 // @Produce json
 // @Param params body BlockParams true "params"
-// @Success 200 {object} http.J{data=model.SampleBlockJson}
+// @Success 200 {object} http.J{data=model.ChainBlockJson}
 // @Router /api/scan/block [post]
 func blockHandle(c *gin.Context) {
 	p := new(BlockParams)

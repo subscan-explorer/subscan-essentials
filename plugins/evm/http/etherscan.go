@@ -507,6 +507,5 @@ func etherscanHandle(w http.ResponseWriter, r *http.Request) error {
 			return nil
 		}
 	}
-	util.Debug(actionParams)
 	return nil
 }

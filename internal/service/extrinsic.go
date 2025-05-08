@@ -26,9 +26,12 @@ func (s *Service) createExtrinsic(ctx context.Context,
 		extrinsic.Success = s.getExtrinsicSuccess(eventMap[extrinsic.ExtrinsicIndex])
 		extrinsic.BlockTimestamp = block.BlockTimestamp
 		extrinsic.AccountId = address.Format(extrinsic.AccountId)
-		if extrinsic.IsSigned {
-			fee, _ := GetExtrinsicFee(encodeExtrinsics[index])
-			extrinsic.Fee = fee
+		if extrinsic.Signature != "" {
+			weight, actualFee, isV2Weight := model.CheckoutWeight(eventMap[extrinsic.ExtrinsicIndex])
+			extrinsic.Fee, extrinsic.UsedFee, err = GetExtrinsicFee(ctx, encodeExtrinsics[index], block.ParentHash, block.SpecVersion, weight, actualFee, isV2Weight)
+			if err != nil {
+				util.Logger().Error(fmt.Errorf("extrinsic %s GetExtrinsicFee err %v", extrinsic.ExtrinsicIndex, err))
+			}
 		}
 
 		if err = s.dao.CreateExtrinsic(ctx, txn, &extrinsic); err == nil {

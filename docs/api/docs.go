@@ -838,7 +838,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/model.SampleBlockJson"
+                                            "$ref": "#/definitions/model.ChainBlockJson"
                                         }
                                     }
                                 }
@@ -1964,6 +1964,44 @@ const docTemplate = `{
                 },
                 "type": {
                     "type": "integer"
+                }
+            }
+        },
+        "model.ChainBlockJson": {
+            "type": "object",
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "block_timestamp": {
+                    "type": "integer"
+                },
+                "event_count": {
+                    "type": "integer"
+                },
+                "extrinsics_count": {
+                    "type": "integer"
+                },
+                "extrinsics_root": {
+                    "type": "string"
+                },
+                "finalized": {
+                    "type": "boolean"
+                },
+                "hash": {
+                    "type": "string"
+                },
+                "parent_hash": {
+                    "type": "string"
+                },
+                "spec_version": {
+                    "type": "integer"
+                },
+                "state_root": {
+                    "type": "string"
+                },
+                "validator": {
+                    "type": "string"
                 }
             }
         },

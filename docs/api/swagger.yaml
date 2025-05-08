@@ -451,6 +451,31 @@ definitions:
       type:
         type: integer
     type: object
+  model.ChainBlockJson:
+    properties:
+      block_num:
+        type: integer
+      block_timestamp:
+        type: integer
+      event_count:
+        type: integer
+      extrinsics_count:
+        type: integer
+      extrinsics_root:
+        type: string
+      finalized:
+        type: boolean
+      hash:
+        type: string
+      parent_hash:
+        type: string
+      spec_version:
+        type: integer
+      state_root:
+        type: string
+      validator:
+        type: string
+    type: object
   model.ChainEventJson:
     properties:
       block_num:
@@ -1606,7 +1631,7 @@ paths:
             - $ref: '#/definitions/internal_server_http.J'
             - properties:
                 data:
-                  $ref: '#/definitions/model.SampleBlockJson'
+                  $ref: '#/definitions/model.ChainBlockJson'
               type: object
       summary: Get block details
       tags:

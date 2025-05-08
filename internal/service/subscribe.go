@@ -86,7 +86,7 @@ func reSubscribeFromChain() {
 		_ = newConn.SetReadDeadline(time.Now().Add(15 * time.Second))
 		setConn(newConn)
 
-		if err := subscribeFromChain(); err != nil {
+		if err = subscribeFromChain(); err != nil {
 			util.Logger().Error(fmt.Errorf("subscribe error: %v", err))
 			continue
 		}
@@ -113,11 +113,10 @@ func (s *Service) Subscribe(ctx context.Context) {
 			_, message, err := c.ReadMessage()
 			if err != nil {
 				time.Sleep(time.Second * 5)
-				util.Logger().Error(fmt.Errorf("read error: %v", err))
+				// util.Logger().Error(fmt.Errorf("read error: %v", err))
 				reSubscribeFromChain()
 				continue
 			}
-			util.Debug(message)
 			_ = subscribeSrv.parser(message)
 		}
 	}()

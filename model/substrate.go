@@ -1,6 +1,7 @@
 package model
 
 import (
+	"bytes"
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 	"github.com/itering/subscan/util/address"
 	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
+	"strconv"
 	"strings"
 )
 
@@ -125,6 +127,7 @@ type ChainExtrinsic struct {
 	IsSigned      bool            `json:"is_signed"`
 	Success       bool            `json:"success"`
 	Fee           decimal.Decimal `json:"fee" gorm:"type:decimal(65,0);"`
+	UsedFee       decimal.Decimal `json:"used_fee" gorm:"type:decimal(65,0);"`
 }
 
 type ExtrinsicParams []ExtrinsicParam
@@ -298,4 +301,79 @@ func CheckoutParamValueAddress(value interface{}) string {
 		}
 	}
 	return address.Format(util.ToString(value))
+}
+
+type DispatchInfo struct {
+	Weight    decimal.Decimal
+	Class     string      `json:"class"`
+	PaysFee   string      `json:"pays_fee"`
+	WeightTry interface{} `json:"weight"`
+	V2        bool        `json:"v2"`
+}
+
+func (d *DispatchInfo) UnmarshalJSON(data []byte) error {
+	type T DispatchInfo
+
+	j := json.NewDecoder(bytes.NewReader(data))
+	j.UseNumber()
+	if err := j.Decode((*T)(d)); err != nil {
+		return err
+	}
+
+	switch v := d.WeightTry.(type) {
+	case json.Number:
+		d.Weight, _ = decimal.NewFromString(v.String())
+		return nil
+	}
+
+	var v2Weight *struct {
+		ProofSize uint64 `json:"proof_size"`
+		RefTime   uint64 `json:"ref_time"`
+	}
+
+	if err := util.UnmarshalAny(&v2Weight, d.WeightTry); err != nil {
+		return err
+	}
+	d.V2 = true
+	d.Weight, _ = decimal.NewFromString(strconv.FormatUint(v2Weight.RefTime, 10))
+	return nil
+}
+
+func CheckoutWeight(events []ChainEvent) (decimal.Decimal, decimal.Decimal, bool) {
+	var extrinsicState DispatchInfo
+	var weight decimal.Decimal
+	actualFee := decimal.NewFromInt32(-1)
+	var isV2Weight bool
+	for _, event := range events {
+		if !strings.EqualFold(event.ModuleId, "system") && !strings.EqualFold(event.ModuleId, "TransactionPayment") {
+			continue
+		}
+		switch {
+		case strings.EqualFold(event.EventId, "ExtrinsicSuccess"):
+			if len(event.Params) < 1 {
+				continue
+			}
+			util.Logger().Error(util.UnmarshalAny(&extrinsicState, event.Params[0].Value))
+			weight = extrinsicState.Weight
+			isV2Weight = extrinsicState.V2
+		case strings.EqualFold(event.EventId, "ExtrinsicFailed"):
+			if len(event.Params) < 2 {
+				continue
+			}
+			util.Logger().Error(util.UnmarshalAny(&extrinsicState, event.Params[1].Value))
+			weight = extrinsicState.Weight
+			isV2Weight = extrinsicState.V2
+			// https://github.com/paritytech/substrate/blob/d0540a7996/frame/transaction-payment/src/lib.rs#L832
+			// https://github.com/open-web3-stack/open-runtime-module-library/blob/master/oracle/src/lib.rs#L168
+			// TransactionFeePaid { who: T::AccountId, actual_fee: BalanceOf<T>, tip: BalanceOf<T> },
+		case strings.EqualFold(event.EventId, "TransactionFeePaid"):
+			if len(event.Params) < 3 {
+				continue
+			}
+			actualFee = util.DecimalFromInterface(event.Params[1].Value)
+			tip := util.DecimalFromInterface(event.Params[2].Value)
+			actualFee = actualFee.Sub(tip)
+		}
+	}
+	return weight, actualFee, isV2Weight
 }

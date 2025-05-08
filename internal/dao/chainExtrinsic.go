@@ -26,6 +26,7 @@ func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.C
 		Success:            extrinsic.Success,
 		IsSigned:           extrinsic.Signature != "",
 		Fee:                extrinsic.Fee,
+		UsedFee:            extrinsic.UsedFee,
 	}
 	query := txn.Scopes(d.TableNameFunc(&ce), model.IgnoreDuplicate).Scopes(model.IgnoreDuplicate).Create(&ce)
 	if query.RowsAffected > 0 {

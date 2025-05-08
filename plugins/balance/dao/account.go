@@ -47,7 +47,7 @@ func AfterAccountCreate(ctx context.Context, db *gorm.DB, account *bModel.Accoun
 	}
 	accountData := new(bModel.AccountData)
 	accountDataRaw.ToAny(accountData)
-	return db.WithContext(ctx).Debug().Model(account).Where("address = ?", account.Address).UpdateColumns(map[string]interface{}{
+	return db.WithContext(ctx).Model(account).Where("address = ?", account.Address).UpdateColumns(map[string]interface{}{
 		"nonce":    accountData.Nonce,
 		"balance":  accountData.Data.Free.Add(accountData.Data.Reserved),
 		"locked":   decimal.Max(accountData.Data.MiscFrozen, accountData.Data.FeeFrozen),

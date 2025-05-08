@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/itering/subscan/util/mq"
 	"github.com/itering/substrate-api-rpc/model"
 	"sync"
 	"time"
@@ -79,7 +80,7 @@ func (s *SubscribeService) subscribeFetchBlock(ctx context.Context) {
 				startBlock = s.lastBlock + 1
 			}
 			for i := startBlock; i <= s.finalizedBlockNum-FinalizedWaitingBlockCount; i++ {
-				// mq.Instant.Publish("block", "block", map[string]interface{}{"block_num": i})
+				_ = mq.Instant.Publish("block", "block", map[string]interface{}{"block_num": i})
 				util.Logger().Info(fmt.Sprintf("Publish block num %d", i))
 				s.lastBlock = i
 			}

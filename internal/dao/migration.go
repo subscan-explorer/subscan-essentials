@@ -13,8 +13,10 @@ func (d *Dao) Migration() {
 		num, _ := d.GetFillBestBlockNum(context.TODO())
 		blockNum = uint(num)
 	}
-	_ = db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(d.InternalTables(blockNum)...)
-
+	if d.DbDriver == "mysql" {
+		db = db.Set("gorm:table_options", "ENGINE=InnoDB")
+	}
+	_ = db.AutoMigrate(d.InternalTables(blockNum)...)
 	for i := 0; uint(i) <= blockNum/model.SplitTableBlockNum; i++ {
 		d.AddIndex(uint(i) * model.SplitTableBlockNum)
 	}

@@ -2,6 +2,8 @@ package service
 
 import (
 	"fmt"
+	"github.com/itering/scale.go/source"
+	"github.com/itering/scale.go/types"
 	"os"
 	"strings"
 
@@ -44,6 +46,11 @@ func (s *Service) initSubRuntimeLatest() {
 		if data, err := readTypeRegistry(); err == nil {
 			substrate.RegCustomTypes(data)
 		}
+		types.RegCustomTypes(map[string]source.TypeStruct{
+			"WeightV2":              {Type: "struct", TypeMapping: [][]string{{"ref_time", "Compact<u64>"}, {"proofSize", "Compact<u64>"}}},
+			"RuntimeDispatchInfo":   {Type: "struct", TypeMapping: [][]string{{"weight", "WeightV2"}, {"class", "DispatchClass"}, {"partialFee", "Balance"}}},
+			"RuntimeDispatchInfoV1": {Type: "struct", TypeMapping: [][]string{{"weight", "Weight"}, {"class", "DispatchClass"}, {"partialFee", "Balance"}}},
+		})
 	}()
 
 	// find db

@@ -19,7 +19,6 @@ type Storage struct {
 func EmitEvent(ctx context.Context, d *Storage, event *storage.Event, block *storage.Block) error {
 	var paramEvent []storage.EventParam
 	_ = util.UnmarshalAny(&paramEvent, event.Params)
-	util.Debug(event)
 	switch event.EventId {
 	// [accountId, balance]
 	case "Endowed", "Reserved", "Unreserved", "Deposit", "Minted", "Issued", "Locked", "Unlocked", "Withdraw":
