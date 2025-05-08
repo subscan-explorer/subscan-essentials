@@ -18,7 +18,6 @@ Developers are free to use the codebase to extend functionalities and develop un
   - [Requirement](#Requirement)
   - [Structure](docs/tree.md)
   - [Installation](#Install)
-  - [UI](#UI)
   - [Config](#Config)
   - [Usage](#Usage)
   - [Docker](#Docker)
@@ -44,7 +43,7 @@ Developers are free to use the codebase to extend functionalities and develop un
 * Git
 * Golang 1.23.0+
 * Redis 3.0.4+
-* MySQL 8.0+
+* MySQL 8.0+/Postgres 16+
 
 ### Install
 
@@ -71,6 +70,10 @@ cp configs/config.yaml.example configs/config.yaml
 | VERIFY_SERVER          | NULL          | solidity verify server |
 | SUBSTRATE_ADDRESS_TYPE | 0             | ss58 address type      |
 | SUBSTRATE_ACCURACY     | 10            | native token accuracy  |
+| CHAIN_WS_ENDPOINT      |               | websocket endpoint url |
+| NETWORK_NODE           | moonbeam      | network node name      |
+| WORKER_GOROUTINE_COUNT | 10            | worker goroutine count |
+| ETH_RPC                |               | Evm rpc endpoint       |
 
 
 
@@ -200,4 +203,5 @@ GPL-3.0
 ## Resource
  
 - [SUBSCAN] https://github.com/subscan-explorer
+- [scale.go] https://github.com/subscan-explorer/scale.go
 - [Darwinia] https://github.com/darwinia-network
