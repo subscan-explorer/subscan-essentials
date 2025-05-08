@@ -16,6 +16,6 @@ COPY configs/config.yaml.example configs/config.yaml
 
 COPY --from=builder /subscan/cmd/subscan cmd/subscan
 WORKDIR cmd
-
+RUN apk update && apk add gcompat
 ENTRYPOINT ["/subscan/cmd/subscan"]
 EXPOSE 4399
