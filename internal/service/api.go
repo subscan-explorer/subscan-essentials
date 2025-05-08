@@ -108,6 +108,7 @@ func (s *Service) EventsList(ctx context.Context, page, row int, where ...model.
 			Params:         event.Params,
 			EventIdx:       event.EventIdx,
 			EventIndex:     fmt.Sprintf("%d-%d", event.BlockNum, event.EventIdx),
+			Phase:          event.Phase,
 		}
 		if block, ok := blockMap[event.BlockNum]; ok {
 			ej.BlockTimestamp = block.BlockTimestamp
@@ -134,4 +135,8 @@ func (s *Service) SubstrateRuntimeInfo(spec int) *metadata.Instant {
 		return metadata.Latest(nil)
 	}
 	return runtime
+}
+
+func (s *Service) LogsList(ctx context.Context, blockNum uint) []model.ChainLogJson {
+	return s.dao.GetLogByBlockNum(ctx, blockNum)
 }

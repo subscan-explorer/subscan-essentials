@@ -27,7 +27,7 @@ func init() {
 func Migration() {
 	util.ConfDir = "../../../configs"
 	configs.Init()
-	db, err := gorm.Open(mysql.Open(configs.Boot.Database.DSN))
+	db, err := gorm.Open(mysql.Open(configs.Boot.Database.Mysql.DSN))
 	if err != nil {
 		panic(err)
 	}

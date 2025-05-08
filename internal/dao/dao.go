@@ -20,7 +20,7 @@ func New() (dao *Dao, storage *DbStorage, pool *redisDao.Dao) {
 		redis: pool,
 	}
 	dao.Migration()
-	storage = &DbStorage{db: db}
+	storage = &DbStorage{db: db, DbDriver: db.Dialector.Name()}
 	return
 }
 

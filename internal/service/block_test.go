@@ -28,7 +28,7 @@ func TestService_CreateChainBlock(t *testing.T) {
 			},
 		},
 	}
-	err := testSrv.CreateChainBlock(context.TODO(), nil, hash, &block, event, 4)
+	err := testSrv.CreateChainBlock(context.TODO(), hash, &block, event, 4)
 	assert.NoError(t, err)
 
 }

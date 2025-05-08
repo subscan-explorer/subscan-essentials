@@ -31,6 +31,7 @@ func (a *Balance) Enable() bool {
 func (a *Balance) ProcessBlock(context.Context, *storage.Block) error { return nil }
 
 func (a *Balance) SetRedisPool(pool subscan_plugin.RedisPool) {
+	a.pool = pool
 	srv = service.New(a.d, pool)
 }
 
@@ -68,7 +69,7 @@ func (a *Balance) SubscribeExtrinsic() []string {
 }
 
 func (a *Balance) SubscribeEvent() []string {
-	return []string{"Balances"}
+	return []string{"balances"}
 }
 
 func (a *Balance) Version() string {
@@ -77,6 +78,7 @@ func (a *Balance) Version() string {
 
 func (a *Balance) Migrate() {
 	_ = a.d.AutoMigration(&model.Account{})
+	_ = a.d.AutoMigration(&model.Transfer{})
 }
 
 func (a *Balance) ExecWorker(context.Context, string, string, interface{}) error { return nil }

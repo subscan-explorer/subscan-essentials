@@ -11,7 +11,7 @@ import (
 type MockServer struct {
 }
 
-func (m MockServer) AccountTokens(ctx context.Context, address string) []dao.AccountTokenJson {
+func (m MockServer) AccountTokens(ctx context.Context, address, _ string) []dao.AccountTokenJson {
 	return nil
 }
 
@@ -19,7 +19,7 @@ func (m MockServer) Collectibles(ctx context.Context, address string, contract s
 	return nil, 0
 }
 
-func (m MockServer) TokenList(ctx context.Context, category string, page, row int) ([]dao.Token, int) {
+func (m MockServer) TokenList(ctx context.Context, _, category string, page, row int) ([]dao.Token, int) {
 	return nil, 0
 }
 
@@ -43,8 +43,8 @@ func (m MockServer) BlockByHash(ctx context.Context, hash string) *dao.EvmBlock 
 	return nil
 }
 
-func (m MockServer) TransactionsJson(ctx context.Context, opts ...model.Option) []dao.TransactionSampleJson {
-	return nil
+func (m MockServer) TransactionsJson(ctx context.Context, page model.Option, opts ...model.Option) ([]dao.TransactionSampleJson, int) {
+	return nil, 0
 }
 
 func (m MockServer) Accounts(ctx context.Context, page int, row int) ([]dao.AccountsJson, int64) {

@@ -5,7 +5,6 @@ import (
 	"github.com/itering/subscan/util"
 	"net/url"
 	"os"
-
 	"testing"
 
 	"github.com/go-kratos/kratos/v2/config"
@@ -128,6 +127,7 @@ func TestDefaultInit(t *testing.T) {
 			t.Error("Boot.Redis is nil")
 			return
 		}
+
 	})
 }
 
@@ -137,11 +137,11 @@ func TestFakeEnvInit(t *testing.T) {
 		writeConfigAndInit(t)
 		// check value
 		// THIS required example's value
-		yamlDSN, err := ParseDSN(Boot.Database.Api)
+		yamlDSN, err := ParseDSN(Boot.Database.Mysql.Api)
 		if err != nil {
 			panic(err)
 		}
-		rightDSN, err := (&Database{}).mergeDefaultDSNs(getFakeDefaultEnvDSN(), yamlDSN)
+		rightDSN, err := (&Database{}).Mysql.mergeDefaultDSNs(getFakeDefaultEnvDSN(), yamlDSN)
 		if err != nil {
 			panic(err)
 		}
@@ -154,17 +154,17 @@ func TestFakeEnvInit(t *testing.T) {
 			}
 			rightDSNMysql := fmt.Sprintf("%s@tcp(%s)%s?%s", user, rightDSN.Host, rightDSN.Path, rightDSN.RawQuery)
 			t.Run("Gorm mysql dsn", func(t *testing.T) {
-				if Boot.Database.DSN != rightDSNMysql {
+				if Boot.Database.Mysql.DSN != rightDSNMysql {
 					t.Logf("Right DSN: %s", rightDSNMysql)
-					t.Logf("Test DSN: %s", Boot.Database.DSN)
+					t.Logf("Test DSN: %s", Boot.Database.Mysql.DSN)
 					t.Fatal("unexpected mysql Database.DSN")
 				}
 			})
 		} else {
 			t.Run("Other DSN", func(t *testing.T) {
-				if Boot.Database.DSN != rightDSN.String() {
+				if Boot.Database.Mysql.DSN != rightDSN.String() {
 					t.Logf("Right DSN: %s", rightDSN.String())
-					t.Logf("Test DSN: %s", Boot.Database.DSN)
+					t.Logf("Test DSN: %s", Boot.Database.Mysql.DSN)
 					t.Fatal("unexpected Database.DSN")
 				}
 			})
@@ -201,7 +201,7 @@ func TestFakeDBGetEnvDSN(t *testing.T) {
 	EnvSandbox(func() {
 		setFakeEnvs(nil)
 		boot := fakeBootstrap(t)
-		env := boot.Database.getEnvDSN()
+		env := boot.Database.Mysql.getEnvDSN()
 		if env.String() != getFakeDefaultEnvDSN().String() {
 			t.Fatalf("unexpected database dsn: %s", env.String())
 		}
@@ -220,12 +220,12 @@ func TestFakeDBGetYamlDSN(t *testing.T) {
 	EnvSandbox(func() {
 		writeConfigWithoutInit(t)
 		boot := fakeBootstrap(t)
-		env, err := boot.Database.getYamlDSN()
+		env, err := boot.Database.Mysql.getYamlDSN()
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		if env.String() != dsnParseAndString(boot.Database.Api) {
+		if env.String() != dsnParseAndString(boot.Database.Mysql.Api) {
 			t.Fatalf("unexpected database api dsn: %s", env.String())
 		}
 		os.Clearenv()
@@ -234,9 +234,12 @@ func TestFakeDBGetYamlDSN(t *testing.T) {
 		if err != nil {
 			panic(err)
 		}
-		_, err = boot.Database.getYamlDSN()
+		env, err = boot.Database.Mysql.getYamlDSN()
 		if err != nil {
 			t.Fatal(err)
+		}
+		if env.String() != dsnParseAndString(boot.Database.Mysql.Test) {
+			t.Fatalf("unexpected database task dsn: %s", env.String())
 		}
 		os.Clearenv()
 	})
@@ -255,7 +258,7 @@ func TestMergeDefaultDSNsFunc(t *testing.T) {
 		}
 
 		t.Run("Test merge order Env final", func(t *testing.T) {
-			ns, err := db.mergeDefaultDSNs(testYaml, testEnv)
+			ns, err := db.Mysql.mergeDefaultDSNs(testYaml, testEnv)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -279,7 +282,7 @@ func TestMergeDefaultDSNsFunc(t *testing.T) {
 		})
 
 		t.Run("Test merge order Yaml final", func(t *testing.T) {
-			ns, err := db.mergeDefaultDSNs(testEnv, testYaml)
+			ns, err := db.Mysql.mergeDefaultDSNs(testEnv, testYaml)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -303,7 +306,7 @@ func TestMergeDefaultDSNsFunc(t *testing.T) {
 		})
 
 		t.Run("Test one nil param A", func(t *testing.T) {
-			ns, err := db.mergeDefaultDSNs(testEnv, nil)
+			ns, err := db.Mysql.mergeDefaultDSNs(testEnv, nil)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -313,7 +316,7 @@ func TestMergeDefaultDSNsFunc(t *testing.T) {
 		})
 
 		t.Run("Test one nil param B", func(t *testing.T) {
-			ns, err := db.mergeDefaultDSNs(nil, testEnv)
+			ns, err := db.Mysql.mergeDefaultDSNs(nil, testEnv)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -328,7 +331,7 @@ func TestMergeDefaultDSNsFunc(t *testing.T) {
 				panic(err)
 			}
 
-			ns, err := db.mergeDefaultDSNs(emptyDSN, nil)
+			ns, err := db.Mysql.mergeDefaultDSNs(emptyDSN, nil)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -350,7 +353,7 @@ func TestMergeDefaultDSNsFunc(t *testing.T) {
 					panic(err)
 				}
 				testDSN := &url.URL{}
-				ns, err := db.mergeDefaultDSNs(emptyDSN, testDSN)
+				ns, err := db.Mysql.mergeDefaultDSNs(emptyDSN, testDSN)
 				if err != nil {
 					t.Fatal(err)
 				}

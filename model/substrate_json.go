@@ -74,14 +74,14 @@ type ChainEventJson struct {
 	Params         EventParams `json:"params"`
 	EventIdx       uint        `json:"event_idx"`
 	BlockTimestamp int         `json:"block_timestamp"`
+	Phase          int         `json:"phase"`
 }
 
 type ChainLogJson struct {
-	BlockNum   int    `json:"block_num"`
-	LogIndex   string `json:"log_index" gorm:"default: null;size:100"`
-	LogType    string `json:"log_type"`
-	OriginType string `json:"origin_type"`
-	Data       string `json:"data"`
+	BlockNum int    `json:"block_num"`
+	LogIndex string `json:"log_index" gorm:"default: null;size:100"`
+	LogType  string `json:"log_type"`
+	Data     string `json:"data"`
 }
 
 type TransferJson struct {

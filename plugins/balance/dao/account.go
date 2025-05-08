@@ -13,7 +13,7 @@ import (
 
 func GetAccountList(db storage.DB, page, row int) ([]bModel.Account, int) {
 	var accounts []bModel.Account
-	opt := storage.Option{PluginPrefix: "balance", Page: page, PageSize: row}
+	opt := storage.Option{Page: page, PageSize: row}
 	db.FindBy(&accounts, nil, &opt)
 	return accounts, len(accounts)
 }
@@ -21,7 +21,7 @@ func GetAccountList(db storage.DB, page, row int) ([]bModel.Account, int) {
 func GetAccountByAddress(ctx context.Context, db storage.DB, address string) *bModel.Account {
 	var account bModel.Account
 	d := db.GetDbInstance().(*gorm.DB)
-	q := d.WithContext(ctx).Where("address = ?", address).First(&account)
+	q := d.WithContext(ctx).Debug().Where("address = ?", address).First(&account)
 	if q.Error != nil {
 		return nil
 	}
@@ -32,7 +32,7 @@ func GetAccountByAddress(ctx context.Context, db storage.DB, address string) *bM
 func RefreshAccount(ctx context.Context, s *Storage, accountId string) error {
 	accountId = address.Format(accountId)
 	db := s.Dao.GetDbInstance().(*gorm.DB)
-	var account bModel.Account
+	var account = bModel.Account{Address: accountId}
 	q := db.WithContext(ctx).Where("address = ?", accountId).FirstOrCreate(&account)
 	if q.RowsAffected == 1 {
 		_, _ = s.Pool.HINCRBY(ctx, model.MetadataCacheKey(), "total_account", 1)
@@ -47,8 +47,7 @@ func AfterAccountCreate(ctx context.Context, db *gorm.DB, account *bModel.Accoun
 	}
 	accountData := new(bModel.AccountData)
 	accountDataRaw.ToAny(accountData)
-
-	return db.WithContext(ctx).Where("address = ?", account.Address).UpdateColumns(map[string]interface{}{
+	return db.WithContext(ctx).Debug().Model(account).Where("address = ?", account.Address).UpdateColumns(map[string]interface{}{
 		"nonce":    accountData.Nonce,
 		"balance":  accountData.Data.Free.Add(accountData.Data.Reserved),
 		"locked":   decimal.Max(accountData.Data.MiscFrozen, accountData.Data.FeeFrozen),

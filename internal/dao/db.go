@@ -2,10 +2,11 @@ package dao
 
 import (
 	"database/sql"
+	"errors"
 	"gorm.io/gorm/logger"
+	"gorm.io/gorm/schema"
 	"os"
 
-	"errors"
 	"fmt"
 	"log"
 	"reflect"
@@ -16,14 +17,16 @@ import (
 	"github.com/itering/subscan/model"
 	"github.com/itering/substrate-api-rpc/websocket"
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 
 	"github.com/itering/subscan/util"
 	"gorm.io/gorm"
 )
 
 type DbStorage struct {
-	db     *gorm.DB
-	Prefix string
+	db       *gorm.DB
+	Prefix   string
+	DbDriver string
 }
 
 func (d *DbStorage) GetDbInstance() any {
@@ -110,7 +113,11 @@ func (d *DbStorage) FindBy(record interface{}, query interface{}, option *storag
 
 func (d *DbStorage) AutoMigration(model interface{}) error {
 	if d.checkProtected(model) == nil {
-		return d.db.Table(d.getPluginPrefixTableName(model)).Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(model)
+		if d.DbDriver == "mysql" {
+			return d.db.Table(d.getPluginPrefixTableName(model)).Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(model)
+		}
+		return d.db.Table(d.getPluginPrefixTableName(model)).AutoMigrate(model)
+
 	}
 	return nil
 }
@@ -168,7 +175,7 @@ func (d *Dao) DbCommit(c *GormDB) {
 	}
 	tx := c.Commit()
 	c.gdbDone = true
-	if err := tx.Error; err != nil && err != sql.ErrTxDone {
+	if err := tx.Error; err != nil && !errors.Is(err, sql.ErrTxDone) {
 		fmt.Println("Fatal error DbCommit", err)
 	}
 }
@@ -179,7 +186,7 @@ func (d *Dao) DbRollback(c *GormDB) {
 	}
 	tx := c.Rollback()
 	c.gdbDone = true
-	if err := tx.Error; err != nil && err != sql.ErrTxDone {
+	if err := tx.Error; err != nil && !errors.Is(err, sql.ErrTxDone) {
 		fmt.Println("Fatal error DbRollback", err)
 	}
 }
@@ -193,23 +200,41 @@ func (d *Dao) DbBegin() *GormDB {
 	return &GormDB{txn, false}
 }
 
+type NamingStrategy struct {
+	schema.NamingStrategy
+}
+
+func (n NamingStrategy) UniqueName(_, column string) string {
+	return column
+}
+
+func (n NamingStrategy) IndexName(_, column string) string {
+	return column
+}
+
 // private funcs
 func newDb() (db *gorm.DB) {
 	var err error
-
+	dbDriver := util.GetEnv("DB_DRIVER", "mysql")
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
-			SlowThreshold:             time.Second,   // Slow SQL threshold
-			LogLevel:                  logger.Silent, // Log level
-			IgnoreRecordNotFoundError: true,          // Ignore ErrRecordNotFound error for logger
-			ParameterizedQueries:      false,         // Don't include params in the SQL log
-			Colorful:                  false,         // Disable color
+			SlowThreshold: time.Second, // Slow SQL threshold
+			// LogLevel:                  logger.Silent, // Log level
+			IgnoreRecordNotFoundError: true, // Ignore ErrRecordNotFound error for logger
 		},
 	)
-	db, err = gorm.Open(mysql.Open(configs.Boot.Database.DSN), &gorm.Config{
+	util.Logger().Debug(fmt.Sprintf("Set DB_DRIVER %s", dbDriver))
+	conf := &gorm.Config{
 		Logger: newLogger,
-	})
+	}
+	if dbDriver == "mysql" {
+		conf.NamingStrategy = NamingStrategy{}
+		db, err = gorm.Open(mysql.Open(configs.Boot.Database.Mysql.DSN), conf)
+	} else {
+		db, err = gorm.Open(postgres.Open(configs.Boot.Database.Postgres.DSN), conf)
+	}
+
 	if err != nil {
 		panic(err)
 	}

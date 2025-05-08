@@ -61,22 +61,46 @@ Developers are free to use the codebase to extend functionalities and develop un
 cp configs/config.yaml.example configs/config.yaml
 ```
 
-#### Set
+## Environment Variables
 
-1. Redis  configs/redis.toml
+### Common
 
-> addr： redis host and port (default: 127.0.0.1:6379)
+| Name                   | Default Value | Describe               |
+|------------------------|---------------|------------------------|
+| CONF_DIR               | ../configs    | configs path           |
+| VERIFY_SERVER          | NULL          | solidity verify server |
+| SUBSTRATE_ADDRESS_TYPE | 0             | ss58 address type      |
+| SUBSTRATE_ACCURACY     | 10            | native token accuracy  |
 
-2. Mysql  configs/mysql.toml
 
-> host: mysql host (default: 127.0.0.1)
-> user: mysql user (default: root)
-> pass: mysql user passwd (default: "")
-> db:   mysql db name (default: "subscan")
 
-3. Http   configs/http.toml
+### Database
 
-> addr: local http server port (default: 0.0.0.0:4399)
+| Name              | Default Value      | Describe               |
+|-------------------|--------------------|------------------------|
+| DB_DRIVER         | mysql              | support mysql/postgres |
+| MYSQL_HOST        | 127.0.0.1          | mysql host             |
+| MYSQL_USER        | root               | mysql user             |
+| MYSQL_PASS        |                    | mysql password         |
+| MYSQL_DB          | subscan-essentials | mysql db name          |
+| MYSQL_PORT        | 3306               | mysql port             |
+| POSTGRES_HOST     | 127.0.0.1          | postgres port          |
+| POSTGRES_USER     | gorm               | postgres user          |
+| POSTGRES_PASS     | gorm               | postgres password      |
+| POSTGRES_DB       | subscan-essentials | postgres db name       |
+| POSTGRES_PORT     | 9920               | postgres port          |
+| POSTGRES_SSL_MODE | disable            | postgres ssl mode      |
+| MAX_DB_CONN_COUNT | 200                | gorm max db conn count |
+
+
+### Redis
+
+| Name                  | Default Value | Describe |
+|-----------------------|---------------|----------|
+| REDIS_HOST            | 127.0.0.1     |          |
+| REDIS_PORT            | 6379          |          |
+| REDIS_DATABASE        | 0             |          |
+| REDIS_PASSWORD        |               |          |
 
 
 ### Usage

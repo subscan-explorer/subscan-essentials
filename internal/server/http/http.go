@@ -59,6 +59,8 @@ func initRouter(e *gin.Engine) {
 			s.POST("extrinsic", extrinsicHandle)
 			// Event
 			s.POST("events", eventsHandle)
+			// Log
+			s.POST("logs", logsHandle)
 
 			s.POST("check_hash", checkSearchHashHandle)
 

@@ -15,12 +15,12 @@ var (
 	// WSEndPoint chain rpc endpoint, default is wss://polkadot-rpc.dwellir.com
 	WSEndPoint = GetEnv("CHAIN_WS_ENDPOINT", "wss://westend-asset-hub-rpc.polkadot.io")
 	// NetworkNode network node name, default is polkadot
-	NetworkNode = GetEnv("NETWORK_NODE", "assethub-westend")
+	NetworkNode = GetEnv("NETWORK_NODE", "moonbeam")
 	// ConfDir config directory, default is ../configs
 	ConfDir = GetEnv("CONF_DIR", "../configs")
 
 	// IsEvmChain is evm chain, address type is 0x h160
-	IsEvmChain = GetEnv("IS_EVM_CHAIN", "false") == "true"
+	IsEvmChain = StringInSlice(NetworkNode, []string{"moonbeam", "moonriver", "moonbase"})
 )
 
 // EventStorageKey state system.events storage key

@@ -23,7 +23,6 @@ func (s *Service) unknownToken() {
 				Decimals: p.TokenDecimals,
 			})
 		}
-		return
 	})
 
 }

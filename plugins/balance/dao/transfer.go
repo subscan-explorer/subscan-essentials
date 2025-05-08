@@ -2,23 +2,13 @@ package dao
 
 import (
 	"context"
+	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/model"
-	"github.com/shopspring/decimal"
+	bModel "github.com/itering/subscan/plugins/balance/model"
 	"gorm.io/gorm"
 )
 
-type Transfer struct {
-	Id             uint            `json:"id" gorm:"primary_key;autoIncrement:false"`
-	Sender         string          `json:"sender" gorm:"size:255;index:query_function"`
-	Receiver       string          `json:"receiver" gorm:"size:255;index:query_function"`
-	Amount         decimal.Decimal `json:"amount" gorm:"decimal(65)"`
-	BlockTimestamp int64           `json:"block_timestamp" `
-	Symbol         string          `json:"symbol" gorm:"size:255"`
-	TokenId        string          `json:"token_id" gorm:"size:255"`
-	ExtrinsicIndex string          `json:"extrinsic_index" gorm:"size:255;index:extrinsic_index"`
-}
-
-func CreateTransfer(ctx context.Context, d *Storage, transfer *Transfer) error {
+func CreateTransfer(ctx context.Context, d *Storage, transfer *bModel.Transfer) error {
 	db := d.Dao.GetDbInstance().(*gorm.DB)
 	query := db.WithContext(ctx).Scopes(model.IgnoreDuplicate).Create(transfer)
 	if query.RowsAffected > 0 {
@@ -27,4 +17,16 @@ func CreateTransfer(ctx context.Context, d *Storage, transfer *Transfer) error {
 		_ = RefreshAccount(ctx, d, model.CheckoutParamValueAddress(transfer.Receiver))
 	}
 	return query.Error
+}
+
+func Transfers(ctx context.Context, db storage.DB, opts ...model.Option) ([]bModel.Transfer, int) {
+	var list []bModel.Transfer
+	d := db.GetDbInstance().(*gorm.DB)
+	var count int64
+	q := d.WithContext(ctx).Model(bModel.Transfer{}).Scopes(opts...).Count(&count)
+	if q.Error != nil {
+		return nil, 0
+	}
+	q = d.WithContext(ctx).Model(bModel.Transfer{}).Scopes(opts...).Find(&list)
+	return list, int(count)
 }

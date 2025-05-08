@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/itering/subscan/plugins/evm/abi"
 	"github.com/itering/subscan/plugins/evm/feature/delegateProxy"
-	"github.com/itering/subscan/plugins/evm/feature/erc1155"
 	"github.com/itering/subscan/plugins/evm/feature/erc20"
 	"github.com/itering/subscan/plugins/evm/feature/erc721"
 	"github.com/itering/subscan/share/web3"
@@ -53,15 +52,15 @@ func (t TransactionReceipt) EventProcess(ctx context.Context) error {
 			setContractProxyImplementation(ctx, t.Address, util.AddHex(abi.DecodeAddress(topics[1])))
 		}
 
-	case erc1155.EventTransferBatch, erc1155.EventTransferSingle, erc1155.EventURI:
-		if token := GetTokenByContract(ctx, t.Address); token == nil {
-			erc1155token := erc1155.Init(web3.RPC, t.Address)
-			if result, _ := erc1155token.SupportsInterface(ctx); result {
-				return Publish(Eip1155Token, Eip1155Token, t)
-			}
-		} else if token.Category == Eip1155Token {
-			_ = Publish(token.Category, Eip1155Token, t)
-		}
+		// case erc1155.EventTransferBatch, erc1155.EventTransferSingle, erc1155.EventURI:
+		// 	if token := GetTokenByContract(ctx, t.Address); token == nil {
+		// 		erc1155token := erc1155.Init(web3.RPC, t.Address)
+		// 		if result, _ := erc1155token.SupportsInterface(ctx); result {
+		// 			return Publish(Eip1155Token, Eip1155Token, t)
+		// 		}
+		// 	} else if token.Category == Eip1155Token {
+		// 		_ = Publish(token.Category, Eip1155Token, t)
+		// 	}
 	}
 	return nil
 }

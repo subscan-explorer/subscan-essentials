@@ -14,7 +14,2969 @@ const docTemplate = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {}
+    "paths": {
+        "/api/plugin/balance/account": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Get account details",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plugins_balance_http.accountParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/plugins_balance_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_itering_subscan_plugins_balance_model.Account"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/plugin/balance/accounts": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "accounts"
+                ],
+                "summary": "Get accounts list",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plugins_balance_http.accountsParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/plugins_balance_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "count": {
+                                                    "type": "integer"
+                                                },
+                                                "list": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/definitions/github_com_itering_subscan_plugins_balance_model.Account"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/plugin/balance/transfer": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transfers"
+                ],
+                "summary": "Get transfer list",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plugins_balance_http.transferParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/plugins_balance_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "count": {
+                                                    "type": "integer"
+                                                },
+                                                "list": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/definitions/model.TransferJson"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/plugin/evm/account/tokens": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EVM"
+                ],
+                "summary": "Get account tokens",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plugins_evm_http.accountTokensParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/plugins_evm_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.AccountTokenJson"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/plugin/evm/accounts": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EVM"
+                ],
+                "summary": "Evm accounts list",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plugins_evm_http.EvmAccountParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/plugins_evm_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "count": {
+                                                    "type": "integer"
+                                                },
+                                                "list": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.AccountsJson"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/plugin/evm/block": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EVM"
+                ],
+                "summary": "Evm block info",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plugins_evm_http.EvmBlockParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/plugins_evm_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.EvmBlock"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/plugin/evm/blocks": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EVM"
+                ],
+                "summary": "Evm blocks",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plugins_evm_http.EvmBlocks"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/plugins_evm_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "count": {
+                                                    "type": "integer"
+                                                },
+                                                "list": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.EvmBlockJson"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/plugin/evm/contract": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EVM"
+                ],
+                "summary": "Evm contract info",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plugins_evm_http.contractParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/plugins_evm_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.Contract"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/plugin/evm/contracts": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EVM"
+                ],
+                "summary": "Evm contract list",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plugins_evm_http.contractsParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/plugins_evm_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "count": {
+                                                    "type": "integer"
+                                                },
+                                                "list": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.ContractsJson"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/plugin/evm/token/erc721/collectibles": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EVM"
+                ],
+                "summary": "Evm Erc721 collectibles",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plugins_evm_http.collectiblesParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/plugins_evm_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "count": {
+                                                    "type": "integer"
+                                                },
+                                                "list": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.Erc721Holders"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/plugin/evm/token/holder": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EVM"
+                ],
+                "summary": "Evm token holder",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plugins_evm_http.tokenHolderParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/plugins_evm_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "count": {
+                                                    "type": "integer"
+                                                },
+                                                "list": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.TokenHolder"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/plugin/evm/token/transfer": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EVM"
+                ],
+                "summary": "Evm token transfer",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plugins_evm_http.tokenTransferParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/plugins_evm_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "count": {
+                                                    "type": "integer"
+                                                },
+                                                "list": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.TokenTransferJson"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/plugin/evm/tokens": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EVM"
+                ],
+                "summary": "Evm token list",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plugins_evm_http.tokenListParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/plugins_evm_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "count": {
+                                                    "type": "integer"
+                                                },
+                                                "list": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.Token"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/plugin/evm/transaction": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EVM"
+                ],
+                "summary": "Evm transaction info",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plugins_evm_http.transactionParam"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/plugins_evm_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.Transaction"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/plugin/evm/transactions": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EVM"
+                ],
+                "summary": "Evm transactions",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plugins_evm_http.transactionsParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/plugins_evm_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "count": {
+                                                    "type": "integer"
+                                                },
+                                                "list": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.TransactionSampleJson"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/scan/block": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "block"
+                ],
+                "summary": "Get block details",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_server_http.BlockParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/internal_server_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.SampleBlockJson"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/scan/blocks": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "block"
+                ],
+                "summary": "Blocks list",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_server_http.BlocksParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/internal_server_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "blocks": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/definitions/model.SampleBlockJson"
+                                                    }
+                                                },
+                                                "count": {
+                                                    "type": "integer"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/scan/events": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "Get events list",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_server_http.eventsParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/internal_server_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "count": {
+                                                    "type": "integer"
+                                                },
+                                                "events": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/definitions/model.ChainEventJson"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/scan/extrinsic": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "extrinsics"
+                ],
+                "summary": "Get extrinsic details",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_server_http.extrinsicParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/internal_server_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.ExtrinsicDetail"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/scan/extrinsics": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "extrinsics"
+                ],
+                "summary": "Get extrinsics list",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_server_http.extrinsicsParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/internal_server_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "count": {
+                                                    "type": "integer"
+                                                },
+                                                "extrinsics": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/definitions/model.ChainExtrinsicJson"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/scan/logs": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "logs"
+                ],
+                "summary": "Get logs list",
+                "parameters": [
+                    {
+                        "description": "Block number",
+                        "name": "block_num",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/internal_server_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/model.ChainLogJson"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/scan/metadata": {
+            "post": {
+                "description": "get metadata info, include chain customer info, runtime info, etc.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "metadata"
+                ],
+                "summary": "Current network metadata",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/internal_server_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "additionalProperties": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/scan/runtime/list": {
+            "post": {
+                "description": "runtimeListHandler  get runtime list",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "runtime"
+                ],
+                "summary": "Get runtime list",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/internal_server_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "list": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/definitions/model.RuntimeVersion"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/scan/runtime/metadata": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "runtime"
+                ],
+                "summary": "Get runtime metadata",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_server_http.runtimeMetadataParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/internal_server_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "info": {
+                                                    "$ref": "#/definitions/metadata.Instant"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/scan/token": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tokens"
+                ],
+                "summary": "Token list",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/internal_server_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "object",
+                                            "properties": {
+                                                "detail": {
+                                                    "type": "object",
+                                                    "additionalProperties": {
+                                                        "$ref": "#/definitions/github_com_itering_subscan_share_token.Token"
+                                                    }
+                                                },
+                                                "token": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "github_com_itering_subscan_plugins_balance_model.Account": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "balance": {
+                    "type": "number"
+                },
+                "locked": {
+                    "type": "number"
+                },
+                "nonce": {
+                    "type": "integer"
+                },
+                "reserved": {
+                    "type": "number"
+                }
+            }
+        },
+        "github_com_itering_subscan_plugins_evm_dao.AccountTokenJson": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "type": "number"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "contract": {
+                    "type": "string"
+                },
+                "decimals": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "symbol": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_itering_subscan_plugins_evm_dao.AccountsJson": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "type": "number"
+                },
+                "evm_account": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_itering_subscan_plugins_evm_dao.Contract": {
+            "type": "object",
+            "properties": {
+                "CompileSettings": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "abi": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "address": {
+                    "type": "string"
+                },
+                "block_num": {
+                    "type": "integer"
+                },
+                "compiler_version": {
+                    "type": "string"
+                },
+                "constructor_arguments": {
+                    "type": "string"
+                },
+                "contract_name": {
+                    "type": "string"
+                },
+                "creation_bytecode": {
+                    "type": "string"
+                },
+                "creation_code": {
+                    "type": "string"
+                },
+                "deploy_at": {
+                    "type": "integer"
+                },
+                "deploy_code_hash": {
+                    "type": "string"
+                },
+                "deployer": {
+                    "type": "string"
+                },
+                "eip_standard": {
+                    "type": "string"
+                },
+                "event_identifiers": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "evm_version": {
+                    "type": "string"
+                },
+                "external_libraries": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "extrinsic_index": {
+                    "type": "string"
+                },
+                "method_identifiers": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "optimization_runs": {
+                    "type": "integer"
+                },
+                "optimize": {
+                    "type": "boolean"
+                },
+                "precompile": {
+                    "type": "integer"
+                },
+                "proxy_implementation": {
+                    "type": "string"
+                },
+                "source_code": {
+                    "type": "string"
+                },
+                "transaction_count": {
+                    "type": "integer"
+                },
+                "tx_hash": {
+                    "type": "string"
+                },
+                "verify_status": {
+                    "type": "string"
+                },
+                "verify_time": {
+                    "type": "integer"
+                },
+                "verify_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_itering_subscan_plugins_evm_dao.ContractsJson": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "contract_name": {
+                    "type": "string"
+                },
+                "transaction_count": {
+                    "type": "integer"
+                },
+                "verify_status": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_itering_subscan_plugins_evm_dao.Erc721Holders": {
+            "type": "object",
+            "properties": {
+                "contract": {
+                    "type": "string"
+                },
+                "holder": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.Metadata"
+                },
+                "storage_url": {
+                    "type": "string"
+                },
+                "token_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_itering_subscan_plugins_evm_dao.EvmBlock": {
+            "type": "object",
+            "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "base_fee_per_gas": {
+                    "type": "number"
+                },
+                "block_hash": {
+                    "type": "string"
+                },
+                "block_num": {
+                    "type": "integer"
+                },
+                "block_size": {
+                    "type": "number"
+                },
+                "difficulty": {
+                    "type": "number"
+                },
+                "extra_data": {
+                    "type": "string"
+                },
+                "gas_limit": {
+                    "type": "number"
+                },
+                "gas_used": {
+                    "type": "number"
+                },
+                "logs_bloom": {
+                    "type": "string"
+                },
+                "miner": {
+                    "type": "string"
+                },
+                "parent_hash": {
+                    "type": "string"
+                },
+                "receipts_root": {
+                    "type": "string"
+                },
+                "seal_fields": {
+                    "type": "string"
+                },
+                "sha3_uncles": {
+                    "type": "string"
+                },
+                "state_root": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "integer"
+                },
+                "total_difficulty": {
+                    "type": "number"
+                },
+                "transaction_count": {
+                    "type": "integer"
+                },
+                "transactions_root": {
+                    "type": "string"
+                },
+                "uncles": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_itering_subscan_plugins_evm_dao.EvmBlockJson": {
+            "type": "object",
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "block_timestamp": {
+                    "type": "integer"
+                },
+                "miner": {
+                    "type": "string"
+                },
+                "transactions": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_itering_subscan_plugins_evm_dao.Metadata": {
+            "type": "object",
+            "properties": {
+                "animation_url": {
+                    "type": "string"
+                },
+                "attributes": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": true
+                    }
+                },
+                "background_color": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "external_url": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "youtube_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_itering_subscan_plugins_evm_dao.Token": {
+            "type": "object",
+            "properties": {
+                "base_token_uri": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string"
+                },
+                "contract": {
+                    "type": "string"
+                },
+                "decimals": {
+                    "type": "integer"
+                },
+                "holders": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "totalSupply": {
+                    "type": "number"
+                },
+                "transfer_count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_itering_subscan_plugins_evm_dao.TokenHolder": {
+            "type": "object",
+            "properties": {
+                "balance": {
+                    "type": "number"
+                },
+                "contract": {
+                    "type": "string"
+                },
+                "holder": {
+                    "type": "string"
+                }
+            }
+        },
+        "github_com_itering_subscan_plugins_evm_dao.TokenTransferJson": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "contract": {
+                    "type": "string"
+                },
+                "create_at": {
+                    "type": "integer"
+                },
+                "decimals": {
+                    "type": "integer"
+                },
+                "from": {
+                    "type": "string"
+                },
+                "hash": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "storage_url": {
+                    "type": "string"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "to": {
+                    "type": "string"
+                },
+                "token_id": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
+        "github_com_itering_subscan_plugins_evm_dao.Transaction": {
+            "type": "object",
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "block_timestamp": {
+                    "type": "integer"
+                },
+                "contract": {
+                    "type": "string"
+                },
+                "cumulative_gas_used": {
+                    "type": "number"
+                },
+                "effective_gas_price": {
+                    "description": "eip 1559",
+                    "type": "number"
+                },
+                "extrinsic_index": {
+                    "type": "string"
+                },
+                "from_address": {
+                    "type": "string"
+                },
+                "gas_limit": {
+                    "type": "number"
+                },
+                "gas_price": {
+                    "type": "number"
+                },
+                "gas_used": {
+                    "type": "number"
+                },
+                "hash": {
+                    "type": "string"
+                },
+                "input_data": {
+                    "type": "string"
+                },
+                "max_fee_per_gas": {
+                    "type": "number"
+                },
+                "max_priority_fee_per_gas": {
+                    "type": "number"
+                },
+                "nonce": {
+                    "type": "integer"
+                },
+                "precompile": {
+                    "type": "integer"
+                },
+                "r": {
+                    "type": "string"
+                },
+                "s": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "to_address": {
+                    "type": "string"
+                },
+                "transaction_id": {
+                    "description": "pk",
+                    "type": "integer"
+                },
+                "transaction_index": {
+                    "type": "integer"
+                },
+                "txn_type": {
+                    "type": "integer"
+                },
+                "v": {
+                    "type": "integer"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
+        "github_com_itering_subscan_plugins_evm_dao.TransactionSampleJson": {
+            "type": "object",
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "block_timestamp": {
+                    "type": "integer"
+                },
+                "from_address": {
+                    "type": "string"
+                },
+                "hash": {
+                    "type": "string"
+                },
+                "to_address": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "number"
+                }
+            }
+        },
+        "github_com_itering_subscan_share_token.Token": {
+            "type": "object",
+            "properties": {
+                "decimals": {
+                    "type": "integer"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "token_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_server_http.BlockParams": {
+            "type": "object",
+            "properties": {
+                "block_hash": {
+                    "type": "string"
+                },
+                "block_num": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        },
+        "internal_server_http.BlocksParams": {
+            "type": "object",
+            "properties": {
+                "page": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "row": {
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
+                }
+            }
+        },
+        "internal_server_http.J": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {},
+                "generated_at": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_server_http.checkSearchParams": {
+            "type": "object",
+            "properties": {
+                "hash": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_server_http.eventsParams": {
+            "type": "object",
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "event": {
+                    "type": "string"
+                },
+                "module": {
+                    "type": "string"
+                },
+                "page": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "row": {
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
+                }
+            }
+        },
+        "internal_server_http.extrinsicParams": {
+            "type": "object",
+            "properties": {
+                "extrinsic_index": {
+                    "type": "string"
+                },
+                "hash": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_server_http.extrinsicsParams": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "block_num": {
+                    "type": "integer"
+                },
+                "call": {
+                    "type": "string"
+                },
+                "module": {
+                    "type": "string"
+                },
+                "page": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "row": {
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
+                },
+                "signed": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_server_http.runtimeMetadataParams": {
+            "type": "object",
+            "properties": {
+                "spec": {
+                    "type": "integer"
+                }
+            }
+        },
+        "metadata.Instant": {
+            "type": "object",
+            "properties": {
+                "apis": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.RuntimeApiMetadata"
+                    }
+                },
+                "call_index": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/types.CallIndex"
+                    }
+                },
+                "customer": {
+                    "$ref": "#/definitions/types.CustomMetadata"
+                },
+                "event_index": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "$ref": "#/definitions/types.EventIndex"
+                    }
+                },
+                "extrinsic": {
+                    "$ref": "#/definitions/types.ExtrinsicMetadata"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/types.MetadataTag"
+                },
+                "metadata_version": {
+                    "type": "integer"
+                },
+                "outer_enums": {
+                    "$ref": "#/definitions/types.OuterEnumsMetadata"
+                },
+                "type": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.ChainEventJson": {
+            "type": "object",
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "block_timestamp": {
+                    "type": "integer"
+                },
+                "event_id": {
+                    "type": "string"
+                },
+                "event_idx": {
+                    "type": "integer"
+                },
+                "event_index": {
+                    "type": "string"
+                },
+                "extrinsic_index": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "module_id": {
+                    "type": "string"
+                },
+                "params": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.EventParam"
+                    }
+                },
+                "phase": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.ChainExtrinsicJson": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "type": "string"
+                },
+                "block_num": {
+                    "type": "integer"
+                },
+                "block_timestamp": {
+                    "type": "integer"
+                },
+                "call_module": {
+                    "type": "string"
+                },
+                "call_module_function": {
+                    "type": "string"
+                },
+                "extrinsic_hash": {
+                    "type": "string"
+                },
+                "extrinsic_index": {
+                    "type": "string"
+                },
+                "fee": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "nonce": {
+                    "type": "integer"
+                },
+                "params": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.ExtrinsicParam"
+                    }
+                },
+                "signature": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "model.ChainLogJson": {
+            "type": "object",
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "string"
+                },
+                "log_index": {
+                    "type": "string"
+                },
+                "log_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.EventParam": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string"
+                },
+                "type_name": {
+                    "type": "string"
+                },
+                "value": {}
+            }
+        },
+        "model.ExtrinsicDetail": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "type": "string"
+                },
+                "block_num": {
+                    "type": "integer"
+                },
+                "block_timestamp": {
+                    "type": "integer"
+                },
+                "call_module": {
+                    "type": "string"
+                },
+                "call_module_function": {
+                    "type": "string"
+                },
+                "extrinsic_hash": {
+                    "type": "string"
+                },
+                "extrinsic_index": {
+                    "type": "string"
+                },
+                "fee": {
+                    "type": "number"
+                },
+                "finalized": {
+                    "type": "boolean"
+                },
+                "lifetime": {
+                    "$ref": "#/definitions/model.Lifetime"
+                },
+                "nonce": {
+                    "type": "integer"
+                },
+                "params": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.ExtrinsicParam"
+                    }
+                },
+                "signature": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "model.ExtrinsicParam": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "type_name": {
+                    "type": "string"
+                },
+                "value": {}
+            }
+        },
+        "model.Lifetime": {
+            "type": "object",
+            "properties": {
+                "birth": {
+                    "type": "integer"
+                },
+                "death": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.RuntimeVersion": {
+            "type": "object",
+            "properties": {
+                "modules": {
+                    "type": "string"
+                },
+                "spec_version": {
+                    "type": "integer"
+                }
+            }
+        },
+        "model.SampleBlockJson": {
+            "type": "object",
+            "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
+                "block_timestamp": {
+                    "type": "integer"
+                },
+                "event_count": {
+                    "type": "integer"
+                },
+                "extrinsics_count": {
+                    "type": "integer"
+                },
+                "finalized": {
+                    "type": "boolean"
+                },
+                "hash": {
+                    "type": "string"
+                },
+                "validator": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.TransferJson": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "block_num": {
+                    "type": "integer"
+                },
+                "block_timestamp": {
+                    "type": "integer"
+                },
+                "extrinsic_index": {
+                    "type": "string"
+                },
+                "fee": {
+                    "type": "number"
+                },
+                "from": {
+                    "type": "string"
+                },
+                "hash": {
+                    "type": "string"
+                },
+                "module": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "to": {
+                    "type": "string"
+                }
+            }
+        },
+        "plugins_balance_http.J": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {},
+                "message": {
+                    "type": "string"
+                },
+                "ttl": {
+                    "type": "integer"
+                }
+            }
+        },
+        "plugins_balance_http.accountParams": {
+            "type": "object",
+            "required": [
+                "address"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                }
+            }
+        },
+        "plugins_balance_http.accountsParams": {
+            "type": "object",
+            "properties": {
+                "page": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "row": {
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
+                }
+            }
+        },
+        "plugins_balance_http.transferParams": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "block_num": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "page": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "row": {
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
+                }
+            }
+        },
+        "plugins_evm_http.EvmAccountParams": {
+            "type": "object",
+            "properties": {
+                "page": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "row": {
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
+                }
+            }
+        },
+        "plugins_evm_http.EvmBlockParams": {
+            "type": "object",
+            "properties": {
+                "block_num": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "hash": {
+                    "type": "string"
+                }
+            }
+        },
+        "plugins_evm_http.EvmBlocks": {
+            "type": "object",
+            "properties": {
+                "page": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "row": {
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
+                }
+            }
+        },
+        "plugins_evm_http.J": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {},
+                "message": {
+                    "type": "string"
+                },
+                "ttl": {
+                    "type": "integer"
+                }
+            }
+        },
+        "plugins_evm_http.accountTokensParams": {
+            "type": "object",
+            "required": [
+                "address"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "category": {
+                    "type": "string",
+                    "enum": [
+                        "erc20",
+                        "erc721"
+                    ]
+                }
+            }
+        },
+        "plugins_evm_http.collectiblesParams": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "contract": {
+                    "type": "string"
+                },
+                "page": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "row": {
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
+                }
+            }
+        },
+        "plugins_evm_http.contractParams": {
+            "type": "object",
+            "required": [
+                "address"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                }
+            }
+        },
+        "plugins_evm_http.contractsParams": {
+            "type": "object",
+            "properties": {
+                "page": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "row": {
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
+                }
+            }
+        },
+        "plugins_evm_http.tokenHolderParams": {
+            "type": "object",
+            "required": [
+                "token_address"
+            ],
+            "properties": {
+                "page": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "row": {
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
+                },
+                "token_address": {
+                    "type": "string"
+                }
+            }
+        },
+        "plugins_evm_http.tokenListParams": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string",
+                    "enum": [
+                        "erc20",
+                        "erc721"
+                    ]
+                },
+                "contract": {
+                    "type": "string"
+                },
+                "page": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "row": {
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
+                }
+            }
+        },
+        "plugins_evm_http.tokenTransferParams": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "page": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "row": {
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
+                },
+                "token_address": {
+                    "type": "string"
+                }
+            }
+        },
+        "plugins_evm_http.transactionParam": {
+            "type": "object",
+            "required": [
+                "hash"
+            ],
+            "properties": {
+                "hash": {
+                    "type": "string"
+                }
+            }
+        },
+        "plugins_evm_http.transactionsParams": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "block_num": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "page": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "row": {
+                    "type": "integer",
+                    "maximum": 100,
+                    "minimum": 1
+                }
+            }
+        },
+        "types.CallIndex": {
+            "type": "object",
+            "properties": {
+                "call": {
+                    "$ref": "#/definitions/types.MetadataCalls"
+                },
+                "module": {
+                    "$ref": "#/definitions/types.MetadataModules"
+                }
+            }
+        },
+        "types.CustomMetadata": {
+            "type": "object",
+            "properties": {
+                "map": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "$ref": "#/definitions/types.CustomValueMetadata"
+                        }
+                    }
+                }
+            }
+        },
+        "types.CustomValueMetadata": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "integer"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.EventIndex": {
+            "type": "object",
+            "properties": {
+                "call": {
+                    "$ref": "#/definitions/types.MetadataEvents"
+                },
+                "module": {
+                    "$ref": "#/definitions/types.MetadataModules"
+                }
+            }
+        },
+        "types.ExtrinsicMetadata": {
+            "type": "object",
+            "properties": {
+                "addressType": {
+                    "type": "integer"
+                },
+                "callType": {
+                    "type": "integer"
+                },
+                "extraType": {
+                    "type": "integer"
+                },
+                "signatureType": {
+                    "type": "integer"
+                },
+                "signedExtensions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.SignedExtensions"
+                    }
+                },
+                "signed_identifier": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "type": {
+                    "type": "integer"
+                },
+                "version": {
+                    "type": "integer"
+                }
+            }
+        },
+        "types.MapType": {
+            "type": "object",
+            "properties": {
+                "hasher": {
+                    "type": "string"
+                },
+                "isLinked": {
+                    "type": "boolean"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "key2": {
+                    "type": "string"
+                },
+                "key2Hasher": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.MetadataCalls": {
+            "type": "object",
+            "properties": {
+                "args": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.MetadataModuleCallArgument"
+                    }
+                },
+                "docs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "lookup": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.MetadataConstants": {
+            "type": "object",
+            "properties": {
+                "constants_value": {
+                    "type": "string"
+                },
+                "docs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "type_value": {
+                    "type": "integer"
+                }
+            }
+        },
+        "types.MetadataEvents": {
+            "type": "object",
+            "properties": {
+                "args": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "args_name": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "args_type_name": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "docs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "lookup": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.MetadataModuleCallArgument": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "type_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.MetadataModuleError": {
+            "type": "object",
+            "properties": {
+                "doc": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "fields": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.ModuleErrorField"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.MetadataModules": {
+            "type": "object",
+            "properties": {
+                "calls": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.MetadataCalls"
+                    }
+                },
+                "calls_value": {
+                    "$ref": "#/definitions/types.PalletLookUp"
+                },
+                "constants": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.MetadataConstants"
+                    }
+                },
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.MetadataModuleError"
+                    }
+                },
+                "errors_value": {
+                    "$ref": "#/definitions/types.PalletLookUp"
+                },
+                "events": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.MetadataEvents"
+                    }
+                },
+                "events_value": {
+                    "$ref": "#/definitions/types.PalletLookUp"
+                },
+                "index": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "prefix": {
+                    "type": "string"
+                },
+                "storage": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.MetadataStorage"
+                    }
+                }
+            }
+        },
+        "types.MetadataStorage": {
+            "type": "object",
+            "properties": {
+                "docs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "fallback": {
+                    "type": "string"
+                },
+                "hasher": {
+                    "type": "string"
+                },
+                "modifier": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/types.StorageType"
+                }
+            }
+        },
+        "types.MetadataTag": {
+            "type": "object",
+            "properties": {
+                "modules": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.MetadataModules"
+                    }
+                }
+            }
+        },
+        "types.ModuleErrorField": {
+            "type": "object",
+            "properties": {
+                "doc": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "type": {
+                    "type": "string"
+                },
+                "type_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.NMapType": {
+            "type": "object",
+            "properties": {
+                "hashers": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "key_vec": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "keys_id": {
+                    "type": "integer"
+                },
+                "value": {
+                    "type": "string"
+                },
+                "value_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "types.OuterEnumsMetadata": {
+            "type": "object",
+            "properties": {
+                "callType": {
+                    "type": "integer"
+                },
+                "errorType": {
+                    "type": "integer"
+                },
+                "eventType": {
+                    "type": "integer"
+                }
+            }
+        },
+        "types.PalletLookUp": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "integer"
+                }
+            }
+        },
+        "types.RuntimeApiMetadata": {
+            "type": "object",
+            "properties": {
+                "docs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "methods": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.RuntimeApiMethodMetadata"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.RuntimeApiMethodMetadata": {
+            "type": "object",
+            "properties": {
+                "docs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "inputs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.RuntimeApiMethodParamMetadata"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "outputs": {
+                    "type": "string"
+                },
+                "outputsId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "types.RuntimeApiMethodParamMetadata": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "typeId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "types.SignedExtensions": {
+            "type": "object",
+            "properties": {
+                "additionalSigned": {
+                    "type": "integer"
+                },
+                "identifier": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "integer"
+                }
+            }
+        },
+        "types.StorageType": {
+            "type": "object",
+            "properties": {
+                "PlainTypeValue": {
+                    "type": "integer"
+                },
+                "double_map_type": {
+                    "$ref": "#/definitions/types.MapType"
+                },
+                "map_type": {
+                    "$ref": "#/definitions/types.MapType"
+                },
+                "n_map_type": {
+                    "$ref": "#/definitions/types.NMapType"
+                },
+                "origin": {
+                    "type": "string"
+                },
+                "plain_type": {
+                    "type": "string"
+                }
+            }
+        }
+    }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it

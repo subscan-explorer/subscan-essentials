@@ -10,9 +10,8 @@ import (
 func TestService_AddEvent(t *testing.T) {
 	txn := testSrv.dao.DbBegin()
 	defer testSrv.dao.DbRollback(txn)
-	affect, err := testSrv.AddEvent(txn, &testBlock, []model.ChainEvent{testEvent})
+	err := testSrv.AddEvent(txn, &testBlock, []model.ChainEvent{testEvent})
 	assert.NoError(t, err)
-	assert.Equal(t, 1, affect)
 }
 
 func TestService_GetEventList(t *testing.T) {
@@ -23,7 +22,7 @@ func TestService_GetEventList(t *testing.T) {
 			BlockNum:       947687,
 			ModuleId:       "imonline",
 			EventId:        "AllGood",
-			Params:         "[]",
+			Params:         nil,
 			BlockTimestamp: 1594791900,
 		}}, list)
 }

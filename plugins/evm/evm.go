@@ -73,7 +73,7 @@ func (a *EVM) Version() string {
 }
 
 func (a *EVM) ConsumptionQueue() []string {
-	return []string{dao.Eip20Token, dao.Eip721Token, dao.Eip1155Token}
+	return []string{dao.Eip20Token, dao.Eip721Token}
 }
 
 func (a *EVM) ExecWorker(ctx context.Context, queue, class string, raw interface{}) error {

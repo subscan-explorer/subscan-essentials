@@ -53,8 +53,8 @@ func (s *Storage) Tables() []interface{} {
 		&EvmBlock{},
 		&Erc721Holders{},
 		&AbiMapping{},
-		&ERC1155Item{},
-		&ERC1155Holder{},
+		// &ERC1155Item{},
+		// &ERC1155Holder{},
 		&Account{},
 	}
 

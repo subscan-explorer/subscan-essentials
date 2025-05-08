@@ -4,9 +4,9 @@ import (
 	"context"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/itering/subscan/util"
-	"strings"
-
+	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
+	"strings"
 )
 
 type TransactionReceipt struct {
@@ -46,13 +46,16 @@ type EventLog struct {
 	LogIndex         uint     `json:"log_index"`
 }
 
-// BillionAddress todo
 func BillionAddress(ctx context.Context) string {
 	// d := sg.db
-	var h160 string
-	// minBalance := decimal.New(1, 18) // 1 ETH
-	// d.GetDB(ctx).Model(&model.ChainAccount{}).Select("evm_address").Where("account_balance > ?", minBalance).Where("evm_address like ?", "0x%").Take(&h160)
-	return h160
+	minBalance := decimal.New(1, 18) // 1 ETH
+	var res []AccountsJson
+	sg.db.WithContext(ctx).Debug().Select("evm_account,balance").
+		Model(&Account{}).Joins("left join balance_accounts on evm_accounts.address=balance_accounts.address").Where("balance>?", minBalance).Scan(&res)
+	if len(res) > 0 {
+		return res[0].EvmAccount
+	}
+	return NullAddress
 }
 
 func SplitReceiptData(abiStr string, method, data string) []interface{} {

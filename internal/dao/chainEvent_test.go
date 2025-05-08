@@ -16,7 +16,7 @@ func TestDao_CreateEvent(t *testing.T) {
 
 func TestDao_GetEventByBlockNum(t *testing.T) {
 	events := testDao.GetEventByBlockNum(947687)
-	assert.Equal(t, []model.ChainEventJson{{BlockNum: 947687, EventIdx: 0, ModuleId: "imonline", EventId: "AllGood", Params: "", EventIndex: "947687-0"}}, events)
+	assert.Equal(t, []model.ChainEventJson{{BlockNum: 947687, EventIdx: 0, ModuleId: "imonline", EventId: "AllGood", Params: nil, EventIndex: "947687-0"}}, events)
 }
 
 func TestDao_GetEventList(t *testing.T) {

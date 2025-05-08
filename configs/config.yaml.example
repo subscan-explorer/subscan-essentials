@@ -8,9 +8,10 @@ server:
   grpc:
     addr: 0.0.0.0:9000
 database:
-  api: "?writeTimeout=3s&parseTime=true&loc=Local&charset=utf8mb4,utf8"
-  task: "?parseTime=true&loc=Local&charset=utf8mb4,utf8"
-  test: "mysql://root:@mysql:3306/subscan?parseTime=true&loc=Local&charset=utf8mb4,utf8"
+  mysql:
+    api: "?writeTimeout=3s&parseTime=true&loc=Local&charset=utf8mb4,utf8"
+  postgres:
+    api: "host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable"
 redis:
   proto: tcp
   addr: redis:6379

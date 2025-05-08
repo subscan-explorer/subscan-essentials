@@ -96,9 +96,9 @@ const (
 	wsSpec
 )
 
-func (s *Service) FillBlockData(ctx context.Context, blockNum uint) (err error) {
+func (s *Service) FillBlockData(ctx context.Context, blockNum uint, force bool) (err error) {
 	block := s.dao.GetBlockByNum(ctx, blockNum)
-	if block != nil && block.Finalized && !block.CodecError {
+	if block != nil && block.Finalized && !block.CodecError && !force {
 		return nil
 	}
 

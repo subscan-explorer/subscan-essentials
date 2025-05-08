@@ -37,7 +37,9 @@ func emitMsg(message *workers.Msg) {
 		default:
 			// Call the plugin's process function
 			for _, plugin := range plugins.RegisteredPlugins {
-				return plugin.ExecWorker(ctx, queue, class, rawInterface)
+				if err := plugin.ExecWorker(ctx, queue, class, rawInterface); err != nil {
+					return err
+				}
 			}
 		}
 		return nil
@@ -55,7 +57,7 @@ func blockWorker(ctx context.Context, raw interface{}) error {
 		return err
 	}
 
-	if err := srv.FillBlockData(ctx, args.BlockNum); err != nil {
+	if err := srv.FillBlockData(ctx, args.BlockNum, false); err != nil {
 		util.Logger().Error(fmt.Errorf("fill block %d data error: %s", args.BlockNum, err.Error()))
 		return err
 	}

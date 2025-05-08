@@ -43,7 +43,7 @@ type IDao interface {
 	ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsicJson
 
 	CreateLog(txn *GormDB, ce *model.ChainLog) error
-	GetLogByBlockNum(blockNum uint) []model.ChainLogJson
+	GetLogByBlockNum(ctx context.Context, blockNum uint) []model.ChainLogJson
 
 	SetMetadata(c context.Context, metadata map[string]interface{}) (err error)
 	IncrMetadata(c context.Context, filed string, incrNum int) (err error)

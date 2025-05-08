@@ -159,6 +159,7 @@ func TokenHolderCount(ctx context.Context, contract string) int {
 }
 
 func RefreshHolder(ctx context.Context, contract, address, category string) error {
+	fmt.Println("refresh holder", contract, address, category)
 	t := GetTokenByContract(ctx, contract)
 	if t == nil {
 		return nil
@@ -174,9 +175,9 @@ func RefreshHolder(ctx context.Context, contract, address, category string) erro
 		return nil
 	}
 	// erc1155 balance
-	if category == Eip1155Token {
-		balance = decimal.New(ERC1155TokenIdsCount(ctx, contract, address), 0)
-	}
+	// if category == Eip1155Token {
+	// 	balance = decimal.New(ERC1155TokenIdsCount(ctx, contract, address), 0)
+	// }
 
 	q := sg.AddOrUpdateItem(ctx, &TokenHolder{Contract: contract, Holder: address, Balance: balance}, []string{"contract", "holder"}, "balance")
 	if q.RowsAffected == 1 || (q.RowsAffected == 2 && balance.IsZero()) {

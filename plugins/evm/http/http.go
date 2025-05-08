@@ -13,6 +13,7 @@ func Router() []router.Http {
 	srv = &dao.ApiSrv{}
 	return []router.Http{
 		{"etherscan", etherscanHandle, http.MethodGet},
+
 		{"blocks", blocksHandle, http.MethodPost},
 		{"block", blockHandle, http.MethodPost},
 
@@ -28,31 +29,50 @@ func Router() []router.Http {
 		{"token/holder", tokenHolderHandle, http.MethodPost},
 		{"tokens", tokenListHandle, http.MethodPost},
 		{"token/transfer", tokenTransferHandle, http.MethodPost},
-		{Router: "token/erc721/collectibles", Handle: collectiblesHandle, Method: http.MethodPost},
-		{Router: "account/tokens", Handle: accountTokensHandle, Method: http.MethodPost},
+		{"token/erc721/collectibles", collectiblesHandle, http.MethodPost},
+		{"account/tokens", accountTokensHandle, http.MethodPost},
 	}
 }
 
+type accountTokensParams struct {
+	Address  string `json:"address" validate:"required,eth_addr"`
+	Category string `json:"category" validate:"omitempty,oneof=erc20 erc721"`
+}
+
+// @Summary Get account tokens
+// @Tags EVM
+// @Accept json
+// @Produce json
+// @Param params body accountTokensParams true "params"
+// @Success 200 {object} J{data=[]dao.AccountTokenJson}
+// @Router /api/plugin/evm/account/tokens [post]
 func accountTokensHandle(w http.ResponseWriter, r *http.Request) error {
-	p := new(struct {
-		Address string `json:"address" validate:"required,eth_addr"`
-	})
+	p := new(accountTokensParams)
 	if err := validator.Validate(r.Body, p); err != nil {
 		toJson(w, 10001, nil, err)
 		return nil
 	}
-	tokens := srv.AccountTokens(r.Context(), p.Address)
+	tokens := srv.AccountTokens(r.Context(), p.Address, p.Category)
 	toJson(w, 0, tokens, nil)
 	return nil
 }
 
+type collectiblesParams struct {
+	Address  string `json:"address" validate:"omitempty,eth_addr"`
+	Contract string `json:"contract" validate:"omitempty,eth_addr"`
+	Page     int    `json:"page" validate:"min=0"`
+	Row      int    `json:"row" validate:"min=1,max=100"`
+}
+
+// @Summary Evm Erc721 collectibles
+// @Tags EVM
+// @Accept json
+// @Produce json
+// @Param params body collectiblesParams true "params"
+// @Success 200 {object} J{data=object{list=[]dao.Erc721Holders,count=int}}
+// @Router /api/plugin/evm/token/erc721/collectibles [post]
 func collectiblesHandle(w http.ResponseWriter, r *http.Request) error {
-	p := new(struct {
-		Address  string `json:"address" validate:"omitempty,eth_addr"`
-		Contract string `json:"contract" validate:"omitempty,eth_addr"`
-		Page     int    `json:"page" validate:"min=0"`
-		Row      int    `json:"row" validate:"min=1,max=100"`
-	})
+	p := new(collectiblesParams)
 	if err := validator.Validate(r.Body, p); err != nil {
 		toJson(w, 10001, nil, err)
 		return nil
@@ -66,28 +86,47 @@ func collectiblesHandle(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+type tokenListParams struct {
+	Page     int    `json:"page" validate:"min=0"`
+	Row      int    `json:"row" validate:"min=1,max=100"`
+	Category string `json:"category" validate:"omitempty,oneof=erc20 erc721"`
+	Contract string `json:"contract" validate:"omitempty,eth_addr"`
+}
+
+// @Summary Evm token list
+// @Tags EVM
+// @Accept json
+// @Produce json
+// @Param params body tokenListParams true "params"
+// @Success 200 {object} J{data=object{list=[]dao.Token,count=int}}
+// @Router /api/plugin/evm/tokens [post]
 func tokenListHandle(w http.ResponseWriter, r *http.Request) error {
-	p := new(struct {
-		Page     int    `json:"page" validate:"min=0"`
-		Row      int    `json:"row" validate:"min=1,max=100"`
-		Category string `json:"category" validate:"omitempty,oneof=erc20 erc721"`
-	})
+	p := new(tokenListParams)
 	if err := validator.Validate(r.Body, p); err != nil {
 		toJson(w, 10001, nil, err)
 		return nil
 	}
-	list, count := srv.TokenList(r.Context(), p.Category, p.Page, p.Row)
+	list, count := srv.TokenList(r.Context(), p.Contract, p.Category, p.Page, p.Row)
 	toJson(w, 0, map[string]interface{}{"list": list, "count": count}, nil)
 	return nil
 }
 
+type tokenTransferParams struct {
+	TokenAddress string `json:"token_address" validate:"omitempty,eth_addr"`
+	Address      string `json:"address" validate:"omitempty,eth_addr"`
+	Page         int    `json:"page" validate:"min=0"`
+	Row          int    `json:"row" validate:"min=1,max=100"`
+}
+
+// @Summary Evm token transfer
+// @Tags EVM
+// @Accept json
+// @Produce json
+// @Param params body tokenTransferParams true "params"
+// @Success 200 {object} J{data=object{list=[]dao.TokenTransferJson,count=int}}
+// @Router /api/plugin/evm/token/transfer [post]
 func tokenTransferHandle(w http.ResponseWriter, r *http.Request) error {
-	p := new(struct {
-		TokenAddress string `json:"token_address" validate:"omitempty,eth_addr"`
-		Address      string `json:"address" validate:"omitempty,eth_addr"`
-		Page         int    `json:"page" validate:"min=0"`
-		Row          int    `json:"row" validate:"min=1,max=100"`
-	})
+	p := new(tokenTransferParams)
 	if err := validator.Validate(r.Body, p); err != nil {
 		toJson(w, 10001, nil, err)
 		return nil
@@ -101,12 +140,21 @@ func tokenTransferHandle(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+type tokenHolderParams struct {
+	TokenAddress string `json:"token_address" validate:"required,eth_addr"`
+	Page         int    `json:"page" validate:"min=0"`
+	Row          int    `json:"row" validate:"min=1,max=100"`
+}
+
+// @Summary Evm token holder
+// @Tags EVM
+// @Accept json
+// @Produce json
+// @Param params body tokenHolderParams true "params"
+// @Success 200 {object} J{data=object{list=[]dao.TokenHolder,count=int}}
+// @Router /api/plugin/evm/token/holder [post]
 func tokenHolderHandle(w http.ResponseWriter, r *http.Request) error {
-	p := new(struct {
-		TokenAddress string `json:"token_address" validate:"required,eth_addr"`
-		Page         int    `json:"page" validate:"min=0"`
-		Row          int    `json:"row" validate:"min=1,max=100"`
-	})
+	p := new(tokenHolderParams)
 	if err := validator.Validate(r.Body, p); err != nil {
 		toJson(w, 10001, nil, err)
 		return nil
@@ -116,11 +164,20 @@ func tokenHolderHandle(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+type EvmBlocks struct {
+	Row  int `json:"row" validate:"min=1,max=100"`
+	Page int `json:"page" validate:"min=0"`
+}
+
+// @Summary Evm blocks
+// @Tags EVM
+// @Accept json
+// @Produce json
+// @Param params body EvmBlocks true "params"
+// @Success 200 {object} J{data=object{list=[]dao.EvmBlockJson,count=int}}
+// @Router /api/plugin/evm/blocks [post]
 func blocksHandle(w http.ResponseWriter, r *http.Request) error {
-	p := new(struct {
-		Row  int `json:"row" validate:"min=1,max=100"`
-		Page int `json:"page" validate:"min=0"`
-	})
+	p := new(EvmBlocks)
 	if err := validator.Validate(r.Body, p); err != nil {
 		toJson(w, 10001, nil, err)
 		return nil
@@ -133,11 +190,20 @@ func blocksHandle(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+type EvmBlockParams struct {
+	Hash     string `json:"hash" validate:"omitempty,len=66"`
+	BlockNum uint   `json:"block_num" validate:"omitempty,min=0"`
+}
+
+// @Summary Evm block info
+// @Tags EVM
+// @Accept json
+// @Produce json
+// @Param params body EvmBlockParams true "params"
+// @Success 200 {object} J{data=dao.EvmBlock}
+// @Router /api/plugin/evm/block [post]
 func blockHandle(w http.ResponseWriter, r *http.Request) error {
-	p := new(struct {
-		Hash     string `json:"hash" validate:"omitempty,len=66"`
-		BlockNum uint   `json:"block_num" validate:"omitempty,min=0"`
-	})
+	p := new(EvmBlockParams)
 	if err := validator.Validate(r.Body, p); err != nil {
 		toJson(w, 10001, nil, err)
 		return nil
@@ -156,10 +222,19 @@ func blockHandle(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+type transactionParam struct {
+	Hash string `json:"hash" validate:"required,len=66"`
+}
+
+// @Summary Evm transaction info
+// @Tags EVM
+// @Accept json
+// @Produce json
+// @Param params body transactionParam true "params"
+// @Success 200 {object} J{data=dao.Transaction}
+// @Router /api/plugin/evm/transaction [post]
 func transactionHandle(w http.ResponseWriter, r *http.Request) error {
-	p := new(struct {
-		Hash string `json:"hash" validate:"required,len=66"`
-	})
+	p := new(transactionParam)
 	if err := validator.Validate(r.Body, p); err != nil {
 		toJson(w, 10001, nil, err)
 		return nil
@@ -173,13 +248,22 @@ func transactionHandle(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+type transactionsParams struct {
+	Page     int    `json:"page" validate:"min=0"`
+	Row      int    `json:"row" validate:"min=1,max=100"`
+	BlockNum uint   `json:"block_num" validate:"omitempty,min=0"`
+	Address  string `json:"address" validate:"omitempty,eth_addr"`
+}
+
+// @Summary Evm transactions
+// @Tags EVM
+// @Accept json
+// @Produce json
+// @Param params body transactionsParams true "params"
+// @Success 200 {object} J{data=object{list=[]dao.TransactionSampleJson,count=int}}
+// @Router /api/plugin/evm/transactions [post]
 func transactionsHandle(w http.ResponseWriter, r *http.Request) error {
-	p := new(struct {
-		Page     int    `json:"page" validate:"min=0"`
-		Row      int    `json:"row" validate:"min=1,max=100"`
-		BlockNum uint   `json:"block_num" validate:"omitempty,min=0"`
-		Address  string `json:"address" validate:"omitempty,eth_addr"`
-	})
+	p := new(transactionsParams)
 	if err := validator.Validate(r.Body, p); err != nil {
 		toJson(w, 10001, nil, err)
 		return nil
@@ -191,17 +275,25 @@ func transactionsHandle(w http.ResponseWriter, r *http.Request) error {
 	if p.BlockNum > 0 {
 		opts = append(opts, model.Where("block_num = ?", p.BlockNum))
 	}
-	opts = append(opts, model.WithLimit(p.Row*p.Page, p.Row))
-	transactions := srv.TransactionsJson(r.Context(), opts...)
-	toJson(w, 0, transactions, nil)
+	list, count := srv.TransactionsJson(r.Context(), model.WithLimit(p.Row*p.Page, p.Row), opts...)
+	toJson(w, 0, map[string]interface{}{"list": list, "count": count}, nil)
 	return nil
 }
 
+type EvmAccountParams struct {
+	Page int `json:"page" validate:"min=0"`
+	Row  int `json:"row" validate:"min=1,max=100"`
+}
+
+// @Summary Evm accounts list
+// @Tags EVM
+// @Accept json
+// @Produce json
+// @Param params body EvmAccountParams true "params"
+// @Success 200 {object} J{data=object{list=[]dao.AccountsJson,count=int}}
+// @Router /api/plugin/evm/accounts [post]
 func accountsHandle(w http.ResponseWriter, r *http.Request) error {
-	p := new(struct {
-		Page int `json:"page" validate:"min=0"`
-		Row  int `json:"row" validate:"min=1,max=100"`
-	})
+	p := new(EvmAccountParams)
 	if err := validator.Validate(r.Body, p); err != nil {
 		toJson(w, 10001, nil, err)
 		return nil
@@ -211,10 +303,19 @@ func accountsHandle(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+type contractParams struct {
+	Address string `json:"address" validate:"required,eth_addr"`
+}
+
+// @Summary Evm contract info
+// @Tags EVM
+// @Accept json
+// @Produce json
+// @Param params body contractParams true "params"
+// @Success 200 {object} J{data=dao.Contract}
+// @Router /api/plugin/evm/contract [post]
 func contractHandle(w http.ResponseWriter, r *http.Request) error {
-	p := new(struct {
-		Address string `json:"address" validate:"required,eth_addr"`
-	})
+	p := new(contractParams)
 	if err := validator.Validate(r.Body, p); err != nil {
 		toJson(w, 10001, nil, err)
 		return nil
@@ -228,11 +329,20 @@ func contractHandle(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }
 
+type contractsParams struct {
+	Page int `json:"page" validate:"min=0"`
+	Row  int `json:"row" validate:"min=1,max=100"`
+}
+
+// @Summary Evm contract list
+// @Tags EVM
+// @Accept json
+// @Produce json
+// @Param params body contractsParams true "params"
+// @Success 200 {object} J{data=object{list=[]dao.ContractsJson,count=int}}
+// @Router /api/plugin/evm/contracts [post]
 func contractsHandle(w http.ResponseWriter, r *http.Request) error {
-	p := new(struct {
-		Page int `json:"page" validate:"min=0"`
-		Row  int `json:"row" validate:"min=1,max=100"`
-	})
+	p := new(contractsParams)
 	if err := validator.Validate(r.Body, p); err != nil {
 		toJson(w, 10001, nil, err)
 		return nil

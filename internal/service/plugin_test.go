@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"github.com/itering/subscan/model"
 	"testing"
 )
@@ -10,5 +11,5 @@ func Test_emitEvent(t *testing.T) {
 }
 
 func Test_emitExtrinsic(t *testing.T) {
-	testSrv.emitExtrinsic(&testBlock, &testSignedExtrinsic, []model.ChainEvent{testEvent})
+	testSrv.emitExtrinsic(context.TODO(), &testBlock, &testSignedExtrinsic, []model.ChainEvent{testEvent})
 }

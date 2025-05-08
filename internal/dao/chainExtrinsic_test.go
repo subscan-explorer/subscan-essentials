@@ -30,7 +30,7 @@ func TestDao_DropExtrinsicNotFinalizedData(t *testing.T) {
 
 func TestDao_GetExtrinsicsByBlockNum(t *testing.T) {
 	extrinsics := testDao.GetExtrinsicsByBlockNum(947687)
-	assert.Equal(t, []model.ChainExtrinsicJson{{BlockTimestamp: 1594791900, BlockNum: 947687, ExtrinsicIndex: "947687-0", CallModuleFunction: "set", CallModule: "timestamp", Params: "[{\"name\":\"now\",\"type\":\"Compact\\u003cMoment\\u003e\",\"value\":1594791900}]", AccountId: "", AccountIndex: "", Signature: "", Nonce: 0, ExtrinsicHash: "", Success: true, Fee: decimal.New(0, 0)}}, extrinsics)
+	assert.Equal(t, []model.ChainExtrinsicJson{{BlockTimestamp: 1594791900, BlockNum: 947687, ExtrinsicIndex: "947687-0", CallModuleFunction: "set", CallModule: "timestamp", Params: nil, AccountId: "", Signature: "", Nonce: 0, ExtrinsicHash: "", Success: true, Fee: decimal.New(0, 0)}}, extrinsics)
 }
 
 func TestDao_GetExtrinsicsByHash(t *testing.T) {

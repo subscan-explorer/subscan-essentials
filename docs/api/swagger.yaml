@@ -1,4 +1,1867 @@
+definitions:
+  github_com_itering_subscan_plugins_balance_model.Account:
+    properties:
+      address:
+        type: string
+      balance:
+        type: number
+      locked:
+        type: number
+      nonce:
+        type: integer
+      reserved:
+        type: number
+    type: object
+  github_com_itering_subscan_plugins_evm_dao.AccountTokenJson:
+    properties:
+      balance:
+        type: number
+      category:
+        type: string
+      contract:
+        type: string
+      decimals:
+        type: integer
+      name:
+        type: string
+      symbol:
+        type: string
+    type: object
+  github_com_itering_subscan_plugins_evm_dao.AccountsJson:
+    properties:
+      balance:
+        type: number
+      evm_account:
+        type: string
+    type: object
+  github_com_itering_subscan_plugins_evm_dao.Contract:
+    properties:
+      CompileSettings:
+        items:
+          type: integer
+        type: array
+      abi:
+        items:
+          type: integer
+        type: array
+      address:
+        type: string
+      block_num:
+        type: integer
+      compiler_version:
+        type: string
+      constructor_arguments:
+        type: string
+      contract_name:
+        type: string
+      creation_bytecode:
+        type: string
+      creation_code:
+        type: string
+      deploy_at:
+        type: integer
+      deploy_code_hash:
+        type: string
+      deployer:
+        type: string
+      eip_standard:
+        type: string
+      event_identifiers:
+        items:
+          type: integer
+        type: array
+      evm_version:
+        type: string
+      external_libraries:
+        items:
+          type: integer
+        type: array
+      extrinsic_index:
+        type: string
+      method_identifiers:
+        items:
+          type: integer
+        type: array
+      optimization_runs:
+        type: integer
+      optimize:
+        type: boolean
+      precompile:
+        type: integer
+      proxy_implementation:
+        type: string
+      source_code:
+        type: string
+      transaction_count:
+        type: integer
+      tx_hash:
+        type: string
+      verify_status:
+        type: string
+      verify_time:
+        type: integer
+      verify_type:
+        type: string
+    type: object
+  github_com_itering_subscan_plugins_evm_dao.ContractsJson:
+    properties:
+      address:
+        type: string
+      contract_name:
+        type: string
+      transaction_count:
+        type: integer
+      verify_status:
+        type: string
+    type: object
+  github_com_itering_subscan_plugins_evm_dao.Erc721Holders:
+    properties:
+      contract:
+        type: string
+      holder:
+        type: string
+      metadata:
+        $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.Metadata'
+      storage_url:
+        type: string
+      token_id:
+        type: string
+    type: object
+  github_com_itering_subscan_plugins_evm_dao.EvmBlock:
+    properties:
+      author:
+        type: string
+      base_fee_per_gas:
+        type: number
+      block_hash:
+        type: string
+      block_num:
+        type: integer
+      block_size:
+        type: number
+      difficulty:
+        type: number
+      extra_data:
+        type: string
+      gas_limit:
+        type: number
+      gas_used:
+        type: number
+      logs_bloom:
+        type: string
+      miner:
+        type: string
+      parent_hash:
+        type: string
+      receipts_root:
+        type: string
+      seal_fields:
+        type: string
+      sha3_uncles:
+        type: string
+      state_root:
+        type: string
+      timestamp:
+        type: integer
+      total_difficulty:
+        type: number
+      transaction_count:
+        type: integer
+      transactions_root:
+        type: string
+      uncles:
+        type: string
+    type: object
+  github_com_itering_subscan_plugins_evm_dao.EvmBlockJson:
+    properties:
+      block_num:
+        type: integer
+      block_timestamp:
+        type: integer
+      miner:
+        type: string
+      transactions:
+        type: integer
+    type: object
+  github_com_itering_subscan_plugins_evm_dao.Metadata:
+    properties:
+      animation_url:
+        type: string
+      attributes:
+        items:
+          additionalProperties: true
+          type: object
+        type: array
+      background_color:
+        type: string
+      description:
+        type: string
+      external_url:
+        type: string
+      image:
+        type: string
+      name:
+        type: string
+      youtube_url:
+        type: string
+    type: object
+  github_com_itering_subscan_plugins_evm_dao.Token:
+    properties:
+      base_token_uri:
+        type: string
+      category:
+        type: string
+      contract:
+        type: string
+      decimals:
+        type: integer
+      holders:
+        type: integer
+      name:
+        type: string
+      symbol:
+        type: string
+      totalSupply:
+        type: number
+      transfer_count:
+        type: integer
+    type: object
+  github_com_itering_subscan_plugins_evm_dao.TokenHolder:
+    properties:
+      balance:
+        type: number
+      contract:
+        type: string
+      holder:
+        type: string
+    type: object
+  github_com_itering_subscan_plugins_evm_dao.TokenTransferJson:
+    properties:
+      category:
+        type: string
+      contract:
+        type: string
+      create_at:
+        type: integer
+      decimals:
+        type: integer
+      from:
+        type: string
+      hash:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      storage_url:
+        type: string
+      symbol:
+        type: string
+      to:
+        type: string
+      token_id:
+        type: string
+      value:
+        type: number
+    type: object
+  github_com_itering_subscan_plugins_evm_dao.Transaction:
+    properties:
+      block_num:
+        type: integer
+      block_timestamp:
+        type: integer
+      contract:
+        type: string
+      cumulative_gas_used:
+        type: number
+      effective_gas_price:
+        description: eip 1559
+        type: number
+      extrinsic_index:
+        type: string
+      from_address:
+        type: string
+      gas_limit:
+        type: number
+      gas_price:
+        type: number
+      gas_used:
+        type: number
+      hash:
+        type: string
+      input_data:
+        type: string
+      max_fee_per_gas:
+        type: number
+      max_priority_fee_per_gas:
+        type: number
+      nonce:
+        type: integer
+      precompile:
+        type: integer
+      r:
+        type: string
+      s:
+        type: string
+      success:
+        type: boolean
+      to_address:
+        type: string
+      transaction_id:
+        description: pk
+        type: integer
+      transaction_index:
+        type: integer
+      txn_type:
+        type: integer
+      v:
+        type: integer
+      value:
+        type: number
+    type: object
+  github_com_itering_subscan_plugins_evm_dao.TransactionSampleJson:
+    properties:
+      block_num:
+        type: integer
+      block_timestamp:
+        type: integer
+      from_address:
+        type: string
+      hash:
+        type: string
+      to_address:
+        type: string
+      value:
+        type: number
+    type: object
+  github_com_itering_subscan_share_token.Token:
+    properties:
+      decimals:
+        type: integer
+      symbol:
+        type: string
+      token_id:
+        type: string
+    type: object
+  internal_server_http.BlockParams:
+    properties:
+      block_hash:
+        type: string
+      block_num:
+        minimum: 0
+        type: integer
+    type: object
+  internal_server_http.BlocksParams:
+    properties:
+      page:
+        minimum: 0
+        type: integer
+      row:
+        maximum: 100
+        minimum: 1
+        type: integer
+    type: object
+  internal_server_http.J:
+    properties:
+      code:
+        type: integer
+      data: {}
+      generated_at:
+        type: integer
+      message:
+        type: string
+    type: object
+  internal_server_http.checkSearchParams:
+    properties:
+      hash:
+        type: string
+    type: object
+  internal_server_http.eventsParams:
+    properties:
+      block_num:
+        type: integer
+      event:
+        type: string
+      module:
+        type: string
+      page:
+        minimum: 0
+        type: integer
+      row:
+        maximum: 100
+        minimum: 1
+        type: integer
+    type: object
+  internal_server_http.extrinsicParams:
+    properties:
+      extrinsic_index:
+        type: string
+      hash:
+        type: string
+    type: object
+  internal_server_http.extrinsicsParams:
+    properties:
+      address:
+        type: string
+      block_num:
+        type: integer
+      call:
+        type: string
+      module:
+        type: string
+      page:
+        minimum: 0
+        type: integer
+      row:
+        maximum: 100
+        minimum: 1
+        type: integer
+      signed:
+        type: string
+    type: object
+  internal_server_http.runtimeMetadataParams:
+    properties:
+      spec:
+        type: integer
+    type: object
+  metadata.Instant:
+    properties:
+      apis:
+        items:
+          $ref: '#/definitions/types.RuntimeApiMetadata'
+        type: array
+      call_index:
+        additionalProperties:
+          $ref: '#/definitions/types.CallIndex'
+        type: object
+      customer:
+        $ref: '#/definitions/types.CustomMetadata'
+      event_index:
+        additionalProperties:
+          $ref: '#/definitions/types.EventIndex'
+        type: object
+      extrinsic:
+        $ref: '#/definitions/types.ExtrinsicMetadata'
+      metadata:
+        $ref: '#/definitions/types.MetadataTag'
+      metadata_version:
+        type: integer
+      outer_enums:
+        $ref: '#/definitions/types.OuterEnumsMetadata'
+      type:
+        type: integer
+    type: object
+  model.ChainEventJson:
+    properties:
+      block_num:
+        type: integer
+      block_timestamp:
+        type: integer
+      event_id:
+        type: string
+      event_idx:
+        type: integer
+      event_index:
+        type: string
+      extrinsic_index:
+        type: string
+      id:
+        type: integer
+      module_id:
+        type: string
+      params:
+        items:
+          $ref: '#/definitions/model.EventParam'
+        type: array
+      phase:
+        type: integer
+    type: object
+  model.ChainExtrinsicJson:
+    properties:
+      account_id:
+        type: string
+      block_num:
+        type: integer
+      block_timestamp:
+        type: integer
+      call_module:
+        type: string
+      call_module_function:
+        type: string
+      extrinsic_hash:
+        type: string
+      extrinsic_index:
+        type: string
+      fee:
+        type: number
+      id:
+        type: integer
+      nonce:
+        type: integer
+      params:
+        items:
+          $ref: '#/definitions/model.ExtrinsicParam'
+        type: array
+      signature:
+        type: string
+      success:
+        type: boolean
+    type: object
+  model.ChainLogJson:
+    properties:
+      block_num:
+        type: integer
+      data:
+        type: string
+      log_index:
+        type: string
+      log_type:
+        type: string
+    type: object
+  model.EventParam:
+    properties:
+      type:
+        type: string
+      type_name:
+        type: string
+      value: {}
+    type: object
+  model.ExtrinsicDetail:
+    properties:
+      account_id:
+        type: string
+      block_num:
+        type: integer
+      block_timestamp:
+        type: integer
+      call_module:
+        type: string
+      call_module_function:
+        type: string
+      extrinsic_hash:
+        type: string
+      extrinsic_index:
+        type: string
+      fee:
+        type: number
+      finalized:
+        type: boolean
+      lifetime:
+        $ref: '#/definitions/model.Lifetime'
+      nonce:
+        type: integer
+      params:
+        items:
+          $ref: '#/definitions/model.ExtrinsicParam'
+        type: array
+      signature:
+        type: string
+      success:
+        type: boolean
+    type: object
+  model.ExtrinsicParam:
+    properties:
+      name:
+        type: string
+      type:
+        type: string
+      type_name:
+        type: string
+      value: {}
+    type: object
+  model.Lifetime:
+    properties:
+      birth:
+        type: integer
+      death:
+        type: integer
+    type: object
+  model.RuntimeVersion:
+    properties:
+      modules:
+        type: string
+      spec_version:
+        type: integer
+    type: object
+  model.SampleBlockJson:
+    properties:
+      block_num:
+        type: integer
+      block_timestamp:
+        type: integer
+      event_count:
+        type: integer
+      extrinsics_count:
+        type: integer
+      finalized:
+        type: boolean
+      hash:
+        type: string
+      validator:
+        type: string
+    type: object
+  model.TransferJson:
+    properties:
+      amount:
+        type: number
+      block_num:
+        type: integer
+      block_timestamp:
+        type: integer
+      extrinsic_index:
+        type: string
+      fee:
+        type: number
+      from:
+        type: string
+      hash:
+        type: string
+      module:
+        type: string
+      success:
+        type: boolean
+      to:
+        type: string
+    type: object
+  plugins_balance_http.J:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+      ttl:
+        type: integer
+    type: object
+  plugins_balance_http.accountParams:
+    properties:
+      address:
+        type: string
+    required:
+    - address
+    type: object
+  plugins_balance_http.accountsParams:
+    properties:
+      page:
+        minimum: 0
+        type: integer
+      row:
+        maximum: 100
+        minimum: 1
+        type: integer
+    type: object
+  plugins_balance_http.transferParams:
+    properties:
+      address:
+        type: string
+      block_num:
+        minimum: 0
+        type: integer
+      page:
+        minimum: 0
+        type: integer
+      row:
+        maximum: 100
+        minimum: 1
+        type: integer
+    type: object
+  plugins_evm_http.EvmAccountParams:
+    properties:
+      page:
+        minimum: 0
+        type: integer
+      row:
+        maximum: 100
+        minimum: 1
+        type: integer
+    type: object
+  plugins_evm_http.EvmBlockParams:
+    properties:
+      block_num:
+        minimum: 0
+        type: integer
+      hash:
+        type: string
+    type: object
+  plugins_evm_http.EvmBlocks:
+    properties:
+      page:
+        minimum: 0
+        type: integer
+      row:
+        maximum: 100
+        minimum: 1
+        type: integer
+    type: object
+  plugins_evm_http.J:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+      ttl:
+        type: integer
+    type: object
+  plugins_evm_http.accountTokensParams:
+    properties:
+      address:
+        type: string
+      category:
+        enum:
+        - erc20
+        - erc721
+        type: string
+    required:
+    - address
+    type: object
+  plugins_evm_http.collectiblesParams:
+    properties:
+      address:
+        type: string
+      contract:
+        type: string
+      page:
+        minimum: 0
+        type: integer
+      row:
+        maximum: 100
+        minimum: 1
+        type: integer
+    type: object
+  plugins_evm_http.contractParams:
+    properties:
+      address:
+        type: string
+    required:
+    - address
+    type: object
+  plugins_evm_http.contractsParams:
+    properties:
+      page:
+        minimum: 0
+        type: integer
+      row:
+        maximum: 100
+        minimum: 1
+        type: integer
+    type: object
+  plugins_evm_http.tokenHolderParams:
+    properties:
+      page:
+        minimum: 0
+        type: integer
+      row:
+        maximum: 100
+        minimum: 1
+        type: integer
+      token_address:
+        type: string
+    required:
+    - token_address
+    type: object
+  plugins_evm_http.tokenListParams:
+    properties:
+      category:
+        enum:
+        - erc20
+        - erc721
+        type: string
+      contract:
+        type: string
+      page:
+        minimum: 0
+        type: integer
+      row:
+        maximum: 100
+        minimum: 1
+        type: integer
+    type: object
+  plugins_evm_http.tokenTransferParams:
+    properties:
+      address:
+        type: string
+      page:
+        minimum: 0
+        type: integer
+      row:
+        maximum: 100
+        minimum: 1
+        type: integer
+      token_address:
+        type: string
+    type: object
+  plugins_evm_http.transactionParam:
+    properties:
+      hash:
+        type: string
+    required:
+    - hash
+    type: object
+  plugins_evm_http.transactionsParams:
+    properties:
+      address:
+        type: string
+      block_num:
+        minimum: 0
+        type: integer
+      page:
+        minimum: 0
+        type: integer
+      row:
+        maximum: 100
+        minimum: 1
+        type: integer
+    type: object
+  types.CallIndex:
+    properties:
+      call:
+        $ref: '#/definitions/types.MetadataCalls'
+      module:
+        $ref: '#/definitions/types.MetadataModules'
+    type: object
+  types.CustomMetadata:
+    properties:
+      map:
+        items:
+          additionalProperties:
+            $ref: '#/definitions/types.CustomValueMetadata'
+          type: object
+        type: array
+    type: object
+  types.CustomValueMetadata:
+    properties:
+      type:
+        type: integer
+      value:
+        type: string
+    type: object
+  types.EventIndex:
+    properties:
+      call:
+        $ref: '#/definitions/types.MetadataEvents'
+      module:
+        $ref: '#/definitions/types.MetadataModules'
+    type: object
+  types.ExtrinsicMetadata:
+    properties:
+      addressType:
+        type: integer
+      callType:
+        type: integer
+      extraType:
+        type: integer
+      signatureType:
+        type: integer
+      signed_identifier:
+        items:
+          type: string
+        type: array
+      signedExtensions:
+        items:
+          $ref: '#/definitions/types.SignedExtensions'
+        type: array
+      type:
+        type: integer
+      version:
+        type: integer
+    type: object
+  types.MapType:
+    properties:
+      hasher:
+        type: string
+      isLinked:
+        type: boolean
+      key:
+        type: string
+      key2:
+        type: string
+      key2Hasher:
+        type: string
+      value:
+        type: string
+    type: object
+  types.MetadataCalls:
+    properties:
+      args:
+        items:
+          $ref: '#/definitions/types.MetadataModuleCallArgument'
+        type: array
+      docs:
+        items:
+          type: string
+        type: array
+      lookup:
+        type: string
+      name:
+        type: string
+    type: object
+  types.MetadataConstants:
+    properties:
+      constants_value:
+        type: string
+      docs:
+        items:
+          type: string
+        type: array
+      name:
+        type: string
+      type:
+        type: string
+      type_value:
+        type: integer
+    type: object
+  types.MetadataEvents:
+    properties:
+      args:
+        items:
+          type: string
+        type: array
+      args_name:
+        items:
+          type: string
+        type: array
+      args_type_name:
+        items:
+          type: string
+        type: array
+      docs:
+        items:
+          type: string
+        type: array
+      lookup:
+        type: string
+      name:
+        type: string
+    type: object
+  types.MetadataModuleCallArgument:
+    properties:
+      name:
+        type: string
+      type:
+        type: string
+      type_name:
+        type: string
+    type: object
+  types.MetadataModuleError:
+    properties:
+      doc:
+        items:
+          type: string
+        type: array
+      fields:
+        items:
+          $ref: '#/definitions/types.ModuleErrorField'
+        type: array
+      name:
+        type: string
+    type: object
+  types.MetadataModules:
+    properties:
+      calls:
+        items:
+          $ref: '#/definitions/types.MetadataCalls'
+        type: array
+      calls_value:
+        $ref: '#/definitions/types.PalletLookUp'
+      constants:
+        items:
+          $ref: '#/definitions/types.MetadataConstants'
+        type: array
+      errors:
+        items:
+          $ref: '#/definitions/types.MetadataModuleError'
+        type: array
+      errors_value:
+        $ref: '#/definitions/types.PalletLookUp'
+      events:
+        items:
+          $ref: '#/definitions/types.MetadataEvents'
+        type: array
+      events_value:
+        $ref: '#/definitions/types.PalletLookUp'
+      index:
+        type: integer
+      name:
+        type: string
+      prefix:
+        type: string
+      storage:
+        items:
+          $ref: '#/definitions/types.MetadataStorage'
+        type: array
+    type: object
+  types.MetadataStorage:
+    properties:
+      docs:
+        items:
+          type: string
+        type: array
+      fallback:
+        type: string
+      hasher:
+        type: string
+      modifier:
+        type: string
+      name:
+        type: string
+      type:
+        $ref: '#/definitions/types.StorageType'
+    type: object
+  types.MetadataTag:
+    properties:
+      modules:
+        items:
+          $ref: '#/definitions/types.MetadataModules'
+        type: array
+    type: object
+  types.ModuleErrorField:
+    properties:
+      doc:
+        items:
+          type: string
+        type: array
+      type:
+        type: string
+      type_name:
+        type: string
+    type: object
+  types.NMapType:
+    properties:
+      hashers:
+        items:
+          type: string
+        type: array
+      key_vec:
+        items:
+          type: string
+        type: array
+      keys_id:
+        type: integer
+      value:
+        type: string
+      value_id:
+        type: integer
+    type: object
+  types.OuterEnumsMetadata:
+    properties:
+      callType:
+        type: integer
+      errorType:
+        type: integer
+      eventType:
+        type: integer
+    type: object
+  types.PalletLookUp:
+    properties:
+      type:
+        type: integer
+    type: object
+  types.RuntimeApiMetadata:
+    properties:
+      docs:
+        items:
+          type: string
+        type: array
+      methods:
+        items:
+          $ref: '#/definitions/types.RuntimeApiMethodMetadata'
+        type: array
+      name:
+        type: string
+    type: object
+  types.RuntimeApiMethodMetadata:
+    properties:
+      docs:
+        items:
+          type: string
+        type: array
+      inputs:
+        items:
+          $ref: '#/definitions/types.RuntimeApiMethodParamMetadata'
+        type: array
+      name:
+        type: string
+      outputs:
+        type: string
+      outputsId:
+        type: integer
+    type: object
+  types.RuntimeApiMethodParamMetadata:
+    properties:
+      name:
+        type: string
+      type:
+        type: string
+      typeId:
+        type: integer
+    type: object
+  types.SignedExtensions:
+    properties:
+      additionalSigned:
+        type: integer
+      identifier:
+        type: string
+      type:
+        type: integer
+    type: object
+  types.StorageType:
+    properties:
+      PlainTypeValue:
+        type: integer
+      double_map_type:
+        $ref: '#/definitions/types.MapType'
+      map_type:
+        $ref: '#/definitions/types.MapType'
+      n_map_type:
+        $ref: '#/definitions/types.NMapType'
+      origin:
+        type: string
+      plain_type:
+        type: string
+    type: object
 info:
   contact: {}
-paths: {}
+paths:
+  /api/plugin/balance/account:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/plugins_balance_http.accountParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/plugins_balance_http.J'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_itering_subscan_plugins_balance_model.Account'
+              type: object
+      summary: Get account details
+      tags:
+      - accounts
+  /api/plugin/balance/accounts:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/plugins_balance_http.accountsParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/plugins_balance_http.J'
+            - properties:
+                data:
+                  properties:
+                    count:
+                      type: integer
+                    list:
+                      items:
+                        $ref: '#/definitions/github_com_itering_subscan_plugins_balance_model.Account'
+                      type: array
+                  type: object
+              type: object
+      summary: Get accounts list
+      tags:
+      - accounts
+  /api/plugin/balance/transfer:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/plugins_balance_http.transferParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/plugins_balance_http.J'
+            - properties:
+                data:
+                  properties:
+                    count:
+                      type: integer
+                    list:
+                      items:
+                        $ref: '#/definitions/model.TransferJson'
+                      type: array
+                  type: object
+              type: object
+      summary: Get transfer list
+      tags:
+      - transfers
+  /api/plugin/evm/account/tokens:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/plugins_evm_http.accountTokensParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/plugins_evm_http.J'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.AccountTokenJson'
+                  type: array
+              type: object
+      summary: Get account tokens
+      tags:
+      - EVM
+  /api/plugin/evm/accounts:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/plugins_evm_http.EvmAccountParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/plugins_evm_http.J'
+            - properties:
+                data:
+                  properties:
+                    count:
+                      type: integer
+                    list:
+                      items:
+                        $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.AccountsJson'
+                      type: array
+                  type: object
+              type: object
+      summary: Evm accounts list
+      tags:
+      - EVM
+  /api/plugin/evm/block:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/plugins_evm_http.EvmBlockParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/plugins_evm_http.J'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.EvmBlock'
+              type: object
+      summary: Evm block info
+      tags:
+      - EVM
+  /api/plugin/evm/blocks:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/plugins_evm_http.EvmBlocks'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/plugins_evm_http.J'
+            - properties:
+                data:
+                  properties:
+                    count:
+                      type: integer
+                    list:
+                      items:
+                        $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.EvmBlockJson'
+                      type: array
+                  type: object
+              type: object
+      summary: Evm blocks
+      tags:
+      - EVM
+  /api/plugin/evm/contract:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/plugins_evm_http.contractParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/plugins_evm_http.J'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.Contract'
+              type: object
+      summary: Evm contract info
+      tags:
+      - EVM
+  /api/plugin/evm/contracts:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/plugins_evm_http.contractsParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/plugins_evm_http.J'
+            - properties:
+                data:
+                  properties:
+                    count:
+                      type: integer
+                    list:
+                      items:
+                        $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.ContractsJson'
+                      type: array
+                  type: object
+              type: object
+      summary: Evm contract list
+      tags:
+      - EVM
+  /api/plugin/evm/token/erc721/collectibles:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/plugins_evm_http.collectiblesParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/plugins_evm_http.J'
+            - properties:
+                data:
+                  properties:
+                    count:
+                      type: integer
+                    list:
+                      items:
+                        $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.Erc721Holders'
+                      type: array
+                  type: object
+              type: object
+      summary: Evm Erc721 collectibles
+      tags:
+      - EVM
+  /api/plugin/evm/token/holder:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/plugins_evm_http.tokenHolderParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/plugins_evm_http.J'
+            - properties:
+                data:
+                  properties:
+                    count:
+                      type: integer
+                    list:
+                      items:
+                        $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.TokenHolder'
+                      type: array
+                  type: object
+              type: object
+      summary: Evm token holder
+      tags:
+      - EVM
+  /api/plugin/evm/token/transfer:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/plugins_evm_http.tokenTransferParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/plugins_evm_http.J'
+            - properties:
+                data:
+                  properties:
+                    count:
+                      type: integer
+                    list:
+                      items:
+                        $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.TokenTransferJson'
+                      type: array
+                  type: object
+              type: object
+      summary: Evm token transfer
+      tags:
+      - EVM
+  /api/plugin/evm/tokens:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/plugins_evm_http.tokenListParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/plugins_evm_http.J'
+            - properties:
+                data:
+                  properties:
+                    count:
+                      type: integer
+                    list:
+                      items:
+                        $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.Token'
+                      type: array
+                  type: object
+              type: object
+      summary: Evm token list
+      tags:
+      - EVM
+  /api/plugin/evm/transaction:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/plugins_evm_http.transactionParam'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/plugins_evm_http.J'
+            - properties:
+                data:
+                  $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.Transaction'
+              type: object
+      summary: Evm transaction info
+      tags:
+      - EVM
+  /api/plugin/evm/transactions:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/plugins_evm_http.transactionsParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/plugins_evm_http.J'
+            - properties:
+                data:
+                  properties:
+                    count:
+                      type: integer
+                    list:
+                      items:
+                        $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.TransactionSampleJson'
+                      type: array
+                  type: object
+              type: object
+      summary: Evm transactions
+      tags:
+      - EVM
+  /api/scan/block:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/internal_server_http.BlockParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/internal_server_http.J'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.SampleBlockJson'
+              type: object
+      summary: Get block details
+      tags:
+      - block
+  /api/scan/blocks:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/internal_server_http.BlocksParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/internal_server_http.J'
+            - properties:
+                data:
+                  properties:
+                    blocks:
+                      items:
+                        $ref: '#/definitions/model.SampleBlockJson'
+                      type: array
+                    count:
+                      type: integer
+                  type: object
+              type: object
+      summary: Blocks list
+      tags:
+      - block
+  /api/scan/events:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/internal_server_http.eventsParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/internal_server_http.J'
+            - properties:
+                data:
+                  properties:
+                    count:
+                      type: integer
+                    events:
+                      items:
+                        $ref: '#/definitions/model.ChainEventJson'
+                      type: array
+                  type: object
+              type: object
+      summary: Get events list
+      tags:
+      - events
+  /api/scan/extrinsic:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/internal_server_http.extrinsicParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/internal_server_http.J'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.ExtrinsicDetail'
+              type: object
+      summary: Get extrinsic details
+      tags:
+      - extrinsics
+  /api/scan/extrinsics:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/internal_server_http.extrinsicsParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/internal_server_http.J'
+            - properties:
+                data:
+                  properties:
+                    count:
+                      type: integer
+                    extrinsics:
+                      items:
+                        $ref: '#/definitions/model.ChainExtrinsicJson'
+                      type: array
+                  type: object
+              type: object
+      summary: Get extrinsics list
+      tags:
+      - extrinsics
+  /api/scan/logs:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Block number
+        in: body
+        name: block_num
+        required: true
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/internal_server_http.J'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.ChainLogJson'
+                  type: array
+              type: object
+      summary: Get logs list
+      tags:
+      - logs
+  /api/scan/metadata:
+    post:
+      description: get metadata info, include chain customer info, runtime info, etc.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/internal_server_http.J'
+            - properties:
+                data:
+                  additionalProperties:
+                    type: string
+                  type: object
+              type: object
+      summary: Current network metadata
+      tags:
+      - metadata
+  /api/scan/runtime/list:
+    post:
+      description: runtimeListHandler  get runtime list
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/internal_server_http.J'
+            - properties:
+                data:
+                  properties:
+                    list:
+                      items:
+                        $ref: '#/definitions/model.RuntimeVersion'
+                      type: array
+                  type: object
+              type: object
+      summary: Get runtime list
+      tags:
+      - runtime
+  /api/scan/runtime/metadata:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/internal_server_http.runtimeMetadataParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/internal_server_http.J'
+            - properties:
+                data:
+                  properties:
+                    info:
+                      $ref: '#/definitions/metadata.Instant'
+                  type: object
+              type: object
+      summary: Get runtime metadata
+      tags:
+      - runtime
+  /api/scan/token:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/internal_server_http.J'
+            - properties:
+                data:
+                  properties:
+                    detail:
+                      additionalProperties:
+                        $ref: '#/definitions/github_com_itering_subscan_share_token.Token'
+                      type: object
+                    token:
+                      items:
+                        type: string
+                      type: array
+                  type: object
+              type: object
+      summary: Token list
+      tags:
+      - tokens
 swagger: "2.0"

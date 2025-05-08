@@ -62,7 +62,7 @@ func (d *Dao) GetExtrinsicList(c context.Context, page, row int, _ string, query
 			tableCount int64
 		)
 
-		queryOrigin := d.db.Scopes(d.TableNameFunc(&model.ChainExtrinsic{BlockNum: uint(index) * model.SplitTableBlockNum}))
+		queryOrigin := d.db.WithContext(c).Scopes(d.TableNameFunc(&model.ChainExtrinsic{BlockNum: uint(index) * model.SplitTableBlockNum}))
 
 		queryOrigin.Scopes(queryWhere...)
 		queryOrigin.Count(&tableCount)
@@ -81,10 +81,6 @@ func (d *Dao) GetExtrinsicList(c context.Context, page, row int, _ string, query
 		}
 		extrinsics = append(extrinsics, tableData...)
 	}
-	if len(queryWhere) == 0 {
-		m, _ := d.GetMetadata(c)
-		count = int64(util.StringToInt(m["count_extrinsic"]))
-	}
 	return extrinsics, int(count)
 }
 
@@ -92,7 +88,7 @@ func (d *Dao) GetExtrinsicsByHash(c context.Context, hash string) *model.ChainEx
 	var extrinsic model.ChainExtrinsic
 	blockNum, _ := d.GetFillBestBlockNum(c)
 	for index := blockNum / int(model.SplitTableBlockNum); index >= 0; index-- {
-		query := d.db.Model(model.ChainExtrinsic{BlockNum: uint(index) * model.SplitTableBlockNum}).Where("extrinsic_hash = ?", hash).Order("id asc").Limit(1).Scan(&extrinsic)
+		query := d.db.Scopes(model.TableNameFunc(model.ChainExtrinsic{BlockNum: uint(index) * model.SplitTableBlockNum})).Where("extrinsic_hash = ?", hash).First(&extrinsic)
 		if query != nil && query.Error == nil {
 			return &extrinsic
 		}
@@ -110,8 +106,8 @@ func (d *Dao) GetExtrinsicsDetailByHash(c context.Context, hash string) *model.E
 func (d *Dao) GetExtrinsicsDetailByIndex(c context.Context, index string) *model.ExtrinsicDetail {
 	var extrinsic model.ChainExtrinsic
 	indexArr := strings.Split(index, "-")
-	query := d.db.Model(model.ChainExtrinsic{BlockNum: util.StringToUInt(indexArr[0])}).
-		Where("extrinsic_index = ?", index).Scan(&extrinsic)
+	query := d.db.Scopes(model.TableNameFunc(model.ChainExtrinsic{BlockNum: util.StringToUInt(indexArr[0])})).
+		Where("extrinsic_index = ?", index).Find(&extrinsic)
 	if query == nil || query.Error != nil {
 		return nil
 	}
@@ -132,6 +128,7 @@ func (d *Dao) extrinsicsAsDetail(ctx context.Context, e *model.ChainExtrinsic) *
 		Success:            e.Success,
 		Fee:                e.Fee,
 		Finalized:          true,
+		Params:             e.Params,
 	}
 	d.FindLifeTime(ctx, &detail, e.Era)
 	return &detail

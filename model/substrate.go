@@ -82,6 +82,7 @@ func (c *ChainEvent) AsPlugin() *storage.Event {
 		EventId:      c.EventId,
 		Params:       c.Params.Marshal(),
 		EventIdx:     int(c.EventIdx),
+		Id:           c.Id(),
 	}
 }
 
