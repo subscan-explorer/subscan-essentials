@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - develop
+      - new
 
 jobs:
   build:
