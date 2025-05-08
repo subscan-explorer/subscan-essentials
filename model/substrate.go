@@ -191,7 +191,7 @@ type RuntimeVersion struct {
 	Name        string `json:"-"`
 	SpecVersion int    `json:"spec_version" gorm:"index:spec_version,unique"`
 	Modules     string `json:"modules"  gorm:"type:TEXT;"`
-	RawData     string `json:"-" gorm:"type:MEDIUMTEXT;"`
+	RawData     string `json:"-" gorm:"type:string;"`
 }
 
 type ChainLog struct {
