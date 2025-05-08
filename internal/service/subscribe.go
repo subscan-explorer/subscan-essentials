@@ -80,10 +80,6 @@ func reSubscribeFromChain() {
 			continue
 		}
 
-		newConn.SetPingHandler(func(msg string) error {
-			return newConn.WriteControl(websocket.PongMessage, []byte(msg), time.Now().Add(time.Second))
-		})
-		_ = newConn.SetReadDeadline(time.Now().Add(15 * time.Second))
 		setConn(newConn)
 
 		if err = subscribeFromChain(); err != nil {
@@ -113,7 +109,7 @@ func (s *Service) Subscribe(ctx context.Context) {
 			_, message, err := c.ReadMessage()
 			if err != nil {
 				time.Sleep(time.Second * 5)
-				// util.Logger().Error(fmt.Errorf("read error: %v", err))
+				util.Logger().Error(fmt.Errorf("read error: %v", err))
 				reSubscribeFromChain()
 				continue
 			}
@@ -133,6 +129,7 @@ func (s *Service) Subscribe(ctx context.Context) {
 			if c == nil {
 				continue
 			}
+			_ = c.SetWriteDeadline(time.Now().Add(5 * time.Second))
 			if err := c.WriteMessage(websocket.PingMessage, nil); err != nil {
 				util.Logger().Error(fmt.Errorf("ping error: %v", err))
 			}
