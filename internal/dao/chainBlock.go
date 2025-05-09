@@ -70,7 +70,7 @@ func (d *Dao) GetBlockList(ctx context.Context, page, row int) []model.ChainBloc
 	if head < 0 {
 		return nil
 	}
-	end := head - row
+	end := head - row + 1
 	if end < 0 {
 		end = 0
 	}
@@ -90,7 +90,7 @@ func (d *Dao) GetBlockList(ctx context.Context, page, row int) []model.ChainBloc
 		d.db.Scopes(model.TableNameFunc(model.ChainBlock{BlockNum: bestNum - model.SplitTableBlockNum})).
 			Joins(fmt.Sprintf("JOIN (SELECT id from %s order by block_num desc limit %d) as t on %s.id=t.id",
 				model.ChainBlock{BlockNum: bestNum - model.SplitTableBlockNum}.TableName(),
-				uint(row)-(headBlock%model.SplitTableBlockNum+1),
+				uint(row)-(headBlock%model.SplitTableBlockNum),
 				model.ChainBlock{BlockNum: bestNum - model.SplitTableBlockNum}.TableName(),
 			)).
 			Order("block_num desc").Scan(&endBlocks)

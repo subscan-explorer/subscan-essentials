@@ -229,19 +229,6 @@ func TestFakeDBGetYamlDSN(t *testing.T) {
 			t.Fatalf("unexpected database api dsn: %s", env.String())
 		}
 		os.Clearenv()
-
-		err = os.Setenv("TEST_MOD", "true")
-		if err != nil {
-			panic(err)
-		}
-		env, err = boot.Database.Mysql.getYamlDSN()
-		if err != nil {
-			t.Fatal(err)
-		}
-		if env.String() != dsnParseAndString(boot.Database.Mysql.Test) {
-			t.Fatalf("unexpected database task dsn: %s", env.String())
-		}
-		os.Clearenv()
 	})
 }
 

@@ -2,57 +2,62 @@
 
 # Subscan Essentials
 
-![License: GPL](https://img.shields.io/badge/license-GPL-blue.svg)
+[![License: GPL](https://img.shields.io/badge/license-GPL-blue.svg)](LICENSE)
 [![Go Report Card](https://goreportcard.com/badge/github.com/itering/subscan)](https://goreportcard.com/report/github.com/itering/subscan)
-![subscan](https://github.com/subscan-explorer/subscan-essentials/workflows/subscan/badge.svg)
+![CI/CD](https://github.com/subscan-explorer/subscan-essentials/workflows/subscan/badge.svg)
 
-Subscan Essentials is a high-precision blockchain explorer scaffold project. 
-It supports substrate-based blockchain networks with developer-friendly interface, standard or custom module parsing capabilities. 
-It's developed by the Subscan team and used in [subscan.io](https://www.subscan.io/). 
-Developers are free to use the codebase to extend functionalities and develop unique user experiences for their audiences.
+Subscan Essentials is a high-precision blockchain explorer scaffold supporting Substrate-based networks. Developed by the Subscan team and powering [subscan.io](https://www.subscan.io/), it provides:
 
-## Contents
+- Developer-friendly interface
+- Standard/custom module parsing
+- Extensible plugin system
+- Multi-chain compatibility
 
-- [Feature](#Feature)
-- [QuickStart](#QuickStart)
-  - [Requirement](#Requirement)
-  - [Structure](docs/tree.md)
-  - [Installation](#Install)
-  - [Config](#Config)
-  - [Usage](#Usage)
-  - [Docker](#Docker)
-  - [Test](#Test)
-- [Contributions](#Contributions)
-- [LICENSE](#LICENSE)
-- [Resource](#Resource)
+## Table of Contents
 
-## Feature
+- [Features](#features)
+- [Quick Start](#quick-start)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Configuration](#configuration)
+  - [Running Services](#running-services)
+- [Docker Deployment](#docker-deployment)
+- [Testing](#testing)
+- [Contributing](#contributing)
+- [License](#license)
+- [Resources](#resources)
 
-1. Support Substrate network [custom](/custom_type.md) type registration 
-2. Support index Block, Extrinsic, Event, log, EVM data(block, transaction...)
-3. More data can be indexed by custom [plugins](/plugins)
-4. [Gen](https://github.com/itering/subscan-plugin/tree/master/tools) tool can automatically generate plugin templates
-5. Built-in default HTTP API [DOC](/docs/index.md)
+## Features
 
+- **Substrate Integration**
+  - Custom type registration ([guide](/custom_type.md))
+  - Indexes blocks, extrinsics, events, logs, and EVM data
+- **Extensibility**
+  - Custom plugins framework ([docs](/plugins))
+  - Auto-generate plugin templates via [gen tool](https://github.com/itering/subscan-plugin/tree/master/tools)
+- **APIs**
+  - Built-in HTTP API documentation ([docs](/docs))
 
-## QuickStart
+---
 
-### Requirement
+## Quick Start
 
-* Linux / Mac OSX
-* Git
-* Golang 1.23.0+
-* Redis 3.0.4+
-* MySQL 8.0+/Postgres 16+
+### Prerequisites
 
-### Install
+- Linux/macOS
+- Git
+- **Go 1.23+**
+- **Redis 3.0.4+**
+- **MySQL 8.0+** or **PostgreSQL 16+**
+
+### Installation
 
 ```bash
 ./build.sh build
 
 ```
 
-### Config
+### configuration
 
 #### Init config file 
 
@@ -106,11 +111,11 @@ cp configs/config.yaml.example configs/config.yaml
 | REDIS_PASSWORD        |               |          |
 
 
-### Usage
+### running-services
 
 - Start DB
 
-**Make sure you have started redis and mysql**
+**Make sure you have started redis and mysql/postgres**
 
 - Subscribe
 ```bash
@@ -158,7 +163,7 @@ GLOBAL OPTIONS:
 
 ```
 
-### Docker
+### docker-deployment
 
 Use [docker-compose](https://docs.docker.com/compose/) can start projects quickly 
 
@@ -181,27 +186,29 @@ docker-compose build
 docker-compose up -d
 ```
 
-### Test
+### testing
 
-
-**default test mysql database is subscan_test. Please CREATE it or change configs/config.yaml**
-
-```bash
-go test ./...
+1. Create test database (if using MySQL):
+```sql
+CREATE DATABASE subscan_test;
 ```
 
+2. Run tests:
+```bash
+go test -v ./...
+```
 
-## Contributions
+## contributing
 
-We welcome contributions of any kind. Issues labeled can be good (first) contributions.
+We welcome contributions! Please see CONTRIBUTING.md for guidelines. Good first issues are labeled with **good first issue**.
 
 ## LICENSE
 
 GPL-3.0
 
 
-## Resource
+## resources
  
 - [SUBSCAN] https://github.com/subscan-explorer
-- [scale.go] https://github.com/subscan-explorer/scale.go
+- [scale.go] https://github.com/subscan-explorer/scale.go SCALE codec implementation
 - [Darwinia] https://github.com/darwinia-network

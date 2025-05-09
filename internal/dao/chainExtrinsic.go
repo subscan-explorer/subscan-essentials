@@ -38,20 +38,6 @@ func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.C
 	return query.Error
 }
 
-func (d *Dao) GetExtrinsicsByBlockNum(blockNum uint) []model.ChainExtrinsicJson {
-	var extrinsics []model.ChainExtrinsic
-	query := d.db.Model(model.ChainExtrinsic{BlockNum: blockNum}).
-		Where("block_num = ?", blockNum).Order("id asc").Scan(&extrinsics)
-	if query == nil || query.Error != nil {
-		return nil
-	}
-	var list []model.ChainExtrinsicJson
-	for _, extrinsic := range extrinsics {
-		list = append(list, *d.ExtrinsicsAsJson(&extrinsic))
-	}
-	return list
-}
-
 func (d *Dao) GetExtrinsicList(c context.Context, page, row int, _ string, queryWhere ...model.Option) ([]model.ChainExtrinsic, int) {
 	var extrinsics []model.ChainExtrinsic
 	var count int64

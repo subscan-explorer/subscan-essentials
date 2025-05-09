@@ -154,7 +154,7 @@ func (m *MockDao) DropEventNotFinalizedData(blockNum int, finalized bool) bool {
 	return false
 }
 
-func (m *MockDao) GetEventByBlockNum(blockNum uint, where ...string) []model.ChainEventJson {
+func (m *MockDao) GetEventByBlockNum(blockNum uint, where ...string) []model.ChainEvent {
 
 	return nil
 }

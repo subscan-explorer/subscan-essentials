@@ -22,7 +22,8 @@ func TestService_GetEventList(t *testing.T) {
 			BlockNum:       947687,
 			ModuleId:       "imonline",
 			EventId:        "AllGood",
-			Params:         nil,
+			Params:         model.EventParams{},
 			BlockTimestamp: 1594791900,
+			ExtrinsicIndex: "947687-0",
 		}}, list)
 }
