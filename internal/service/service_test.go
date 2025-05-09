@@ -69,7 +69,7 @@ type MockDao struct {
 	mock.Mock
 }
 
-func (m *MockDao) GetBlockNumArr(start, end uint) []int {
+func (m *MockDao) GetBlockNumArr(ctx context.Context, start, end uint) []int {
 	return nil
 }
 

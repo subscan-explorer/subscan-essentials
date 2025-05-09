@@ -23,7 +23,7 @@ type IDao interface {
 	SaveFillAlreadyBlockNum(context.Context, int) error
 	SaveFillAlreadyFinalizedBlockNum(c context.Context, blockNum int) (err error)
 	GetFillBestBlockNum(c context.Context) (num int, err error)
-	GetBlockNumArr(start, end uint) []int
+	GetBlockNumArr(ctx context.Context, start, end uint) []int
 	GetFillFinalizedBlockNum(c context.Context) (num int, err error)
 	GetBlockList(ctx context.Context, page, row int) []model.ChainBlock
 	BlockAsJson(c context.Context, block *model.ChainBlock) *model.ChainBlockJson

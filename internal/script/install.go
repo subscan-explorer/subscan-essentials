@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/itering/subscan/util/mq"
 	"io"
 	"os"
 
@@ -59,42 +60,64 @@ func fileCopy(src, dst string) error {
 }
 
 // CheckCompleteness Check blocks Completeness
-func CheckCompleteness() {
+func CheckCompleteness(startBlock uint, fastMode bool) {
 	srv := service.New()
 	defer srv.Close()
-
 	c := context.TODO()
-	dao := srv.GetDao()
+
 	// latest fill block num
-	latest, err := dao.GetFillFinalizedBlockNum(c)
+	latest, err := srv.GetFinalizedBlock(c)
 	if err != nil {
 		panic(err)
 	}
+	const holdOnNum uint = 20
 
-	var thisRepairedBlock []uint
-	var repairedBlockNum uint
-	for {
-		endBlockNum := repairedBlockNum + 300
+	util.Debug(fmt.Sprintf("Now: block height %d", latest))
+	var (
+		latestBlockNum uint
+	)
 
-		if endBlockNum > uint(latest) {
-			break
+	var fillBlock = func(num uint) {
+		if fastMode {
+			_ = mq.Instant.Publish("block", "block", map[string]interface{}{"block_num": num, "finalized": true, "force": true})
+			return
 		}
-
-		if endBlockNum/model.SplitTableBlockNum != (repairedBlockNum+1)/model.SplitTableBlockNum {
-			endBlockNum = (endBlockNum/model.SplitTableBlockNum)*model.SplitTableBlockNum - 1
+		// re-sync
+		err = srv.FillBlockData(c, num, true)
+		if err != nil {
+			panic(fmt.Errorf("not found the block num %d %v", num, err))
 		}
-
-		allFetchBlockNums := dao.GetBlockNumArr(repairedBlockNum, endBlockNum)
-
-		for i := repairedBlockNum; i < endBlockNum; i++ {
-			if !util.IntInSlice(int(i), allFetchBlockNums) {
-				thisRepairedBlock = append(thisRepairedBlock, i)
-			}
-		}
-		repairedBlockNum = endBlockNum
 	}
 
-	if len(thisRepairedBlock) > 0 {
-		fmt.Println("Check repair block over, repaired block ....", thisRepairedBlock, len(thisRepairedBlock))
+	if startBlock > 0 {
+		latestBlockNum = startBlock - 1
+	} else {
+		latestBlockNum = 1
+	}
+
+	for {
+		if latestBlockNum >= uint(latest)-holdOnNum {
+			break
+		}
+		endBlockNum := latestBlockNum + 3000
+		if endBlockNum/model.SplitTableBlockNum != (latestBlockNum+1)/model.SplitTableBlockNum {
+			endBlockNum = (endBlockNum/model.SplitTableBlockNum)*model.SplitTableBlockNum - 1
+		}
+		if endBlockNum > uint(latest)-holdOnNum {
+			endBlockNum = uint(latest) - holdOnNum
+		}
+
+		util.Logger().Info(fmt.Sprintf("Start checkout block %d, end block %d", latestBlockNum+1, endBlockNum))
+		var allFetchBlockNums = srv.GetDao().GetBlockNumArr(c, latestBlockNum+1, endBlockNum)
+
+		if uint(len(allFetchBlockNums)) < endBlockNum-latestBlockNum {
+			for i := latestBlockNum + 1; i <= endBlockNum; i++ {
+				if !util.IntInSlice(int(i), allFetchBlockNums) {
+					util.Logger().Info(fmt.Sprintf("Missing block %d", i))
+					fillBlock(i)
+				}
+			}
+		}
+		latestBlockNum = endBlockNum
 	}
 }

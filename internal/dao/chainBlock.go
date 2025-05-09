@@ -187,8 +187,8 @@ func (d *Dao) BlocksReverseByNum(blockNums []uint) map[uint]model.ChainBlock {
 	return toMap
 }
 
-func (d *Dao) GetBlockNumArr(start, end uint) []int {
+func (d *Dao) GetBlockNumArr(c context.Context, start, end uint) []int {
 	var blockNums []int
-	d.db.Model(model.ChainBlock{BlockNum: end}).Where("block_num BETWEEN ? AND ?", start, end).Order("block_num asc").Pluck("block_num", &blockNums)
+	d.db.WithContext(c).Scopes(d.TableNameFunc(&model.ChainBlock{BlockNum: end})).Where("block_num BETWEEN ? AND ?", start, end).Order("block_num asc").Pluck("block_num", &blockNums)
 	return blockNums
 }

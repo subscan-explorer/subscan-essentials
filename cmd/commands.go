@@ -26,8 +26,12 @@ var commands = []cli.Command{
 	{
 		Name:  "CheckCompleteness",
 		Usage: "Create blocks completeness",
+		Flags: []cli.Flag{
+			cli.UintFlag{Name: "StartBlock"},
+			cli.BoolFlag{Name: "fast"},
+		},
 		Action: func(c *cli.Context) error {
-			script.CheckCompleteness()
+			script.CheckCompleteness(c.Uint("StartBlock"), c.Bool("fast"))
 			return nil
 		},
 	},
