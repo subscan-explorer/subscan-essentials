@@ -9,7 +9,7 @@ import (
 var commands = []cli.Command{
 	{
 		Name:  "start",
-		Usage: "Start one worker, E.g. subscribe",
+		Usage: "Start a daemon to subscribe to block or start a worker to process events",
 		Action: func(c *cli.Context) error {
 			observer.Run(c.Args().Get(0))
 			return nil
@@ -27,8 +27,8 @@ var commands = []cli.Command{
 		Name:  "CheckCompleteness",
 		Usage: "Create blocks completeness",
 		Flags: []cli.Flag{
-			cli.UintFlag{Name: "StartBlock"},
-			cli.BoolFlag{Name: "fast"},
+			cli.UintFlag{Name: "StartBlock", Usage: "start block to check"},
+			cli.BoolFlag{Name: "fast", Usage: "fast mode, will publish to worker"},
 		},
 		Action: func(c *cli.Context) error {
 			script.CheckCompleteness(c.Uint("StartBlock"), c.Bool("fast"))

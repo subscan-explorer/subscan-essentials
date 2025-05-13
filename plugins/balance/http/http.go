@@ -84,7 +84,7 @@ type transferParams struct {
 // @Accept json
 // @Produce json
 // @Param params body transferParams true "params"
-// @Success 200 {object} J{data=object{list=[]model.TransferJson,count=int}}
+// @Success 200 {object} J{data=object{list=[]model.Transfer,count=int}}
 // @Router /api/plugin/balance/transfer [post]
 func transferHandle(w http.ResponseWriter, r *http.Request) error {
 	p := new(transferParams)

@@ -29,19 +29,6 @@ func (d *Dao) CreateEvent(txn *GormDB, event *model.ChainEvent) error {
 	return query.Error
 }
 
-func (d *Dao) GetEventByBlockNum(blockNum uint, where ...string) []model.ChainEvent {
-	var events []model.ChainEvent
-	queryOrigin := d.db.Scopes(model.TableNameFunc(model.ChainEvent{BlockNum: blockNum})).Where("block_num = ?", blockNum)
-	for _, w := range where {
-		queryOrigin = queryOrigin.Where(w)
-	}
-	query := queryOrigin.Order("id asc").Find(&events)
-	if query.Error != nil {
-		return nil
-	}
-	return events
-}
-
 func (d *Dao) GetEventList(ctx context.Context, page, row int, order string, where ...model.Option) ([]model.ChainEvent, int) {
 	var Events []model.ChainEvent
 
@@ -84,15 +71,15 @@ func (d *Dao) GetEventsByIndex(extrinsicIndex string) []model.ChainEvent {
 	return Event
 }
 
-func (d *Dao) GetEventByIdx(index string) *model.ChainEvent {
+func (d *Dao) GetEventByIdx(ctx context.Context, index string) *model.ChainEvent {
 	var Event model.ChainEvent
 	indexArr := strings.Split(index, "-")
 	if len(indexArr) < 2 {
 		return nil
 	}
-	query := d.db.Model(model.ChainEvent{BlockNum: util.StringToUInt(indexArr[0])}).
+	query := d.db.WithContext(ctx).Scopes(model.TableNameFunc(model.ChainEvent{BlockNum: util.StringToUInt(indexArr[0])})).
 		Where("block_num = ?", indexArr[0]).
-		Where("event_idx = ?", indexArr[1]).Scan(&Event)
+		Where("event_idx = ?", indexArr[1]).First(&Event)
 	if query == nil || query.Error != nil {
 		return nil
 	}

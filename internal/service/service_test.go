@@ -167,7 +167,7 @@ func (m *MockDao) GetEventsByIndex(extrinsicIndex string) []model.ChainEvent {
 	return nil
 }
 
-func (m *MockDao) GetEventByIdx(index string) *model.ChainEvent {
+func (m *MockDao) GetEventByIdx(ctx context.Context, index string) *model.ChainEvent {
 	return nil
 }
 

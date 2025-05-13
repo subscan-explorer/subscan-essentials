@@ -5,10 +5,9 @@ import (
 	"errors"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
-	"os"
 
 	"fmt"
-	"log"
+
 	"reflect"
 	"time"
 
@@ -216,17 +215,9 @@ func (n NamingStrategy) IndexName(_, column string) string {
 func newDb() (db *gorm.DB) {
 	var err error
 	dbDriver := util.GetEnv("DB_DRIVER", "mysql")
-	newLogger := logger.New(
-		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
-		logger.Config{
-			SlowThreshold: time.Second, // Slow SQL threshold
-			// LogLevel:                  logger.Silent, // Log level
-			IgnoreRecordNotFoundError: true, // Ignore ErrRecordNotFound error for logger
-		},
-	)
 	util.Logger().Debug(fmt.Sprintf("Set DB_DRIVER %s", dbDriver))
 	conf := &gorm.Config{
-		Logger: newLogger,
+		Logger: logger.Default,
 	}
 	if dbDriver == "mysql" {
 		conf.NamingStrategy = NamingStrategy{}

@@ -40,9 +40,8 @@ func (s *Service) GetTransferJson(ctx context.Context, addr string, blockNum uin
 	if addr != "" {
 		opts = append(opts, cmodel.Where("sender = ? or receiver = ?", addr, addr))
 	}
-	opts = append(opts, cmodel.WithLimit(page*row, row))
 
-	list, count := dao.Transfers(ctx, s.d, opts...)
+	list, count := dao.Transfers(ctx, s.d, cmodel.WithLimit(page*row, row), opts...)
 	for index := range list {
 		list[index].Sender = address.Encode(list[index].Sender)
 		list[index].Receiver = address.Encode(list[index].Receiver)

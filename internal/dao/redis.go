@@ -2,8 +2,6 @@ package dao
 
 import (
 	"context"
-	"time"
-
 	"log"
 )
 
@@ -15,9 +13,3 @@ func (d *Dao) pingRedis(ctx context.Context) (err error) {
 	}
 	return
 }
-
-func (d *Dao) SetHeartBeatNow(c context.Context, action string) error {
-	return d.redis.SetCache(c, action, time.Now().Unix(), 300)
-}
-
-// private funcs

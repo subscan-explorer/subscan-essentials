@@ -2,7 +2,6 @@ package dao
 
 import (
 	"context"
-	"github.com/itering/subscan/model"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -12,11 +11,6 @@ func TestDao_CreateEvent(t *testing.T) {
 	err := testDao.CreateEvent(txn, &testEvent)
 	txn.Commit()
 	assert.NoError(t, err)
-}
-
-func TestDao_GetEventByBlockNum(t *testing.T) {
-	events := testDao.GetEventByBlockNum(947687)
-	assert.Equal(t, []model.ChainEvent{{ID: 94768700000, ExtrinsicIndex: "947687-0", BlockNum: 947687, EventIdx: 0, ModuleId: "imonline", EventId: "AllGood"}}, events)
 }
 
 func TestDao_GetEventList(t *testing.T) {
@@ -31,7 +25,7 @@ func TestDao_GetEventsByIndex(t *testing.T) {
 }
 
 func TestDao_GetEventByIdx(t *testing.T) {
-	event := testDao.GetEventByIdx("947687-0")
+	event := testDao.GetEventByIdx(context.TODO(), "947687-0")
 	assert.Equal(t, uint(947687), event.BlockNum)
 	assert.Equal(t, uint(0), event.EventIdx)
 }

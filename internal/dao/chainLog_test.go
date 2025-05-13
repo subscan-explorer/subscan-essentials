@@ -11,7 +11,6 @@ func TestDao_CreateLog(t *testing.T) {
 	err := testDao.CreateLog(txn, &testLog)
 	txn.Commit()
 	assert.NoError(t, err)
-
 }
 
 func TestDao_GetLogByBlockNum(t *testing.T) {

@@ -118,8 +118,8 @@ func (s *Service) GetBlockByHashJson(ctx context.Context, hash string) *model.Ch
 	return s.dao.BlockAsJson(ctx, block)
 }
 
-func (s *Service) EventByIndex(index string) *model.ChainEvent {
-	return s.dao.GetEventByIdx(index)
+func (s *Service) EventByIndex(ctx context.Context, index string) *model.ChainEvent {
+	return s.dao.GetEventByIdx(ctx, index)
 }
 
 func (s *Service) ValidatorsList(hash string) (validatorList []string) {

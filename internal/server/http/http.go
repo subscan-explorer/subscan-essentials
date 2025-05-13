@@ -61,6 +61,7 @@ func initRouter(e *gin.Engine) {
 			s.POST("extrinsic", extrinsicHandle)
 			// Event
 			s.POST("events", eventsHandle)
+			s.POST("event", eventHandle)
 			// Log
 			s.POST("logs", logsHandle)
 

@@ -51,6 +51,7 @@ type BlocksParams struct {
 func blocksHandle(c *gin.Context) {
 	p := new(BlocksParams)
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
+		toJson(c, nil, err)
 		return
 	}
 
@@ -78,6 +79,7 @@ type BlockParams struct {
 func blockHandle(c *gin.Context) {
 	p := new(BlockParams)
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
+		toJson(c, nil, err)
 		return
 	}
 	ctx := c.Request.Context()
@@ -109,6 +111,7 @@ type extrinsicsParams struct {
 func extrinsicsHandle(c *gin.Context) {
 	p := new(extrinsicsParams)
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
+		toJson(c, nil, err)
 		return
 	}
 	ctx := c.Request.Context()
@@ -160,6 +163,7 @@ type extrinsicParams struct {
 func extrinsicHandle(c *gin.Context) {
 	p := new(extrinsicParams)
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
+		toJson(c, nil, err)
 		return
 	}
 	if p.ExtrinsicIndex == "" && p.Hash == "" {
@@ -195,6 +199,7 @@ type eventsParams struct {
 func eventsHandle(c *gin.Context) {
 	p := new(eventsParams)
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
+		toJson(c, nil, err)
 		return
 	}
 	ctx := c.Request.Context()
@@ -214,6 +219,27 @@ func eventsHandle(c *gin.Context) {
 	toJson(c, map[string]interface{}{"events": events, "count": count}, nil)
 }
 
+type eventParams struct {
+	EventIndex string `json:"event_index" binding:"required"`
+}
+
+// @Summary Get event info
+// @Tags events
+// @Accept json
+// @Produce json
+// @Param params body eventParams true "params"
+// @Success 200 {object} http.J{data=model.ChainEventJson}
+// @Router /api/scan/event [post]
+func eventHandle(c *gin.Context) {
+	p := new(eventParams)
+	if err := c.MustBindWith(p, binding.JSON); err != nil {
+		toJson(c, nil, err)
+		return
+	}
+	ctx := c.Request.Context()
+	toJson(c, svc.EventById(ctx, p.EventIndex), nil)
+}
+
 // logsHandle handler get logs list
 // @Summary Get logs list
 // @Tags logs
@@ -227,6 +253,7 @@ func logsHandle(c *gin.Context) {
 		BlockNum uint `json:"block_num" binding:"required"`
 	})
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
+		toJson(c, nil, err)
 		return
 	}
 	ctx := c.Request.Context()
@@ -248,6 +275,7 @@ type checkSearchParams struct {
 func checkSearchHashHandle(c *gin.Context) {
 	p := new(checkSearchParams)
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
+		toJson(c, nil, err)
 		return
 	}
 
@@ -292,6 +320,7 @@ type runtimeMetadataParams struct {
 func runtimeMetadataHandle(c *gin.Context) {
 	p := new(runtimeMetadataParams)
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
+		toJson(c, nil, err)
 		return
 	}
 

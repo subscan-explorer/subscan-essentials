@@ -12,6 +12,27 @@ definitions:
       reserved:
         type: number
     type: object
+  github_com_itering_subscan_plugins_balance_model.Transfer:
+    properties:
+      amount:
+        type: number
+      block_timestamp:
+        type: integer
+      blockNum:
+        type: integer
+      extrinsic_index:
+        type: string
+      id:
+        type: integer
+      receiver:
+        type: string
+      sender:
+        type: string
+      symbol:
+        type: string
+      token_id:
+        type: string
+    type: object
   github_com_itering_subscan_plugins_evm_dao.AccountTokenJson:
     properties:
       balance:
@@ -376,6 +397,13 @@ definitions:
       hash:
         type: string
     type: object
+  internal_server_http.eventParams:
+    properties:
+      event_index:
+        type: string
+    required:
+    - event_index
+    type: object
   internal_server_http.eventsParams:
     properties:
       block_num:
@@ -623,29 +651,6 @@ definitions:
       hash:
         type: string
       validator:
-        type: string
-    type: object
-  model.TransferJson:
-    properties:
-      amount:
-        type: number
-      block_num:
-        type: integer
-      block_timestamp:
-        type: integer
-      extrinsic_index:
-        type: string
-      fee:
-        type: number
-      from:
-        type: string
-      hash:
-        type: string
-      module:
-        type: string
-      success:
-        type: boolean
-      to:
         type: string
     type: object
   plugins_balance_http.J:
@@ -1233,7 +1238,7 @@ paths:
                       type: integer
                     list:
                       items:
-                        $ref: '#/definitions/model.TransferJson'
+                        $ref: '#/definitions/github_com_itering_subscan_plugins_balance_model.Transfer'
                       type: array
                   type: object
               type: object
@@ -1669,6 +1674,32 @@ paths:
       summary: Blocks list
       tags:
       - block
+  /api/scan/event:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: params
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/internal_server_http.eventParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/internal_server_http.J'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.ChainEventJson'
+              type: object
+      summary: Get event info
+      tags:
+      - events
   /api/scan/events:
     post:
       consumes:

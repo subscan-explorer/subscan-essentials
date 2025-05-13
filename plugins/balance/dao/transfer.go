@@ -19,7 +19,7 @@ func CreateTransfer(ctx context.Context, d *Storage, transfer *bModel.Transfer) 
 	return query.Error
 }
 
-func Transfers(ctx context.Context, db storage.DB, opts ...model.Option) ([]bModel.Transfer, int) {
+func Transfers(ctx context.Context, db storage.DB, page model.Option, opts ...model.Option) ([]bModel.Transfer, int) {
 	var list []bModel.Transfer
 	d := db.GetDbInstance().(*gorm.DB)
 	var count int64
@@ -27,6 +27,6 @@ func Transfers(ctx context.Context, db storage.DB, opts ...model.Option) ([]bMod
 	if q.Error != nil {
 		return nil, 0
 	}
-	q = d.WithContext(ctx).Model(bModel.Transfer{}).Scopes(opts...).Find(&list)
+	q = d.WithContext(ctx).Model(bModel.Transfer{}).Scopes(page).Scopes(opts...).Find(&list)
 	return list, int(count)
 }

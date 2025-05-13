@@ -118,6 +118,29 @@ func (s *Service) EventsList(ctx context.Context, page, row int, where ...model.
 	return result, count
 }
 
+func (s *Service) EventById(ctx context.Context, eventIndex string) *model.ChainEventJson {
+	event := s.dao.GetEventByIdx(ctx, eventIndex)
+	if event == nil {
+		return nil
+	}
+	ej := model.ChainEventJson{
+		Id:             event.ID,
+		ExtrinsicIndex: event.ExtrinsicIndex,
+		BlockNum:       event.BlockNum,
+		ModuleId:       event.ModuleId,
+		EventId:        event.EventId,
+		Params:         event.Params,
+		EventIdx:       event.EventIdx,
+		EventIndex:     fmt.Sprintf("%d-%d", event.BlockNum, event.EventIdx),
+		Phase:          event.Phase,
+	}
+	block := s.dao.GetBlockByNum(ctx, event.BlockNum)
+	if block != nil {
+		ej.BlockTimestamp = block.BlockTimestamp
+	}
+	return &ej
+}
+
 func (s *Service) GetExtrinsicByHash(ctx context.Context, hash string) *model.ChainExtrinsic {
 	return s.dao.GetExtrinsicsByHash(ctx, hash)
 }

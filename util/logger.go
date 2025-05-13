@@ -2,6 +2,7 @@ package util
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 )
@@ -21,6 +22,10 @@ type MLogger struct {
 	warningLogger *log.Logger
 	errorLogger   *log.Logger
 	debugLogger   *log.Logger
+}
+
+func (l *MLogger) Printf(s string, i ...interface{}) {
+	l.logWithCallerDepth(l.infoLogger, 3, fmt.Sprintf(s, i...))
 }
 
 func NewLogger() *MLogger {

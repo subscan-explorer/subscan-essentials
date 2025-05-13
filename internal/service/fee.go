@@ -131,9 +131,8 @@ func GetPaymentQueryFeeDetails(_ context.Context, encodedExtrinsic, hash string)
 }
 
 func GetExtrinsicFee(ctx context.Context, encodeExtrinsic, hash string, spec int, actualWeight, actualFeeByEvent decimal.Decimal, isV2Weight bool) (fee, actualFee decimal.Decimal, err error) {
-	var feeDetails = new(PaymentQueryFeeDetails)
 	var paymentInfo = new(PaymentQueryInfo)
-	feeDetails, err = GetPaymentQueryFeeDetails(ctx, encodeExtrinsic, hash)
+	feeDetails, err := GetPaymentQueryFeeDetails(ctx, encodeExtrinsic, hash)
 	if !actualFeeByEvent.IsPositive() {
 		paymentInfo, err = GetPaymentQueryInfo(ctx, spec, encodeExtrinsic, hash, isV2Weight)
 		if err != nil || paymentInfo == nil {

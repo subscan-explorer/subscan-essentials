@@ -159,7 +159,7 @@ const docTemplate = `{
                                                 "list": {
                                                     "type": "array",
                                                     "items": {
-                                                        "$ref": "#/definitions/model.TransferJson"
+                                                        "$ref": "#/definitions/github_com_itering_subscan_plugins_balance_model.Transfer"
                                                     }
                                                 }
                                             }
@@ -904,6 +904,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/scan/event": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "events"
+                ],
+                "summary": "Get event info",
+                "parameters": [
+                    {
+                        "description": "params",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_server_http.eventParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/internal_server_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/model.ChainEventJson"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/scan/events": {
             "post": {
                 "consumes": [
@@ -1301,6 +1346,38 @@ const docTemplate = `{
                 },
                 "reserved": {
                     "type": "number"
+                }
+            }
+        },
+        "github_com_itering_subscan_plugins_balance_model.Transfer": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "blockNum": {
+                    "type": "integer"
+                },
+                "block_timestamp": {
+                    "type": "integer"
+                },
+                "extrinsic_index": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "receiver": {
+                    "type": "string"
+                },
+                "sender": {
+                    "type": "string"
+                },
+                "symbol": {
+                    "type": "string"
+                },
+                "token_id": {
+                    "type": "string"
                 }
             }
         },
@@ -1855,6 +1932,17 @@ const docTemplate = `{
                 }
             }
         },
+        "internal_server_http.eventParams": {
+            "type": "object",
+            "required": [
+                "event_index"
+            ],
+            "properties": {
+                "event_index": {
+                    "type": "string"
+                }
+            }
+        },
         "internal_server_http.eventsParams": {
             "type": "object",
             "properties": {
@@ -2228,41 +2316,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "validator": {
-                    "type": "string"
-                }
-            }
-        },
-        "model.TransferJson": {
-            "type": "object",
-            "properties": {
-                "amount": {
-                    "type": "number"
-                },
-                "block_num": {
-                    "type": "integer"
-                },
-                "block_timestamp": {
-                    "type": "integer"
-                },
-                "extrinsic_index": {
-                    "type": "string"
-                },
-                "fee": {
-                    "type": "number"
-                },
-                "from": {
-                    "type": "string"
-                },
-                "hash": {
-                    "type": "string"
-                },
-                "module": {
-                    "type": "string"
-                },
-                "success": {
-                    "type": "boolean"
-                },
-                "to": {
                     "type": "string"
                 }
             }

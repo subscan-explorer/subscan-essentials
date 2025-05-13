@@ -29,10 +29,9 @@ type IDao interface {
 	BlockAsJson(c context.Context, block *model.ChainBlock) *model.ChainBlockJson
 
 	CreateEvent(txn *GormDB, event *model.ChainEvent) error
-	GetEventByBlockNum(blockNum uint, where ...string) []model.ChainEvent
 	GetEventList(ctx context.Context, page, row int, order string, where ...model.Option) ([]model.ChainEvent, int)
 	GetEventsByIndex(extrinsicIndex string) []model.ChainEvent
-	GetEventByIdx(index string) *model.ChainEvent
+	GetEventByIdx(ctx context.Context, index string) *model.ChainEvent
 
 	CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.ChainExtrinsic) error
 	GetExtrinsicList(c context.Context, page, row int, order string, queryWhere ...model.Option) ([]model.ChainExtrinsic, int)
