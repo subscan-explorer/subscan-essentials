@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/itering/subscan/share/web3"
 	"github.com/itering/subscan/util"
 	"os"
 )
@@ -59,6 +60,7 @@ type SolcMetadataSetting struct {
 	Metadata          map[string]interface{} `json:"metadata,omitempty"`
 	CompilationTarget map[string]string      `json:"compilationTarget"`
 	OutputSelection   interface{}            `json:"outputSelection,omitempty"`
+	ReviveVersion     string                 `json:"revive_version,omitempty"`
 }
 
 func NewSmartContractCompile(ContractName, SourceCode, CompilerVersion, EvmVersion string, ExternalLibraries map[string]interface{}, Optimize bool, OptimizationRuns uint) *SmartContractCompile {
@@ -101,9 +103,9 @@ func (s *SmartContractCompile) AsInput(_ context.Context, compilationTarget stri
 			Enabled: s.Optimize,
 			Runs:    int(s.OptimizationRuns),
 		},
-		EvmVersion:        s.EvmVersion,
-		Libraries:         s.ExternalLibraries,
-		Metadata:          map[string]interface{}{"bytecodeHash": "ipfs"},
+		EvmVersion: s.EvmVersion,
+		Libraries:  s.ExternalLibraries,
+		// Metadata:          map[string]interface{}{"bytecodeHash": "ipfs"},
 		CompilationTarget: map[string]string{s.ContractName: s.ContractName},
 		OutputSelection: map[string]interface{}{
 			"*": map[string][]string{"*": {"evm.bytecode", "metadata", "abi"}},
@@ -125,6 +127,8 @@ type VerificationRes struct {
 	Message                string        `json:"message"`
 	Abi                    []interface{} `json:"abi"`
 	CreationBytecodeLength int           `json:"creation_bytecode_length"`
+	ReviveVersion          string        `json:"revive_version,omitempty"`
+	ContractName           string        `json:"contract_name,omitempty"`
 }
 
 func (metadataValue *CompilerJSONInput) VerifyFromJsonInput(_ context.Context, address string) (*VerificationRes, error) {
@@ -139,7 +143,7 @@ func (metadataValue *CompilerJSONInput) VerifyFromJsonInput(_ context.Context, a
 			Address:         address,
 			CompilerVersion: metadataValue.Compiler.Version,
 			Metadata:        util.ToString(metadataValue),
-			Chain:           1,
+			Chain:           int(web3.CHAIN_ID),
 		}), fmt.Sprintf("%s/verify", verifyServer))
 		if err != nil {
 			return nil, err

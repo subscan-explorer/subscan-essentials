@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/itering/subscan-plugin/router"
 	"github.com/itering/subscan/model"
+	"github.com/itering/subscan/plugins/evm/contract"
 	"github.com/itering/subscan/plugins/evm/dao"
 	"github.com/itering/subscan/util/validator"
 	"net/http"
@@ -24,6 +25,8 @@ func Router() []router.Http {
 
 		{"contract", contractHandle, http.MethodPost},
 		{"contracts", contractsHandle, http.MethodPost},
+		{"contract/solcs", solcVersions, http.MethodPost},
+		{"contract/resolcs", resolcVersions, http.MethodPost},
 
 		// token holder
 		{"token/holder", tokenHolderHandle, http.MethodPost},
@@ -349,5 +352,39 @@ func contractsHandle(w http.ResponseWriter, r *http.Request) error {
 	}
 	list, count := srv.Contracts(r.Context(), p.Page, p.Row)
 	toJson(w, 0, map[string]interface{}{"list": list, "count": count}, nil)
+	return nil
+}
+
+// @Summary Polkadot pvm resolc versions
+// @Tags EVM
+// @Accept json
+// @Produce json
+// @Success 200 {object} J{data=[]string}
+// @Router /api/plugin/evm/contract/solcs [post]
+func resolcVersions(w http.ResponseWriter, r *http.Request) error {
+	toJson(w, 0, contract.ReviveVersion, nil)
+	return nil
+}
+
+type EvmContractSolcVersionsParam struct {
+	Releases bool `json:"releases" binding:"omitempty"`
+}
+
+// @Summary EVM contract solc versions
+// @Tags EVM
+// @Accept json
+// @Produce json
+// @Param param body EvmContractSolcVersionsParam true "param"
+// @Success 200 {object} J{data=[]string}
+// @Router /api/scan/evm/contract/solcs [post]
+func solcVersions(w http.ResponseWriter, r *http.Request) error {
+	p := new(EvmContractSolcVersionsParam)
+	if err := validator.Validate(r.Body, p); err != nil {
+		toJson(w, 10001, nil, err)
+		return nil
+	}
+
+	list, err := contract.SolcVersions(r.Context(), p.Releases)
+	toJson(w, 0, list, err)
 	return nil
 }

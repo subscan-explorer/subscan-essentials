@@ -1822,3 +1822,9 @@ var (
 		"soljson-v0.1.2+commit.d0d36e3.js",
 		"soljson-v0.1.1+commit.6ff4cd6.js"}
 )
+
+var ReviveVersion = []string{
+	"v0.1.0-dev.12",
+	"v0.1.0-dev.13",
+	"v0.1.0-dev.14",
+}

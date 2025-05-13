@@ -723,6 +723,11 @@ definitions:
         minimum: 1
         type: integer
     type: object
+  plugins_evm_http.EvmContractSolcVersionsParam:
+    properties:
+      releases:
+        type: boolean
+    type: object
   plugins_evm_http.J:
     properties:
       code:
@@ -1391,6 +1396,27 @@ paths:
       summary: Evm contract info
       tags:
       - EVM
+  /api/plugin/evm/contract/solcs:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/plugins_evm_http.J'
+            - properties:
+                data:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: Polkadot pvm resolc versions
+      tags:
+      - EVM
   /api/plugin/evm/contracts:
     post:
       consumes:
@@ -1733,6 +1759,34 @@ paths:
       summary: Get events list
       tags:
       - events
+  /api/scan/evm/contract/solcs:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: param
+        in: body
+        name: param
+        required: true
+        schema:
+          $ref: '#/definitions/plugins_evm_http.EvmContractSolcVersionsParam'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/plugins_evm_http.J'
+            - properties:
+                data:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: EVM contract solc versions
+      tags:
+      - EVM
   /api/scan/extrinsic:
     post:
       consumes:

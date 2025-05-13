@@ -14,6 +14,7 @@ type CompilerJSONInput struct {
 	Compiler struct {
 		Version string `json:"version"`
 	} `json:"compiler"`
+	ResolcVersion string `json:"resolc_version,omitempty"`
 }
 
 func (metadataValue *CompilerJSONInput) FormatContractName() string {

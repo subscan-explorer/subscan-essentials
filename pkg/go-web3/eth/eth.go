@@ -842,3 +842,17 @@ func (eth *Eth) MaxPriorityFeePerGas(ctx context.Context) (*big.Int, error) {
 
 	return pointer.ToBigInt()
 }
+
+func (eth *Eth) GetChainId(ctx context.Context) (*big.Int, error) {
+
+	params := make([]*dto.RequestTransactionParameters, 1)
+	pointer := &dto.RequestResult{}
+
+	err := eth.provider.SendRequest(ctx, &pointer, "eth_chainId", params)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return pointer.ToBigInt()
+}

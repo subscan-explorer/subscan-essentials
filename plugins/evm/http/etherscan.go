@@ -379,23 +379,26 @@ func etherscanHandle(w http.ResponseWriter, r *http.Request) error {
 			ContractAddress  string `form:"contractaddress" binding:"required,eth_addr"`
 			SourceCode       string `form:"sourceCode" binding:"required"`
 			CodeFormat       string `form:"codeformat" binding:"oneof=solidity-single-file solidity-standard-json-input"`
-			ContractName     string `form:"contractname" binding:"required"`
+			ContractName     string `form:"contractname" binding:""`
 			CompilerVersion  string `form:"compilerversion" binding:"required"`
 			OptimizationUsed int    `form:"optimizationUsed" binding:"omitempty,oneof=0 1"`
 			Runs             uint   `form:"runs" binding:"omitempty,min=1"`
 			EvmVersion       string `form:"evmversion" binding:"omitempty"`
 			LicenseType      int    `form:"licenseType" binding:"omitempty,min=1,max=14"`
+			ResolcVersion    string `form:"resolcVersion" binding:"omitempty"`
 		}
 		const VerifyFail = "Fail - Unable to verify"
 
 		p := new(SourceCode)
-		if err := binding.Query.Bind(r, p); err != nil {
+		if err := binding.Form.Bind(r, p); err != nil {
 			etherscanRes(w, 0, VerifyFail, err)
 			return nil
 		}
 		p.ContractAddress = address.Format(p.ContractAddress)
 
-		p.ContractName = strings.Split(p.ContractName, ":")[0]
+		if p.ContractName != "" {
+			p.ContractName = strings.Split(p.ContractName, ":")[0]
+		}
 		externalLibrary := make(map[string]interface{})
 		// Optimize
 		if p.OptimizationUsed == 1 && p.Runs < 1 {
@@ -416,6 +419,10 @@ func etherscanHandle(w http.ResponseWriter, r *http.Request) error {
 		}
 		if len(localContract.VerifyStatus) != 0 {
 			etherscanRes(w, 1, "Already Verified", fmt.Errorf("Contract source code already verified"))
+			return nil
+		}
+		if p.ResolcVersion != "" && !util.StringInSlice(p.ResolcVersion, contract.ReviveVersion) {
+			etherscanRes(w, 1, VerifyFail, fmt.Errorf("Fail - Invalid resolc version"))
 			return nil
 		}
 		var input *contract.CompilerJSONInput
@@ -442,24 +449,26 @@ func etherscanHandle(w http.ResponseWriter, r *http.Request) error {
 					input.Settings.Optimizer.Enabled = true
 					input.Settings.Optimizer.Runs = int(p.Runs)
 				}
-				if len(input.Settings.CompilationTarget) == 0 {
+				if len(input.Settings.CompilationTarget) == 0 && p.ContractName != "" {
 					input.Settings.CompilationTarget = make(map[string]string)
 					dir, pth := path.Split(p.ContractName)
 					contractName := strings.ReplaceAll(pth, ".sol", "")
 					if len(dir) != 0 {
 						input.Settings.CompilationTarget[p.ContractName] = contractName
 					}
-					for ph, source := range input.Sources {
+					for ph := range input.Sources {
 						if len(input.Settings.CompilationTarget) == 0 && strings.Contains(strings.ToLower(ph), strings.ToLower(contractName)) {
 							input.Settings.CompilationTarget[ph] = contractName
-						}
-						if len(source.Keccak256) == 0 {
-							source.Keccak256 = util.AddHex(util.BytesToHex(keccak.Keccak256([]byte(source.Content))))
-							input.Sources[ph] = source
 						}
 					}
 					if len(input.Settings.CompilationTarget) == 0 {
 						input.Settings.CompilationTarget[fmt.Sprintf("%s.sol", contractName)] = contractName
+					}
+				}
+				for ph, source := range input.Sources {
+					if len(source.Keccak256) == 0 {
+						source.Keccak256 = util.AddHex(util.BytesToHex(keccak.Keccak256([]byte(source.Content))))
+						input.Sources[ph] = source
 					}
 				}
 			}
@@ -470,15 +479,16 @@ func etherscanHandle(w http.ResponseWriter, r *http.Request) error {
 		}
 
 		input.Format()
+		if p.ResolcVersion != "" {
+			input.ResolcVersion = p.ResolcVersion
+		}
 		verify, err := input.VerifyFromJsonInput(r.Context(), p.ContractAddress)
 		if err != nil {
 			// raise http 500 error
-			w.WriteHeader(500)
 			etherscanRes(w, 0, VerifyFail, err)
 			return nil
 		}
 		if err = localContract.VerifySuccess(r.Context(), verify, p.CodeFormat, input); err != nil {
-			w.WriteHeader(500)
 			etherscanRes(w, 0, VerifyFail, err)
 			return nil
 		}

@@ -114,6 +114,12 @@ func (c *Contract) VerifySuccess(ctx context.Context, verifyRes *evmContract.Ver
 	c.Optimize = input.Settings.Optimizer.Enabled
 	c.OptimizationRuns = uint(input.Settings.Optimizer.Runs)
 	c.VerifyTime = uint(time.Now().Unix())
+	if verifyRes.ReviveVersion != "" {
+		input.Settings.ReviveVersion = verifyRes.ReviveVersion
+	}
+	if verifyRes.ContractName != "" {
+		c.ContractName = verifyRes.ContractName
+	}
 	var abiValue abi.ABI
 	_ = abiValue.UnmarshalJSON(c.Abi)
 	methodIdentifiers := make(map[string]string)

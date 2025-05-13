@@ -422,6 +422,43 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/plugin/evm/contract/solcs": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EVM"
+                ],
+                "summary": "Polkadot pvm resolc versions",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/plugins_evm_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/api/plugin/evm/contracts": {
             "post": {
                 "consumes": [
@@ -995,6 +1032,54 @@ const docTemplate = `{
                                                         "$ref": "#/definitions/model.ChainEventJson"
                                                     }
                                                 }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/scan/evm/contract/solcs": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "EVM"
+                ],
+                "summary": "EVM contract solc versions",
+                "parameters": [
+                    {
+                        "description": "param",
+                        "name": "param",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/plugins_evm_http.EvmContractSolcVersionsParam"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/plugins_evm_http.J"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
                                             }
                                         }
                                     }
@@ -2418,6 +2503,14 @@ const docTemplate = `{
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
+                }
+            }
+        },
+        "plugins_evm_http.EvmContractSolcVersionsParam": {
+            "type": "object",
+            "properties": {
+                "releases": {
+                    "type": "boolean"
                 }
             }
         },

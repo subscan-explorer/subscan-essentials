@@ -8,6 +8,7 @@ import (
 	"github.com/itering/subscan/internal/service"
 	"github.com/itering/subscan/plugins"
 	customValidator "github.com/itering/subscan/util/validator"
+	netHttp "net/http"
 	"time"
 )
 
@@ -85,6 +86,11 @@ func pluginRouter(g *gin.RouterGroup) {
 			g.Group("plugin").Group(name).Handle(r.Method, r.Router, func(context *gin.Context) {
 				_ = r.Handle(context.Writer, context.Request)
 			})
+			if r.Method != netHttp.MethodPost {
+				g.Group("plugin").Group(name).Handle(netHttp.MethodPost, r.Router, func(context *gin.Context) {
+					_ = r.Handle(context.Writer, context.Request)
+				})
+			}
 		}
 	}
 }
