@@ -1205,12 +1205,12 @@ const docTemplate = `{
                 "summary": "Get logs list",
                 "parameters": [
                     {
-                        "description": "Block number",
-                        "name": "block_num",
+                        "description": "params",
+                        "name": "params",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "$ref": "#/definitions/internal_server_http.logsParams"
                         }
                     }
                 ],
@@ -2037,6 +2037,9 @@ const docTemplate = `{
                 "event": {
                     "type": "string"
                 },
+                "extrinsic_index": {
+                    "type": "string"
+                },
                 "module": {
                     "type": "string"
                 },
@@ -2088,6 +2091,17 @@ const docTemplate = `{
                 },
                 "signed": {
                     "type": "string"
+                }
+            }
+        },
+        "internal_server_http.logsParams": {
+            "type": "object",
+            "required": [
+                "block_num"
+            ],
+            "properties": {
+                "block_num": {
+                    "type": "integer"
                 }
             }
         },

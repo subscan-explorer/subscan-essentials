@@ -181,11 +181,12 @@ func extrinsicHandle(c *gin.Context) {
 }
 
 type eventsParams struct {
-	Row      int    `json:"row" binding:"min=1,max=100"`
-	Page     int    `json:"page" binding:"min=0"`
-	Module   string `json:"module" binding:"omitempty"`
-	Event    string `json:"event" binding:"omitempty"`
-	BlockNum uint   `json:"block_num" binding:"omitempty"`
+	Row            int    `json:"row" binding:"min=1,max=100"`
+	Page           int    `json:"page" binding:"min=0"`
+	Module         string `json:"module" binding:"omitempty"`
+	Event          string `json:"event" binding:"omitempty"`
+	BlockNum       uint   `json:"block_num" binding:"omitempty"`
+	ExtrinsicIndex string `json:"extrinsic_index" binding:"omitempty"`
 }
 
 // eventsHandle handler get events list
@@ -214,6 +215,9 @@ func eventsHandle(c *gin.Context) {
 	if p.BlockNum > 0 {
 		query = append(query, model.Where("block_num = ?", p.BlockNum))
 	}
+	if p.ExtrinsicIndex != "" {
+		query = append(query, model.Where("extrinsic_index = ?", p.ExtrinsicIndex))
+	}
 
 	events, count := svc.EventsList(ctx, p.Page, p.Row, query...)
 	toJson(c, map[string]interface{}{"events": events, "count": count}, nil)
@@ -240,18 +244,20 @@ func eventHandle(c *gin.Context) {
 	toJson(c, svc.EventById(ctx, p.EventIndex), nil)
 }
 
+type logsParams struct {
+	BlockNum uint `json:"block_num" binding:"required"`
+}
+
 // logsHandle handler get logs list
 // @Summary Get logs list
 // @Tags logs
 // @Accept json
 // @Produce json
-// @Param block_num body uint true "Block number"
+// @Param params body logsParams true "params"
 // @Success 200 {object} http.J{data=[]model.ChainLogJson}
 // @Router /api/scan/logs [post]
 func logsHandle(c *gin.Context) {
-	p := new(struct {
-		BlockNum uint `json:"block_num" binding:"required"`
-	})
+	p := new(logsParams)
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		toJson(c, nil, err)
 		return

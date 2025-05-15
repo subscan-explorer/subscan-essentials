@@ -55,7 +55,7 @@ func (c *ChainBlock) AsPlugin() *storage.Block {
 
 type ChainEvent struct {
 	ID             uint        `gorm:"primary_key;autoIncrement:false" json:"-"`
-	ExtrinsicIndex string      `gorm:"default: null;size:100;" json:"extrinsic_index"`
+	ExtrinsicIndex string      `gorm:"default:null;size:100;index:extrinsic_index" json:"extrinsic_index"`
 	BlockNum       uint        `json:"block_num"  gorm:"index:block_num"`
 	ExtrinsicIdx   int         `json:"extrinsic_idx"`
 	ModuleId       string      `json:"module_id" gorm:"size:255;index:query_function"`
