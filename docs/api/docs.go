@@ -2483,6 +2483,9 @@ const docTemplate = `{
         "plugins_evm_http.EvmAccountParams": {
             "type": "object",
             "properties": {
+                "address": {
+                    "type": "string"
+                },
                 "page": {
                     "type": "integer",
                     "minimum": 0

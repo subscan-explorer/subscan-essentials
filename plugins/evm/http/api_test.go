@@ -47,7 +47,7 @@ func (m MockServer) TransactionsJson(ctx context.Context, page model.Option, opt
 	return nil, 0
 }
 
-func (m MockServer) Accounts(ctx context.Context, page int, row int) ([]dao.AccountsJson, int64) {
+func (m MockServer) Accounts(ctx context.Context, address string, page int, row int) ([]dao.AccountsJson, int64) {
 	return nil, 0
 }
 

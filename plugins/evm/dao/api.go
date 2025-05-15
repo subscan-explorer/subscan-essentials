@@ -24,7 +24,7 @@ type ISrv interface {
 	BlockByNum(ctx context.Context, blockNum uint) *EvmBlock
 	BlockByHash(ctx context.Context, hash string) *EvmBlock
 	TransactionsJson(ctx context.Context, page model.Option, opts ...model.Option) ([]TransactionSampleJson, int)
-	Accounts(ctx context.Context, page int, row int) ([]AccountsJson, int64)
+	Accounts(ctx context.Context, adress string, page int, row int) ([]AccountsJson, int64)
 	Contracts(ctx context.Context, page int, row int) ([]ContractsJson, int64)
 
 	AccountTokens(ctx context.Context, address, category string) []AccountTokenJson
@@ -400,14 +400,22 @@ type AccountsJson struct {
 	Balance    decimal.Decimal `json:"balance"`
 }
 
-func (a *ApiSrv) Accounts(ctx context.Context, page int, row int) ([]AccountsJson, int64) {
+func (a *ApiSrv) Accounts(ctx context.Context, address string, page int, row int) ([]AccountsJson, int64) {
 	var count int64
-	sg.db.WithContext(ctx).Model(&Account{}).Count(&count)
+	q := sg.db.WithContext(ctx).Model(&Account{})
+	if address != "" {
+		q.Where("evm_account = ?", address)
+	}
+	q.Count(&count)
 	if count == 0 {
 		return nil, 0
 	}
 	var res []AccountsJson
-	sg.db.WithContext(ctx).Select("evm_account,balance").Model(&Account{}).Joins("left join balance_accounts on evm_accounts.address=balance_accounts.address").Order("balance desc").Limit(row).Offset((page - 1) * row).Scan(&res)
+	query := sg.db.WithContext(ctx).Select("evm_account,balance").Model(&Account{}).Joins("left join balance_accounts on evm_accounts.address=balance_accounts.address")
+	if address != "" {
+		query.Where("evm_account = ?", address)
+	}
+	query.Order("balance desc").Limit(row).Offset((page - 1) * row).Scan(&res)
 	return res, count
 }
 

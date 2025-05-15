@@ -706,6 +706,8 @@ definitions:
     type: object
   plugins_evm_http.EvmAccountParams:
     properties:
+      address:
+        type: string
       page:
         minimum: 0
         type: integer

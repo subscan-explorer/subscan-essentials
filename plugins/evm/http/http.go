@@ -284,8 +284,9 @@ func transactionsHandle(w http.ResponseWriter, r *http.Request) error {
 }
 
 type EvmAccountParams struct {
-	Page int `json:"page" validate:"min=0"`
-	Row  int `json:"row" validate:"min=1,max=100"`
+	Page    int    `json:"page" validate:"min=0"`
+	Row     int    `json:"row" validate:"min=1,max=100"`
+	Address string `json:"address" validate:"omitempty,eth_addr"`
 }
 
 // @Summary Evm accounts list
@@ -301,7 +302,7 @@ func accountsHandle(w http.ResponseWriter, r *http.Request) error {
 		toJson(w, 10001, nil, err)
 		return nil
 	}
-	list, count := srv.Accounts(r.Context(), p.Page, p.Row)
+	list, count := srv.Accounts(r.Context(), p.Address, p.Page, p.Row)
 	toJson(w, 0, map[string]interface{}{"list": list, "count": count}, nil)
 	return nil
 }
