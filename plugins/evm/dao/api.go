@@ -415,7 +415,7 @@ func (a *ApiSrv) Accounts(ctx context.Context, address string, page int, row int
 	if address != "" {
 		query.Where("evm_account = ?", address)
 	}
-	query.Order("balance desc").Limit(row).Offset((page - 1) * row).Scan(&res)
+	query.Order("balance desc").Order("evm_account desc").Limit(row).Offset((page - 1) * row).Scan(&res)
 	return res, count
 }
 

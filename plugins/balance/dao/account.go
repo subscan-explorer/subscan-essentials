@@ -31,6 +31,9 @@ func GetAccountByAddress(ctx context.Context, db storage.DB, address string) *bM
 
 func RefreshAccount(ctx context.Context, s *Storage, accountId string) error {
 	accountId = address.Format(accountId)
+	if accountId == "" {
+		return nil
+	}
 	db := s.Dao.GetDbInstance().(*gorm.DB)
 	var account = bModel.Account{Address: accountId}
 	q := db.WithContext(ctx).Where("address = ?", accountId).FirstOrCreate(&account)
