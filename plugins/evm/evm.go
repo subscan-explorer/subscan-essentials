@@ -85,3 +85,7 @@ func (a *EVM) Migrate() {
 		_ = a.d.AutoMigration(table)
 	}
 }
+
+func (a *EVM) RefreshMetadata() {
+	dao.RefreshMetadata(context.TODO())
+}

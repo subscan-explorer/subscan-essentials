@@ -15,17 +15,21 @@ func (d *Dao) Redis() *redis.Pool {
 }
 
 func Init() *Dao {
-	pool := newCachePool(configs.Boot.Redis.Addr, "")
+	pool := newCachePool(configs.Boot.Redis.Addr, "", configs.Boot.Redis.DbName)
 	return &Dao{redis: pool}
 }
 
-func newCachePool(host, password string) *redis.Pool {
+func newCachePool(host, password string, database int) *redis.Pool {
 	var pool = &redis.Pool{
 		MaxIdle:     10,
 		IdleTimeout: 240 * time.Second,
 		Dial: func() (redis.Conn, error) {
 			// the redis protocol should probably be made sett-able
-			c, err := redis.Dial("tcp", host, redis.DialReadTimeout(time.Millisecond*200), redis.DialConnectTimeout(time.Millisecond*200), redis.DialWriteTimeout(time.Millisecond*200))
+			c, err := redis.Dial("tcp", host, redis.DialReadTimeout(time.Millisecond*200),
+				redis.DialConnectTimeout(time.Millisecond*200),
+				redis.DialWriteTimeout(time.Millisecond*200),
+				redis.DialDatabase(database),
+			)
 			if err != nil {
 				return nil, err
 			}

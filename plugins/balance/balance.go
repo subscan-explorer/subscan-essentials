@@ -82,3 +82,7 @@ func (a *Balance) Migrate() {
 }
 
 func (a *Balance) ExecWorker(context.Context, string, string, interface{}) error { return nil }
+
+func (a *Balance) RefreshMetadata() {
+	dao.RefreshMetadata(context.TODO(), &dao.Storage{Dao: a.d, Pool: a.pool})
+}

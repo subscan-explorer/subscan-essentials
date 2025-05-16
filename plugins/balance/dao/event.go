@@ -9,6 +9,7 @@ import (
 	bModel "github.com/itering/subscan/plugins/balance/model"
 	"github.com/itering/subscan/share/token"
 	"github.com/itering/subscan/util"
+	"gorm.io/gorm"
 )
 
 type Storage struct {
@@ -42,4 +43,14 @@ func EmitEvent(ctx context.Context, d *Storage, event *storage.Event, block *sto
 		})
 	}
 	return nil
+}
+
+func RefreshMetadata(ctx context.Context, d *Storage) {
+	// account
+	var count int64
+	db := d.Dao.GetDbInstance().(*gorm.DB)
+	_ = db.Model(&bModel.Account{}).Count(&count)
+	var transferCount int64
+	_ = db.Model(&bModel.Transfer{}).Count(&transferCount)
+	_ = d.Pool.HmSetEx(ctx, model.MetadataCacheKey(), map[string]int{"total_transfer": int(transferCount), "total_account": int(count)}, -1)
 }

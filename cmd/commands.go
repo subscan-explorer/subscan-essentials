@@ -35,4 +35,12 @@ var commands = []cli.Command{
 			return nil
 		},
 	},
+	{
+		Name:  "refreshMetadata",
+		Usage: "refresh metadata",
+		Action: func(c *cli.Context) error {
+			script.RefreshMetadata()
+			return nil
+		},
+	},
 }

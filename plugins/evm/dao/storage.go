@@ -3,6 +3,7 @@ package dao
 import (
 	"context"
 	subscan_plugin "github.com/itering/subscan-plugin"
+	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util/mq"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -65,4 +66,18 @@ func Publish(queue, class string, args interface{}) error {
 		return nil
 	}
 	return mq.Instant.Publish(queue, class, args)
+}
+
+func RefreshMetadata(ctx context.Context) {
+	db := sg.db
+	var count int64
+	_ = db.Model(Account{}).Count(&count)
+
+	var txnCount int64
+	_ = db.Model(&Transaction{}).Count(&txnCount)
+
+	var contractCount int64
+	_ = db.Model(&Contract{}).Count(&contractCount)
+	_ = sg.redis.HmSetEx(ctx, model.MetadataCacheKey(),
+		map[string]int{"total_evm_contract": int(contractCount), "total_evm_account": int(count), "total_transaction": int(txnCount)}, -1)
 }

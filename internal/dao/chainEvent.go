@@ -9,7 +9,6 @@ import (
 )
 
 func (d *Dao) CreateEvent(txn *GormDB, event *model.ChainEvent) error {
-	var incrCount int
 	e := model.ChainEvent{
 		ID:             event.Id(),
 		ExtrinsicIndex: fmt.Sprintf("%d-%d", event.BlockNum, event.ExtrinsicIdx),
@@ -22,10 +21,6 @@ func (d *Dao) CreateEvent(txn *GormDB, event *model.ChainEvent) error {
 		Phase:          event.Phase,
 	}
 	query := txn.Scopes(d.TableNameFunc(&e), model.IgnoreDuplicate).Create(&e)
-	if query.RowsAffected > 0 {
-		incrCount++
-		_ = d.IncrMetadata(context.TODO(), "count_event", incrCount)
-	}
 	return query.Error
 }
 

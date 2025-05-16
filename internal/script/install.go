@@ -4,6 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/itering/subscan/plugins"
+	"github.com/itering/subscan/plugins/balance"
+	"github.com/itering/subscan/plugins/evm"
 	"github.com/itering/subscan/util/mq"
 	"io"
 	"os"
@@ -120,4 +123,26 @@ func CheckCompleteness(startBlock uint, fastMode bool) {
 		}
 		latestBlockNum = endBlockNum
 	}
+}
+
+func RefreshMetadata() {
+	ctx := context.TODO()
+	srv := service.New()
+	defer srv.Close()
+	d := srv.GetDao()
+	u := make(map[string]interface{})
+	// extrinsic
+	{
+		_, count := d.GetExtrinsicList(ctx, 0, 1, "desc")
+		u["count_extrinsic"] = count
+		_, count = d.GetExtrinsicList(ctx, 0, 1, "desc", model.Where("is_signed = ?", true))
+		u["count_signed_extrinsic"] = count
+	}
+	util.Logger().Error(srv.GetDao().SetMetadata(ctx, u))
+	// balance plugin
+	b := plugins.RegisteredPlugins["balance"].(*balance.Balance)
+	b.RefreshMetadata()
+	// evm plugin
+	e := plugins.RegisteredPlugins["evm"].(*evm.EVM)
+	e.RefreshMetadata()
 }

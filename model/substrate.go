@@ -124,7 +124,7 @@ type ChainExtrinsic struct {
 	Nonce         int             `json:"nonce"`
 	Era           string          `json:"era"`
 	ExtrinsicHash string          `json:"extrinsic_hash" gorm:"default: null;index:extrinsic_hash"`
-	IsSigned      bool            `json:"is_signed"`
+	IsSigned      bool            `json:"is_signed" gorm:"index"`
 	Success       bool            `json:"success"`
 	Fee           decimal.Decimal `json:"fee" gorm:"type:decimal(65,0);"`
 	UsedFee       decimal.Decimal `json:"used_fee" gorm:"type:decimal(65,0);"`
