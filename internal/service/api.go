@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
+	"github.com/itering/subscan/configs"
 	"github.com/itering/subscan/model"
+	"github.com/itering/subscan/plugins"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/address"
 	"github.com/itering/substrate-api-rpc/metadata"
@@ -23,6 +25,12 @@ func (s *Service) Metadata(ctx context.Context) (map[string]string, error) {
 	m["networkNode"] = util.NetworkNode
 	m["balanceAccuracy"] = util.BalanceAccuracy
 	m["addressType"] = util.AddressType
+
+	evm, ok := plugins.RegisteredPlugins["evm"]
+	if ok && evm.Enable() {
+		m["enable_evm"] = fmt.Sprintf("%t", configs.Boot.UI.EnableEvm)
+	}
+	m["enable_substrate"] = fmt.Sprintf("%t", configs.Boot.UI.EnableSubstrate)
 	return m, err
 }
 

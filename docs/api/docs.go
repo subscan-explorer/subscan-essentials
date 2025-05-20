@@ -1940,6 +1940,9 @@ const docTemplate = `{
                 "block_timestamp": {
                     "type": "integer"
                 },
+                "create": {
+                    "type": "string"
+                },
                 "from_address": {
                     "type": "string"
                 },

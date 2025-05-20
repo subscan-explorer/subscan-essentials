@@ -373,6 +373,7 @@ type TransactionSampleJson struct {
 	BlockTimestamp uint            `json:"block_timestamp"`
 	FromAddress    string          `json:"from_address"`
 	ToAddress      string          `json:"to_address"`
+	Create         string          `json:"create"`
 	Value          decimal.Decimal `json:"value"`
 }
 
@@ -390,6 +391,7 @@ func (a *ApiSrv) TransactionsJson(ctx context.Context, page model.Option, opts .
 			FromAddress:    v.FromAddress,
 			ToAddress:      v.ToAddress,
 			Value:          v.Value,
+			Create:         v.Contract,
 		})
 	}
 	return res, int(count)

@@ -20,3 +20,6 @@ redis:
   write_timeout: 1s
   idle: 10
   active: 100
+UI:
+  enable_substrate: true
+  enable_evm: true

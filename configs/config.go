@@ -18,11 +18,17 @@ type Bootstrap struct {
 	Server   *Server   `json:"server,omitempty"`
 	Database *Database `json:"database,omitempty"`
 	Redis    *Redis    `json:"redis,omitempty"`
+	UI       *UI       `json:"ui,omitempty"`
 }
 
 type Server struct {
 	Http *ServerHttp `json:"http,omitempty"`
 	Grpc *ServerGrpc `json:"grpc,omitempty"`
+}
+
+type UI struct {
+	EnableSubstrate bool `json:"enable_substrate"`
+	EnableEvm       bool `json:"enable_evm"`
 }
 
 type ServerHttp struct {
