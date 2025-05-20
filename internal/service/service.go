@@ -2,11 +2,10 @@ package service
 
 import (
 	"fmt"
-	"io/ioutil"
+	"github.com/itering/scale.go/source"
+	"github.com/itering/scale.go/types"
 	"os"
 	"strings"
-
-	"log"
 
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/util"
@@ -17,16 +16,18 @@ import (
 
 // Service
 type Service struct {
-	dao dao.IDao
+	dao       dao.IDao
+	dbStorage *dao.DbStorage
 }
 
 // New  a service and return.
 func New() (s *Service) {
 	websocket.SetEndpoint(util.WSEndPoint)
-	d, dbStorage := dao.New()
-	s = &Service{dao: d}
+	d, dbStorage, pool := dao.New()
+	s = &Service{dao: d, dbStorage: dbStorage}
 	s.initSubRuntimeLatest()
-	pluginRegister(dbStorage)
+	s.unknownToken()
+	pluginRegister(dbStorage, pool)
 	return s
 }
 
@@ -42,17 +43,14 @@ func (s *Service) Close() {
 func (s *Service) initSubRuntimeLatest() {
 	// reg network custom type
 	defer func() {
-		go s.unknownToken()
-		if c, err := readTypeRegistry(); err == nil {
-			substrate.RegCustomTypes(c)
-			if unknown := metadata.Decoder.CheckRegistry(); len(unknown) > 0 {
-				log.Printf("Found unknown type %s", strings.Join(unknown, ", "))
-			}
-		} else {
-			if os.Getenv("TEST_MOD") != "true" {
-				panic(err)
-			}
+		if data, err := readTypeRegistry(); err == nil {
+			substrate.RegCustomTypes(data)
 		}
+		types.RegCustomTypes(map[string]source.TypeStruct{
+			"WeightV2":              {Type: "struct", TypeMapping: [][]string{{"ref_time", "Compact<u64>"}, {"proofSize", "Compact<u64>"}}},
+			"RuntimeDispatchInfo":   {Type: "struct", TypeMapping: [][]string{{"weight", "WeightV2"}, {"class", "DispatchClass"}, {"partialFee", "Balance"}}},
+			"RuntimeDispatchInfoV1": {Type: "struct", TypeMapping: [][]string{{"weight", "Weight"}, {"class", "DispatchClass"}, {"partialFee", "Balance"}}},
+		})
 	}()
 
 	// find db
@@ -70,5 +68,5 @@ func (s *Service) initSubRuntimeLatest() {
 
 // read custom registry from local or remote
 func readTypeRegistry() ([]byte, error) {
-	return ioutil.ReadFile(fmt.Sprintf(util.ConfDir+"/source/%s.json", util.NetworkNode))
+	return os.ReadFile(fmt.Sprintf(util.ConfDir+"/source/%s.json", util.NetworkNode))
 }

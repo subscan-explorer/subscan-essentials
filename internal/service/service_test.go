@@ -21,11 +21,10 @@ var (
 		ExtrinsicIndex:     "947689-1",
 		BlockNum:           947689,
 		BlockTimestamp:     1594791900,
-		VersionInfo:        "04",
 		CallModuleFunction: "transfer",
 		CallModule:         "balances",
 		AccountId:          "242f0781faa44f34ddcbc9e731d0ddb51c97f5b58bb2202090a3a1c679fc4c63",
-		Params: util.ToString([]model.ExtrinsicParam{
+		Params: []model.ExtrinsicParam{
 			{
 				Name:  "dest",
 				Type:  "Address",
@@ -36,7 +35,7 @@ var (
 				Type:  "Compact<Balance>",
 				Value: "1000000000000000000",
 			},
-		}),
+		},
 		Success:       true,
 		ExtrinsicHash: "0x368f61800f8645f67d59baf0602b236ff47952097dcaef3aa026b50ddc8dcea0",
 		Signature:     "d46ec05eb03ef6904b36fd06fe7923d2a5bccf68ddb53573e821652dafd9644ae82e29c6dbe1519a5b7052c4647814f2987ad23b7c930ed7175726755e27898f",
@@ -50,22 +49,19 @@ var (
 		ParentHash:     "0x14b8b808939e4930703403d74e73ff7829c18680dd434e851b200982af423dea",
 		StateRoot:      "0xd3adc9ed6f9e2df6a13a88a3628c01d7920fd709693120b3df75434aea3592a7",
 		ExtrinsicsRoot: "0xc99ede2068646be80f2957c21667a7669539bd105bd855af37c2166a1ba43e4a",
-		Logs:           `["0x0642414245b501010a000000fac3d70f000000009e335d221536deb53426c3f2529a14426a322463a844d527f8050c73f09c2d37bfe0d8f57a7b6c6e6cd6ef576d00bb97b5bcf8c87ec7a55670b03c0dfe823000d2d3bb5767274a282be5dd15f7e6ea333dc44c299f187dee4900fdf1a0b46003","0x00904d4d5252fbe5a48df0e2a689c92a630bcbb451d66e2ac0ea839096e2617c4fe1b22a635e","0x05424142450101ea06828ccb667fbaebdda98219e93700c24c6887b767680949fde8082a93673cf96bb377923751c892d37c78eaa5c8e6b453efbac656fbcac4a8b99a82287e89"]`,
-		Extrinsics:     `["0x280402000b603301517301"]`,
-		Event:          `0x040000000000000080e36a0900000000020000`,
 		SpecVersion:    3,
 		Validator:      "60e2feb892e672d5579ed10ecae0d162031fe5adc3692498ad262fb126a65732",
 		Finalized:      true,
 	}
 
 	testEvent = model.ChainEvent{
-		EventIdx:     0,
-		BlockNum:     947687,
-		ModuleId:     "imonline",
-		EventId:      "AllGood",
-		Params:       util.ToString([]interface{}{}),
-		ExtrinsicIdx: 0,
-		EventIndex:   "947687-0",
+		EventIdx:       0,
+		BlockNum:       947687,
+		ModuleId:       "imonline",
+		EventId:        "AllGood",
+		Params:         model.EventParams{},
+		ExtrinsicIdx:   0,
+		ExtrinsicIndex: "947687-0",
 	}
 )
 
@@ -73,7 +69,7 @@ type MockDao struct {
 	mock.Mock
 }
 
-func (m *MockDao) GetBlockNumArr(start, end int) []int {
+func (m *MockDao) GetBlockNumArr(ctx context.Context, start, end uint) []int {
 	return nil
 }
 
@@ -82,10 +78,6 @@ func (m *MockDao) Close() {}
 func (m *MockDao) Ping(ctx context.Context) (err error) { return nil }
 
 func (m *MockDao) SetHeartBeatNow(context.Context, string) error {
-	return nil
-}
-
-func (m *MockDao) DaemonHeath(context.Context) map[string]bool {
 	return nil
 }
 
@@ -105,22 +97,22 @@ func (m *MockDao) UpdateEventAndExtrinsic(*dao.GormDB, *model.ChainBlock, int, i
 	return nil
 }
 
-func (m *MockDao) GetNearBlock(blockNum int) *model.ChainBlock {
+func (m *MockDao) GetNearBlock(blockNum uint) *model.ChainBlock {
 	return &model.ChainBlock{BlockNum: blockNum, SpecVersion: 4}
 }
 
 func (m *MockDao) SetBlockFinalized(*model.ChainBlock) {
 }
 
-func (m *MockDao) BlocksReverseByNum(blockNums []int) map[int]model.ChainBlock {
-	return map[int]model.ChainBlock{testBlock.BlockNum: testBlock}
+func (m *MockDao) BlocksReverseByNum(_ []uint) map[uint]model.ChainBlock {
+	return map[uint]model.ChainBlock{testBlock.BlockNum: testBlock}
 }
 
 func (m *MockDao) GetBlockByHash(context.Context, string) *model.ChainBlock {
 	return nil
 }
 
-func (m *MockDao) GetBlockByNum(blockNum int) *model.ChainBlock {
+func (m *MockDao) GetBlockByNum(ctx context.Context, blockNum uint) *model.ChainBlock {
 	args := m.Called(blockNum)
 	if args.Get(0) == nil {
 		return nil
@@ -146,7 +138,7 @@ func (m *MockDao) GetFillFinalizedBlockNum(c context.Context) (num int, err erro
 	return args.Int(0), args.Error(1)
 }
 
-func (m *MockDao) GetBlockList(page, row int) []model.ChainBlock {
+func (m *MockDao) GetBlockList(ctx context.Context, page, row int) []model.ChainBlock {
 	return []model.ChainBlock{testBlock}
 }
 
@@ -162,12 +154,12 @@ func (m *MockDao) DropEventNotFinalizedData(blockNum int, finalized bool) bool {
 	return false
 }
 
-func (m *MockDao) GetEventByBlockNum(blockNum int, where ...string) []model.ChainEventJson {
+func (m *MockDao) GetEventByBlockNum(blockNum uint, where ...string) []model.ChainEvent {
 
 	return nil
 }
 
-func (m *MockDao) GetEventList(page, row int, order string, where ...string) ([]model.ChainEvent, int) {
+func (m *MockDao) GetEventList(ctx context.Context, page, row int, order string, where ...model.Option) ([]model.ChainEvent, int) {
 	return []model.ChainEvent{testEvent}, 1
 }
 
@@ -175,7 +167,7 @@ func (m *MockDao) GetEventsByIndex(extrinsicIndex string) []model.ChainEvent {
 	return nil
 }
 
-func (m *MockDao) GetEventByIdx(index string) *model.ChainEvent {
+func (m *MockDao) GetEventByIdx(ctx context.Context, index string) *model.ChainEvent {
 	return nil
 }
 
@@ -187,11 +179,11 @@ func (m *MockDao) DropExtrinsicNotFinalizedData(c context.Context, blockNum int,
 	return true
 }
 
-func (m *MockDao) GetExtrinsicsByBlockNum(blockNum int) []model.ChainExtrinsicJson {
+func (m *MockDao) GetExtrinsicsByBlockNum(blockNum uint) []model.ChainExtrinsicJson {
 	return nil
 }
 
-func (m *MockDao) GetExtrinsicList(c context.Context, page, row int, order string, queryWhere ...string) ([]model.ChainExtrinsic, int) {
+func (m *MockDao) GetExtrinsicList(c context.Context, page, row int, order string, queryWhere ...model.Option) ([]model.ChainExtrinsic, int) {
 	return []model.ChainExtrinsic{testSignedExtrinsic}, 1
 }
 
@@ -220,7 +212,7 @@ func (m *MockDao) GetLogsByIndex(index string) *model.ChainLogJson {
 	return nil
 }
 
-func (m *MockDao) GetLogByBlockNum(blockNum int) []model.ChainLogJson {
+func (m *MockDao) GetLogByBlockNum(c context.Context, blockNum uint) []model.ChainLogJson {
 	return nil
 }
 
@@ -233,7 +225,7 @@ func (m *MockDao) IncrMetadata(c context.Context, filed string, incrNum int) (er
 }
 
 func (m *MockDao) GetMetadata(c context.Context) (ms map[string]string, err error) {
-	return nil, nil
+	return make(map[string]string), nil
 }
 
 func (m *MockDao) GetBestBlockNum(c context.Context) (uint64, error) {

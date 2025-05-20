@@ -44,7 +44,6 @@ var testCases = []struct {
 	{"/api/scan/runtime/metadata", strings.NewReader(`{"spec": 1}`), "POST"},
 	{"/api/scan/runtime/list", nil, "POST"},
 	{"/api/now", nil, "POST"},
-	{"/api/system/status", nil, "GET"},
 	{"/ping", nil, "GET"},
 }
 

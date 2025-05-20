@@ -6,7 +6,7 @@ import (
 )
 
 func (d *Dao) CreateRuntimeVersion(name string, specVersion int) int64 {
-	query := d.db.Create(&model.RuntimeVersion{
+	query := d.db.Scopes(model.IgnoreDuplicate).Create(&model.RuntimeVersion{
 		Name:        name,
 		SpecVersion: specVersion,
 	})
@@ -14,7 +14,7 @@ func (d *Dao) CreateRuntimeVersion(name string, specVersion int) int64 {
 }
 
 func (d *Dao) SetRuntimeData(specVersion int, modules string, rawData string) int64 {
-	query := d.db.Model(model.RuntimeVersion{}).Where("spec_version=?", specVersion).UpdateColumn(model.RuntimeVersion{
+	query := d.db.Model(model.RuntimeVersion{}).Where("spec_version=?", specVersion).Updates(model.RuntimeVersion{
 		Modules: modules,
 		RawData: rawData,
 	})
@@ -30,20 +30,20 @@ func (d *Dao) RuntimeVersionList() []model.RuntimeVersion {
 func (d *Dao) RuntimeVersionRecent() *model.RuntimeVersion {
 	var list model.RuntimeVersion
 	query := d.db.Select("spec_version,raw_data").Model(model.RuntimeVersion{}).Order("spec_version DESC").First(&list)
-	if query.RecordNotFound() {
+	if query.Error != nil {
 		return nil
 	}
 	return &list
 }
 
 func (d *Dao) RuntimeVersionRaw(spec int) *metadata.RuntimeRaw {
-	var one metadata.RuntimeRaw
-	query := d.db.Model(model.RuntimeVersion{}).
-		Select("spec_version as spec ,raw_data as raw").
-		Where("spec_version = ?", spec).
-		Scan(&one)
-	if query.RecordNotFound() {
+	var one model.RuntimeVersion
+	query := d.db.Model(model.RuntimeVersion{}).Where("spec_version = ?", spec).First(&one)
+	if query.Error != nil {
 		return nil
 	}
-	return &one
+	return &metadata.RuntimeRaw{
+		Spec: one.SpecVersion,
+		Raw:  one.RawData,
+	}
 }

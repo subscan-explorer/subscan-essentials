@@ -88,19 +88,19 @@ func TestUnmarshalAny(t *testing.T) {
 		Two int
 	})
 	mapTest := map[string]int{"one": 1, "two": 2}
-	UnmarshalAny(&p, mapTest)
+	_ = UnmarshalAny(&p, mapTest)
 	assert.Equal(t, &struct {
 		One int
 		Two int
 	}{1, 2}, p)
 
-	UnmarshalAny(&p, `{"one":21,"two":22}`)
+	_ = UnmarshalAny(&p, `{"one":21,"two":22}`)
 	assert.Equal(t, &struct {
 		One int
 		Two int
 	}{21, 22}, p)
 
-	UnmarshalAny(&p, []byte(`{"one":31,"two":32}`))
+	_ = UnmarshalAny(&p, []byte(`{"one":31,"two":32}`))
 	assert.Equal(t, &struct {
 		One int
 		Two int

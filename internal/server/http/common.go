@@ -19,8 +19,3 @@ func ping(ctx *gin.Context) {
 func now(c *gin.Context) {
 	toJson(c, time.Now().Unix(), nil)
 }
-
-func systemStatus(c *gin.Context) {
-	status := svc.DaemonHealth(c)
-	toJson(c, status, nil)
-}

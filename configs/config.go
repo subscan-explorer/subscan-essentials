@@ -3,6 +3,7 @@ package configs
 import (
 	"errors"
 	"fmt"
+	"github.com/itering/subscan/util"
 	"net/url"
 	"os"
 	"strings"
@@ -11,17 +12,23 @@ import (
 
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/config/file"
-	"github.com/itering/subscan/util"
 )
 
 type Bootstrap struct {
 	Server   *Server   `json:"server,omitempty"`
 	Database *Database `json:"database,omitempty"`
 	Redis    *Redis    `json:"redis,omitempty"`
+	UI       *UI       `json:"ui,omitempty"`
 }
 
 type Server struct {
 	Http *ServerHttp `json:"http,omitempty"`
+	Grpc *ServerGrpc `json:"grpc,omitempty"`
+}
+
+type UI struct {
+	EnableSubstrate bool `json:"enable_substrate"`
+	EnableEvm       bool `json:"enable_evm"`
 }
 
 type ServerHttp struct {
@@ -30,12 +37,44 @@ type ServerHttp struct {
 	Timeout string `json:"timeout,omitempty"`
 }
 
+type ServerGrpc struct {
+	Addr string `json:"addr,omitempty"`
+}
+
+type IDatabase interface {
+	mergeEnvironment()
+	GetHost() string
+}
+
+type Mysql struct {
+	Host     string
+	DSN      string   `json:"-"`
+	Multiple []string `json:"-"`
+	Api      string   `json:"api"`
+	Test     string   `json:"test"`
+}
+
+func (dc *Mysql) GetHost() string {
+	return dc.Host
+}
+
+type Postgres struct {
+	DSN string `json:"-"`
+	Api string `json:"api"`
+
+	Host     string
+	User     string
+	Password string
+	DBName   string
+	Port     string
+	SSLMode  string
+	Multiple []string
+}
+
 type Database struct {
-	Driver string `json:"-"` // Unused
-	DSN    string `json:"-"`
-	Api    string `json:"api"`
-	Task   string `json:"task"`
-	Test   string `json:"test"`
+	Driver   string    `json:"-"` // Unused
+	Mysql    *Mysql    `json:"mysql"`
+	Postgres *Postgres `json:"postgres"`
 }
 
 type Redis struct {
@@ -69,7 +108,16 @@ func Init() {
 		panic(fmt.Errorf("config.yaml not completed"))
 	}
 
-	Boot.Database.mergeEnvironment()
+	// db driver
+	Boot.Database.Driver = util.GetEnv("DB_DRIVER", "mysql")
+	if Boot.Database.Driver == "mysql" {
+		Boot.Database.Mysql.mergeEnvironment()
+	} else if Boot.Database.Driver == "postgres" {
+		Boot.Database.Postgres.mergeEnvironment()
+	} else {
+		panic(fmt.Errorf("unsupported db driver: %s", Boot.Database.Driver))
+	}
+
 	Boot.Redis.mergeEnvironment()
 }
 
@@ -79,7 +127,7 @@ func setVarDefaultValueStr(variable *string, defaultValue string) {
 	}
 }
 
-func (dc *Database) mergeEnvironment() {
+func (dc *Mysql) mergeEnvironment() {
 	var (
 		err                  error
 		dsn, envDSN, fileDSN *url.URL
@@ -96,16 +144,26 @@ func (dc *Database) mergeEnvironment() {
 	}
 
 	var dsnStr = dsn.String()
-
+	dc.Host = dsn.Host
 	// for gorm
 	if dsn.Scheme == "mysql" {
 		dsnStr = fmt.Sprintf("%s@tcp(%s)%s?%s", getUserOfDSN(dsn), dsn.Host, dsn.Path, dsn.RawQuery)
 	}
+
 	dc.DSN = dsnStr
-	dc.Driver = dsn.Scheme
 }
 
-func (dc *Database) getEnvDSN() *url.URL {
+func (d *Database) GetHost() string {
+	if Boot.Database.Driver == "mysql" {
+		return Boot.Database.Mysql.Host
+	} else if Boot.Database.Driver == "postgres" {
+		return Boot.Database.Postgres.GetHost()
+	}
+	return ""
+
+}
+
+func (dc *Mysql) getEnvDSN() *url.URL {
 	dbHost := os.Getenv("MYSQL_HOST")
 	dbUser := os.Getenv("MYSQL_USER")
 	dbPass := os.Getenv("MYSQL_PASS")
@@ -113,10 +171,7 @@ func (dc *Database) getEnvDSN() *url.URL {
 	dbPort := os.Getenv("MYSQL_PORT")
 
 	var user *url.Userinfo
-	if dbPass != "" {
-		if dbUser == "" {
-			dbUser = "root"
-		}
+	if dbUser != "" && dbPass != "" {
 		user = url.UserPassword(dbUser, dbPass)
 	} else {
 		user = url.User(dbUser)
@@ -135,21 +190,13 @@ func (dc *Database) getEnvDSN() *url.URL {
 	}
 }
 
-func (dc *Database) getYamlDSN() (*url.URL, error) {
+func (dc *Mysql) getYamlDSN() (*url.URL, error) {
 	var (
-		isTaskMode = os.Getenv("TASK_MOD") == "true"
-		isTestMode = os.Getenv("TEST_MOD") == "true"
-		err        error
-		dsn        *url.URL
+		err error
+		dsn *url.URL
 	)
 
-	if isTaskMode {
-		dsn, err = ParseDSN(dc.Task)
-	} else if isTestMode {
-		dsn, err = ParseDSN(dc.Test)
-	} else {
-		dsn, err = ParseDSN(dc.Api)
-	}
+	dsn, err = ParseDSN(dc.Api)
 
 	if err != nil {
 		return nil, err
@@ -185,7 +232,7 @@ func getUserOfDSN(dsn *url.URL) string {
 	return user
 }
 
-func (_ *Database) mergeDefaultDSNs(a, b *url.URL) (*url.URL, error) {
+func (_ *Mysql) mergeDefaultDSNs(a, b *url.URL) (*url.URL, error) {
 	if a == nil && b == nil {
 		return nil, errors.New("must have least one is non-nil")
 	}
@@ -208,7 +255,7 @@ func (_ *Database) mergeDefaultDSNs(a, b *url.URL) (*url.URL, error) {
 	}
 	host := valueOrDefaultStr("127.0.0.1", a.Hostname(), b.Hostname())
 	port := valueOrDefaultStr("3306", a.Port(), b.Port())
-	dbPath := valueOrDefaultStr("subscan", getDBNameOfDSN(a), getDBNameOfDSN(b))
+	dbPath := valueOrDefaultStr("subscan-essentials", getDBNameOfDSN(a), getDBNameOfDSN(b))
 	query := valueOrDefaultStr("", a.RawQuery, b.RawQuery)
 	return &url.URL{
 		Scheme:   scheme,
@@ -255,4 +302,33 @@ func ParseDSN(dsn string) (*url.URL, error) {
 	}
 
 	return url.Parse(dsn)
+}
+
+func (p Postgres) GetHost() string {
+	return p.Host
+}
+
+func (p *Postgres) mergeEnvironment() {
+	p.Host = valueOrDefaultStr("127.0.0.1", p.Host, os.Getenv("POSTGRES_HOST"))
+	p.User = valueOrDefaultStr("gorm", p.User, os.Getenv("POSTGRES_USER"))
+	p.Password = valueOrDefaultStr("gorm", p.Password, os.Getenv("POSTGRES_PASS"))
+	p.DBName = valueOrDefaultStr("subscan-essentials", p.DBName, os.Getenv("POSTGRES_DB"))
+	p.Port = valueOrDefaultStr("9920", p.Port, os.Getenv("POSTGRES_PORT"))
+	p.SSLMode = valueOrDefaultStr("disable", p.SSLMode, os.Getenv("POSTGRES_SSL_MODE"))
+
+	// host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disablea
+	p.DSN = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s", p.Host, p.User, p.Password, p.DBName, p.Port, p.SSLMode)
+}
+
+func EnvSandbox(fn func()) {
+	originEnvsBackup := os.Environ()
+	os.Clearenv()
+	defer func() {
+		os.Clearenv()
+		for _, s := range originEnvsBackup {
+			env := strings.SplitN(s, "=", 2)
+			_ = os.Setenv(env[0], env[1])
+		}
+	}()
+	fn()
 }

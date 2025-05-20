@@ -7,15 +7,15 @@ import (
 )
 
 func TestDecode(t *testing.T) {
-	assert.Equal(t, ss58.Decode("fawfafwaf", 42), "")
+	assert.Equal(t, ss58.Decode("fawfafwaf"), "")
 	assert.Equal(t, ss58.Decode(
-		"5FcEGUiujfdWyf6RME1G8pCTkmkgXFDECaTSpVDWVnNiZJXR", 42),
+		"5FcEGUiujfdWyf6RME1G8pCTkmkgXFDECaTSpVDWVnNiZJXR"),
 		"9cbfadc7579a27fcb3ea4bb1940aade652d1dd9a2dc69c9920f1de42d8ca0234")
 	assert.Equal(t, ss58.Decode(
-		"132LXQzhfrQRAdWyfSr1hzSWrfGh7KcDrFVeyajLVcHy3voi", 0),
+		"132LXQzhfrQRAdWyfSr1hzSWrfGh7KcDrFVeyajLVcHy3voi"),
 		"597d6fed2bdf74f6187833c49967e95f83e5c0a8e710ade206f6755f3448e769")
 	assert.Equal(t, ss58.Decode(
-		"FAHqreQSkzH5BsXFJN1m6touWNGHPpu11LuCDbyzVa5fnck", 2),
+		"FAHqreQSkzH5BsXFJN1m6touWNGHPpu11LuCDbyzVa5fnck"),
 		"72612c619e1a5b8b2001fb484fd06882df5a41ae6e36afb38592a922429a2814")
 
 }

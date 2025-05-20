@@ -2,182 +2,195 @@
 
 # Subscan Essentials
 
-![License: GPL](https://img.shields.io/badge/license-GPL-blue.svg)
+[![License: GPL](https://img.shields.io/badge/license-GPL-blue.svg)](LICENSE)
 [![Go Report Card](https://goreportcard.com/badge/github.com/itering/subscan)](https://goreportcard.com/report/github.com/itering/subscan)
-![subscan](https://github.com/itering/subscan/workflows/subscan/badge.svg)
+![CI/CD](https://github.com/subscan-explorer/subscan-essentials/workflows/subscan/badge.svg)
 
-Subscan Essentials is a high-precision blockchain explorer scaffold project. 
-It supports substrate-based blockchain networks with developer-friendly interface, standard or custom module parsing capabilities. 
-It's developed by the Subscan team and used in [subscan.io](https://www.subscan.io/). 
-Developers are free to use the codebase to extend functionalities and develop unique user experiences for their audiences.
+Subscan Essentials is a high-precision blockchain explorer scaffold supporting Substrate-based networks. Developed by
+the Subscan team and powering [subscan.io](https://www.subscan.io/), it provides:
 
-## Contents
+- Developer-friendly interface
+- Standard/custom module parsing
+- Extensible plugin system
+- Multi-chain compatibility
 
-- [Feature](#Feature)
-- [QuickStart](#QuickStart)
-  - [Requirement](#Requirement)
-  - [Structure](docs/tree.md)
-  - [Installation](#Install)
-  - [UI](#UI)
-  - [Config](#Config)
-  - [Usage](#Usage)
-  - [Docker](#Docker)
-  - [Test](#Test)
-- [Contributions](#Contributions)
-- [LICENSE](#LICENSE)
-- [Resource](#Resource)
+## Table of Contents
 
-## Feature
+- [Features](#features)
+- [Quick Start](#quick-start)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+    - [Configuration](#configuration)
+    - [Running Services](#running-services)
+- [Docker Deployment](#docker-deployment)
+- [Testing](#testing)
+- [Contributing](#contributing)
+- [License](#license)
+- [Resources](#resources)
 
-1. Support Substrate network [custom](/custom_type.md) type registration 
-2. Support index Block, Extrinsic, Event, log
-3. More data can be indexed by custom [plugins](/plugins)
-4. [Gen](https://github.com/itering/subscan-plugin/tree/master/tools) tool can automatically generate plugin templates
-5. Built-in default HTTP API [DOC](/docs/index.md)
+## Features
 
+- **Substrate Integration**
+    - Custom type registration ([guide](/custom_type.md))
+    - Indexes blocks, extrinsics, events, logs, and EVM data
+- **Extensibility**
+    - Custom plugins framework ([docs](/plugins))
+    - Auto-generate plugin templates via [gen tool](https://github.com/itering/subscan-plugin/tree/master/tools)
+- **APIs**
+    - Built-in HTTP API documentation ([docs](/docs))
 
-## QuickStart
+---
 
-### Requirement
+## Quick Start
 
-* Linux / Mac OSX
-* Git
-* Golang 1.12.4+
-* Redis 3.0.4+
-* MySQL 5.6+
-* Node 8.9.0+
+### Prerequisites
 
-### Install
+- Linux/macOS
+- Git
+- **Go 1.23+**
+- **Redis 3.0.4+**
+- **MySQL 8.0+** or **PostgreSQL 16+**
+
+### Installation
 
 ```bash
 ./build.sh build
 
-//UI
-cd ui && yarn && yarn dev
 ```
 
-### UI
+### configuration
 
-The ui part is built with [nuxt.js](https://nuxtjs.org/) and [amis](https://github.com/baidu/amis)
-
-Demo: [blocks](/ui/plugins/blocks.js), refer to [amis docs](https://baidu.gitee.io/amis/docs/index) for further detail.
-
-[Online Demo](https://crab.demo.subscan.io/)
-
-Please change proxy target in nuxt.config.js to your server name in development.
-
-```js
-proxy: {
-   "/api": {
-      target: "https://your_server_name.com",
-      secure: false,
-      changeOrigin: true,
-      pathRewrite: {
-         "^/api": "/api"
-      }
-   },
-}
-```
-
-Please change browserBaseURL in nuxt.config.js to your server name in production.
-
-```js
-axios: {
-   proxy: process.env.NODE_ENV !== 'production',
-    browserBaseURL: process.env.NODE_ENV !== 'production' ? "" : "https://your_server_name.com"
-},
-```
-
-#### Example
-
-![ui_demo](./ui_demo.png)
-
-First choose a search type, and enter search content.
-Then click search button, result will be shown in the output section.
-
-#### Feature Supported
-
-- search block detail by block number or block hash
-- search extrinsic detail by extrinsic index or extrinsic hash
-- search runtime info by spec version
-- plugin (blocks, events)
-
-
-### Config
-
-#### Init config file 
+#### Init config file
 
 ```bash
 cp configs/config.yaml.example configs/config.yaml
 ```
 
-#### Set
+```yaml
+server:
+  http:
+    addr: 0.0.0.0:4399 # http api port
+    timeout: 30s       # http timeout 
+database:
+  mysql:
+    api: "mysql://root:helloload@127.0.0.1:3306?writeTimeout=3s&parseTime=true&loc=Local&charset=utf8mb4,utf8" # mysql default dsn
+  postgres:
+    api: "host=localhost user=gorm password=gorm dbname=gorm port=9920 sslmode=disable" # postgres default dsn
+redis:
+  proto: tcp
+  addr: 127.0.0.1:6379 # redis host
+  password: "" # redis password
+  read_timeout: 1s 
+  write_timeout: 1s
+  idle: 10
+  active: 100
+UI:
+  enable_substrate: true # if true, ui will show substrate data
+  enable_evm: true       # if true, ui will show evm data
+```
 
-1. Redis  configs/redis.toml
-
-> addr： redis host and port (default: 127.0.0.1:6379)
-
-2. Mysql  configs/mysql.toml
-
-> host: mysql host (default: 127.0.0.1)
-> user: mysql user (default: root)
-> pass: mysql user passwd (default: "")
-> db:   mysql db name (default: "subscan")
-
-3. Http   configs/http.toml
-
-> addr: local http server port (default: 0.0.0.0:4399)
 
 
-### Usage
+## Available Environment Variables
+
+
+
+
+### Common
+
+| Name                   | Default Value | Describe               |
+|------------------------|---------------|------------------------|
+| CONF_DIR               | ../configs    | configs path           |
+| VERIFY_SERVER          | NULL          | solidity verify server |
+| SUBSTRATE_ADDRESS_TYPE | 0             | ss58 address type      |
+| SUBSTRATE_ACCURACY     | 10            | native token accuracy  |
+| CHAIN_WS_ENDPOINT      |               | websocket endpoint url |
+| NETWORK_NODE           | moonbeam      | network node name      |
+| WORKER_GOROUTINE_COUNT | 10            | worker goroutine count |
+| ETH_RPC                |               | Evm rpc endpoint       |
+
+### Database
+
+| Name              | Default Value      | Describe               |
+|-------------------|--------------------|------------------------|
+| DB_DRIVER         | mysql              | support mysql/postgres |
+| MYSQL_HOST        | 127.0.0.1          | mysql host             |
+| MYSQL_USER        | root               | mysql user             |
+| MYSQL_PASS        |                    | mysql password         |
+| MYSQL_DB          | subscan-essentials | mysql db name          |
+| MYSQL_PORT        | 3306               | mysql port             |
+| POSTGRES_HOST     | 127.0.0.1          | postgres port          |
+| POSTGRES_USER     | gorm               | postgres user          |
+| POSTGRES_PASS     | gorm               | postgres password      |
+| POSTGRES_DB       | subscan-essentials | postgres db name       |
+| POSTGRES_PORT     | 9920               | postgres port          |
+| POSTGRES_SSL_MODE | disable            | postgres ssl mode      |
+| MAX_DB_CONN_COUNT | 200                | gorm max db conn count |
+
+### Redis
+
+| Name           | Default Value | Describe                   |
+|----------------|---------------|----------------------------|
+| REDIS_HOST     | 127.0.0.1     | redis host                 |
+| REDIS_PORT     | 6379          | redis host port            |
+| REDIS_DATABASE | 0             | redis db                   |
+| REDIS_PASSWORD |               | redis password default nil |
+
+### running-services
 
 - Start DB
 
-**Make sure you have started redis and mysql**
+**Make sure you have started redis and mysql/postgres**
 
-- Substrate Daemon
+- Subscribe
+
 ```bash
-cd cmd
-./subscan start substrate
+cd cmd && ./subscan start subscribe
+```
+
+- Worker
+
+```bash
+cd cmd && ./subscan start worker
 ```
 
 - Api Server
+
 ```bash
-cd cmd
-./subscan
+cd cmd && ./subscan
 ```
 
-- Help 
+- Help
 
 ```
 NAME:
-   SubScan - SubScan Backend Service, use -h get help
+   SUBSCAN - SUBSCAN Backend Service, use -h get help
 
 USAGE:
-   main [global options] command [command options] [arguments...]
+   cmd [global options] command [command options] [arguments...]
 
 VERSION:
-   1.0
+   2.0
 
 DESCRIPTION:
    SubScan Backend Service, substrate blockchain explorer
 
 COMMANDS:
-     start    Start one worker, E.g substrate
-     install  Create database and create default conf file
-     help, h  Shows a list of commands or help for one command
+   start              Start one worker, E.g. subscribe
+   install            Install default database and create default conf file
+   CheckCompleteness  Create blocks completeness
+   help, h            Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
    --conf value   (default: "../configs")
    --help, -h     show help
    --version, -v  print the version
 
-
 ```
 
-### Docker
+### docker-deployment
 
-Use [docker-compose](https://docs.docker.com/compose/) can start projects quickly 
+Use [docker-compose](https://docs.docker.com/compose/) can start projects quickly
 
 Create local network
 
@@ -198,29 +211,31 @@ docker-compose build
 docker-compose up -d
 ```
 
-### Test
+### testing
 
+1. Create test database (if using MySQL):
 
-**default test mysql database is subscan_test. Please CREATE it or change configs/mysql.toml**
-
-```bash
-go test ./...
-
-//UI
-cd ui && yarn && yarn test
+```sql
+CREATE DATABASE subscan-essentials;
 ```
 
+2. Run tests:
 
-## Contributions
+```bash
+go test -v ./...
+```
 
-We welcome contributions of any kind. Issues labeled can be good (first) contributions.
+## contributing
+
+We welcome contributions! Please see CONTRIBUTING.md for guidelines. Good first issues are labeled with **good first
+issue**.
 
 ## LICENSE
 
 GPL-3.0
 
+## resources
 
-## Resource
- 
-- [ITERING] https://github.com/itering
-- [Darwinia] https://github.com/darwinia-network/darwinia
+- [SUBSCAN] https://github.com/subscan-explorer
+- [scale.go] https://github.com/subscan-explorer/scale.go SCALE codec implementation
+- [Darwinia] https://github.com/darwinia-network

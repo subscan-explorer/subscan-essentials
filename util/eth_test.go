@@ -1,0 +1,60 @@
+package util
+
+import (
+	"github.com/stretchr/testify/assert"
+	"testing"
+)
+
+func TestAbiStringDecoder(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"0x", ""},
+		{"0x6162630000000000000000000000000000000000000000000000000000000000", "abc"},
+		{"0x0000000000000000000000000000000000000000000000000000000000000020" +
+			"0000000000000000000000000000000000000000000000000000000000000003" +
+			"6162630000000000000000000000000000000000000000000000000000000000", "abc"},
+	}
+
+	for _, test := range tests {
+		result := AbiStringDecoder(test.input)
+		if result != test.expected {
+			t.Errorf("AbiStringDecoder failed, got: %s, want: %s", result, test.expected)
+		}
+	}
+}
+
+func TestDataAnalysis(t *testing.T) {
+	log := "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef" +
+		"6162630000000000000000000000000000000000000000000000000000000000" +
+		"6162630000000000000000000000000000000000000000000000000000000000" +
+		"0000000000000000000000000000000000000000000000000000000000000003"
+	expected := []string{
+		"1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+		"6162630000000000000000000000000000000000000000000000000000000000",
+		"6162630000000000000000000000000000000000000000000000000000000000",
+		"0000000000000000000000000000000000000000000000000000000000000003",
+	}
+	result := DataAnalysis(log)
+	assert.Equal(t, expected, result)
+}
+
+func TestPadding(t *testing.T) {
+	expected := "0000000000000000000000000000000000000000000000000000000000000123"
+	result := Padding("123")
+	assert.Equal(t, expected, result)
+}
+
+func TestPaddingLeft(t *testing.T) {
+	expected := "1230000000000000000000000000000000000000000000000000000000000000"
+	result := PaddingLeft("123")
+	assert.Equal(t, expected, result)
+}
+
+func TestBigIntToHex(t *testing.T) {
+	b := "12345678901234567890"
+	expected := "ab54a98ceb1f0ad2"
+	result := BigIntToHex(b)
+	assert.Equal(t, expected, result)
+}

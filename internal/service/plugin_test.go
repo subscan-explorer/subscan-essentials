@@ -1,15 +1,15 @@
 package service
 
 import (
+	"context"
 	"github.com/itering/subscan/model"
-	"github.com/shopspring/decimal"
 	"testing"
 )
 
 func Test_emitEvent(t *testing.T) {
-	testSrv.emitEvent(&testBlock, &testEvent, decimal.Zero)
+	testSrv.emitEvent(&testBlock, &testEvent)
 }
 
 func Test_emitExtrinsic(t *testing.T) {
-	testSrv.emitExtrinsic(&testBlock, &testSignedExtrinsic, []model.ChainEvent{testEvent})
+	testSrv.emitExtrinsic(context.TODO(), &testBlock, &testSignedExtrinsic, []model.ChainEvent{testEvent})
 }

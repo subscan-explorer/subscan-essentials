@@ -3,7 +3,7 @@ package validator
 import (
 	"bytes"
 	"github.com/stretchr/testify/assert"
-	"io/ioutil"
+	"io"
 	"testing"
 )
 
@@ -23,7 +23,7 @@ func TestValidate(t *testing.T) {
 
 	t3 := new(bytes.Buffer)
 	t3.WriteString(`{"block_hash":"ttt","block_num":2}`)
-	err = Validate(ioutil.NopCloser(t3), model)
+	err = Validate(io.NopCloser(t3), model)
 	assert.NoError(t, err)
 
 	t4 := map[string]interface{}{"block_num": "1", "block_hash": 12}

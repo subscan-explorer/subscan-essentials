@@ -2,7 +2,7 @@ version: "2.4"
 
 services:
   mysql:
-    image: mysql:5.7
+    image: arm64v8/mysql:latest
     restart: always
     environment:
       # Name of the db created on start up
@@ -18,7 +18,7 @@ services:
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
 
   redis:
-    image: redis
+    image: arm64v8/redis:latest
     ports:
       - '6379:6379'
     volumes:

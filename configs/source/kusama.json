@@ -1,5 +1,32 @@
 {
+  "ElectionResult#0-2029": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "electedStashes",
+        "Vec<AccountId>"
+      ],
+      [
+        "exposures",
+        "Vec<(AccountId, Exposure)>"
+      ]
+    ]
+  },
   "Keys": "SessionKeysPolkadot",
+  "RoundSnapshot": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "voters",
+        "Vec<(AccountId, VoteWeight, Vec<AccountId>)>"
+      ],
+      [
+        "targets",
+        "Vec<AccountId>"
+      ]
+    ]
+  },
+  "VoteWeight": "u64",
   "ValidatorPrefs": {
     "type": "struct",
     "type_mapping": [
@@ -9,6 +36,20 @@
       ]
     ]
   },
+  "EraPoints": {
+    "type": "struct",
+    "type_mapping": [
+      [
+        "total",
+        "Points"
+      ],
+      [
+        "individual",
+        "Vec<Points>"
+      ]
+    ]
+  },
+  "BalanceLock<Balance, BlockNumber>#1019-1045": "BalanceLock",
   "Timepoint": {
     "type": "struct",
     "type_mapping": [
@@ -206,7 +247,8 @@
       "Governance",
       "Staking",
       "IdentityJudgement",
-      "CancelProxy"
+      "CancelProxy",
+      "Auction"
     ]
   },
   "Address#1050-2027": "AccountId",
@@ -215,7 +257,6 @@
   "RefCount": "u32",
   "Box<<T as Config>::Call>": "Call",
   "Box<<T as Config<I>>::Proposal>": "Proposal",
-  "AccountInfo": "AccountInfoWithTripleRefCount",
   "Address#2028-?": "MultiAddress",
   "LookupSource#2028-?": "MultiAddress",
   "Keys#2028-2029": {
@@ -249,5 +290,18 @@
   },
   "ValidatorPrefs#2028-?": "ValidatorPrefsWithBlocked",
   "Keys#2030-?": "SessionKeys6",
-  "CompactAssignments#9010-?": "CompactAssignmentsWith24"
+  "CompactAssignments#9010-?": "CompactAssignmentsWith24",
+  "AssetInstance#9010-9090": "AssetInstanceV0",
+  "MultiAsset#9010-9090": "MultiAssetV0",
+  "Xcm#9010-9090": "XcmV0",
+  "XcmOrder#9010-9090": "XcmOrderV0",
+  "MultiLocation#9010-9090": "MultiLocationV0",
+  "AssetInstance#9100-9100": "AssetInstanceV1",
+  "MultiAsset#9100-9100": "MultiAssetV1",
+  "Xcm#9100-9100": "XcmV1",
+  "XcmOrder#9100-9100": "XcmOrderV1",
+  "MultiLocation#9100-9100": "MultiLocationV1",
+  "AccountInfo#2030-?": "AccountInfoWithTripleRefCount",
+  "AccountInfo#2028-2029": "AccountInfoWithProviders",
+  "RefCount#0-2024": "U8"
 }

@@ -1,3 +1,10 @@
-run:
-  skip-dirs:
+issues:
+  exclude-dirs:
+    - typecheck
+    - govet
+    - pkg/go-solidity-sha3
+    - pkg/recws
+    - pkg/go-web3
+    - pkg/time
+    - pkg/ecode
     - plugins/balance

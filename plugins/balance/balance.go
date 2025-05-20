@@ -1,15 +1,14 @@
 package balance
 
 import (
-	"fmt"
-	plugin "github.com/itering/subscan-plugin"
+	"context"
+	"github.com/itering/subscan-plugin"
 	"github.com/itering/subscan-plugin/router"
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/plugins/balance/dao"
 	"github.com/itering/subscan/plugins/balance/http"
 	"github.com/itering/subscan/plugins/balance/model"
 	"github.com/itering/subscan/plugins/balance/service"
-	"github.com/itering/subscan/util"
 	"github.com/shopspring/decimal"
 	"strings"
 )
@@ -17,7 +16,23 @@ import (
 var srv *service.Service
 
 type Balance struct {
-	d storage.Dao
+	d    storage.Dao
+	pool subscan_plugin.RedisPool
+}
+
+func (a *Balance) ConsumptionQueue() []string {
+	return nil
+}
+
+func (a *Balance) Enable() bool {
+	return true
+}
+
+func (a *Balance) ProcessBlock(context.Context, *storage.Block) error { return nil }
+
+func (a *Balance) SetRedisPool(pool subscan_plugin.RedisPool) {
+	a.pool = pool
+	srv = service.New(a.d, pool)
 }
 
 func New() *Balance {
@@ -25,7 +40,6 @@ func New() *Balance {
 }
 
 func (a *Balance) InitDao(d storage.Dao) {
-	srv = service.New(d)
 	a.d = d
 	a.Migrate()
 }
@@ -38,16 +52,13 @@ func (a *Balance) ProcessExtrinsic(*storage.Block, *storage.Extrinsic, []storage
 	return nil
 }
 
-func (a *Balance) ProcessEvent(block *storage.Block, event *storage.Event, fee decimal.Decimal) error {
+func (a *Balance) ProcessEvent(block *storage.Block, event *storage.Event, _ decimal.Decimal) error {
 	if event == nil {
 		return nil
 	}
-	var paramEvent []storage.EventParam
-	util.UnmarshalAny(&paramEvent, event.Params)
-
-	switch fmt.Sprintf("%s-%s", strings.ToLower(event.ModuleId), strings.ToLower(event.EventId)) {
-	case strings.ToLower("System-NewAccount"):
-		return dao.NewAccount(a.d, util.ToString(paramEvent[0].Value))
+	switch strings.ToLower(event.ModuleId) {
+	case strings.ToLower("Balances"):
+		return dao.EmitEvent(context.TODO(), &dao.Storage{Dao: a.d, Pool: a.pool}, event, block)
 	}
 
 	return nil
@@ -58,29 +69,20 @@ func (a *Balance) SubscribeExtrinsic() []string {
 }
 
 func (a *Balance) SubscribeEvent() []string {
-	return []string{"system"}
+	return []string{"balances"}
 }
 
 func (a *Balance) Version() string {
 	return "0.1"
 }
 
-func (a *Balance) UiConf() *plugin.UiConfig {
-	conf := new(plugin.UiConfig)
-	conf.Init()
-	conf.Body.Api.Method = "post"
-	conf.Body.Api.Url = "api/plugin/balance/accounts"
-	conf.Body.Api.Adaptor = fmt.Sprintf(conf.Body.Api.Adaptor, "list")
-	conf.Body.Columns = []plugin.UiColumns{
-		{Name: "address", Label: "address"},
-		{Name: "nonce", Label: "nonce"},
-		{Name: "balance", Label: "balance"},
-		{Name: "lock", Label: "lock"},
-	}
-	return conf
-}
-
 func (a *Balance) Migrate() {
 	_ = a.d.AutoMigration(&model.Account{})
-	_ = a.d.AddUniqueIndex(&model.Account{}, "address", "address")
+	_ = a.d.AutoMigration(&model.Transfer{})
+}
+
+func (a *Balance) ExecWorker(context.Context, string, string, interface{}) error { return nil }
+
+func (a *Balance) RefreshMetadata() {
+	dao.RefreshMetadata(context.TODO(), &dao.Storage{Dao: a.d, Pool: a.pool})
 }

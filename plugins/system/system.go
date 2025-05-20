@@ -1,7 +1,8 @@
 package system
 
 import (
-	ui "github.com/itering/subscan-plugin"
+	"context"
+	subscan_plugin "github.com/itering/subscan-plugin"
 	"github.com/itering/subscan-plugin/router"
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/plugins/system/model"
@@ -14,6 +15,18 @@ var srv *service.Service
 
 type System struct {
 	d storage.Dao
+}
+
+func (a *System) ConsumptionQueue() []string {
+	return nil
+}
+
+func (a *System) Enable() bool {
+	return true
+}
+
+func (a *System) ProcessBlock(context.Context, *storage.Block) error {
+	return nil
 }
 
 func New() *System {
@@ -36,7 +49,7 @@ func (a *System) ProcessExtrinsic(*storage.Block, *storage.Extrinsic, []storage.
 
 func (a *System) ProcessEvent(block *storage.Block, event *storage.Event, _ decimal.Decimal) error {
 	var paramEvent []storage.EventParam
-	util.UnmarshalAny(&paramEvent, event.Params)
+	_ = util.UnmarshalAny(&paramEvent, event.Params)
 	switch event.EventId {
 	case "ExtrinsicFailed":
 		srv.ExtrinsicFailed(block.SpecVersion, event, paramEvent)
@@ -48,6 +61,10 @@ func (a *System) Migrate() {
 	db := a.d
 	_ = db.AutoMigration(&model.ExtrinsicError{})
 	_ = db.AddUniqueIndex(&model.ExtrinsicError{}, "extrinsic_hash", "extrinsic_hash")
+}
+
+func (a *System) SetRedisPool(subscan_plugin.RedisPool) {
+
 }
 
 func (a *System) Version() string {
@@ -62,6 +79,4 @@ func (a *System) SubscribeEvent() []string {
 	return []string{"system"}
 }
 
-func (a *System) UiConf() *ui.UiConfig {
-	return nil
-}
+func (a *System) ExecWorker(context.Context, string, string, interface{}) error { return nil }

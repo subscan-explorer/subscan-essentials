@@ -1,13 +1,13 @@
 package observer
 
 import (
-	"log"
+	"context"
+	"fmt"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
-
-	"github.com/itering/substrate-api-rpc/pkg/recws"
 
 	"github.com/itering/subscan/internal/service"
 	"github.com/itering/subscan/util"
@@ -21,28 +21,34 @@ var (
 func Run(dt string) {
 	srv = service.New()
 	defer srv.Close()
-	for {
-		switch dt {
-		case "substrate":
-			subscribeConn := &recws.RecConn{KeepAliveTimeout: 10 * time.Second, WriteTimeout: time.Second * 5, ReadTimeout: 10 * time.Second}
-			subscribeConn.Dial(util.WSEndPoint, nil)
-			go srv.Subscribe(subscribeConn, stop)
-		default:
-			log.Fatalf("no such daemon component: %s", dt)
-		}
-		enableTermSignalHandler()
-		if _, ok := <-stop; ok {
-			time.Sleep(3 * time.Second)
-			break
-		}
+	ctx, cancel := context.WithCancel(context.Background())
+	wg := new(sync.WaitGroup)
+	go enableTermSignalHandler(cancel)
+	switch dt {
+	case "subscribe":
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			srv.Subscribe(ctx)
+		}()
+	case "worker":
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			Consumption()
+		}()
+	default:
+		panic(fmt.Sprintf("no such daemon component: %s", dt))
 	}
+	time.Sleep(3 * time.Second)
+	wg.Wait()
+
 }
 
-func enableTermSignalHandler() {
+func enableTermSignalHandler(cancel func()) {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
-	go func() {
-		log.Printf("Received signal %s, exiting...\n", <-sigs)
-		stop <- struct{}{}
-	}()
+	util.Logger().Info(fmt.Sprintf("Received signal %s, exiting...\n", <-sigs))
+	cancel()
+	close(stop)
 }

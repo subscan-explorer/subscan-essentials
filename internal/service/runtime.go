@@ -3,7 +3,6 @@ package service
 import (
 	"strings"
 
-	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc/metadata"
 	"github.com/itering/substrate-api-rpc/rpc"
@@ -12,21 +11,6 @@ import (
 var (
 	runtimeSpecs []int
 )
-
-func (s *Service) SubstrateRuntimeList() []model.RuntimeVersion {
-	return s.dao.RuntimeVersionList()
-}
-
-func (s *Service) SubstrateRuntimeInfo(spec int) *metadata.Instant {
-	if metadataInstant, ok := metadata.RuntimeMetadata[spec]; ok {
-		return metadataInstant
-	}
-	runtime := metadata.Process(s.dao.RuntimeVersionRaw(spec))
-	if runtime == nil {
-		return metadata.Latest(nil)
-	}
-	return runtime
-}
 
 func (s *Service) regRuntimeVersion(name string, spec int, hash ...string) error {
 	if util.IntInSlice(spec, runtimeSpecs) {

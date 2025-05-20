@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/itering/subscan/util/mq"
+	"github.com/itering/substrate-api-rpc/model"
 	"sync"
 	"time"
 
@@ -13,134 +15,76 @@ import (
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc/rpc"
 	"github.com/itering/substrate-api-rpc/websocket"
-	"github.com/panjf2000/ants/v2"
 )
 
-// FinalizedWaitingBlockCount
-// Because when receive chain_finalizedHead, get block still not finalized
-// so set Waiting block count to try avoid
 const (
-	FinalizedWaitingBlockCount = 3
-	ChainNewHead               = "chain_newHead"
-	ChainFinalizedHead         = "chain_finalizedHead"
-	StateStorage               = "state_storage"
+	FinalizedWaitingBlockCount = 2
 	BlockTime                  = 6
+	ChainFinalizedHead         = "chain_finalizedHead"
+	StateRuntimeVersion        = "state_runtimeVersion"
 )
-
-type subscription struct {
-	Topic  string `json:"topic"`
-	Latest int64  `json:"latest"`
-}
 
 var (
-	onceFinHead     sync.Once
-	subscriptionIds = []subscription{{Topic: ChainNewHead}, {Topic: ChainFinalizedHead}, {Topic: StateStorage}}
+	onceFinHead sync.Once
 )
 
 type SubscribeService struct {
 	*Service
-	newHead    chan bool
-	newFinHead chan bool
-	done       chan struct{}
+	newFinHead        chan bool
+	lastBlock         int64
+	finalizedBlockNum int64
 }
 
-func (s *Service) initSubscribeService(done chan struct{}) *SubscribeService {
+func (s *Service) initSubscribeService() *SubscribeService {
 	return &SubscribeService{
 		Service:    s,
-		newHead:    make(chan bool, 1),
 		newFinHead: make(chan bool, 1),
-		done:       done,
 	}
 }
 
 func (s *SubscribeService) parser(message []byte) (err error) {
-	upgradeHealth := func(topic string) {
-		for index, subscript := range subscriptionIds {
-			if subscript.Topic == topic {
-				subscriptionIds[index].Latest = time.Now().Unix()
-			}
-		}
-	}
-
-	var j rpc.JsonRpcResult
+	var j model.JsonRpcResult
 	if err = json.Unmarshal(message, &j); err != nil {
 		return err
 	}
-
-	switch j.Id {
-	case runtimeVersion:
+	switch j.Method {
+	case ChainFinalizedHead:
+		r := j.ToNewHead()
+		_ = s.updateChainMetadata(map[string]interface{}{"finalized_blockNum": util.HexToNumStr(r.Number)})
+		s.finalizedBlockNum = util.U256(r.Number).Int64()
+		s.newFinHead <- true
+	case StateRuntimeVersion:
 		r := j.ToRuntimeVersion()
 		_ = s.regRuntimeVersion(r.ImplName, r.SpecVersion)
 		_ = s.updateChainMetadata(map[string]interface{}{"implName": r.ImplName, "specVersion": r.SpecVersion})
 		util.CurrentRuntimeSpecVersion = r.SpecVersion
-		return
-	}
-
-	switch j.Method {
-	case ChainNewHead:
-		r := j.ToNewHead()
-		_ = s.updateChainMetadata(map[string]interface{}{"blockNum": util.HexToNumStr(r.Number)})
-		upgradeHealth(j.Method)
-	case ChainFinalizedHead:
-		r := j.ToNewHead()
-		_ = s.updateChainMetadata(map[string]interface{}{"finalized_blockNum": util.HexToNumStr(r.Number)})
-		upgradeHealth(j.Method)
-		go func() {
-			s.newFinHead <- true
-			onceFinHead.Do(func() {
-				go s.subscribeFetchBlock()
-			})
-		}()
-	case StateStorage:
-		upgradeHealth(j.Method)
 	default:
 		return
 	}
 	return
 }
 
-func (s *SubscribeService) subscribeFetchBlock() {
-	var wg sync.WaitGroup
-	ctx := context.TODO()
-	type BlockFinalized struct {
-		BlockNum  int  `json:"block_num"`
-		Finalized bool `json:"finalized"`
-	}
-
-	p, _ := ants.NewPoolWithFunc(5, func(i interface{}) {
-		blockNum := i.(BlockFinalized)
-		func(bf BlockFinalized) {
-			if err := s.FillBlockData(nil, bf.BlockNum, bf.Finalized); err != nil {
-				log.Printf("ChainGetBlockHash get error %v", err)
-			} else {
-				s.SetHeartBeat(fmt.Sprintf("%s:heartBeat:%s", util.NetworkNode, "substrate"))
-			}
-		}(blockNum)
-		wg.Done()
-	}, ants.WithOptions(ants.Options{PanicHandler: func(c interface{}) {}}))
-
-	defer p.Release()
+func (s *SubscribeService) subscribeFetchBlock(ctx context.Context) {
 	for {
 		select {
 		case <-s.newFinHead:
-			final, err := s.dao.GetFinalizedBlockNum(context.TODO())
-			if err != nil || final == 0 {
+
+			if s.finalizedBlockNum == 0 {
 				time.Sleep(BlockTime * time.Second)
 				return
 			}
 
 			lastNum, _ := s.dao.GetFillFinalizedBlockNum(ctx)
-			startBlock := lastNum + 1
-			if lastNum == 0 {
-				startBlock = lastNum
+			startBlock := int64(lastNum)
+			if s.lastBlock > 0 {
+				startBlock = s.lastBlock + 1
 			}
-
-			for i := startBlock; i <= int(final-FinalizedWaitingBlockCount); i++ {
-				wg.Add(1)
-				_ = p.Invoke(BlockFinalized{BlockNum: i, Finalized: true})
+			for i := startBlock; i <= s.finalizedBlockNum-FinalizedWaitingBlockCount; i++ {
+				_ = mq.Instant.Publish("block", "block", map[string]interface{}{"block_num": i})
+				util.Logger().Info(fmt.Sprintf("Publish block num %d", i))
+				s.lastBlock = i
 			}
-			wg.Wait()
-		case <-s.done:
+		case <-ctx.Done():
 			return
 		}
 	}
@@ -153,35 +97,43 @@ const (
 	wsSpec
 )
 
-func (s *Service) FillBlockData(conn websocket.WsConn, blockNum int, finalized bool) (err error) {
-	block := s.dao.GetBlockByNum(blockNum)
-	if block != nil && block.Finalized && !block.CodecError {
+func (s *Service) FillBlockData(ctx context.Context, blockNum uint, force bool) (err error) {
+	block := s.dao.GetBlockByNum(ctx, blockNum)
+	if block != nil && block.Finalized && !block.CodecError && !force {
 		return nil
 	}
 
-	v := &rpc.JsonRpcResult{}
+	conn := s.dbStorage.RPCPool().Conn
+
+	v := &model.JsonRpcResult{}
 
 	// Block Hash
-	if err = websocket.SendWsRequest(conn, v, rpc.ChainGetBlockHash(wsBlockHash, blockNum)); err != nil {
+	if err = websocket.SendWsRequest(conn, v, rpc.ChainGetBlockHash(wsBlockHash, int(blockNum))); err != nil {
 		return fmt.Errorf("websocket send error: %v", err)
 	}
 	blockHash, err := v.ToString()
 	if err != nil || blockHash == "" {
 		return fmt.Errorf("ChainGetBlockHash get error %v", err)
 	}
-	log.Printf("Block num %d hash %s", blockNum, blockHash)
+	util.Logger().Info(fmt.Sprintf("Block num %d hash %s", blockNum, blockHash))
 
 	// block
 	if err = websocket.SendWsRequest(conn, v, rpc.ChainGetBlock(wsBlock, blockHash)); err != nil {
 		return fmt.Errorf("websocket send error: %v", err)
 	}
 	rpcBlock := v.ToBlock()
+	if rpcBlock == nil {
+		return errors.New("nil block data")
+	}
 
 	// event
 	if err = websocket.SendWsRequest(conn, v, rpc.StateGetStorage(wsEvent, util.EventStorageKey, blockHash)); err != nil {
 		return fmt.Errorf("websocket send error: %v", err)
 	}
 	event, _ := v.ToString()
+	if event == "" {
+		return errors.New("nil event data")
+	}
 
 	// runtime
 	if err = websocket.SendWsRequest(conn, v, rpc.ChainGetRuntimeVersion(wsSpec, blockHash)); err != nil {
@@ -201,31 +153,16 @@ func (s *Service) FillBlockData(conn websocket.WsConn, blockNum int, finalized b
 		util.CurrentRuntimeSpecVersion = specVersion
 	}
 
-	if rpcBlock == nil || specVersion == -1 {
-		return errors.New("nil block data")
+	if specVersion == -1 {
+		return errors.New("nil runtime version")
 	}
 
 	var setFinalized = func() {
-		if finalized {
-			_ = s.dao.SaveFillAlreadyFinalizedBlockNum(context.TODO(), blockNum)
-		}
-	}
-	// refresh finalized info for update
-	if block != nil {
-		// Confirm data, only set block Finalized, refresh all block data
-		block.ExtrinsicsRoot = rpcBlock.Block.Header.ExtrinsicsRoot
-		block.Hash = blockHash
-		block.ParentHash = rpcBlock.Block.Header.ParentHash
-		block.StateRoot = rpcBlock.Block.Header.StateRoot
-		block.Extrinsics = util.ToString(rpcBlock.Block.Extrinsics)
-		block.Logs = util.ToString(rpcBlock.Block.Header.Digest.Logs)
-		block.Event = event
-		_ = s.UpdateBlockData(conn, block, finalized)
-		return
+		_ = s.dao.SaveFillAlreadyFinalizedBlockNum(context.TODO(), int(blockNum))
 	}
 	// for Create
-	if err = s.CreateChainBlock(conn, blockHash, &rpcBlock.Block, event, specVersion, finalized); err == nil {
-		_ = s.dao.SaveFillAlreadyBlockNum(context.TODO(), blockNum)
+	if err = s.CreateChainBlock(ctx, blockHash, &rpcBlock.Block, event, specVersion); err == nil {
+		_ = s.dao.SaveFillAlreadyBlockNum(ctx, int(blockNum))
 		setFinalized()
 	} else {
 		log.Printf("Create chain block error %v", err)

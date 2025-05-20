@@ -6,10 +6,10 @@ import (
 	"golang.org/x/crypto/blake2b"
 )
 
-func Decode(address string, addressType int) string {
+func Decode(address string) string {
 	checksumPrefix := []byte("SS58PRE")
 	ss58Format := base58.Decode(address)
-	if len(ss58Format) == 0 || ss58Format[0] != byte(addressType) {
+	if len(ss58Format) == 0 {
 		return ""
 	}
 	var checksumLength int

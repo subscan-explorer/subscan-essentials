@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"github.com/itering/subscan/model"
+	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -15,11 +17,9 @@ func TestService_createExtrinsic(t *testing.T) {
 	metadataInstant := testSrv.getMetadataInstant(4, "")
 	decodeExtrinsics, err := substrate.DecodeExtrinsic(encodeExtrinsic, metadataInstant, 4)
 	assert.NoError(t, err)
-
-	count, blockTime, txMap, feeMap, err := testSrv.createExtrinsic(ctx, txn, &testBlock, encodeExtrinsic, decodeExtrinsics, nil)
+	var extrinsics []model.ChainExtrinsic
+	_ = util.UnmarshalAny(&extrinsics, decodeExtrinsics)
+	err = testSrv.createExtrinsic(ctx, txn, &testBlock, extrinsics, encodeExtrinsic, nil)
 	assert.NoError(t, err)
-	assert.Equal(t, 3, count)
-	assert.Equal(t, 1595556906, blockTime)
-	assert.Equal(t, 1, len(feeMap))
-	assert.Equal(t, map[string]string{"947687-2": "5ee3f70a70d033d30755eeb1afe80520433cdc1d99348a522f2302d785ac907a"}, txMap)
+
 }

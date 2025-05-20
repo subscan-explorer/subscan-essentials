@@ -9,12 +9,12 @@ import (
 func TestSubscribeParserMessage(t *testing.T) {
 	done := make(chan struct{})
 	defer close(done)
-	subscribeSrv := testSrv.initSubscribeService(done)
+	subscribeSrv := testSrv.initSubscribeService()
 
 	err := subscribeSrv.parser([]byte(``))
 	assert.Error(t, err)
 
-	testSrv.dao.(*MockDao).On("GetBestBlockNum", context.TODO()).Return(uint64(1245201), nil)
+	testSrv.dao.(*MockDao).On("GetFinalizedBlock", context.TODO()).Return(uint64(1245201), nil)
 	testSrv.dao.(*MockDao).On("GetFillBestBlockNum", context.TODO()).Return(1245200, nil)
 	testSrv.dao.(*MockDao).On("GetFinalizedBlockNum", context.TODO()).Return(uint64(1245201), nil)
 	testSrv.dao.(*MockDao).On("GetFillFinalizedBlockNum", context.TODO()).Return(1245200, nil)
@@ -26,21 +26,4 @@ func TestSubscribeParserMessage(t *testing.T) {
 	_ = subscribeSrv.parser([]byte(`{"jsonrpc":"2.0","method":"chain_finalizedHead","params":{"result":{"digest":{"logs":["0x064241424534021c0000000a61dc0f00000000","0x00904d4d5252c32aca3b03b483429056df60abca5bb2142f34124c6d03c664c191e7178fffbf","0x054241424501013a92db271ab64cc1827ca7c76ae324c8dd978679758935b94503c0765b5d8a5fe3b2d266b78b8b8879b68200a31fb7e56b9da323069d4a76a7c52715faf54d86"]},"extrinsicsRoot":"0x10a8648c10909b1a68a80679a27f650e82b3962fbb42f021883f359bbce0ad55","number":"0x13004a","parentHash":"0x5db569d34f8018f4b49adfee7b719e19f5c192a50b4c1e680f1fd550209c988d","stateRoot":"0x798f98a70681cd1d70b39b806dcb0db6aa68ed6395d3051cd9ed1eb7c1efb6ff"},"subscription":19171}}`))
 
 	_ = subscribeSrv.parser([]byte(`{"jsonrpc":"2.0","method":"state_storage","params":{"result":{"block":"0xcee4c91b637487d951ef4704ffe6b36de5bb2a54fe39016dafae5f118d5b8752","changes":[["0x481e203dcea218263e3a96ca9e4b193857c875e4cff74148e4628f264b974c80","0xf48667ede356681b0000000000000000"]]},"subscription":19447}}`))
-}
-
-func TestService_FillBlockData(t *testing.T) {
-	testSrv.dao.(*MockDao).On("GetBlockByNum", 1245201).Return(nil, nil)
-	tc := TestConn{}
-	err := testSrv.FillBlockData(&tc, 1245201, true)
-	assert.NoError(t, err)
-}
-
-func TestService_subscribeFetchBlock(t *testing.T) {
-	done := make(chan struct{})
-	defer close(done)
-	testSrv.dao.(*MockDao).On("GetFinalizedBlockNum", context.TODO()).Return(uint64(1245201), nil)
-	testSrv.dao.(*MockDao).On("GetFillFinalizedBlockNum", context.TODO()).Return(1245200, nil)
-	sub := testSrv.initSubscribeService(done)
-	go sub.subscribeFetchBlock()
-	sub.newFinHead <- true
 }

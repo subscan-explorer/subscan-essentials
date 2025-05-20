@@ -17,22 +17,19 @@ var (
 		ParentHash:     "0x14b8b808939e4930703403d74e73ff7829c18680dd434e851b200982af423dea",
 		StateRoot:      "0xd3adc9ed6f9e2df6a13a88a3628c01d7920fd709693120b3df75434aea3592a7",
 		ExtrinsicsRoot: "0xc99ede2068646be80f2957c21667a7669539bd105bd855af37c2166a1ba43e4a",
-		Logs:           `["0x0642414245b501010a000000fac3d70f000000009e335d221536deb53426c3f2529a14426a322463a844d527f8050c73f09c2d37bfe0d8f57a7b6c6e6cd6ef576d00bb97b5bcf8c87ec7a55670b03c0dfe823000d2d3bb5767274a282be5dd15f7e6ea333dc44c299f187dee4900fdf1a0b46003","0x00904d4d5252fbe5a48df0e2a689c92a630bcbb451d66e2ac0ea839096e2617c4fe1b22a635e","0x05424142450101ea06828ccb667fbaebdda98219e93700c24c6887b767680949fde8082a93673cf96bb377923751c892d37c78eaa5c8e6b453efbac656fbcac4a8b99a82287e89"]`,
-		Extrinsics:     `["0x280402000b603301517301"]`,
-		Event:          `0x040000000000000080e36a0900000000020000`,
 		SpecVersion:    3,
 		Validator:      "60e2feb892e672d5579ed10ecae0d162031fe5adc3692498ad262fb126a65732",
 		Finalized:      true,
 	}
 
 	testEvent = model.ChainEvent{
-		EventIdx:     0,
-		BlockNum:     947687,
-		ModuleId:     "imonline",
-		EventId:      "AllGood",
-		Params:       util.ToString([]interface{}{}),
-		ExtrinsicIdx: 0,
-		EventIndex:   "947687-0",
+		EventIdx:       0,
+		BlockNum:       947687,
+		ModuleId:       "imonline",
+		EventId:        "AllGood",
+		Params:         model.EventParams{},
+		ExtrinsicIdx:   0,
+		ExtrinsicIndex: "947687-0",
 	}
 
 	testExtrinsic = model.ChainExtrinsic{
@@ -40,14 +37,13 @@ var (
 		ExtrinsicIndex:     "947687-0",
 		BlockNum:           947687,
 		BlockTimestamp:     1594791900,
-		VersionInfo:        "04",
 		CallModuleFunction: "set",
 		CallModule:         "timestamp",
-		Params: model.ExtrinsicParam{
+		Params: model.ExtrinsicParams{model.ExtrinsicParam{
 			Name:  "now",
 			Type:  "Compact<Moment>",
 			Value: 1594791900,
-		},
+		}},
 		Success: true,
 	}
 
@@ -56,7 +52,6 @@ var (
 		ExtrinsicIndex:     "947689-1",
 		BlockNum:           947689,
 		BlockTimestamp:     1594791900,
-		VersionInfo:        "04",
 		CallModuleFunction: "transfer",
 		CallModule:         "balances",
 		AccountId:          "242f0781faa44f34ddcbc9e731d0ddb51c97f5b58bb2202090a3a1c679fc4c63",
@@ -82,7 +77,7 @@ var (
 		BlockNum: 947687,
 		LogIndex: "947687-0",
 		LogType:  "Seal",
-		Data:     `{"data":"0x0e4278b7e76436dc08ee4c47d83a0313ef5980dc9fc46b94ccf76318906a4c162e6d1a2b33a69184d4c662ce31176652f0fde8b87cd58e6d1347a28aa29fd58e","engine":1161969986}`,
+		Data:     map[string]interface{}{"data": "0x0e4278b7e76436dc08ee4c47d83a0313ef5980dc9fc46b94ccf76318906a4c162e6d1a2b33a69184d4c662ce31176652f0fde8b87cd58e6d1347a28aa29fd58e", "engine": 1161969986},
 	}
 )
 
@@ -90,7 +85,7 @@ func init() {
 	util.ConfDir = "../../configs"
 	configs.Init()
 
-	testDao, _ = New()
+	testDao, _, _ = New()
 	var tables []string
 	db := testDao.db
 	err := db.Raw("show tables;").Pluck("Tables_in_subscan_test", &tables).Error
@@ -104,17 +99,32 @@ func init() {
 	}
 	ctx := context.TODO()
 	txn := testDao.DbBegin()
-	_ = testDao.CreateBlock(txn, &testBlock)
-	_ = testDao.CreateEvent(txn, &testEvent)
-	_ = testDao.CreateExtrinsic(ctx, txn, &testExtrinsic)
-	_ = testDao.CreateExtrinsic(ctx, txn, &testSignedExtrinsic)
-	_ = testDao.CreateLog(txn, &testLog)
+	err = testDao.CreateBlock(txn, &testBlock)
+	if err != nil {
+		panic(err)
+	}
+	err = testDao.CreateEvent(txn, &testEvent)
+	if err != nil {
+		panic(err)
+	}
+	err = testDao.CreateExtrinsic(ctx, txn, &testExtrinsic)
+	if err != nil {
+		panic(err)
+	}
+	err = testDao.CreateExtrinsic(ctx, txn, &testSignedExtrinsic)
+	if err != nil {
+		panic(err)
+	}
+	err = testDao.CreateLog(txn, &testLog)
+	if err != nil {
+		panic(err)
+	}
 	txn.Commit()
 
 	testDao.CreateRuntimeVersion("polkadot", 1)
 	testDao.SetRuntimeData(1, "system|staking", "0x0")
 
-	conn, _ := testDao.redis.GetContext(ctx)
+	conn, _ := testDao.redis.Redis().GetContext(ctx)
 	_, _ = conn.Do("FLUSHALL")
 	defer conn.Close()
 }

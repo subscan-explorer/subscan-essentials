@@ -3,6 +3,7 @@ package plugins
 import (
 	"github.com/itering/subscan-plugin"
 	"github.com/itering/subscan/plugins/balance"
+	"github.com/itering/subscan/plugins/evm"
 	"github.com/itering/subscan/plugins/system"
 	"reflect"
 	"strings"
@@ -16,9 +17,10 @@ var RegisteredPlugins = make(map[string]PluginFactory)
 func init() {
 	registerNative(balance.New())
 	registerNative(system.New())
+	registerNative(evm.New())
 }
 
-func register(name string, f interface{}) {
+func register(name string, f subscan_plugin.Plugin) {
 	name = strings.ToLower(name)
 	if f == nil {
 		return
@@ -33,20 +35,6 @@ func register(name string, f interface{}) {
 	}
 }
 
-func registerNative(p interface{}) {
+func registerNative(p subscan_plugin.Plugin) {
 	register(reflect.ValueOf(p).Type().Elem().Name(), p)
-}
-
-type PluginInfo struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
-	Ui      bool   `json:"ui"`
-}
-
-func List() []PluginInfo {
-	plugins := make([]PluginInfo, 0, len(RegisteredPlugins))
-	for name, plugin := range RegisteredPlugins {
-		plugins = append(plugins, PluginInfo{Name: name, Version: plugin.Version(), Ui: plugin.UiConf() != nil})
-	}
-	return plugins
 }

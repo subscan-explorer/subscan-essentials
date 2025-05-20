@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/itering/subscan/share/token"
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc/rpc"
 	"github.com/itering/substrate-api-rpc/websocket"
@@ -16,6 +17,12 @@ func (s *Service) unknownToken() {
 		if p, _ := rpc.GetSystemProperties(nil); p != nil {
 			util.AddressType = util.IntToString(p.Ss58Format)
 			util.BalanceAccuracy = util.IntToString(p.TokenDecimals)
+			token.SetDefault(&token.Token{
+				TokenId:  p.TokenSymbol,
+				Symbol:   p.TokenSymbol,
+				Decimals: p.TokenDecimals,
+			})
 		}
 	})
+
 }
