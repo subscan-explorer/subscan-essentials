@@ -2662,6 +2662,13 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
+                "category": {
+                    "type": "string",
+                    "enum": [
+                        "erc20",
+                        "erc721"
+                    ]
+                },
                 "page": {
                     "type": "integer",
                     "minimum": 0

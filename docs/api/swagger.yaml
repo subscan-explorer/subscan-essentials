@@ -829,6 +829,11 @@ definitions:
     properties:
       address:
         type: string
+      category:
+        enum:
+        - erc20
+        - erc721
+        type: string
       page:
         minimum: 0
         type: integer

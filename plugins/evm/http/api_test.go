@@ -23,7 +23,7 @@ func (m MockServer) TokenList(ctx context.Context, _, category string, page, row
 	return nil, 0
 }
 
-func (m MockServer) TokenTransfers(ctx context.Context, address, tokenAddress string, page, row int) ([]dao.TokenTransferJson, int) {
+func (m MockServer) TokenTransfers(ctx context.Context, address, tokenAddress, _ string, page, row int) ([]dao.TokenTransferJson, int) {
 	return nil, 0
 }
 

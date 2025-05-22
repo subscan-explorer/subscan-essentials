@@ -119,6 +119,7 @@ type tokenTransferParams struct {
 	Address      string `json:"address" validate:"omitempty,eth_addr"`
 	Page         int    `json:"page" validate:"min=0"`
 	Row          int    `json:"row" validate:"min=1,max=100"`
+	Category     string `json:"category" validate:"omitempty,oneof=erc20 erc721"`
 }
 
 // @Summary Evm token transfer
@@ -138,7 +139,7 @@ func tokenTransferHandle(w http.ResponseWriter, r *http.Request) error {
 		toJson(w, 10001, nil, fmt.Errorf("token_address or address is required"))
 		return nil
 	}
-	transfers, count := srv.TokenTransfers(r.Context(), p.Address, p.TokenAddress, p.Page, p.Row)
+	transfers, count := srv.TokenTransfers(r.Context(), p.Address, p.TokenAddress, p.Category, p.Page, p.Row)
 	toJson(w, 0, map[string]interface{}{"transfers": transfers, "count": count}, nil)
 	return nil
 }

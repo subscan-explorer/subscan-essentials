@@ -30,7 +30,7 @@ type ISrv interface {
 	AccountTokens(ctx context.Context, address, category string) []AccountTokenJson
 	Collectibles(ctx context.Context, address string, contract string, page, row int) ([]Erc721Holders, int)
 	TokenList(ctx context.Context, contract, category string, page, row int) ([]Token, int)
-	TokenTransfers(ctx context.Context, address, tokenAddress string, page, row int) ([]TokenTransferJson, int)
+	TokenTransfers(ctx context.Context, address, tokenAddress, category string, page, row int) ([]TokenTransferJson, int)
 	TokenHolders(ctx context.Context, address string, page int, row int) ([]TokenHolder, int)
 }
 
@@ -490,7 +490,7 @@ func (a *ApiSrv) TokenList(ctx context.Context, contract, category string, page,
 	return tokens, int(count)
 }
 
-func (a *ApiSrv) TokenTransfers(ctx context.Context, address, tokenAddress string, page, row int) ([]TokenTransferJson, int) {
+func (a *ApiSrv) TokenTransfers(ctx context.Context, address, tokenAddress, category string, page, row int) ([]TokenTransferJson, int) {
 	var transfers []TokensTransfers
 	var count int64
 
@@ -500,6 +500,9 @@ func (a *ApiSrv) TokenTransfers(ctx context.Context, address, tokenAddress strin
 	}
 	if tokenAddress != "" {
 		query.Where("contract = ?", tokenAddress)
+	}
+	if category != "" {
+		query.Where("category = ?", category)
 	}
 	query.Count(&count)
 	query.Offset(page * row).Limit(row).Find(&transfers)
