@@ -21,7 +21,7 @@ require (
 	github.com/swaggo/swag v1.16.4
 	github.com/urfave/cli v1.22.1
 	golang.org/x/crypto v0.36.0
-	golang.org/x/net v0.34.0
+	golang.org/x/net v0.38.0
 	gorm.io/datatypes v1.2.5
 	gorm.io/driver/mysql v1.5.6
 	gorm.io/driver/postgres v1.5.0
