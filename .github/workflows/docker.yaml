@@ -4,9 +4,7 @@ on:
     tags:
       - 'v*'
     branches:
-      - main
-      - develop
-      - new
+      - master
 
 jobs:
   build:
