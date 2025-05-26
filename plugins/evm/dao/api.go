@@ -380,8 +380,12 @@ type TransactionSampleJson struct {
 func (a *ApiSrv) TransactionsJson(ctx context.Context, page model.Option, opts ...model.Option) ([]TransactionSampleJson, int) {
 	var list []Transaction
 	var count int64
-	sg.db.WithContext(ctx).Scopes(page).Scopes(opts...).Find(&list)
 	sg.db.WithContext(ctx).Model(Transaction{}).Scopes(opts...).Count(&count)
+	if count == 0 {
+		return nil, 0
+	}
+	sg.db.WithContext(ctx).Scopes(page).Scopes(opts...).Order("transaction_id desc").Find(&list)
+
 	var res []TransactionSampleJson
 	for _, v := range list {
 		res = append(res, TransactionSampleJson{
