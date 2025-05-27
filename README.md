@@ -20,6 +20,7 @@ the Subscan team and powering [subscan.io](https://www.subscan.io/), it provides
 - [Quick Start](#quick-start)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
+    - [React UI Configuration](#react-ui-configuration)
     - [Configuration](#configuration)
     - [Running Services](#running-services)
 - [Docker Deployment](#docker-deployment)
@@ -56,6 +57,59 @@ the Subscan team and powering [subscan.io](https://www.subscan.io/), it provides
 ```bash
 ./build.sh build
 
+```
+
+### React UI Configuration
+
+Subscan Essentials supports a React-based UI for a modern frontend experience. The React UI repository is available at [subscan-essentials-ui-react](https://github.com/subscan-explorer/subscan-essentials-ui-react).
+
+#### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+
+#### Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/subscan-explorer/subscan-essentials-ui-react.git
+cd subscan-essentials-ui-react
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+# or
+yarn
+```
+
+#### Configuration
+
+Add API host environment variable when deployment:
+
+```bash
+# API endpoint address
+NEXT_PUBLIC_API_HOST=http://localhost:4399
+```
+
+#### Development Server
+
+```bash
+npm run dev
+# or
+yarn run dev
+```
+
+Visit [http://localhost:3000](http://localhost:3000) to view the UI interface.
+
+#### Production Build
+
+```bash
+npm run build
+# or
+yarn run build
 ```
 
 ### configuration
