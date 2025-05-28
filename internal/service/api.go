@@ -17,20 +17,24 @@ func (s *Service) Ping(ctx context.Context, _ *empty.Empty) (*empty.Empty, error
 	return &empty.Empty{}, s.dao.Ping(ctx)
 }
 
-func (s *Service) Metadata(ctx context.Context) (map[string]string, error) {
-	m, err := s.dao.GetMetadata(ctx)
+func (s *Service) Metadata(ctx context.Context) (map[string]interface{}, error) {
+	meta, err := s.dao.GetMetadata(ctx)
 	if err != nil {
 		return nil, err
 	}
+	m := make(map[string]interface{})
 	m["networkNode"] = util.NetworkNode
 	m["balanceAccuracy"] = util.BalanceAccuracy
 	m["addressType"] = util.AddressType
 
 	evm, ok := plugins.RegisteredPlugins["evm"]
 	if ok && evm.Enable() {
-		m["enable_evm"] = fmt.Sprintf("%t", configs.Boot.UI.EnableEvm)
+		m["enable_evm"] = configs.Boot.UI.EnableEvm
 	}
-	m["enable_substrate"] = fmt.Sprintf("%t", configs.Boot.UI.EnableSubstrate)
+	m["enable_substrate"] = configs.Boot.UI.EnableSubstrate
+	for k, v := range meta {
+		m[k] = v
+	}
 	return m, err
 }
 
