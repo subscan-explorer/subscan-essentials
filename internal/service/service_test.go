@@ -190,6 +190,10 @@ func (m *MockDao) GetExtrinsicList(c context.Context, page, row int, order strin
 func (m *MockDao) GetExtrinsicsByHash(c context.Context, hash string) *model.ChainExtrinsic {
 	return nil
 }
+
+func (m *MockDao) GetExtrinsicsByIndex(c context.Context, index string) *model.ChainExtrinsic {
+	return nil
+}
 func (m *MockDao) GetExtrinsicsDetailByHash(c context.Context, hash string) *model.ExtrinsicDetail {
 	return nil
 }

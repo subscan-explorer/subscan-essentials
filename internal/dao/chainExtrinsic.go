@@ -75,12 +75,23 @@ func (d *Dao) GetExtrinsicsByHash(c context.Context, hash string) *model.ChainEx
 	var extrinsic model.ChainExtrinsic
 	blockNum, _ := d.GetFillBestBlockNum(c)
 	for index := blockNum / int(model.SplitTableBlockNum); index >= 0; index-- {
-		query := d.db.Scopes(model.TableNameFunc(model.ChainExtrinsic{BlockNum: uint(index) * model.SplitTableBlockNum})).Where("extrinsic_hash = ?", hash).First(&extrinsic)
+		query := d.db.WithContext(c).Scopes(model.TableNameFunc(model.ChainExtrinsic{BlockNum: uint(index) * model.SplitTableBlockNum})).Where("extrinsic_hash = ?", hash).First(&extrinsic)
 		if query != nil && query.Error == nil {
 			return &extrinsic
 		}
 	}
 	return nil
+}
+
+func (d *Dao) GetExtrinsicsByIndex(c context.Context, index string) *model.ChainExtrinsic {
+	var extrinsic model.ChainExtrinsic
+	indexArr := strings.Split(index, "-")
+	query := d.db.WithContext(c).Scopes(model.TableNameFunc(model.ChainExtrinsic{BlockNum: util.StringToUInt(indexArr[0])})).
+		Where("extrinsic_index = ?", index).Find(&extrinsic)
+	if query == nil || query.Error != nil {
+		return nil
+	}
+	return &extrinsic
 }
 
 func (d *Dao) GetExtrinsicsDetailByHash(c context.Context, hash string) *model.ExtrinsicDetail {
@@ -93,7 +104,7 @@ func (d *Dao) GetExtrinsicsDetailByHash(c context.Context, hash string) *model.E
 func (d *Dao) GetExtrinsicsDetailByIndex(c context.Context, index string) *model.ExtrinsicDetail {
 	var extrinsic model.ChainExtrinsic
 	indexArr := strings.Split(index, "-")
-	query := d.db.Scopes(model.TableNameFunc(model.ChainExtrinsic{BlockNum: util.StringToUInt(indexArr[0])})).
+	query := d.db.WithContext(c).Scopes(model.TableNameFunc(model.ChainExtrinsic{BlockNum: util.StringToUInt(indexArr[0])})).
 		Where("extrinsic_index = ?", index).Find(&extrinsic)
 	if query == nil || query.Error != nil {
 		return nil

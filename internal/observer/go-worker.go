@@ -5,16 +5,20 @@ import (
 	"fmt"
 	"github.com/bitly/go-simplejson"
 	"github.com/itering/go-workers"
+	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/plugins"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/mq"
+	"github.com/shopspring/decimal"
 )
 
 func Consumption() {
-	// workers.Logger = log.Logger()
 	concurrency := util.StringToInt(util.GetEnv("WORKER_GOROUTINE_COUNT", "10"))
 	workers.Process("block", emitMsg, concurrency)
 	workers.Process("balance", emitMsg, concurrency)
+	workers.Process("plugin-block", emitMsg, concurrency)
+	workers.Process("plugin-event", emitMsg, concurrency)
+	workers.Process("plugin-extrinsic", emitMsg, concurrency)
 
 	for _, plugin := range plugins.RegisteredPlugins {
 		for _, queue := range plugin.ConsumptionQueue() {
@@ -34,6 +38,67 @@ func emitMsg(message *workers.Msg) {
 		switch queue {
 		case "block":
 			return blockWorker(ctx, raw)
+		case "plugin-block":
+			type T struct {
+				BlockNum   uint   `json:"block_num"`
+				PluginName string `json:"plugin_name"`
+			}
+			var args T
+			if err := util.UnmarshalAny(&args, raw); err != nil {
+				panic(fmt.Errorf("plugin-block worker args unmarshal error: %s", err.Error()))
+			}
+
+			p, ok := plugins.RegisteredPlugins[args.PluginName]
+			if !ok {
+				return nil
+			}
+			return p.ProcessBlock(ctx, srv.GetDao().GetBlockByNum(ctx, args.BlockNum).AsPlugin())
+
+		case "plugin-event":
+			type T struct {
+				EventIndex string `json:"event_index"`
+				BlockNum   uint   `json:"block_num"`
+				PluginName string `json:"plugin_name"`
+			}
+			var args T
+			if err := util.UnmarshalAny(&args, raw); err != nil {
+				panic(fmt.Errorf("plugin-block worker args unmarshal error: %s", err.Error()))
+			}
+			p, ok := plugins.RegisteredPlugins[args.PluginName]
+			if !ok {
+				return nil
+			}
+
+			d := srv.GetDao()
+			block := srv.GetDao().GetBlockByNum(ctx, args.BlockNum).AsPlugin()
+			event := d.GetEventByIdx(ctx, args.EventIndex).AsPlugin()
+			return p.ProcessEvent(block, event, decimal.Zero)
+
+		case "plugin-extrinsic":
+			type T struct {
+				ExtrinsicIndex string `json:"event_index"`
+				BlockNum       uint   `json:"block_num"`
+				PluginName     string `json:"plugin_name"`
+			}
+			var args T
+			if err := util.UnmarshalAny(&args, raw); err != nil {
+				panic(fmt.Errorf("plugin-block worker args unmarshal error: %s", err.Error()))
+			}
+			p, ok := plugins.RegisteredPlugins[args.PluginName]
+			if !ok {
+				return nil
+			}
+
+			d := srv.GetDao()
+			block := srv.GetDao().GetBlockByNum(ctx, args.BlockNum).AsPlugin()
+			extrinsic := d.GetExtrinsicsByIndex(ctx, args.ExtrinsicIndex).AsPlugin()
+			events := d.GetEventsByIndex(args.ExtrinsicIndex)
+			var pEvents []storage.Event
+			for _, event := range events {
+				pEvents = append(pEvents, *event.AsPlugin())
+			}
+			return p.ProcessExtrinsic(block, extrinsic, pEvents)
+
 		default:
 			// Call the plugin's process function
 			for _, plugin := range plugins.RegisteredPlugins {
@@ -44,7 +109,10 @@ func emitMsg(message *workers.Msg) {
 		}
 		return nil
 	}
-	util.Logger().Error(do(context.Background(), message.Get("queue").MustString(), message.Get("class").MustString(), message.Get("args")))
+	err := do(context.Background(), message.Get("queue").MustString(), message.Get("class").MustString(), message.Get("args"))
+	if err != nil {
+		_ = mq.Instant.ForcePublish(message.Get("queue").MustString(), message.Get("class").MustString(), message.Get("args"))
+	}
 }
 
 type blockArgs struct {

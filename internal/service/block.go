@@ -86,7 +86,7 @@ func (s *Service) CreateChainBlock(ctx context.Context, hash string, block *smod
 
 	if err = s.dao.CreateBlock(txn, &cb); err == nil {
 		s.dao.DbCommit(txn)
-		s.emitBlock(ctx, &cb)
+		return s.emitBlock(ctx, &cb)
 	}
 	return err
 }
