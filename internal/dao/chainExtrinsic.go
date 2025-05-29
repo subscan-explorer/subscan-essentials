@@ -9,31 +9,14 @@ import (
 	"strings"
 )
 
-func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.ChainExtrinsic) error {
-	ce := model.ChainExtrinsic{
-		ID:                 extrinsic.ID,
-		BlockTimestamp:     extrinsic.BlockTimestamp,
-		ExtrinsicIndex:     extrinsic.ExtrinsicIndex,
-		BlockNum:           extrinsic.BlockNum,
-		CallModuleFunction: extrinsic.CallModuleFunction,
-		CallModule:         extrinsic.CallModule,
-		Params:             extrinsic.Params,
-		AccountId:          extrinsic.AccountId,
-		Signature:          extrinsic.Signature,
-		Era:                extrinsic.Era,
-		ExtrinsicHash:      util.AddHex(extrinsic.ExtrinsicHash),
-		Nonce:              extrinsic.Nonce,
-		Success:            extrinsic.Success,
-		IsSigned:           extrinsic.Signature != "",
-		Fee:                extrinsic.Fee,
-		UsedFee:            extrinsic.UsedFee,
+func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic []model.ChainExtrinsic, signedExtrinsicCount int) error {
+	if len(extrinsic) == 0 {
+		return nil
 	}
-	query := txn.Scopes(d.TableNameFunc(&ce), model.IgnoreDuplicate).Scopes(model.IgnoreDuplicate).Create(&ce)
+	query := txn.Scopes(d.TableNameFunc(&extrinsic[0]), model.IgnoreDuplicate).CreateInBatches(extrinsic, 2000)
 	if query.RowsAffected > 0 {
-		_ = d.IncrMetadata(c, "count_extrinsic", 1)
-		if ce.IsSigned {
-			_ = d.IncrMetadata(c, "count_signed_extrinsic", 1)
-		}
+		_ = d.IncrMetadata(c, "count_extrinsic", int(query.RowsAffected))
+		_ = d.IncrMetadata(c, "count_signed_extrinsic", signedExtrinsicCount)
 	}
 	return query.Error
 }

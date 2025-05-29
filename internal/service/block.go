@@ -65,7 +65,7 @@ func (s *Service) CreateChainBlock(ctx context.Context, hash string, block *smod
 
 	var extrinsics []model.ChainExtrinsic
 	_ = util.UnmarshalAny(&extrinsics, decodeExtrinsics)
-	extrinsics = s.fillExtrinsicHash(extrinsics, block.Extrinsics)
+	extrinsics = s.fillExtrinsicHash(blockNum, extrinsics, block.Extrinsics)
 	cb.BlockTimestamp = FindOutBlockTime(extrinsics)
 	err = s.createExtrinsic(ctx, txn, &cb, extrinsics, block.Extrinsics, eventMap)
 	if err != nil {
@@ -86,6 +86,20 @@ func (s *Service) CreateChainBlock(ctx context.Context, hash string, block *smod
 
 	if err = s.dao.CreateBlock(txn, &cb); err == nil {
 		s.dao.DbCommit(txn)
+		// emit extrinsic/event process after commit
+		for index := range events {
+			e := events[index]
+			e.BlockNum = blockNum
+			if err = s.emitEvent(&e); err != nil {
+				return err
+			}
+		}
+		for index := range extrinsics {
+			e := extrinsics[index]
+			if err = s.emitExtrinsic(ctx, &e); err != nil {
+				return err
+			}
+		}
 		return s.emitBlock(ctx, &cb)
 	}
 	return err
@@ -118,10 +132,6 @@ func (s *Service) GetBlockByHashJson(ctx context.Context, hash string) *model.Ch
 	return s.dao.BlockAsJson(ctx, block)
 }
 
-func (s *Service) EventByIndex(ctx context.Context, index string) *model.ChainEvent {
-	return s.dao.GetEventByIdx(ctx, index)
-}
-
 func (s *Service) ValidatorsList(hash string) (validatorList []string) {
 	validatorsRaw, _ := rpc.ReadStorage(nil, "Session", "Validators", hash)
 	for _, addr := range validatorsRaw.ToStringSlice() {
@@ -130,11 +140,13 @@ func (s *Service) ValidatorsList(hash string) (validatorList []string) {
 	return
 }
 
-func (s *Service) fillExtrinsicHash(extrinsicList []model.ChainExtrinsic, extrinsicRaws []string) []model.ChainExtrinsic {
+func (s *Service) fillExtrinsicHash(blockNum uint, extrinsicList []model.ChainExtrinsic, extrinsicRaws []string) []model.ChainExtrinsic {
 	for i, e := range extrinsicList {
+		extrinsicList[i].BlockNum = blockNum
 		if e.ExtrinsicHash == "" {
 			extrinsicList[i].ExtrinsicHash = util.AddHex(util.BytesToHex(hasher.HashByCryptoName(util.HexToBytes(extrinsicRaws[i]), "Blake2_256")))
 		}
+		extrinsicList[i].ExtrinsicIndex = fmt.Sprintf("%d-%d", e.BlockNum, i)
 	}
 	return extrinsicList
 }

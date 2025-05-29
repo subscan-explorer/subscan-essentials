@@ -103,15 +103,15 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	err = testDao.CreateEvent(txn, &testEvent)
+	err = testDao.CreateEvent(txn, []model.ChainEvent{testEvent})
 	if err != nil {
 		panic(err)
 	}
-	err = testDao.CreateExtrinsic(ctx, txn, &testExtrinsic)
+	err = testDao.CreateExtrinsic(ctx, txn, []model.ChainExtrinsic{testExtrinsic}, 1)
 	if err != nil {
 		panic(err)
 	}
-	err = testDao.CreateExtrinsic(ctx, txn, &testSignedExtrinsic)
+	err = testDao.CreateExtrinsic(ctx, txn, []model.ChainExtrinsic{testSignedExtrinsic}, 1)
 	if err != nil {
 		panic(err)
 	}

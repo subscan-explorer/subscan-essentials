@@ -146,7 +146,7 @@ func (m *MockDao) BlockAsJson(c context.Context, block *model.ChainBlock) *model
 	return &model.ChainBlockJson{}
 }
 
-func (m *MockDao) CreateEvent(txn *dao.GormDB, event *model.ChainEvent) error {
+func (m *MockDao) CreateEvent(txn *dao.GormDB, event []model.ChainEvent) error {
 	return nil
 }
 
@@ -171,7 +171,7 @@ func (m *MockDao) GetEventByIdx(ctx context.Context, index string) *model.ChainE
 	return nil
 }
 
-func (m *MockDao) CreateExtrinsic(c context.Context, txn *dao.GormDB, extrinsic *model.ChainExtrinsic) error {
+func (m *MockDao) CreateExtrinsic(c context.Context, txn *dao.GormDB, extrinsic []model.ChainExtrinsic, u int) error {
 	return nil
 }
 

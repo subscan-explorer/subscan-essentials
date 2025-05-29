@@ -2,13 +2,14 @@ package dao
 
 import (
 	"context"
+	"github.com/itering/subscan/model"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestDao_CreateEvent(t *testing.T) {
 	txn := testDao.DbBegin()
-	err := testDao.CreateEvent(txn, &testEvent)
+	err := testDao.CreateEvent(txn, []model.ChainEvent{testEvent})
 	txn.Commit()
 	assert.NoError(t, err)
 }

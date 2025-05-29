@@ -8,19 +8,11 @@ import (
 	"strings"
 )
 
-func (d *Dao) CreateEvent(txn *GormDB, event *model.ChainEvent) error {
-	e := model.ChainEvent{
-		ID:             event.Id(),
-		ExtrinsicIndex: fmt.Sprintf("%d-%d", event.BlockNum, event.ExtrinsicIdx),
-		BlockNum:       event.BlockNum,
-		ModuleId:       event.ModuleId,
-		Params:         event.Params,
-		EventIdx:       event.EventIdx,
-		EventId:        event.EventId,
-		ExtrinsicIdx:   event.ExtrinsicIdx,
-		Phase:          event.Phase,
+func (d *Dao) CreateEvent(txn *GormDB, events []model.ChainEvent) error {
+	if len(events) == 0 {
+		return nil
 	}
-	query := txn.Scopes(d.TableNameFunc(&e), model.IgnoreDuplicate).Create(&e)
+	query := txn.Scopes(d.TableNameFunc(events[0]), model.IgnoreDuplicate).CreateInBatches(events, 2000)
 	return query.Error
 }
 
