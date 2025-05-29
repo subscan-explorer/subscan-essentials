@@ -35,12 +35,14 @@ func (s *Service) createExtrinsic(ctx context.Context,
 		}
 
 		if err = s.dao.CreateExtrinsic(ctx, txn, &extrinsic); err == nil {
-			go s.emitExtrinsic(ctx, block, &extrinsic, eventMap[extrinsic.ExtrinsicIndex])
+			if err = s.emitExtrinsic(ctx, block, &extrinsic); err != nil {
+				return err
+			}
 		} else {
 			return err
 		}
 	}
-	return err
+	return nil
 }
 
 func (s *Service) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsicJson {

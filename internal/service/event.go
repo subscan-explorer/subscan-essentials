@@ -13,7 +13,9 @@ func (s *Service) AddEvent(txn *dao.GormDB, block *model.ChainBlock, e []model.C
 		event.ExtrinsicIndex = fmt.Sprintf("%d-%d", block.BlockNum, event.ExtrinsicIdx)
 		event.BlockNum = block.BlockNum
 		if err = s.dao.CreateEvent(txn, &event); err == nil {
-			go s.emitEvent(block, &event)
+			if err = s.emitEvent(block, &event); err != nil {
+				break
+			}
 		} else {
 			return err
 		}

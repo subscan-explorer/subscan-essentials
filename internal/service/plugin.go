@@ -2,18 +2,18 @@ package service
 
 import (
 	"context"
-	"github.com/itering/subscan-plugin/storage"
+	"fmt"
 	"github.com/itering/subscan/internal/dao"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/plugins"
 	redisDao "github.com/itering/subscan/share/redis"
-
-	"github.com/shopspring/decimal"
+	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/util/mq"
 )
 
 var (
-	subscribeExtrinsic = make(map[string][]plugins.PluginFactory)
-	subscribeEvent     = make(map[string][]plugins.PluginFactory)
+	subscribeExtrinsic = make(map[string][]string)
+	subscribeEvent     = make(map[string][]string)
 )
 
 // registered storage
@@ -24,49 +24,51 @@ func pluginRegister(ds *dao.DbStorage, pool *redisDao.Dao) {
 		plugin.InitDao(&db)
 		plugin.SetRedisPool(pool)
 		for _, moduleId := range plugin.SubscribeExtrinsic() {
-			subscribeExtrinsic[moduleId] = append(subscribeExtrinsic[moduleId], plugin)
+			subscribeExtrinsic[moduleId] = append(subscribeExtrinsic[moduleId], name)
 		}
 		for _, moduleId := range plugin.SubscribeEvent() {
-			subscribeEvent[moduleId] = append(subscribeEvent[moduleId], plugin)
+			subscribeEvent[moduleId] = append(subscribeEvent[moduleId], name)
 		}
 	}
 }
+
+var ignoreEvent = []string{"system.ExtrinsicSuccess"}
 
 // after event created, emit event data to subscribe plugins
-func (s *Service) emitEvent(block *model.ChainBlock, event *model.ChainEvent) {
-	pBlock := block.AsPlugin()
-	pEvent := event.AsPlugin()
-	for _, plugin := range subscribeEvent[event.ModuleId] {
-		if plugin.Enable() {
-			_ = plugin.ProcessEvent(pBlock, pEvent, decimal.Zero)
+func (s *Service) emitEvent(block *model.ChainBlock, event *model.ChainEvent) (err error) {
+	// ignore some event
+	if util.StringInSliceFold(fmt.Sprintf("%s.%s", event.ModuleId, event.EventId), ignoreEvent) {
+		return
+	}
+	for _, pluginName := range subscribeEvent[event.ModuleId] {
+		if plugins.RegisteredPlugins[pluginName].Enable() {
+			if err = mq.Instant.Publish("plugin-event", "process", map[string]interface{}{"block_num": block.BlockNum, "event_index": event.EventIndex(), "plugin_name": pluginName}); err != nil {
+				return err
+			}
 		}
 	}
-
+	return nil
 }
 
-func (s *Service) emitBlock(ctx context.Context, block *model.ChainBlock) {
-	pBlock := block.AsPlugin()
-	for _, plugin := range plugins.RegisteredPlugins {
+func (s *Service) emitBlock(_ context.Context, block *model.ChainBlock) (err error) {
+	for name, plugin := range plugins.RegisteredPlugins {
 		if plugin.Enable() {
-			_ = plugin.ProcessBlock(ctx, pBlock)
+			if err = mq.Instant.Publish("plugin-block", "process", map[string]interface{}{"block_num": block.BlockNum, "plugin_name": name}); err != nil {
+				return err
+			}
 		}
 	}
+	return
 }
 
 // after extrinsic created, emit extrinsic data to subscribe plugins
-func (s *Service) emitExtrinsic(_ context.Context, block *model.ChainBlock, extrinsic *model.ChainExtrinsic, events []model.ChainEvent) {
-	block.BlockTimestamp = extrinsic.BlockTimestamp
-	pBlock := block.AsPlugin()
-	pExtrinsic := extrinsic.AsPlugin()
-
-	var pEvents []storage.Event
-	for _, event := range events {
-		pEvents = append(pEvents, *event.AsPlugin())
-	}
-
-	for _, plugin := range subscribeExtrinsic[extrinsic.CallModule] {
-		if plugin.Enable() {
-			_ = plugin.ProcessExtrinsic(pBlock, pExtrinsic, pEvents)
+func (s *Service) emitExtrinsic(_ context.Context, block *model.ChainBlock, extrinsic *model.ChainExtrinsic) (err error) {
+	for _, pluginName := range subscribeExtrinsic[extrinsic.CallModule] {
+		if plugins.RegisteredPlugins[pluginName].Enable() {
+			if err = mq.Instant.Publish("plugin-extrinsic", "process", map[string]interface{}{"block_num": block.BlockNum, "extrinsic_index": extrinsic.ExtrinsicIndex, "plugin_name": pluginName}); err != nil {
+				return err
+			}
 		}
 	}
+	return nil
 }

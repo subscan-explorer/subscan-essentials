@@ -76,6 +76,10 @@ func (c ChainEvent) Id() uint {
 	return c.BlockNum*IdGenerateCoefficient + c.EventIdx
 }
 
+func (c ChainEvent) EventIndex() string {
+	return fmt.Sprintf("%d-%d", c.BlockNum, c.EventIdx)
+}
+
 func (c *ChainEvent) AsPlugin() *storage.Event {
 	return &storage.Event{
 		BlockNum:     int(c.BlockNum),

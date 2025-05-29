@@ -36,6 +36,7 @@ type IDao interface {
 	CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.ChainExtrinsic) error
 	GetExtrinsicList(c context.Context, page, row int, order string, queryWhere ...model.Option) ([]model.ChainExtrinsic, int)
 	GetExtrinsicsByHash(c context.Context, hash string) *model.ChainExtrinsic
+	GetExtrinsicsByIndex(c context.Context, index string) *model.ChainExtrinsic
 	GetExtrinsicsDetailByHash(c context.Context, hash string) *model.ExtrinsicDetail
 	GetExtrinsicsDetailByIndex(c context.Context, index string) *model.ExtrinsicDetail
 	ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsicJson

@@ -36,7 +36,7 @@ func RefreshAccount(ctx context.Context, s *Storage, accountId string) error {
 	}
 	db := s.Dao.GetDbInstance().(*gorm.DB)
 	var account = bModel.Account{Address: accountId}
-	q := db.WithContext(ctx).Where("address = ?", accountId).FirstOrCreate(&account)
+	q := db.WithContext(ctx).Scopes(model.IgnoreDuplicate).Where("address = ?", accountId).FirstOrCreate(&account)
 	if q.RowsAffected == 1 {
 		_, _ = s.Pool.HINCRBY(ctx, model.MetadataCacheKey(), "total_account", 1)
 	}
