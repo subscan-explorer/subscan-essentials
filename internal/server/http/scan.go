@@ -93,11 +93,13 @@ func blockHandle(c *gin.Context) {
 
 type extrinsicsParams struct {
 	Pagination
-	Signed   string `json:"signed" binding:"omitempty"`
-	Address  string `json:"address" binding:"omitempty"`
-	Module   string `json:"module" binding:"omitempty"`
-	Call     string `json:"call" binding:"omitempty"`
-	BlockNum uint   `json:"block_num" binding:"omitempty"`
+	Signed       string `json:"signed" binding:"omitempty"`
+	Address      string `json:"address" binding:"omitempty"`
+	Module       string `json:"module" binding:"omitempty"`
+	Call         string `json:"call" binding:"omitempty"`
+	BlockNum     uint   `json:"block_num" binding:"omitempty"`
+	AfterId      uint   `json:"after_id" binding:"omitempty"`
+	HiddenParams bool   `json:"hidden_params" binding:"omitempty"` // hide extrinsic params in response
 }
 
 // extrinsicsHandle handler get extrinsics list
@@ -115,8 +117,13 @@ func extrinsicsHandle(c *gin.Context) {
 		return
 	}
 	ctx := c.Request.Context()
-
+	if p.Row*p.Page > 10000 {
+		toJson(c, nil, util.InvalidPagination)
+		return
+	}
 	var query []model.Option
+	var fixedTableIndex = -1
+
 	if p.Module != "" {
 		query = append(query, model.Where("call_module = ?", p.Module))
 	}
@@ -129,6 +136,7 @@ func extrinsicsHandle(c *gin.Context) {
 	}
 	if p.BlockNum > 0 {
 		query = append(query, model.Where("block_num = ?", p.BlockNum))
+		fixedTableIndex = int(p.BlockNum / model.SplitTableBlockNum)
 	}
 
 	if p.Address != "" {
@@ -139,8 +147,11 @@ func extrinsicsHandle(c *gin.Context) {
 		}
 		query = append(query, model.Where("account_id = ?", account))
 	}
+	if p.HiddenParams {
+		query = append(query, model.Omit("params"))
+	}
 
-	list, count := svc.GetExtrinsicList(ctx, p.Page, p.Row, query...)
+	list, count := svc.GetExtrinsicList(ctx, p.Page, p.Row, fixedTableIndex, p.AfterId, query...)
 	toJson(c, map[string]interface{}{
 		"extrinsics": list, "count": count,
 	}, nil)
@@ -187,6 +198,8 @@ type eventsParams struct {
 	Event          string `json:"event" binding:"omitempty"`
 	BlockNum       uint   `json:"block_num" binding:"omitempty"`
 	ExtrinsicIndex string `json:"extrinsic_index" binding:"omitempty"`
+	AfterId        uint   `json:"after_id" binding:"omitempty"`
+	HiddenParams   bool   `json:"hidden_params" binding:"omitempty"` // hide event params in response
 }
 
 // eventsHandle handler get events list
@@ -203,9 +216,15 @@ func eventsHandle(c *gin.Context) {
 		toJson(c, nil, err)
 		return
 	}
+	if p.Row*p.Page > 10000 {
+		toJson(c, nil, util.InvalidPagination)
+		return
+	}
 	ctx := c.Request.Context()
 
 	var query []model.Option
+	var fixedTableIndex = -1
+
 	if p.Module != "" {
 		query = append(query, model.Where("module_id = ?", p.Module))
 	}
@@ -214,12 +233,22 @@ func eventsHandle(c *gin.Context) {
 	}
 	if p.BlockNum > 0 {
 		query = append(query, model.Where("block_num = ?", p.BlockNum))
+		fixedTableIndex = int(p.BlockNum / model.SplitTableBlockNum)
 	}
 	if p.ExtrinsicIndex != "" {
 		query = append(query, model.Where("extrinsic_index = ?", p.ExtrinsicIndex))
+		parseExtrinsic := model.ParseExtrinsicOrEventIndex(p.ExtrinsicIndex)
+		if parseExtrinsic == nil {
+			toJson(c, nil, util.ParamsError)
+			return
+		}
+		fixedTableIndex = int(parseExtrinsic.BlockNum / model.SplitTableBlockNum)
+	}
+	if p.HiddenParams {
+		query = append(query, model.Omit("params"))
 	}
 
-	events, count := svc.EventsList(ctx, p.Page, p.Row, query...)
+	events, count := svc.EventsList(ctx, p.Page, p.Row, fixedTableIndex, p.AfterId, query...)
 	toJson(c, map[string]interface{}{"events": events, "count": count}, nil)
 }
 

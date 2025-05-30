@@ -2,6 +2,7 @@ package dao
 
 import (
 	"context"
+	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
@@ -11,7 +12,7 @@ import (
 func TestDao_CreateExtrinsic(t *testing.T) {
 	ctx := context.TODO()
 	txn := testDao.DbBegin()
-	_ = testDao.CreateExtrinsic(ctx, txn, &testExtrinsic)
+	_ = testDao.CreateExtrinsic(ctx, txn, []model.ChainExtrinsic{testExtrinsic}, 1)
 	txn.Commit()
 }
 
@@ -29,7 +30,7 @@ func TestDao_GetExtrinsicsByHash(t *testing.T) {
 
 func TestDao_ExtrinsicList(t *testing.T) {
 	ctx := context.TODO()
-	extrinsic, _ := testDao.GetExtrinsicList(ctx, 0, 100, "desc")
+	extrinsic, _ := testDao.GetExtrinsicList(ctx, 0, 100, "desc", -1, 0)
 	assert.GreaterOrEqual(t, 2, len(extrinsic))
 }
 

@@ -60,7 +60,7 @@ type ChainEvent struct {
 	ExtrinsicIdx   int         `json:"extrinsic_idx"`
 	ModuleId       string      `json:"module_id" gorm:"size:255;index:query_function"`
 	EventId        string      `json:"event_id" gorm:"size:255;index:query_function"`
-	Params         EventParams `json:"params" gorm:"type:json"`
+	Params         EventParams `json:"params,omitempty" gorm:"type:json"`
 	EventIdx       uint        `json:"event_idx"`
 	Phase          int         `json:"phase" gorm:"size:8"`
 }

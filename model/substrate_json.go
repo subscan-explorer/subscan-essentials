@@ -33,7 +33,7 @@ type ChainExtrinsicJson struct {
 	ExtrinsicIndex     string          `json:"extrinsic_index"`
 	CallModuleFunction string          `json:"call_module_function"`
 	CallModule         string          `json:"call_module"`
-	Params             ExtrinsicParams `json:"params"`
+	Params             ExtrinsicParams `json:"params,omitempty"`
 	AccountId          string          `json:"account_id"`
 	Signature          string          `json:"signature"`
 	Nonce              int             `json:"nonce"`
