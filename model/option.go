@@ -16,6 +16,12 @@ func Select(query interface{}, args ...interface{}) Option {
 	}
 }
 
+func Omit(args ...string) Option {
+	return func(tx *gorm.DB) *gorm.DB {
+		return tx.Omit(args...)
+	}
+}
+
 func Where(query interface{}, args ...interface{}) Option {
 	return func(tx *gorm.DB) *gorm.DB {
 		return tx.Where(query, args...)

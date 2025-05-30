@@ -368,6 +368,7 @@ func (a *ApiSrv) BlockByHash(ctx context.Context, hash string) *EvmBlock {
 }
 
 type TransactionSampleJson struct {
+	TransactionId  uint64          `json:"transaction_id"`
 	Hash           string          `json:"hash"`
 	BlockNum       uint            `json:"block_num"`
 	BlockTimestamp uint            `json:"block_timestamp"`
@@ -396,6 +397,7 @@ func (a *ApiSrv) TransactionsJson(ctx context.Context, page model.Option, opts .
 			ToAddress:      v.ToAddress,
 			Value:          v.Value,
 			Create:         v.Contract,
+			TransactionId:  v.TransactionId,
 		})
 	}
 	return res, int(count)

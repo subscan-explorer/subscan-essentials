@@ -159,7 +159,7 @@ func (m *MockDao) GetEventByBlockNum(blockNum uint, where ...string) []model.Cha
 	return nil
 }
 
-func (m *MockDao) GetEventList(ctx context.Context, page, row int, order string, where ...model.Option) ([]model.ChainEvent, int) {
+func (m *MockDao) GetEventList(ctx context.Context, page, row int, order string, fixedTableIndex int, afterId uint, where ...model.Option) ([]model.ChainEvent, int) {
 	return []model.ChainEvent{testEvent}, 1
 }
 
@@ -183,7 +183,7 @@ func (m *MockDao) GetExtrinsicsByBlockNum(blockNum uint) []model.ChainExtrinsicJ
 	return nil
 }
 
-func (m *MockDao) GetExtrinsicList(c context.Context, page, row int, order string, queryWhere ...model.Option) ([]model.ChainExtrinsic, int) {
+func (m *MockDao) GetExtrinsicList(c context.Context, page, row int, order string, fixedTableIndex int, afterId uint, queryWhere ...model.Option) ([]model.ChainExtrinsic, int) {
 	return []model.ChainExtrinsic{testSignedExtrinsic}, 1
 }
 

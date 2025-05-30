@@ -1952,6 +1952,9 @@ const docTemplate = `{
                 "to_address": {
                     "type": "string"
                 },
+                "transaction_id": {
+                    "type": "integer"
+                },
                 "value": {
                     "type": "number"
                 }
@@ -2034,6 +2037,9 @@ const docTemplate = `{
         "internal_server_http.eventsParams": {
             "type": "object",
             "properties": {
+                "after_id": {
+                    "type": "integer"
+                },
                 "block_num": {
                     "type": "integer"
                 },
@@ -2042,6 +2048,10 @@ const docTemplate = `{
                 },
                 "extrinsic_index": {
                     "type": "string"
+                },
+                "hidden_params": {
+                    "description": "hide event params in response",
+                    "type": "boolean"
                 },
                 "module": {
                     "type": "string"
@@ -2074,11 +2084,18 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
+                "after_id": {
+                    "type": "integer"
+                },
                 "block_num": {
                     "type": "integer"
                 },
                 "call": {
                     "type": "string"
+                },
+                "hidden_params": {
+                    "description": "hide extrinsic params in response",
+                    "type": "boolean"
                 },
                 "module": {
                     "type": "string"
@@ -2468,6 +2485,10 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
+                "after_id": {
+                    "type": "integer",
+                    "minimum": 0
+                },
                 "block_num": {
                     "type": "integer",
                     "minimum": 0
@@ -2699,6 +2720,10 @@ const docTemplate = `{
             "properties": {
                 "address": {
                     "type": "string"
+                },
+                "after_id": {
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "block_num": {
                     "type": "integer",

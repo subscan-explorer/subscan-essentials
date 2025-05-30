@@ -15,7 +15,7 @@ func TestDao_CreateEvent(t *testing.T) {
 }
 
 func TestDao_GetEventList(t *testing.T) {
-	events, _ := testDao.GetEventList(context.TODO(), 0, 100, "desc")
+	events, _ := testDao.GetEventList(context.TODO(), 0, 100, "desc", -1, 0)
 	assert.GreaterOrEqual(t, 2, len(events))
 }
 

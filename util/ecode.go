@@ -6,6 +6,7 @@ var (
 	ParamsError           = ecode.New(10001)
 	InvalidAccountAddress = ecode.New(10002)
 	RecordNotFound        = ecode.New(10004)
+	InvalidPagination     = ecode.New(10005)
 )
 
 func init() {
@@ -14,6 +15,7 @@ func init() {
 		10001: "Params Error",
 		10002: "Invalid Account Address",
 		10004: "Record Not Found",
+		10005: "Paging limit exceeded, please use the after_id parameter to continue paging",
 	})
 
 }

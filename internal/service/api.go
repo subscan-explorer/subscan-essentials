@@ -81,8 +81,8 @@ func (s *Service) GetFinalizedBlock(c context.Context) (uint64, error) {
 	return s.dao.GetFinalizedBlockNum(c)
 }
 
-func (s *Service) GetExtrinsicList(ctx context.Context, page, row int, query ...model.Option) ([]*model.ChainExtrinsicJson, int) {
-	list, count := s.dao.GetExtrinsicList(ctx, page, row, "desc", query...)
+func (s *Service) GetExtrinsicList(ctx context.Context, page, row int, fixedTableIndex int, afterId uint, query ...model.Option) ([]*model.ChainExtrinsicJson, int) {
+	list, count := s.dao.GetExtrinsicList(ctx, page, row, "desc", fixedTableIndex, afterId, query...)
 	var ejs []*model.ChainExtrinsicJson
 	for _, extrinsic := range list {
 		ejs = append(ejs, s.dao.ExtrinsicsAsJson(&extrinsic))
@@ -98,13 +98,13 @@ func (s *Service) GetExtrinsicDetailByHash(ctx context.Context, hash string) *mo
 	return s.dao.GetExtrinsicsDetailByHash(ctx, hash)
 }
 
-func (s *Service) EventsList(ctx context.Context, page, row int, where ...model.Option) ([]model.ChainEventJson, int) {
+func (s *Service) EventsList(ctx context.Context, page, row int, fixedTableIndex int, afterId uint, where ...model.Option) ([]model.ChainEventJson, int) {
 	var (
 		result    []model.ChainEventJson
 		blockNums []uint
 	)
 
-	list, count := s.dao.GetEventList(ctx, page, row, "desc", where...)
+	list, count := s.dao.GetEventList(ctx, page, row, "desc", fixedTableIndex, afterId, where...)
 	for _, event := range list {
 		blockNums = append(blockNums, event.BlockNum)
 	}

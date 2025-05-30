@@ -5,6 +5,7 @@ import (
 	"github.com/itering/subscan-plugin/router"
 	_ "github.com/itering/subscan/plugins/balance/model"
 	"github.com/itering/subscan/plugins/balance/service"
+	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/address"
 	"github.com/itering/subscan/util/validator"
 	"github.com/pkg/errors"
@@ -77,6 +78,7 @@ type transferParams struct {
 	BlockNum uint   `json:"block_num" validate:"omitempty,min=0"`
 	Row      int    `json:"row" validate:"min=1,max=100"`
 	Page     int    `json:"page" validate:"min=0"`
+	AfterId  uint   `json:"after_id" validate:"omitempty,min=0"`
 }
 
 // @Summary Get transfer list
@@ -92,7 +94,11 @@ func transferHandle(w http.ResponseWriter, r *http.Request) error {
 		toJson(w, 10001, nil, err)
 		return nil
 	}
-	list, count := svc.GetTransferJson(r.Context(), address.Decode(p.Address), p.BlockNum, p.Page, p.Row)
+	if p.Row*p.Page > 10000 {
+		toJson(w, 10005, nil, util.InvalidPagination)
+		return nil
+	}
+	list, count := svc.GetTransferJson(r.Context(), address.Decode(p.Address), p.BlockNum, p.AfterId, p.Page, p.Row)
 	toJson(w, 0, map[string]interface{}{
 		"list": list, "count": count,
 	}, nil)

@@ -30,7 +30,7 @@ func TestDao_GetExtrinsicsByHash(t *testing.T) {
 
 func TestDao_ExtrinsicList(t *testing.T) {
 	ctx := context.TODO()
-	extrinsic, _ := testDao.GetExtrinsicList(ctx, 0, 100, "desc")
+	extrinsic, _ := testDao.GetExtrinsicList(ctx, 0, 100, "desc", -1, 0)
 	assert.GreaterOrEqual(t, 2, len(extrinsic))
 }
 
