@@ -3,8 +3,14 @@ package main
 import (
 	"github.com/itering/subscan/internal/observer"
 	"github.com/itering/subscan/internal/script"
+	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/util/network"
 	"github.com/urfave/cli"
 )
+
+func init() {
+	network.SetCurrent(util.NetworkNode)
+}
 
 var commands = []cli.Command{
 	{

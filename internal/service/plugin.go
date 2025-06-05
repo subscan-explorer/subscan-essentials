@@ -9,6 +9,7 @@ import (
 	redisDao "github.com/itering/subscan/share/redis"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/mq"
+	"strings"
 )
 
 var (
@@ -35,14 +36,14 @@ func pluginRegister(ds *dao.DbStorage, pool *redisDao.Dao) {
 var ignoreEvent = []string{"system.ExtrinsicSuccess"}
 
 // after event created, emit event data to subscribe plugins
-func (s *Service) emitEvent(block *model.ChainBlock, event *model.ChainEvent) (err error) {
+func (s *Service) emitEvent(event *model.ChainEvent) (err error) {
 	// ignore some event
 	if util.StringInSliceFold(fmt.Sprintf("%s.%s", event.ModuleId, event.EventId), ignoreEvent) {
 		return
 	}
-	for _, pluginName := range subscribeEvent[event.ModuleId] {
+	for _, pluginName := range subscribeEvent[strings.ToLower(event.ModuleId)] {
 		if plugins.RegisteredPlugins[pluginName].Enable() {
-			if err = mq.Instant.Publish("plugin-event", "process", map[string]interface{}{"block_num": block.BlockNum, "event_index": event.EventIndex(), "plugin_name": pluginName}); err != nil {
+			if err = mq.Instant.Publish("plugin-event", "process", map[string]interface{}{"event_index": event.EventIndex(), "plugin_name": pluginName}); err != nil {
 				return err
 			}
 		}
@@ -62,10 +63,10 @@ func (s *Service) emitBlock(_ context.Context, block *model.ChainBlock) (err err
 }
 
 // after extrinsic created, emit extrinsic data to subscribe plugins
-func (s *Service) emitExtrinsic(_ context.Context, block *model.ChainBlock, extrinsic *model.ChainExtrinsic) (err error) {
+func (s *Service) emitExtrinsic(_ context.Context, extrinsic *model.ChainExtrinsic) (err error) {
 	for _, pluginName := range subscribeExtrinsic[extrinsic.CallModule] {
 		if plugins.RegisteredPlugins[pluginName].Enable() {
-			if err = mq.Instant.Publish("plugin-extrinsic", "process", map[string]interface{}{"block_num": block.BlockNum, "extrinsic_index": extrinsic.ExtrinsicIndex, "plugin_name": pluginName}); err != nil {
+			if err = mq.Instant.Publish("plugin-extrinsic", "process", map[string]interface{}{"extrinsic_index": extrinsic.ExtrinsicIndex, "plugin_name": pluginName}); err != nil {
 				return err
 			}
 		}

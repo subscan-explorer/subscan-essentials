@@ -6,6 +6,7 @@ import (
 	"github.com/bitly/go-simplejson"
 	"github.com/itering/go-workers"
 	"github.com/itering/subscan-plugin/storage"
+	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/plugins"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/mq"
@@ -57,7 +58,6 @@ func emitMsg(message *workers.Msg) {
 		case "plugin-event":
 			type T struct {
 				EventIndex string `json:"event_index"`
-				BlockNum   uint   `json:"block_num"`
 				PluginName string `json:"plugin_name"`
 			}
 			var args T
@@ -70,14 +70,14 @@ func emitMsg(message *workers.Msg) {
 			}
 
 			d := srv.GetDao()
-			block := srv.GetDao().GetBlockByNum(ctx, args.BlockNum).AsPlugin()
+			eventIndexParse := model.ParseExtrinsicOrEventIndex(args.EventIndex)
+			block := srv.GetDao().GetBlockByNum(ctx, eventIndexParse.BlockNum).AsPlugin()
 			event := d.GetEventByIdx(ctx, args.EventIndex).AsPlugin()
 			return p.ProcessEvent(block, event, decimal.Zero)
 
 		case "plugin-extrinsic":
 			type T struct {
 				ExtrinsicIndex string `json:"event_index"`
-				BlockNum       uint   `json:"block_num"`
 				PluginName     string `json:"plugin_name"`
 			}
 			var args T
@@ -90,7 +90,8 @@ func emitMsg(message *workers.Msg) {
 			}
 
 			d := srv.GetDao()
-			block := srv.GetDao().GetBlockByNum(ctx, args.BlockNum).AsPlugin()
+			extrinsicIndexParse := model.ParseExtrinsicOrEventIndex(args.ExtrinsicIndex)
+			block := srv.GetDao().GetBlockByNum(ctx, extrinsicIndexParse.BlockNum).AsPlugin()
 			extrinsic := d.GetExtrinsicsByIndex(ctx, args.ExtrinsicIndex).AsPlugin()
 			events := d.GetEventsByIndex(args.ExtrinsicIndex)
 			var pEvents []storage.Event
