@@ -148,7 +148,7 @@ func extrinsicsHandle(c *gin.Context) {
 		query = append(query, model.Where("account_id = ?", account))
 	}
 	if p.HiddenParams {
-		query = append(query, model.Omit("params"))
+		query = append(query, model.Omit("params", "params_raw_bytes"))
 	}
 
 	list, count := svc.GetExtrinsicList(ctx, p.Page, p.Row, fixedTableIndex, p.AfterId, query...)
@@ -245,7 +245,7 @@ func eventsHandle(c *gin.Context) {
 		fixedTableIndex = int(parseExtrinsic.BlockNum / model.SplitTableBlockNum)
 	}
 	if p.HiddenParams {
-		query = append(query, model.Omit("params"))
+		query = append(query, model.Omit("params", "params_raw_bytes"))
 	}
 
 	events, count := svc.EventsList(ctx, p.Page, p.Row, fixedTableIndex, p.AfterId, query...)

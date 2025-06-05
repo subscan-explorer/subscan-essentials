@@ -242,8 +242,8 @@ func (m *MockDao) GetFinalizedBlockNum(c context.Context) (uint64, error) {
 	return args.Get(0).(uint64), args.Error(1)
 }
 
-func (m *MockDao) CreateRuntimeVersion(name string, specVersion int) int64 {
-	return 0
+func (m *MockDao) CreateRuntimeVersion(_ context.Context, name string, specVersion int, blockNum uint) bool {
+	return false
 }
 
 func (m *MockDao) SetRuntimeData(specVersion int, modules string, rawData string) int64 {

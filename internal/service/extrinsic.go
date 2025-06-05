@@ -28,6 +28,8 @@ func (s *Service) createExtrinsic(ctx context.Context,
 		extrinsics[index].BlockTimestamp = block.BlockTimestamp
 		extrinsics[index].AccountId = address.Format(extrinsic.AccountId)
 		extrinsics[index].ExtrinsicHash = util.AddHex(extrinsic.ExtrinsicHash)
+		extrinsics[index].ParamsRawBytes = util.HexToBytes(extrinsic.ParamsRaw)
+		extrinsics[index].Params = nil
 		if extrinsic.Signature != "" {
 			extrinsics[index].IsSigned = true
 			countSignedExtrinsic++

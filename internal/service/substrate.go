@@ -55,7 +55,7 @@ func (s *SubscribeService) parser(message []byte) (err error) {
 		s.newFinHead <- true
 	case StateRuntimeVersion:
 		r := j.ToRuntimeVersion()
-		_ = s.regRuntimeVersion(r.ImplName, r.SpecVersion)
+		// _ = s.regRuntimeVersion(r.ImplName, r.SpecVersion)
 		_ = s.updateChainMetadata(map[string]interface{}{"implName": r.ImplName, "specVersion": r.SpecVersion})
 		util.CurrentRuntimeSpecVersion = r.SpecVersion
 	default:
@@ -146,7 +146,7 @@ func (s *Service) FillBlockData(ctx context.Context, blockNum uint, force bool) 
 		specVersion = s.GetCurrentRuntimeSpecVersion(blockNum)
 	} else {
 		specVersion = r.SpecVersion
-		_ = s.regRuntimeVersion(r.ImplName, specVersion, blockHash)
+		_ = s.regRuntimeVersion(ctx, r.ImplName, specVersion, blockNum, blockHash)
 	}
 
 	if specVersion > util.CurrentRuntimeSpecVersion {

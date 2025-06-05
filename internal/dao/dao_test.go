@@ -121,7 +121,7 @@ func init() {
 	}
 	txn.Commit()
 
-	testDao.CreateRuntimeVersion("polkadot", 1)
+	testDao.CreateRuntimeVersion(context.TODO(), "polkadot", 1, 1)
 	testDao.SetRuntimeData(1, "system|staking", "0x0")
 
 	conn, _ := testDao.redis.Redis().GetContext(ctx)
