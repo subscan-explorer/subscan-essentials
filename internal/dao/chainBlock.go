@@ -17,8 +17,11 @@ func (d *Dao) CreateBlock(txn *GormDB, cb *model.ChainBlock) (err error) {
 	if maxTableBlockNum < cb.BlockNum+model.SplitTableBlockNum {
 		if !d.db.Migrator().HasTable(model.ChainBlock{BlockNum: cb.BlockNum + model.SplitTableBlockNum}) {
 			go func() {
-				_ = d.db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
-					d.InternalTables(cb.BlockNum + model.SplitTableBlockNum)...)
+				db := d.db
+				if d.DbDriver == "mysql" {
+					db = db.Set("gorm:table_options", "ENGINE=InnoDB")
+				}
+				_ = db.AutoMigrate(d.InternalTables(cb.BlockNum + model.SplitTableBlockNum)...)
 				d.AddIndex(cb.BlockNum + model.SplitTableBlockNum)
 			}()
 		}
