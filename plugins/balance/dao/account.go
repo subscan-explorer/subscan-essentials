@@ -9,6 +9,7 @@ import (
 	"github.com/itering/substrate-api-rpc/rpc"
 	"github.com/shopspring/decimal"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func GetAccountList(db storage.DB, page, row int) ([]bModel.Account, int) {
@@ -56,4 +57,22 @@ func AfterAccountCreate(ctx context.Context, db *gorm.DB, account *bModel.Accoun
 		"locked":   decimal.Max(accountData.Data.MiscFrozen, accountData.Data.FeeFrozen),
 		"reserved": accountData.Data.Reserved,
 	}).Error
+}
+
+func (s *Storage) AddOrUpdateItem(c context.Context, item interface{}, keys []string, updates ...string) *gorm.DB {
+	var keyFields []clause.Column
+	for _, key := range keys {
+		keyFields = append(keyFields, clause.Column{Name: key})
+	}
+	db := s.Dao.GetDbInstance().(*gorm.DB)
+	if len(updates) > 0 {
+		return db.WithContext(c).Clauses(clause.OnConflict{
+			Columns:   keyFields,
+			DoUpdates: clause.AssignmentColumns(updates),
+		}).Create(item)
+	}
+	return db.WithContext(c).Clauses(clause.OnConflict{
+		Columns:   keyFields,
+		UpdateAll: true,
+	}).Create(item)
 }

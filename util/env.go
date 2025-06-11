@@ -13,7 +13,7 @@ var (
 	// BalanceAccuracy balance accuracy, default is 10(DOT)
 	BalanceAccuracy = GetEnv("SUBSTRATE_ACCURACY", "10")
 	// WSEndPoint chain rpc endpoint, default is wss://rpc.polkadot.io
-	WSEndPoint = GetEnv("CHAIN_WS_ENDPOINT", "wss://rpc.polkadot.io")
+	WSEndPoint = GetEnv("CHAIN_WS_ENDPOINT", "wss://api-asset-hub-kusama.dwellir.com/6ebaaa9b-2f8e-4456-8df8-61918b0f0dbc")
 	// NetworkNode network node name, default is polkadot
 	NetworkNode = GetEnv("NETWORK_NODE", "polkadot")
 	// ConfDir config directory, default is ../configs
