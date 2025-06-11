@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"strings"
 
 	"github.com/itering/subscan/util"
@@ -12,11 +13,11 @@ var (
 	runtimeSpecs []int
 )
 
-func (s *Service) regRuntimeVersion(name string, spec int, hash ...string) error {
+func (s *Service) regRuntimeVersion(ctx context.Context, name string, spec int, blockNum uint, hash ...string) error {
 	if util.IntInSlice(spec, runtimeSpecs) {
 		return nil
 	}
-	if affected := s.dao.CreateRuntimeVersion(name, spec); affected > 0 {
+	if affected := s.dao.CreateRuntimeVersion(ctx, name, spec, blockNum); affected {
 		if coded := s.regCodecMetadata(hash...); coded != "" {
 			runtime := metadata.RegNewMetadataType(spec, coded)
 			s.setRuntimeData(spec, runtime, coded)

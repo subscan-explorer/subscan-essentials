@@ -6,6 +6,7 @@ import (
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/plugins/evm/contract"
 	"github.com/itering/subscan/plugins/evm/dao"
+	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/validator"
 	"net/http"
 )
@@ -257,6 +258,7 @@ type transactionsParams struct {
 	Row      int    `json:"row" validate:"min=1,max=100"`
 	BlockNum uint   `json:"block_num" validate:"omitempty,min=0"`
 	Address  string `json:"address" validate:"omitempty,eth_addr"`
+	AfterId  uint   `json:"after_id" validate:"omitempty,min=0"`
 }
 
 // @Summary Evm transactions
@@ -272,12 +274,19 @@ func transactionsHandle(w http.ResponseWriter, r *http.Request) error {
 		toJson(w, 10001, nil, err)
 		return nil
 	}
+	if p.Row*p.Page > 10000 {
+		toJson(w, 10005, nil, util.InvalidPagination)
+		return nil
+	}
 	var opts []model.Option
 	if p.Address != "" {
 		opts = append(opts, model.Where("from_address = ? or to_address = ?", p.Address, p.Address))
 	}
 	if p.BlockNum > 0 {
 		opts = append(opts, model.Where("block_num = ?", p.BlockNum))
+	}
+	if p.AfterId > 0 {
+		opts = append(opts, model.Where("transaction_id > ?", p.AfterId))
 	}
 	list, count := srv.TransactionsJson(r.Context(), model.WithLimit(p.Row*p.Page, p.Row), opts...)
 	toJson(w, 0, map[string]interface{}{"list": list, "count": count}, nil)
