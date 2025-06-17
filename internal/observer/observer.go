@@ -33,6 +33,7 @@ func Run(dt string) {
 			defer wg.Done()
 			srv.Subscribe(ctx)
 		}()
+		wg.Add(1)
 		go func() {
 			defer wg.Done()
 			RunCron()
@@ -65,7 +66,8 @@ func RunCron() {
 	if _, err := c.AddFunc("@every 3m", func() {
 		script.RefreshMetadata()
 	}); err != nil {
-		panic(err)
+		util.Logger().Error(fmt.Sprintf("Failed to register cron job: %v", err))
+		os.Exit(1)
 	}
 	c.Start()
 	<-stop
