@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"context"
 	"github.com/itering/subscan/model"
 	"github.com/itering/substrate-api-rpc/metadata"
 	"github.com/stretchr/testify/assert"
@@ -8,8 +9,8 @@ import (
 )
 
 func TestDao_CreateRuntimeVersion(t *testing.T) {
-	affect := testDao.CreateRuntimeVersion("polkadot", 1)
-	assert.Equal(t, int64(0), affect)
+	affect := testDao.CreateRuntimeVersion(context.TODO(), "polkadot", 1, 1)
+	assert.False(t, affect)
 }
 
 func TestDao_SetRuntimeData(t *testing.T) {

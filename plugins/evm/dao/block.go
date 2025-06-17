@@ -2,10 +2,13 @@ package dao
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	customerror "github.com/itering/subscan/pkg/go-web3/constants"
 	"github.com/itering/subscan/pkg/go-web3/dto"
 	"github.com/itering/subscan/share/web3"
 	"github.com/itering/subscan/util"
+	"github.com/itering/subscan/util/network"
 	"math/big"
 	"sync"
 
@@ -49,7 +52,12 @@ func (s *Storage) AddEvmBlock(ctx context.Context, blockNum uint, force bool) er
 	if err != nil {
 		return err
 	}
-	return s.processBlock(ctx, uint64(blockNum), blockRaw)
+	err = s.processBlock(ctx, uint64(blockNum), blockRaw)
+	if errors.Is(err, customerror.EMPTYRESPONSE) && network.CurrentIs(network.AssethubWestend) {
+		// ignore empty response
+		return nil
+	}
+	return err
 }
 
 func (s *Storage) processBlock(ctx context.Context, blockNum uint64, blockRaw *dto.Block) (err error) {

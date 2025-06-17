@@ -17,8 +17,11 @@ func (d *Dao) CreateBlock(txn *GormDB, cb *model.ChainBlock) (err error) {
 	if maxTableBlockNum < cb.BlockNum+model.SplitTableBlockNum {
 		if !d.db.Migrator().HasTable(model.ChainBlock{BlockNum: cb.BlockNum + model.SplitTableBlockNum}) {
 			go func() {
-				_ = d.db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
-					d.InternalTables(cb.BlockNum + model.SplitTableBlockNum)...)
+				db := d.db
+				if d.DbDriver == "mysql" {
+					db = db.Set("gorm:table_options", "ENGINE=InnoDB")
+				}
+				_ = db.AutoMigrate(d.InternalTables(cb.BlockNum + model.SplitTableBlockNum)...)
 				d.AddIndex(cb.BlockNum + model.SplitTableBlockNum)
 			}()
 		}
@@ -193,4 +196,22 @@ func (d *Dao) GetBlockNumArr(c context.Context, start, end uint) []int {
 	var blockNums []int
 	d.db.WithContext(c).Scopes(d.TableNameFunc(&model.ChainBlock{BlockNum: end})).Where("block_num BETWEEN ? AND ?", start, end).Order("block_num asc").Pluck("block_num", &blockNums)
 	return blockNums
+}
+
+func (d *Dao) GetBlocksByNums(c context.Context, blockNums []uint, columns string) (blocks []*model.ChainBlock) {
+	if len(blockNums) == 0 {
+		return nil
+	}
+	idxMap := make(map[uint][]uint)
+	for _, num := range blockNums {
+		idxMap[num/model.SplitTableBlockNum] = append(idxMap[num/model.SplitTableBlockNum], num)
+	}
+	for index, ids := range idxMap {
+		var tableData []*model.ChainBlock
+		if err := d.db.WithContext(c).Select(columns).Scopes(model.TableNameFunc(&model.ChainBlock{BlockNum: index * model.SplitTableBlockNum})).Where("block_num IN ?", ids).Find(&tableData).Error; err != nil {
+			continue
+		}
+		blocks = append(blocks, tableData...)
+	}
+	return
 }

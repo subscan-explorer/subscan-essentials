@@ -354,6 +354,8 @@ definitions:
         type: string
       to_address:
         type: string
+      transaction_id:
+        type: integer
       value:
         type: number
     type: object
@@ -408,12 +410,17 @@ definitions:
     type: object
   internal_server_http.eventsParams:
     properties:
+      after_id:
+        type: integer
       block_num:
         type: integer
       event:
         type: string
       extrinsic_index:
         type: string
+      hidden_params:
+        description: hide event params in response
+        type: boolean
       module:
         type: string
       page:
@@ -435,10 +442,15 @@ definitions:
     properties:
       address:
         type: string
+      after_id:
+        type: integer
       block_num:
         type: integer
       call:
         type: string
+      hidden_params:
+        description: hide extrinsic params in response
+        type: boolean
       module:
         type: string
       page:
@@ -695,6 +707,9 @@ definitions:
     properties:
       address:
         type: string
+      after_id:
+        minimum: 0
+        type: integer
       block_num:
         minimum: 0
         type: integer
@@ -855,6 +870,9 @@ definitions:
     properties:
       address:
         type: string
+      after_id:
+        minimum: 0
+        type: integer
       block_num:
         minimum: 0
         type: integer

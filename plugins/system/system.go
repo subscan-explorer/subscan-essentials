@@ -9,12 +9,17 @@ import (
 	"github.com/itering/subscan/plugins/system/service"
 	"github.com/itering/subscan/util"
 	"github.com/shopspring/decimal"
+	"github.com/urfave/cli"
 )
 
 var srv *service.Service
 
 type System struct {
 	d storage.Dao
+}
+
+func (a *System) Commands() []cli.Command {
+	return nil
 }
 
 func (a *System) ConsumptionQueue() []string {

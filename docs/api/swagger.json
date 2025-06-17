@@ -1941,6 +1941,9 @@
                 "to_address": {
                     "type": "string"
                 },
+                "transaction_id": {
+                    "type": "integer"
+                },
                 "value": {
                     "type": "number"
                 }
@@ -2023,6 +2026,9 @@
         "internal_server_http.eventsParams": {
             "type": "object",
             "properties": {
+                "after_id": {
+                    "type": "integer"
+                },
                 "block_num": {
                     "type": "integer"
                 },
@@ -2031,6 +2037,10 @@
                 },
                 "extrinsic_index": {
                     "type": "string"
+                },
+                "hidden_params": {
+                    "description": "hide event params in response",
+                    "type": "boolean"
                 },
                 "module": {
                     "type": "string"
@@ -2063,11 +2073,18 @@
                 "address": {
                     "type": "string"
                 },
+                "after_id": {
+                    "type": "integer"
+                },
                 "block_num": {
                     "type": "integer"
                 },
                 "call": {
                     "type": "string"
+                },
+                "hidden_params": {
+                    "description": "hide extrinsic params in response",
+                    "type": "boolean"
                 },
                 "module": {
                     "type": "string"
@@ -2457,6 +2474,10 @@
                 "address": {
                     "type": "string"
                 },
+                "after_id": {
+                    "type": "integer",
+                    "minimum": 0
+                },
                 "block_num": {
                     "type": "integer",
                     "minimum": 0
@@ -2688,6 +2709,10 @@
             "properties": {
                 "address": {
                     "type": "string"
+                },
+                "after_id": {
+                    "type": "integer",
+                    "minimum": 0
                 },
                 "block_num": {
                     "type": "integer",
