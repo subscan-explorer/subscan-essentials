@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"github.com/itering/subscan/internal/observer"
 	"github.com/itering/subscan/internal/script"
+	"github.com/itering/subscan/internal/service"
+	"github.com/itering/subscan/plugins"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/network"
 	"github.com/urfave/cli"
@@ -49,4 +52,37 @@ var commands = []cli.Command{
 			return nil
 		},
 	},
+	{
+		Name:  "plugin",
+		Usage: "plugin sub commands",
+		Before: func(c *cli.Context) error {
+			srv := service.New()
+			_, cancel := context.WithCancel(context.Background())
+			c.App.After = func(*cli.Context) error {
+				cancel()
+				srv.Close()
+				return nil
+			}
+			return nil
+		},
+		Subcommands: pluginCommands(),
+		After:       func(context *cli.Context) error { return nil },
+	},
+}
+
+func pluginCommands() []cli.Command {
+	var cmds []cli.Command
+	for name, plugin := range plugins.RegisteredPlugins {
+		if !plugin.Enable() {
+			continue
+		}
+		cmds = append(cmds, cli.Command{
+			Name: name,
+			Before: func(c *cli.Context) error {
+				return nil
+			},
+			Subcommands: plugin.Commands(),
+		})
+	}
+	return cmds
 }

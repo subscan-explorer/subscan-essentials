@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"github.com/itering/subscan/internal/server/prom"
 	"github.com/itering/subscan/util/mq"
 	redisUtil "github.com/itering/subscan/util/redis"
 	"os"
@@ -35,12 +37,17 @@ func setupApp() *cli.App {
 	app.Before = func(context *cli.Context) error {
 		configs.Init()
 		redisUtil.Init()
+		go prom.New()
 		runtime.GOMAXPROCS(runtime.NumCPU())
 		mq.New()
 		return nil
 	}
 	app.Commands = commands
 	app.Action = func(*cli.Context) error { run(); return nil }
+	app.After = func(ctx *cli.Context) error {
+		_ = prom.MetricsServer.Shutdown(context.Background())
+		return nil
+	}
 	return app
 }
 

@@ -11,6 +11,7 @@ import (
 	"github.com/itering/subscan/util"
 	"github.com/itering/substrate-api-rpc/metadata"
 	"github.com/shopspring/decimal"
+	"github.com/urfave/cli"
 	"gorm.io/gorm"
 )
 
@@ -18,6 +19,24 @@ type EVM struct {
 	d      storage.Dao
 	s      *dao.Storage
 	enable bool
+}
+
+func (a *EVM) Commands() []cli.Command {
+	return []cli.Command{
+		{
+			Name:        "EvmValidate",
+			Description: "check and repair evm block data",
+			Flags: []cli.Flag{
+				cli.IntFlag{Name: "startBlock"},
+				cli.BoolFlag{Name: "fast"},
+				cli.IntFlag{Name: "blockNum"},
+			},
+			Action: func(c *cli.Context) error {
+				dao.Validate(c.Int("startBlock"), c.Bool("fast"), c.Int("blockNum"))
+				return nil
+			},
+		},
+	}
 }
 
 func (a *EVM) Enable() bool {

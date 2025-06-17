@@ -10,6 +10,7 @@ import (
 	"github.com/itering/subscan/plugins/balance/model"
 	"github.com/itering/subscan/plugins/balance/service"
 	"github.com/shopspring/decimal"
+	"github.com/urfave/cli"
 	"strings"
 )
 
@@ -18,6 +19,32 @@ var srv *service.Service
 type Balance struct {
 	d    storage.Dao
 	pool subscan_plugin.RedisPool
+}
+
+func (a *Balance) Commands() []cli.Command {
+	return []cli.Command{
+		{
+			Name: "InitAccount",
+			Action: func(c *cli.Context) error {
+				dao.InitAccount(a.storage())
+				return nil
+			},
+		},
+		{
+			Name: "RefreshAllAccount",
+			Action: func(c *cli.Context) error {
+				dao.RefreshAllAccount(a.storage())
+				return nil
+			},
+		},
+		{
+			Name: "InitTransfer",
+			Action: func(c *cli.Context) error {
+				dao.InitTransfer(a.storage())
+				return nil
+			},
+		},
+	}
 }
 
 func (a *Balance) ConsumptionQueue() []string {
@@ -58,7 +85,7 @@ func (a *Balance) ProcessEvent(block *storage.Block, event *storage.Event, _ dec
 	}
 	switch strings.ToLower(event.ModuleId) {
 	case strings.ToLower("Balances"):
-		return dao.EmitEvent(context.TODO(), &dao.Storage{Dao: a.d, Pool: a.pool}, event, block)
+		return dao.EmitEvent(context.TODO(), a.storage(), event, block)
 	}
 
 	return nil
@@ -84,5 +111,9 @@ func (a *Balance) Migrate() {
 func (a *Balance) ExecWorker(context.Context, string, string, interface{}) error { return nil }
 
 func (a *Balance) RefreshMetadata() {
-	dao.RefreshMetadata(context.TODO(), &dao.Storage{Dao: a.d, Pool: a.pool})
+	dao.RefreshMetadata(context.TODO(), a.storage())
+}
+
+func (a *Balance) storage() *dao.Storage {
+	return &dao.Storage{Dao: a.d, Pool: a.pool}
 }

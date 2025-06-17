@@ -42,7 +42,10 @@ func NewHTTPServer(c *configs.Server, s *service.Service) *http.Server {
 
 func initRouter(e *gin.Engine) {
 	e.Use(middlewares.CORS())
+	// health
 	e.GET("ping", ping)
+	e.GET("healthz", livenessProbe)
+	e.GET("readiness", readinessProbe)
 	customValidator.RegisterCustomValidator()
 	// internal
 	g := e.Group("/api")

@@ -22,7 +22,7 @@ func New() (dao *Dao, storage *DbStorage, pool *redisDao.Dao) {
 		DbDriver: db.Dialector.Name(),
 	}
 	dao.Migration()
-	storage = &DbStorage{db: db, DbDriver: dao.DbDriver}
+	storage = &DbStorage{db: db, DbDriver: dao.DbDriver, d: dao}
 	return
 }
 

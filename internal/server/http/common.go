@@ -19,3 +19,10 @@ func ping(ctx *gin.Context) {
 func now(c *gin.Context) {
 	toJson(c, time.Now().Unix(), nil)
 }
+
+func livenessProbe(c *gin.Context) {
+	c.String(http.StatusOK, "OK")
+}
+func readinessProbe(c *gin.Context) {
+	c.String(http.StatusOK, "OK")
+}

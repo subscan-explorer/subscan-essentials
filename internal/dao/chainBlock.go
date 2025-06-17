@@ -197,3 +197,21 @@ func (d *Dao) GetBlockNumArr(c context.Context, start, end uint) []int {
 	d.db.WithContext(c).Scopes(d.TableNameFunc(&model.ChainBlock{BlockNum: end})).Where("block_num BETWEEN ? AND ?", start, end).Order("block_num asc").Pluck("block_num", &blockNums)
 	return blockNums
 }
+
+func (d *Dao) GetBlocksByNums(c context.Context, blockNums []uint, columns string) (blocks []*model.ChainBlock) {
+	if len(blockNums) == 0 {
+		return nil
+	}
+	idxMap := make(map[uint][]uint)
+	for _, num := range blockNums {
+		idxMap[num/model.SplitTableBlockNum] = append(idxMap[num/model.SplitTableBlockNum], num)
+	}
+	for index, ids := range idxMap {
+		var tableData []*model.ChainBlock
+		if err := d.db.WithContext(c).Select(columns).Scopes(model.TableNameFunc(&model.ChainBlock{BlockNum: index * model.SplitTableBlockNum})).Where("block_num IN ?", ids).Find(&tableData).Error; err != nil {
+			continue
+		}
+		blocks = append(blocks, tableData...)
+	}
+	return
+}

@@ -8,9 +8,11 @@ import (
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/plugins"
+	"github.com/itering/subscan/share/metrics"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/mq"
 	"github.com/shopspring/decimal"
+	"time"
 )
 
 func Consumption() {
@@ -30,6 +32,10 @@ func Consumption() {
 }
 
 func emitMsg(message *workers.Msg) {
+	startTime := time.Now()
+	defer func() {
+		metrics.WorkerProcessCost.WithLabelValues(message.Get("queue").MustString(), message.Get("class").MustString()).Observe(time.Since(startTime).Seconds())
+	}()
 	var do = func(ctx context.Context, queue, class string, rawInterface interface{}) error {
 		raw, ok := rawInterface.(*simplejson.Json)
 		if !ok {
