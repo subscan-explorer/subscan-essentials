@@ -9,48 +9,39 @@ import (
 	"strings"
 )
 
-func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.ChainExtrinsic) error {
-	ce := model.ChainExtrinsic{
-		ID:                 extrinsic.ID,
-		BlockTimestamp:     extrinsic.BlockTimestamp,
-		ExtrinsicIndex:     extrinsic.ExtrinsicIndex,
-		BlockNum:           extrinsic.BlockNum,
-		CallModuleFunction: extrinsic.CallModuleFunction,
-		CallModule:         extrinsic.CallModule,
-		Params:             extrinsic.Params,
-		AccountId:          extrinsic.AccountId,
-		Signature:          extrinsic.Signature,
-		Era:                extrinsic.Era,
-		ExtrinsicHash:      util.AddHex(extrinsic.ExtrinsicHash),
-		Nonce:              extrinsic.Nonce,
-		Success:            extrinsic.Success,
-		IsSigned:           extrinsic.Signature != "",
-		Fee:                extrinsic.Fee,
-		UsedFee:            extrinsic.UsedFee,
+func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic []model.ChainExtrinsic, signedExtrinsicCount int) error {
+	if len(extrinsic) == 0 {
+		return nil
 	}
-	query := txn.Scopes(d.TableNameFunc(&ce), model.IgnoreDuplicate).Scopes(model.IgnoreDuplicate).Create(&ce)
+	query := txn.Scopes(d.TableNameFunc(&extrinsic[0]), model.IgnoreDuplicate).CreateInBatches(extrinsic, 2000)
 	if query.RowsAffected > 0 {
-		_ = d.IncrMetadata(c, "count_extrinsic", 1)
-		if ce.IsSigned {
-			_ = d.IncrMetadata(c, "count_signed_extrinsic", 1)
-		}
+		_ = d.IncrMetadata(c, "count_extrinsic", int(query.RowsAffected))
+		_ = d.IncrMetadata(c, "count_signed_extrinsic", signedExtrinsicCount)
 	}
 	return query.Error
 }
 
-func (d *Dao) GetExtrinsicList(c context.Context, page, row int, _ string, queryWhere ...model.Option) ([]model.ChainExtrinsic, int) {
+func (d *Dao) GetExtrinsicList(c context.Context, page, row int, _ string, fixedTableIndex int, afterId uint, queryWhere ...model.Option) ([]model.ChainExtrinsic, int) {
 	var extrinsics []model.ChainExtrinsic
 	var count int64
 
 	blockNum, _ := d.GetFillBestBlockNum(context.TODO())
-	for index := blockNum / int(model.SplitTableBlockNum); index >= 0; index-- {
+	maxTableIndex := blockNum / int(model.SplitTableBlockNum)
+	if afterId > 0 {
+		maxTableIndex = int(afterId/model.SplitTableBlockNum) / model.IdGenerateCoefficient
+	}
+	if fixedTableIndex >= 0 {
+		maxTableIndex = fixedTableIndex
+	}
+	for index := maxTableIndex; index >= 0; index-- {
 		var (
 			tableData  []model.ChainExtrinsic
 			tableCount int64
 		)
-
+		if fixedTableIndex >= 0 && index != fixedTableIndex {
+			continue
+		}
 		queryOrigin := d.db.WithContext(c).Scopes(d.TableNameFunc(&model.ChainExtrinsic{BlockNum: uint(index) * model.SplitTableBlockNum}))
-
 		queryOrigin.Scopes(queryWhere...)
 		queryOrigin.Count(&tableCount)
 
@@ -62,7 +53,10 @@ func (d *Dao) GetExtrinsicList(c context.Context, page, row int, _ string, query
 		if len(extrinsics) >= row {
 			continue
 		}
-		query := queryOrigin.Order("id desc").Offset(page*row - int(preCount)).Limit(row - len(extrinsics)).Scan(&tableData)
+		if afterId > 0 {
+			queryOrigin = queryOrigin.Where("id < ?", afterId)
+		}
+		query := queryOrigin.Order("id desc").Offset(page*row - int(preCount)).Limit(row - len(extrinsics)).Find(&tableData)
 		if query == nil || query.Error != nil {
 			continue
 		}

@@ -27,6 +27,6 @@ func Transfers(ctx context.Context, db storage.DB, page model.Option, opts ...mo
 	if q.Error != nil {
 		return nil, 0
 	}
-	q = d.WithContext(ctx).Model(bModel.Transfer{}).Scopes(page).Scopes(opts...).Find(&list)
+	q = d.WithContext(ctx).Model(bModel.Transfer{}).Scopes(page).Scopes(opts...).Order("id desc").Find(&list)
 	return list, int(count)
 }

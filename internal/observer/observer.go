@@ -3,6 +3,7 @@ package observer
 import (
 	"context"
 	"fmt"
+	"github.com/itering/subscan/internal/script"
 	"os"
 	"os/signal"
 	"sync"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/itering/subscan/internal/service"
 	"github.com/itering/subscan/util"
+	"github.com/robfig/cron/v3"
 )
 
 var (
@@ -30,6 +32,11 @@ func Run(dt string) {
 		go func() {
 			defer wg.Done()
 			srv.Subscribe(ctx)
+		}()
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			RunCron()
 		}()
 	case "worker":
 		wg.Add(1)
@@ -51,4 +58,19 @@ func enableTermSignalHandler(cancel func()) {
 	util.Logger().Info(fmt.Sprintf("Received signal %s, exiting...\n", <-sigs))
 	cancel()
 	close(stop)
+}
+
+func RunCron() {
+	// or use cron.DefaultLogger
+	c := cron.New(cron.WithChain(cron.Recover(cron.DefaultLogger)))
+	if _, err := c.AddFunc("@every 3m", func() {
+		script.RefreshMetadata()
+	}); err != nil {
+		util.Logger().Error(fmt.Errorf("failed to register cron job: %v", err))
+		os.Exit(1)
+	}
+	c.Start()
+	<-stop
+	<-c.Stop().Done()
+	util.Logger().Info("Cron stopped")
 }
