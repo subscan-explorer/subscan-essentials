@@ -24,6 +24,7 @@ the Subscan team and powering [subscan.io](https://www.subscan.io/), it provides
     - [Configuration](#configuration)
     - [Running Services](#running-services)
 - [Docker Deployment](#docker-deployment)
+- [Helm Chart Deployment](#helm-chart-deployment)
 - [Testing](#testing)
 - [Contributing](#contributing)
 - [License](#license)
@@ -264,6 +265,40 @@ Run subscan service
 docker-compose build
 docker-compose up -d
 ```
+
+## Helm Chart Deployment
+
+Subscan Essentials supports deployment on Kubernetes via the official Helm Chart.
+
+Helm Chart repository: [subscan-explorer/subscan-essentials-chart](https://github.com/subscan-explorer/subscan-essentials-chart)
+
+### Add Helm Repository
+
+```bash
+helm repo add subscan https://subscan-explorer.github.io/subscan-essentials-chart/
+helm repo update
+```
+
+### Install
+
+```bash
+helm install subscan-essentials subscan/subscan-essentials-chart -f example/subscan-essentials/values.yaml
+```
+
+### Upgrade
+
+```bash
+helm upgrade subscan-essentials subscan/subscan-essentials-chart -f example/subscan-essentials/values.yaml
+```
+
+### Key Configuration Notes
+
+- Supports multi-network (mainnet/testnet) configuration
+- Custom images, resources, environment variables, and Ingress domains are supported
+- You must have PostgreSQL and Redis services ready, and configure their connection info in `values.yaml`
+- For detailed parameters, refer to the [values.yaml example](https://github.com/subscan-explorer/subscan-essentials-chart/tree/main/example/subscan-essentials/values.yaml)
+
+For more details, please see the [Helm Chart repository README](https://github.com/subscan-explorer/subscan-essentials-chart#readme)
 
 ### testing
 
