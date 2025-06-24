@@ -66,7 +66,7 @@ func RunCron() {
 	if _, err := c.AddFunc("@every 3m", func() {
 		script.RefreshMetadata()
 	}); err != nil {
-		util.Logger().Error(fmt.Sprintf("Failed to register cron job: %v", err))
+		util.Logger().Error(fmt.Errorf("failed to register cron job: %v", err))
 		os.Exit(1)
 	}
 	c.Start()
