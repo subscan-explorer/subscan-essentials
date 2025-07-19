@@ -83,7 +83,11 @@ func FindOutBlockTime(extrinsics []model.ChainExtrinsic) int {
 func (s *Service) getExtrinsicSuccess(e []model.ChainEvent) bool {
 	for _, event := range e {
 		if strings.EqualFold(event.ModuleId, "system") {
-			return strings.EqualFold(event.EventId, "ExtrinsicSuccess")
+			if !strings.EqualFold(event.EventId, "ExtrinsicSuccess") || !strings.EqualFold(event.EventId, "ExtrinsicFailed") {
+				continue
+			} else {
+				return strings.EqualFold(event.EventId, "ExtrinsicSuccess")
+			}
 		}
 	}
 	return true
