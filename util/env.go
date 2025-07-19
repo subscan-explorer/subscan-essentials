@@ -12,7 +12,7 @@ var (
 	AddressType = GetEnv("SUBSTRATE_ADDRESS_TYPE", "0")
 	// BalanceAccuracy balance accuracy, default is 10(DOT)
 	BalanceAccuracy = GetEnv("SUBSTRATE_ACCURACY", "10")
-	// WSEndPoint chain rpc endpoint, default is wss://polkadot-rpc.dwellir.com
+	// WSEndPoint chain rpc endpoint, default is wss://rpc.polkadot.io
 	WSEndPoint = GetEnv("CHAIN_WS_ENDPOINT", "wss://rpc.polkadot.io")
 	// NetworkNode network node name, default is polkadot
 	NetworkNode = GetEnv("NETWORK_NODE", "polkadot")
