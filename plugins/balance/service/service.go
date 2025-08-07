@@ -32,7 +32,7 @@ func (s *Service) GetAccountJson(ctx context.Context, addr string) *model.Accoun
 	return account
 }
 
-func (s *Service) GetTransferJson(ctx context.Context, addr string, blockNum uint, page, row int) ([]model.Transfer, int) {
+func (s *Service) GetTransferJson(ctx context.Context, addr string, blockNum uint, afterId uint, page, row int) ([]model.Transfer, int) {
 	var opts []cmodel.Option
 	if blockNum > 0 {
 		opts = append(opts, cmodel.Where("block_num = ?", blockNum))
@@ -40,7 +40,9 @@ func (s *Service) GetTransferJson(ctx context.Context, addr string, blockNum uin
 	if addr != "" {
 		opts = append(opts, cmodel.Where("sender = ? or receiver = ?", addr, addr))
 	}
-
+	if afterId > 0 {
+		opts = append(opts, cmodel.Where("id < ?", afterId))
+	}
 	list, count := dao.Transfers(ctx, s.d, cmodel.WithLimit(page*row, row), opts...)
 	for index := range list {
 		list[index].Sender = address.Encode(list[index].Sender)

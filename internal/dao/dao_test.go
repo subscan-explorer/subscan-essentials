@@ -103,15 +103,15 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	err = testDao.CreateEvent(txn, &testEvent)
+	err = testDao.CreateEvent(txn, []model.ChainEvent{testEvent})
 	if err != nil {
 		panic(err)
 	}
-	err = testDao.CreateExtrinsic(ctx, txn, &testExtrinsic)
+	err = testDao.CreateExtrinsic(ctx, txn, []model.ChainExtrinsic{testExtrinsic}, 1)
 	if err != nil {
 		panic(err)
 	}
-	err = testDao.CreateExtrinsic(ctx, txn, &testSignedExtrinsic)
+	err = testDao.CreateExtrinsic(ctx, txn, []model.ChainExtrinsic{testSignedExtrinsic}, 1)
 	if err != nil {
 		panic(err)
 	}
@@ -121,7 +121,7 @@ func init() {
 	}
 	txn.Commit()
 
-	testDao.CreateRuntimeVersion("polkadot", 1)
+	testDao.CreateRuntimeVersion(context.TODO(), "polkadot", 1, 1)
 	testDao.SetRuntimeData(1, "system|staking", "0x0")
 
 	conn, _ := testDao.redis.Redis().GetContext(ctx)

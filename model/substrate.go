@@ -5,11 +5,16 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
+	scalecodec "github.com/itering/scale.go"
+	"github.com/itering/scale.go/types"
 	"github.com/itering/subscan-plugin/storage"
+	"github.com/itering/subscan/share/substrate"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/address"
+	"github.com/itering/substrate-api-rpc/metadata"
 	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
+	"gorm.io/gorm"
 	"strconv"
 	"strings"
 )
@@ -60,9 +65,12 @@ type ChainEvent struct {
 	ExtrinsicIdx   int         `json:"extrinsic_idx"`
 	ModuleId       string      `json:"module_id" gorm:"size:255;index:query_function"`
 	EventId        string      `json:"event_id" gorm:"size:255;index:query_function"`
-	Params         EventParams `json:"params" gorm:"type:json"`
+	Params         EventParams `json:"params,omitempty" gorm:"type:json"`
 	EventIdx       uint        `json:"event_idx"`
 	Phase          int         `json:"phase" gorm:"size:8"`
+
+	ParamsRawBytes []byte `json:"-" gorm:"types:bytes" `
+	ParamsRaw      string `json:"params_raw" gorm:"-" ` // only for decode
 }
 
 func (c ChainEvent) TableName() string {
@@ -92,12 +100,91 @@ func (c *ChainEvent) AsPlugin() *storage.Event {
 	}
 }
 
+func (c *ChainEvent) AfterFind(tx *gorm.DB) error {
+	ctx := tx.Statement.Context
+	if len(c.ParamsRawBytes) == 0 {
+		return nil
+	}
+	runtimeVersion := GetBlockRuntimeVersion(ctx, tx, c.BlockNum)
+	spec := GetMetadataInstant(ctx, tx, runtimeVersion)
+	event := getEvent(spec, c.ModuleId, c.EventId)
+	if event != nil {
+		params, err := substrate.DecodeEventParams(util.BytesToHex(c.ParamsRawBytes), event.Args, spec, event, *runtimeVersion)
+		if err != nil {
+			util.Logger().Error(fmt.Errorf("decode event params error id %d: %w", c.ID, err))
+			return nil
+		}
+		// use ParamsRawBytes to store the decoded params
+		c.Params = convertScaleEventParams(params)
+	} else {
+		// skip
+	}
+	return nil
+}
+
+func getCall(m *metadata.Instant, moduleName, callName string) *types.MetadataCalls {
+	module := getModule(m, moduleName)
+	if module == nil {
+		return nil
+	}
+
+	for i, call := range module.Calls {
+		if strings.EqualFold(call.Name, callName) {
+			return &module.Calls[i]
+		}
+	}
+	return nil
+}
+
+func getModule(m *metadata.Instant, moduleName string) *types.MetadataModules {
+	for i, mm := range m.Metadata.Modules {
+		if strings.EqualFold(mm.Name, moduleName) {
+			return &m.Metadata.Modules[i]
+		}
+	}
+	return nil
+}
+
+func getEvent(m *metadata.Instant, moduleName, eventName string) *types.MetadataEvents {
+	module := getModule(m, moduleName)
+	if module == nil {
+		return nil
+	}
+
+	for i, event := range module.Events {
+		if strings.EqualFold(event.Name, eventName) {
+			return &module.Events[i]
+		}
+	}
+
+	return nil
+}
+
+func convertScaleEventParams(params []scalecodec.EventParam) EventParams {
+	var eventParams EventParams
+	for _, param := range params {
+		eventParams = append(eventParams, EventParam{Type: param.Type, Value: param.Value, TypeName: param.TypeName, Name: param.Name})
+	}
+	return eventParams
+}
+
+func (c *ChainEvent) BeforeCreate(_ *gorm.DB) error {
+	if len(c.Params) == 0 {
+		return nil
+	}
+	if len(c.ParamsRawBytes) != 0 {
+		c.Params = EventParams{}
+	}
+	return nil
+}
+
 type EventParams []EventParam
 
 type EventParam struct {
 	Type     string      `json:"type"`
 	Value    interface{} `json:"value"`
 	TypeName string      `json:"type_name,omitempty"`
+	Name     string      `json:"name,omitempty"`
 }
 
 func (j EventParams) Value() (driver.Value, error) {
@@ -132,6 +219,9 @@ type ChainExtrinsic struct {
 	Success       bool            `json:"success"`
 	Fee           decimal.Decimal `json:"fee" gorm:"type:decimal(65,0);"`
 	UsedFee       decimal.Decimal `json:"used_fee" gorm:"type:decimal(65,0);"`
+
+	ParamsRawBytes []byte `json:"-" gorm:"types:bytes" `
+	ParamsRaw      string `json:"params_raw" gorm:"-" ` // only for decode
 }
 
 type ExtrinsicParams []ExtrinsicParam
@@ -142,6 +232,45 @@ func (j ExtrinsicParams) Value() (driver.Value, error) {
 	}
 
 	return json.Marshal(j)
+}
+
+func (c *ChainExtrinsic) AfterFind(tx *gorm.DB) error {
+	ctx := tx.Statement.Context
+	if len(c.ParamsRawBytes) == 0 {
+		return nil
+	}
+	specVersion := GetBlockRuntimeVersion(ctx, tx, uint(c.BlockNum))
+	spec := GetMetadataInstant(ctx, tx, specVersion)
+	call := getCall(spec, c.CallModule, c.CallModuleFunction)
+	if call != nil {
+		params, err := substrate.DecodeExtrinsicParams(util.BytesToHex(c.ParamsRawBytes), spec, call, *specVersion)
+		if err != nil {
+			util.Logger().Error(fmt.Errorf("decode extrinsic params error id %d: %w", c.ID, err))
+			return nil
+		}
+		// use ParamsRawBytes to store the decoded params
+		c.Params = convertScaleExtrinsicParams(params)
+	} else {
+		// skip
+	}
+	return nil
+}
+
+func convertScaleExtrinsicParams(params []scalecodec.ExtrinsicParam) (list ExtrinsicParams) {
+	for _, param := range params {
+		list = append(list, ExtrinsicParam{Type: param.Type, Value: param.Value, TypeName: param.TypeName, Name: param.Name})
+	}
+	return
+}
+
+func (c *ChainExtrinsic) BeforeCreate(_ *gorm.DB) error {
+	if len(c.Params) == 0 {
+		return nil
+	}
+	if len(c.ParamsRawBytes) != 0 {
+		c.Params = ExtrinsicParams{}
+	}
+	return nil
 }
 
 func (j *ExtrinsicParams) Scan(src interface{}) error { return json.Unmarshal(src.([]byte), j) }
@@ -196,6 +325,7 @@ type RuntimeVersion struct {
 	SpecVersion int    `json:"spec_version" gorm:"index:spec_version,unique"`
 	Modules     string `json:"modules"  gorm:"type:TEXT;"`
 	RawData     string `json:"-" gorm:"type:string;"`
+	BlockNum    uint   `json:"block_num" gorm:"index:block_num"`
 }
 
 type ChainLog struct {

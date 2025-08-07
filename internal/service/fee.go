@@ -98,10 +98,10 @@ func GetPaymentQueryInfo(_ context.Context, spec int, encodedExtrinsic, hash str
 		storageBytes := util.HexToBytes(result)
 		var decodeMsg storage.StateStorage
 		if isV2Weight {
-			decodeMsg, err = storage.Decode(util.BytesToHex(storageBytes), "RuntimeDispatchInfo", &types.ScaleDecoderOption{Spec: spec})
+			decodeMsg, _, err = storage.Decode(util.BytesToHex(storageBytes), "RuntimeDispatchInfo", &types.ScaleDecoderOption{Spec: spec})
 		}
 		if err != nil || !isV2Weight {
-			if decodeMsg, err = storage.Decode(util.BytesToHex(storageBytes), "RuntimeDispatchInfoV1", &types.ScaleDecoderOption{Spec: spec}); err != nil {
+			if decodeMsg, _, err = storage.Decode(util.BytesToHex(storageBytes), "RuntimeDispatchInfoV1", &types.ScaleDecoderOption{Spec: spec}); err != nil {
 				return nil, err
 			}
 		}

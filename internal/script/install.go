@@ -133,9 +133,9 @@ func RefreshMetadata() {
 	u := make(map[string]interface{})
 	// extrinsic
 	{
-		_, count := d.GetExtrinsicList(ctx, 0, 1, "desc")
+		_, count := d.GetExtrinsicList(ctx, 0, 1, "desc", -1, 0)
 		u["count_extrinsic"] = count
-		_, count = d.GetExtrinsicList(ctx, 0, 1, "desc", model.Where("is_signed = ?", true))
+		_, count = d.GetExtrinsicList(ctx, 0, 1, "desc", -1, 0, model.Where("is_signed = ?", true))
 		u["count_signed_extrinsic"] = count
 	}
 	util.Logger().Error(srv.GetDao().SetMetadata(ctx, u))

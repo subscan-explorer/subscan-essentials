@@ -286,7 +286,6 @@ func etherscanHandle(w http.ResponseWriter, r *http.Request) error {
 	// https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc721-token-transfer-events-by-address
 	// https://docs.etherscan.io/etherscan-v2/api-endpoints/accounts#get-a-list-of-erc1155-token-transfer-events-by-address
 	case "account-tokentx", "account-tokennfttx", "account-token1155tx":
-		fmt.Println(actionParams.Action)
 		if err := binding.Query.Bind(r, tokenParams); err != nil {
 			toJson(w, 0, nil, err)
 			return nil

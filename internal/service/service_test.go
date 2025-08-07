@@ -146,7 +146,7 @@ func (m *MockDao) BlockAsJson(c context.Context, block *model.ChainBlock) *model
 	return &model.ChainBlockJson{}
 }
 
-func (m *MockDao) CreateEvent(txn *dao.GormDB, event *model.ChainEvent) error {
+func (m *MockDao) CreateEvent(txn *dao.GormDB, event []model.ChainEvent) error {
 	return nil
 }
 
@@ -159,7 +159,7 @@ func (m *MockDao) GetEventByBlockNum(blockNum uint, where ...string) []model.Cha
 	return nil
 }
 
-func (m *MockDao) GetEventList(ctx context.Context, page, row int, order string, where ...model.Option) ([]model.ChainEvent, int) {
+func (m *MockDao) GetEventList(ctx context.Context, page, row int, order string, fixedTableIndex int, afterId uint, where ...model.Option) ([]model.ChainEvent, int) {
 	return []model.ChainEvent{testEvent}, 1
 }
 
@@ -171,7 +171,7 @@ func (m *MockDao) GetEventByIdx(ctx context.Context, index string) *model.ChainE
 	return nil
 }
 
-func (m *MockDao) CreateExtrinsic(c context.Context, txn *dao.GormDB, extrinsic *model.ChainExtrinsic) error {
+func (m *MockDao) CreateExtrinsic(c context.Context, txn *dao.GormDB, extrinsic []model.ChainExtrinsic, u int) error {
 	return nil
 }
 
@@ -183,7 +183,7 @@ func (m *MockDao) GetExtrinsicsByBlockNum(blockNum uint) []model.ChainExtrinsicJ
 	return nil
 }
 
-func (m *MockDao) GetExtrinsicList(c context.Context, page, row int, order string, queryWhere ...model.Option) ([]model.ChainExtrinsic, int) {
+func (m *MockDao) GetExtrinsicList(c context.Context, page, row int, order string, fixedTableIndex int, afterId uint, queryWhere ...model.Option) ([]model.ChainExtrinsic, int) {
 	return []model.ChainExtrinsic{testSignedExtrinsic}, 1
 }
 
@@ -242,8 +242,8 @@ func (m *MockDao) GetFinalizedBlockNum(c context.Context) (uint64, error) {
 	return args.Get(0).(uint64), args.Error(1)
 }
 
-func (m *MockDao) CreateRuntimeVersion(name string, specVersion int) int64 {
-	return 0
+func (m *MockDao) CreateRuntimeVersion(_ context.Context, name string, specVersion int, blockNum uint) bool {
+	return false
 }
 
 func (m *MockDao) SetRuntimeData(specVersion int, modules string, rawData string) int64 {

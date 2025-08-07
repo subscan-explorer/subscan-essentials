@@ -28,13 +28,13 @@ type IDao interface {
 	GetBlockList(ctx context.Context, page, row int) []model.ChainBlock
 	BlockAsJson(c context.Context, block *model.ChainBlock) *model.ChainBlockJson
 
-	CreateEvent(txn *GormDB, event *model.ChainEvent) error
-	GetEventList(ctx context.Context, page, row int, order string, where ...model.Option) ([]model.ChainEvent, int)
+	CreateEvent(txn *GormDB, event []model.ChainEvent) error
+	GetEventList(ctx context.Context, page, row int, order string, fixedTableIndex int, afterId uint, where ...model.Option) ([]model.ChainEvent, int)
 	GetEventsByIndex(extrinsicIndex string) []model.ChainEvent
 	GetEventByIdx(ctx context.Context, index string) *model.ChainEvent
 
-	CreateExtrinsic(c context.Context, txn *GormDB, extrinsic *model.ChainExtrinsic) error
-	GetExtrinsicList(c context.Context, page, row int, order string, queryWhere ...model.Option) ([]model.ChainExtrinsic, int)
+	CreateExtrinsic(c context.Context, txn *GormDB, extrinsic []model.ChainExtrinsic, u int) error
+	GetExtrinsicList(c context.Context, page, row int, order string, fixedTableIndex int, afterId uint, queryWhere ...model.Option) ([]model.ChainExtrinsic, int)
 	GetExtrinsicsByHash(c context.Context, hash string) *model.ChainExtrinsic
 	GetExtrinsicsByIndex(c context.Context, index string) *model.ChainExtrinsic
 	GetExtrinsicsDetailByHash(c context.Context, hash string) *model.ExtrinsicDetail
@@ -50,7 +50,7 @@ type IDao interface {
 	GetBestBlockNum(c context.Context) (uint64, error)
 	GetFinalizedBlockNum(c context.Context) (uint64, error)
 
-	CreateRuntimeVersion(name string, specVersion int) int64
+	CreateRuntimeVersion(c context.Context, name string, specVersion int, blockNum uint) bool
 	SetRuntimeData(specVersion int, modules string, rawData string) int64
 	RuntimeVersionList() []model.RuntimeVersion
 	RuntimeVersionRaw(spec int) *metadata.RuntimeRaw

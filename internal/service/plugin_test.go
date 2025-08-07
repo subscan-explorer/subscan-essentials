@@ -2,14 +2,14 @@ package service
 
 import (
 	"context"
-	"github.com/itering/subscan/model"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func Test_emitEvent(t *testing.T) {
-	testSrv.emitEvent(&testBlock, &testEvent)
+	assert.NoError(t, testSrv.emitEvent(&testEvent))
 }
 
 func Test_emitExtrinsic(t *testing.T) {
-	testSrv.emitExtrinsic(context.TODO(), &testBlock, &testSignedExtrinsic, []model.ChainEvent{testEvent})
+	assert.NoError(t, testSrv.emitExtrinsic(context.TODO(), &testSignedExtrinsic))
 }

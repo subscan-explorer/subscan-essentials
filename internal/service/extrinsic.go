@@ -19,28 +19,30 @@ func (s *Service) createExtrinsic(ctx context.Context,
 	eventMap map[string][]model.ChainEvent,
 ) (err error) {
 
+	var countSignedExtrinsic int
+
 	for index, extrinsic := range extrinsics {
-		extrinsic.BlockNum = block.BlockNum
-		extrinsic.ExtrinsicIndex = fmt.Sprintf("%d-%d", extrinsic.BlockNum, index)
-		extrinsic.ID = extrinsic.Id()
-		extrinsic.Success = s.getExtrinsicSuccess(eventMap[extrinsic.ExtrinsicIndex])
-		extrinsic.BlockTimestamp = block.BlockTimestamp
-		extrinsic.AccountId = address.Format(extrinsic.AccountId)
+		extrinsics[index].BlockNum = block.BlockNum
+		extrinsics[index].ExtrinsicIndex = fmt.Sprintf("%d-%d", block.BlockNum, index)
+		extrinsics[index].Success = s.getExtrinsicSuccess(eventMap[extrinsics[index].ExtrinsicIndex])
+		extrinsics[index].BlockTimestamp = block.BlockTimestamp
+		extrinsics[index].AccountId = address.Format(extrinsic.AccountId)
+		extrinsics[index].ExtrinsicHash = util.AddHex(extrinsic.ExtrinsicHash)
+		extrinsics[index].ParamsRawBytes = util.HexToBytes(extrinsic.ParamsRaw)
+		extrinsics[index].Params = nil
 		if extrinsic.Signature != "" {
-			weight, actualFee, isV2Weight := model.CheckoutWeight(eventMap[extrinsic.ExtrinsicIndex])
-			extrinsic.Fee, extrinsic.UsedFee, err = GetExtrinsicFee(ctx, encodeExtrinsics[index], block.ParentHash, block.SpecVersion, weight, actualFee, isV2Weight)
+			extrinsics[index].IsSigned = true
+			countSignedExtrinsic++
+			weight, actualFee, isV2Weight := model.CheckoutWeight(eventMap[extrinsics[index].ExtrinsicIndex])
+			extrinsics[index].Fee, extrinsics[index].UsedFee, err = GetExtrinsicFee(ctx, encodeExtrinsics[index], block.ParentHash, block.SpecVersion, weight, actualFee, isV2Weight)
 			if err != nil {
 				util.Logger().Error(fmt.Errorf("extrinsic %s GetExtrinsicFee err %v", extrinsic.ExtrinsicIndex, err))
 			}
 		}
-
-		if err = s.dao.CreateExtrinsic(ctx, txn, &extrinsic); err == nil {
-			if err = s.emitExtrinsic(ctx, block, &extrinsic); err != nil {
-				return err
-			}
-		} else {
-			return err
-		}
+		extrinsics[index].ID = extrinsics[index].Id()
+	}
+	if err = s.dao.CreateExtrinsic(ctx, txn, extrinsics, countSignedExtrinsic); err != nil {
+		return err
 	}
 	return nil
 }

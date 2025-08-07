@@ -1,16 +1,23 @@
 package dao
 
 import (
+	"context"
 	"github.com/itering/subscan/model"
 	"github.com/itering/substrate-api-rpc/metadata"
 )
 
-func (d *Dao) CreateRuntimeVersion(name string, specVersion int) int64 {
-	query := d.db.Scopes(model.IgnoreDuplicate).Create(&model.RuntimeVersion{
-		Name:        name,
-		SpecVersion: specVersion,
-	})
-	return query.RowsAffected
+func (d *Dao) CreateRuntimeVersion(c context.Context, name string, specVersion int, blockNum uint) bool {
+	var runtime model.RuntimeVersion
+	query := d.db.WithContext(c).First(&runtime, "spec_version=? and name=?", specVersion, name)
+	if query.Error != nil {
+		query = d.db.WithContext(c).Scopes(model.IgnoreDuplicate).Create(&model.RuntimeVersion{Name: name, SpecVersion: specVersion, BlockNum: blockNum})
+		return query.RowsAffected > 0
+	} else {
+		if blockNum < runtime.BlockNum {
+			d.db.WithContext(c).Model(&runtime).Where("spec_version=? and name=?", specVersion, name).Update("block_num", blockNum)
+		}
+	}
+	return runtime.RawData == ""
 }
 
 func (d *Dao) SetRuntimeData(specVersion int, modules string, rawData string) int64 {

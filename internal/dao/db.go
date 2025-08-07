@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"gorm.io/gorm/logger"
@@ -26,6 +27,7 @@ type DbStorage struct {
 	db       *gorm.DB
 	Prefix   string
 	DbDriver string
+	d        *Dao
 }
 
 func (d *DbStorage) GetDbInstance() any {
@@ -160,6 +162,18 @@ func (d *DbStorage) Delete(model interface{}, query interface{}) error {
 	} else {
 		return err
 	}
+}
+
+func (d *DbStorage) GetBlocksByNums(c context.Context, blockNums []uint, columns string) (blocks []*storage.Block) {
+	list := d.d.GetBlocksByNums(c, blockNums, columns)
+	for _, v := range list {
+		blocks = append(blocks, v.AsPlugin())
+	}
+	return
+}
+
+func (d *DbStorage) GetCurrentBlockNum(c context.Context) (uint64, error) {
+	return d.d.GetFinalizedBlockNum(c)
 }
 
 // db

@@ -8,31 +8,35 @@ import (
 	"strings"
 )
 
-func (d *Dao) CreateEvent(txn *GormDB, event *model.ChainEvent) error {
-	e := model.ChainEvent{
-		ID:             event.Id(),
-		ExtrinsicIndex: fmt.Sprintf("%d-%d", event.BlockNum, event.ExtrinsicIdx),
-		BlockNum:       event.BlockNum,
-		ModuleId:       event.ModuleId,
-		Params:         event.Params,
-		EventIdx:       event.EventIdx,
-		EventId:        event.EventId,
-		ExtrinsicIdx:   event.ExtrinsicIdx,
-		Phase:          event.Phase,
+func (d *Dao) CreateEvent(txn *GormDB, events []model.ChainEvent) error {
+	if len(events) == 0 {
+		return nil
 	}
-	query := txn.Scopes(d.TableNameFunc(&e), model.IgnoreDuplicate).Create(&e)
+	query := txn.Scopes(d.TableNameFunc(events[0]), model.IgnoreDuplicate).CreateInBatches(events, 2000)
 	return query.Error
 }
 
-func (d *Dao) GetEventList(ctx context.Context, page, row int, order string, where ...model.Option) ([]model.ChainEvent, int) {
+func (d *Dao) GetEventList(ctx context.Context, page, row int, order string, fixedTableIndex int, afterId uint, where ...model.Option) ([]model.ChainEvent, int) {
 	var Events []model.ChainEvent
 
 	var count int64
 
 	blockNum, _ := d.GetFillBestBlockNum(context.TODO())
-	for index := blockNum / int(model.SplitTableBlockNum); index >= 0; index-- {
+	maxTableIndex := blockNum / int(model.SplitTableBlockNum)
+	if afterId > 0 {
+		maxTableIndex = int(afterId/model.SplitTableBlockNum) / model.IdGenerateCoefficient
+	}
+	if fixedTableIndex >= 0 {
+		maxTableIndex = fixedTableIndex
+	}
+	for index := maxTableIndex; index >= 0; index-- {
 		var tableData []model.ChainEvent
 		var tableCount int64
+
+		if fixedTableIndex >= 0 && index != fixedTableIndex {
+			continue
+		}
+
 		queryOrigin := d.db.WithContext(ctx).Scopes(d.TableNameFunc(&model.ChainEvent{BlockNum: uint(index) * model.SplitTableBlockNum}))
 		queryOrigin.Scopes(where...)
 		queryOrigin.Count(&tableCount)
@@ -45,7 +49,10 @@ func (d *Dao) GetEventList(ctx context.Context, page, row int, order string, whe
 		if len(Events) >= row {
 			continue
 		}
-		query := queryOrigin.Order(fmt.Sprintf("id %s", order)).Offset(page*row - int(preCount)).Limit(row - len(Events)).Scan(&tableData)
+		if afterId > 0 {
+			queryOrigin = queryOrigin.Where("id < ?", afterId)
+		}
+		query := queryOrigin.Order(fmt.Sprintf("id %s", order)).Offset(page*row - int(preCount)).Limit(row - len(Events)).Find(&tableData)
 		if query == nil || query.Error != nil {
 			continue
 		}

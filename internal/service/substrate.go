@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/itering/subscan/share/metrics"
 	"github.com/itering/subscan/util/mq"
 	"github.com/itering/substrate-api-rpc/model"
 	"sync"
@@ -55,7 +56,7 @@ func (s *SubscribeService) parser(message []byte) (err error) {
 		s.newFinHead <- true
 	case StateRuntimeVersion:
 		r := j.ToRuntimeVersion()
-		_ = s.regRuntimeVersion(r.ImplName, r.SpecVersion)
+		// _ = s.regRuntimeVersion(r.ImplName, r.SpecVersion)
 		_ = s.updateChainMetadata(map[string]interface{}{"implName": r.ImplName, "specVersion": r.SpecVersion})
 		util.CurrentRuntimeSpecVersion = r.SpecVersion
 	default:
@@ -75,6 +76,8 @@ func (s *SubscribeService) subscribeFetchBlock(ctx context.Context) {
 			}
 
 			lastNum, _ := s.dao.GetFillFinalizedBlockNum(ctx)
+			metrics.SubBlockGauge("finalized", uint64(s.finalizedBlockNum))
+			metrics.SubBlockGauge("fill-finalized", uint64(lastNum))
 			startBlock := int64(lastNum)
 			if s.lastBlock > 0 {
 				startBlock = s.lastBlock + 1
@@ -102,6 +105,11 @@ func (s *Service) FillBlockData(ctx context.Context, blockNum uint, force bool) 
 	if block != nil && block.Finalized && !block.CodecError && !force {
 		return nil
 	}
+	defer func() {
+		if err != nil {
+			metrics.SubBlockFillError.Inc()
+		}
+	}()
 
 	conn := s.dbStorage.RPCPool().Conn
 
@@ -146,7 +154,7 @@ func (s *Service) FillBlockData(ctx context.Context, blockNum uint, force bool) 
 		specVersion = s.GetCurrentRuntimeSpecVersion(blockNum)
 	} else {
 		specVersion = r.SpecVersion
-		_ = s.regRuntimeVersion(r.ImplName, specVersion, blockHash)
+		_ = s.regRuntimeVersion(ctx, r.ImplName, specVersion, blockNum, blockHash)
 	}
 
 	if specVersion > util.CurrentRuntimeSpecVersion {

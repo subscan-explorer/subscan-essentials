@@ -159,7 +159,6 @@ func TokenHolderCount(ctx context.Context, contract string) int {
 }
 
 func RefreshHolder(ctx context.Context, contract, address, category string) error {
-	fmt.Println("refresh holder", contract, address, category)
 	t := GetTokenByContract(ctx, contract)
 	if t == nil {
 		return nil
