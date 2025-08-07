@@ -34,6 +34,7 @@ func (g *GoWorker) Publish(queue, class string, args interface{}) error {
 func (g *GoWorker) Init() {
 	workers.Configure(map[string]string{
 		"server":    configs.Boot.Redis.Addr,
+		"password":  configs.Boot.Redis.Password,
 		"database":  util.IntToString(configs.Boot.Redis.DbName),
 		"pool":      "30",
 		"process":   "1",
