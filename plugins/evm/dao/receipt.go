@@ -50,7 +50,7 @@ func BillionAddress(ctx context.Context) string {
 	// d := sg.db
 	minBalance := decimal.New(1, 18) // 1 ETH
 	var res []AccountsJson
-	sg.db.WithContext(ctx).Debug().Select("evm_account,balance").
+	sg.db.WithContext(ctx).Select("evm_account,balance").
 		Model(&Account{}).Joins("left join balance_accounts on evm_accounts.address=balance_accounts.address").Where("balance>?", minBalance).Scan(&res)
 	if len(res) > 0 {
 		return res[0].EvmAccount

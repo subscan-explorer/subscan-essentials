@@ -107,7 +107,6 @@ func (s *Service) Subscribe(ctx context.Context) {
 			}
 
 			_, message, err := c.ReadMessage()
-			util.Debug(message)
 			if err != nil {
 				time.Sleep(time.Second * 5)
 				util.Logger().Error(fmt.Errorf("read error: %v", err))

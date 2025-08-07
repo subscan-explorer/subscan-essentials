@@ -158,7 +158,7 @@ func (c *Contract) afterVerify(ctx context.Context) {
 
 func setContractProxyImplementation(ctx context.Context, contractAddress, implementation string) {
 	if contract := GetContract(ctx, contractAddress); contract != nil && contract.ProxyImplementation != "" {
-		sg.db.Model(Contract{}).Debug().Where("address = ?", contractAddress).Update("proxy_implementation", implementation)
+		sg.db.Model(Contract{}).Where("address = ?", contractAddress).Update("proxy_implementation", implementation)
 	}
 }
 

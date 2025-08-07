@@ -22,7 +22,7 @@ func GetAccountList(db storage.DB, page, row int) ([]bModel.Account, int) {
 func GetAccountByAddress(ctx context.Context, db storage.DB, address string) *bModel.Account {
 	var account bModel.Account
 	d := db.GetDbInstance().(*gorm.DB)
-	q := d.WithContext(ctx).Debug().Where("address = ?", address).First(&account)
+	q := d.WithContext(ctx).Where("address = ?", address).First(&account)
 	if q.Error != nil {
 		return nil
 	}
