@@ -139,7 +139,7 @@ func (s *Service) FillBlockData(ctx context.Context, blockNum uint, force bool) 
 		return fmt.Errorf("websocket send error: %v", err)
 	}
 	event, _ := v.ToString()
-	if event == "" {
+	if event == "" && blockNum > 0 {
 		return errors.New("nil event data")
 	}
 
