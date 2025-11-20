@@ -1,6 +1,6 @@
 module github.com/itering/subscan
 
-go 1.23.0
+go 1.24.0
 
 require (
 	github.com/gin-gonic/gin v1.9.1
@@ -21,8 +21,8 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/swaggo/swag v1.16.4
 	github.com/urfave/cli v1.22.16
-	golang.org/x/crypto v0.39.0
-	golang.org/x/net v0.40.0
+	golang.org/x/crypto v0.45.0
+	golang.org/x/net v0.47.0
 	gorm.io/datatypes v1.2.5
 	gorm.io/driver/mysql v1.5.6
 	gorm.io/driver/postgres v1.6.0
@@ -64,7 +64,7 @@ require (
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/supranational/blst v0.3.14 // indirect
-	golang.org/x/tools v0.33.0 // indirect
+	golang.org/x/tools v0.38.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/blake3 v1.1.6 // indirect
 )
@@ -120,9 +120,9 @@ require (
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	golang.org/x/arch v0.4.0 // indirect
-	golang.org/x/sync v0.15.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
-	golang.org/x/text v0.26.0 // indirect
+	golang.org/x/sync v0.18.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240520151616-dc85e6b867a5 // indirect
 	google.golang.org/grpc v1.64.1 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
