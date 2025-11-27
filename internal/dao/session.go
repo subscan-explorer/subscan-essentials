@@ -6,10 +6,10 @@ import (
 )
 
 func (d *Dao) CreateNewSession(ctx context.Context, sessionId uint, validators []string) error {
-	return d.db.WithContext(ctx).Scopes(model.IgnoreDuplicate).Create(&model.Session{
+	return model.AddOrUpdateItem(ctx, d.db, &model.Session{
 		SessionId:  sessionId,
 		Validators: validators,
-	}).Error
+	}, []string{"session_id"}, "validators").Error
 }
 
 func (d *Dao) GetSessionValidatorsById(ctx context.Context, sessionId uint) []string {

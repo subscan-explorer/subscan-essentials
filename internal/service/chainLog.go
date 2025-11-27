@@ -9,6 +9,7 @@ import (
 )
 
 func (s *Service) EmitLog(txn *dao.GormDB, blockNum uint, l []storage.DecoderLog, finalized bool) (runtimeLogData []byte, err error) {
+	var logs []model.ChainLog
 	for index, logData := range l {
 		var jsonRaw model.LogData
 		switch v := logData.Value.(type) {
@@ -29,9 +30,8 @@ func (s *Service) EmitLog(txn *dao.GormDB, blockNum uint, l []storage.DecoderLog
 		if strings.EqualFold(ce.LogType, "PreRuntime") {
 			runtimeLogData = jsonRaw.Bytes()
 		}
-		if err = s.dao.CreateLog(txn, &ce); err != nil {
-			return nil, err
-		}
+		logs = append(logs, ce)
 	}
+	err = s.dao.CreateLog(txn, logs)
 	return
 }

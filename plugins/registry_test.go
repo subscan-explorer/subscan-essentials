@@ -7,10 +7,15 @@ import (
 	"github.com/itering/subscan-plugin/storage"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
+	"github.com/urfave/cli"
 	"testing"
 )
 
 type TPlugin struct{}
+
+func (a *TPlugin) Commands() []cli.Command {
+	return nil
+}
 
 func (a *TPlugin) ProcessBlock(ctx context.Context, block *storage.Block) error {
 	return nil

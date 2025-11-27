@@ -54,8 +54,10 @@ func (s *Service) emitEvent(event *model.ChainEvent) (err error) {
 func (s *Service) emitBlock(_ context.Context, block *model.ChainBlock) (err error) {
 	for name, plugin := range plugins.RegisteredPlugins {
 		if plugin.Enable() {
-			if err = mq.Instant.Publish("plugin-block", "process", map[string]interface{}{"block_num": block.BlockNum, "plugin_name": name}); err != nil {
-				return err
+			if mq.Instant != nil {
+				if err = mq.Instant.Publish("plugin-block", "process", map[string]interface{}{"block_num": block.BlockNum, "plugin_name": name}); err != nil {
+					return err
+				}
 			}
 		}
 	}

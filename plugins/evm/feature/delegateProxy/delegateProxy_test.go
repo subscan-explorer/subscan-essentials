@@ -20,7 +20,7 @@ func TestDelegateProxy(t *testing.T) {
 func TestEIP1967_Implementation(t *testing.T) {
 	ctx := context.Background()
 	proxy1967 := Init1967(
-		web3.NewWeb3(providers.NewHTTPProvider("https://moonbeam-rpc.n.dwellir.com", 60, false)),
+		web3.NewWeb3(providers.NewHTTPProvider("https://wss.api.moonbeam.network", 60, false)),
 		"0x25442adf37379be90ed1f7fccd9c9417b10aa4dc")
 	Implementation, err := proxy1967.Implementation(ctx)
 	assert.NoError(t, err)

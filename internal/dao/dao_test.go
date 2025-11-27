@@ -115,7 +115,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	err = testDao.CreateLog(txn, &testLog)
+	err = testDao.CreateLog(txn, []model.ChainLog{testLog})
 	if err != nil {
 		panic(err)
 	}

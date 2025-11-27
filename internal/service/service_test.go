@@ -214,7 +214,7 @@ func (m *MockDao) ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsi
 	return nil
 }
 
-func (m *MockDao) CreateLog(txn *dao.GormDB, ce *model.ChainLog) error {
+func (m *MockDao) CreateLog(txn *dao.GormDB, ce []model.ChainLog) error {
 	return nil
 }
 
