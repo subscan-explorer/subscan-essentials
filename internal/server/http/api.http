@@ -1,0 +1,127 @@
+### blocks
+POST http://127.0.0.1:4399/api/scan/blocks
+Content-Type: application/json
+
+{
+  "row": 10,
+  "before": 947686
+}
+
+
+
+### extrinsics
+POST http://127.0.0.1:4399/api/scan/extrinsics
+Content-Type: application/json
+
+{
+  "row": 11,
+  "hidden_params": true,
+  "after": 2882119300001
+}
+
+
+
+### events
+POST http://127.0.0.1:4399/api/scan/events
+Content-Type: application/json
+
+{
+  "row": 100,
+  "hidden_params": true,
+  "before":288211930005
+}
+
+### accounts
+POST http://127.0.0.1:4399/api/plugin/balance/accounts
+Content-Type: application/json
+
+{
+  "row": 10,
+  "after": 7
+}
+
+### transfers
+POST http://127.0.0.1:4399/api/plugin/balance/transfer
+Content-Type: application/json
+
+{
+  "row": 2,
+  "after": 1350458300012
+}
+
+### Evm blocks
+POST http://127.0.0.1:4399/api/plugin/evm/blocks
+Content-Type: application/json
+
+{
+  "row": 5,
+  "before": 13504584
+}
+
+
+### Evm transactions
+POST http://127.0.0.1:4399/api/plugin/evm/transactions
+Content-Type: application/json
+
+{
+  "row": 5
+}
+
+
+### Evm Accounts
+POST http://127.0.0.1:4399/api/plugin/evm/accounts
+Content-Type: application/json
+
+{
+  "row": 5,
+  "after": "MTMwNDQzODQ3NzE3NjEzMjE1MjA5MF8weGMzMDU3ZDUyMWY2OWFhNjEyYmZmNGM0MGY3MTdmZTA5M2ZhYTdhOWU"
+}
+
+### Evm Contracts
+POST http://127.0.0.1:4399/api/plugin/evm/contracts
+Content-Type: application/json
+
+{
+  "row": 5
+}
+
+
+### Evm nfts
+POST http://127.0.0.1:4399/api/plugin/evm/token/erc721/collectibles
+Content-Type: application/json
+
+{
+  "row": 2,
+  "contract": "0xffffffff1fcacbd218edc0eba20fc2308c778080",
+  "before": "MHhmZmZmZmZmZjFmY2FjYmQyMThlZGMwZWJhMjBmYzIzMDhjNzc4MDgwXzE="
+}
+
+### Evm tokens
+POST http://127.0.0.1:4399/api/plugin/evm/tokens
+Content-Type: application/json
+
+{
+  "row": 1,
+  "before": "M18weGZmZmZmZmZmMWZjYWNiZDIxOGVkYzBlYmEyMGZjMjMwOGM3NzgwODA="
+}
+
+### Evm token transfers
+POST http://127.0.0.1:4399/api/plugin/evm/token/transfer
+Content-Type: application/json
+
+{
+  "row": 2,
+  "token_address": "0xffffffffea09fb06d082fd1275cd48b191cbcd1d",
+  "before": 13504667000000000
+}
+
+
+### Evm token holders
+POST http://127.0.0.1:4399/api/plugin/evm/token/holder
+Content-Type: application/json
+
+{
+  "row": 1,
+  "token_address": "0xffffffff1fcacbd218edc0eba20fc2308c778080",
+  "before": "MjA0ODYwMjM5NDkyNTBfNA=="
+}

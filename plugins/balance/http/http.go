@@ -25,7 +25,7 @@ func Router(s *service.Service) []router.Http {
 }
 
 type accountsParams struct {
-	Limit  int   `json:"limit" validate:"min=1,max=100"`
+	Limit  int   `json:"row" validate:"min=1,max=100"`
 	Before *uint `json:"before" validate:"omitempty,min=0"`
 	After  *uint `json:"after" validate:"omitempty,min=0"`
 }
@@ -76,7 +76,7 @@ func accountHandle(w http.ResponseWriter, r *http.Request) error {
 type transferParams struct {
 	Address  string `json:"address" validate:"omitempty,addr"`
 	BlockNum uint   `json:"block_num" validate:"omitempty,min=0"`
-	Limit    int    `json:"limit" validate:"min=1,max=100"`
+	Limit    int    `json:"row" validate:"min=1,max=100"`
 	Before   *uint  `json:"before" validate:"omitempty,min=0"`
 	After    *uint  `json:"after" validate:"omitempty,min=0"`
 }

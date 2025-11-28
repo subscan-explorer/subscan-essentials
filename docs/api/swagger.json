@@ -1984,7 +1984,7 @@
                 "before": {
                     "type": "integer"
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2047,13 +2047,13 @@
                     "description": "hide event params in response",
                     "type": "boolean"
                 },
-                "limit": {
+                "module": {
+                    "type": "string"
+                },
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
-                },
-                "module": {
-                    "type": "string"
                 }
             }
         },
@@ -2090,13 +2090,13 @@
                     "description": "hide extrinsic params in response",
                     "type": "boolean"
                 },
-                "limit": {
+                "module": {
+                    "type": "string"
+                },
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
-                },
-                "module": {
-                    "type": "string"
                 },
                 "signed": {
                     "type": "string"
@@ -2471,7 +2471,7 @@
                     "type": "integer",
                     "minimum": 0
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2496,7 +2496,7 @@
                     "type": "integer",
                     "minimum": 0
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2517,7 +2517,7 @@
                     "type": "string",
                     "minLength": 0
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2547,7 +2547,7 @@
                     "type": "integer",
                     "minimum": 0
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2612,7 +2612,7 @@
                 "contract": {
                     "type": "string"
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2641,7 +2641,7 @@
                     "type": "string",
                     "minLength": 0
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2662,7 +2662,7 @@
                     "type": "string",
                     "minLength": 0
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2693,7 +2693,7 @@
                 "contract": {
                     "type": "string"
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2721,7 +2721,7 @@
                         "erc721"
                     ]
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2760,7 +2760,7 @@
                     "type": "integer",
                     "minimum": 0
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1

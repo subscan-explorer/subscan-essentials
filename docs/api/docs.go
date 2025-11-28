@@ -1995,7 +1995,7 @@ const docTemplate = `{
                 "before": {
                     "type": "integer"
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2058,13 +2058,13 @@ const docTemplate = `{
                     "description": "hide event params in response",
                     "type": "boolean"
                 },
-                "limit": {
+                "module": {
+                    "type": "string"
+                },
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
-                },
-                "module": {
-                    "type": "string"
                 }
             }
         },
@@ -2101,13 +2101,13 @@ const docTemplate = `{
                     "description": "hide extrinsic params in response",
                     "type": "boolean"
                 },
-                "limit": {
+                "module": {
+                    "type": "string"
+                },
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
-                },
-                "module": {
-                    "type": "string"
                 },
                 "signed": {
                     "type": "string"
@@ -2482,7 +2482,7 @@ const docTemplate = `{
                     "type": "integer",
                     "minimum": 0
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2507,7 +2507,7 @@ const docTemplate = `{
                     "type": "integer",
                     "minimum": 0
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2528,7 +2528,7 @@ const docTemplate = `{
                     "type": "string",
                     "minLength": 0
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2558,7 +2558,7 @@ const docTemplate = `{
                     "type": "integer",
                     "minimum": 0
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2623,7 +2623,7 @@ const docTemplate = `{
                 "contract": {
                     "type": "string"
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2652,7 +2652,7 @@ const docTemplate = `{
                     "type": "string",
                     "minLength": 0
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2673,7 +2673,7 @@ const docTemplate = `{
                     "type": "string",
                     "minLength": 0
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2704,7 +2704,7 @@ const docTemplate = `{
                 "contract": {
                     "type": "string"
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2732,7 +2732,7 @@ const docTemplate = `{
                         "erc721"
                     ]
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2771,7 +2771,7 @@ const docTemplate = `{
                     "type": "integer",
                     "minimum": 0
                 },
-                "limit": {
+                "row": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1

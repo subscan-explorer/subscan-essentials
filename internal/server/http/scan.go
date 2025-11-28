@@ -33,7 +33,7 @@ func tokenHandle(c *gin.Context) {
 }
 
 type BlocksParams struct {
-	Limit  int  `json:"limit" binding:"min=1,max=100"`
+	Limit  int  `json:"row" binding:"min=1,max=100"`
 	Before uint `json:"before" binding:"omitempty"`
 	After  uint `json:"after" binding:"omitempty"`
 }
@@ -87,7 +87,7 @@ func blockHandle(c *gin.Context) {
 }
 
 type extrinsicsParams struct {
-	Limit        int    `json:"limit" binding:"min=1,max=100"`
+	Limit        int    `json:"row" binding:"min=1,max=100"`
 	Before       uint   `json:"before" binding:"omitempty"`
 	After        uint   `json:"after" binding:"omitempty"`
 	Signed       string `json:"signed" binding:"omitempty"`
@@ -185,7 +185,7 @@ func extrinsicHandle(c *gin.Context) {
 }
 
 type eventsParams struct {
-	Limit          int    `json:"limit" binding:"min=1,max=100"`
+	Limit          int    `json:"row" binding:"min=1,max=100"`
 	Before         uint   `json:"before" binding:"omitempty"`
 	After          uint   `json:"after" binding:"omitempty"`
 	Module         string `json:"module" binding:"omitempty"`

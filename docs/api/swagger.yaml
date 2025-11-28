@@ -382,7 +382,7 @@ definitions:
         type: integer
       before:
         type: integer
-      limit:
+      row:
         maximum: 100
         minimum: 1
         type: integer
@@ -424,12 +424,12 @@ definitions:
       hidden_params:
         description: hide event params in response
         type: boolean
-      limit:
+      module:
+        type: string
+      row:
         maximum: 100
         minimum: 1
         type: integer
-      module:
-        type: string
     type: object
   internal_server_http.extrinsicParams:
     properties:
@@ -453,12 +453,12 @@ definitions:
       hidden_params:
         description: hide extrinsic params in response
         type: boolean
-      limit:
+      module:
+        type: string
+      row:
         maximum: 100
         minimum: 1
         type: integer
-      module:
-        type: string
       signed:
         type: string
     type: object
@@ -704,7 +704,7 @@ definitions:
       before:
         minimum: 0
         type: integer
-      limit:
+      row:
         maximum: 100
         minimum: 1
         type: integer
@@ -722,7 +722,7 @@ definitions:
       block_num:
         minimum: 0
         type: integer
-      limit:
+      row:
         maximum: 100
         minimum: 1
         type: integer
@@ -737,7 +737,7 @@ definitions:
       before:
         minLength: 0
         type: string
-      limit:
+      row:
         maximum: 100
         minimum: 1
         type: integer
@@ -758,7 +758,7 @@ definitions:
       before:
         minimum: 0
         type: integer
-      limit:
+      row:
         maximum: 100
         minimum: 1
         type: integer
@@ -802,7 +802,7 @@ definitions:
         type: string
       contract:
         type: string
-      limit:
+      row:
         maximum: 100
         minimum: 1
         type: integer
@@ -822,7 +822,7 @@ definitions:
       before:
         minLength: 0
         type: string
-      limit:
+      row:
         maximum: 100
         minimum: 1
         type: integer
@@ -835,7 +835,7 @@ definitions:
       before:
         minLength: 0
         type: string
-      limit:
+      row:
         maximum: 100
         minimum: 1
         type: integer
@@ -859,7 +859,7 @@ definitions:
         type: string
       contract:
         type: string
-      limit:
+      row:
         maximum: 100
         minimum: 1
         type: integer
@@ -879,7 +879,7 @@ definitions:
         - erc20
         - erc721
         type: string
-      limit:
+      row:
         maximum: 100
         minimum: 1
         type: integer
@@ -906,7 +906,7 @@ definitions:
       block_num:
         minimum: 0
         type: integer
-      limit:
+      row:
         maximum: 100
         minimum: 1
         type: integer

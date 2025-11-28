@@ -63,7 +63,7 @@ func accountTokensHandle(w http.ResponseWriter, r *http.Request) error {
 type collectiblesParams struct {
 	Address  string  `json:"address" validate:"omitempty,eth_addr"`
 	Contract string  `json:"contract" validate:"omitempty,eth_addr"`
-	Limit    int     `json:"limit" validate:"min=1,max=100"`
+	Limit    int     `json:"row" validate:"min=1,max=100"`
 	Before   *string `json:"before" validate:"omitempty,min=0"`
 	After    *string `json:"after" validate:"omitempty,min=0"`
 }
@@ -91,7 +91,7 @@ func collectiblesHandle(w http.ResponseWriter, r *http.Request) error {
 }
 
 type tokenListParams struct {
-	Limit    int     `json:"limit" validate:"min=1,max=100"`
+	Limit    int     `json:"row" validate:"min=1,max=100"`
 	Before   *string `json:"before" validate:"omitempty,min=0"`
 	After    *string `json:"after" validate:"omitempty,min=0"`
 	Category string  `json:"category" validate:"omitempty,oneof=erc20 erc721"`
@@ -119,7 +119,7 @@ func tokenListHandle(w http.ResponseWriter, r *http.Request) error {
 type tokenTransferParams struct {
 	TokenAddress string `json:"token_address" validate:"omitempty,eth_addr"`
 	Address      string `json:"address" validate:"omitempty,eth_addr"`
-	Limit        int    `json:"limit" validate:"min=1,max=100"`
+	Limit        int    `json:"row" validate:"min=1,max=100"`
 	Before       *uint  `json:"before" validate:"omitempty,min=0"`
 	After        *uint  `json:"after" validate:"omitempty,min=0"`
 	Category     string `json:"category" validate:"omitempty,oneof=erc20 erc721"`
@@ -149,7 +149,7 @@ func tokenTransferHandle(w http.ResponseWriter, r *http.Request) error {
 
 type tokenHolderParams struct {
 	TokenAddress string  `json:"token_address" validate:"required,eth_addr"`
-	Limit        int     `json:"limit" validate:"min=1,max=100"`
+	Limit        int     `json:"row" validate:"min=1,max=100"`
 	Before       *string `json:"before" validate:"omitempty,min=0"`
 	After        *string `json:"after" validate:"omitempty,min=0"`
 }
@@ -173,7 +173,7 @@ func tokenHolderHandle(w http.ResponseWriter, r *http.Request) error {
 }
 
 type EvmBlocks struct {
-	Limit  int   `json:"limit" validate:"min=1,max=100"`
+	Limit  int   `json:"row" validate:"min=1,max=100"`
 	Before *uint `json:"before" validate:"omitempty,min=0"`
 	After  *uint `json:"after" validate:"omitempty,min=0"`
 }
@@ -258,7 +258,7 @@ func transactionHandle(w http.ResponseWriter, r *http.Request) error {
 }
 
 type transactionsParams struct {
-	Limit    int    `json:"limit" validate:"min=1,max=100"`
+	Limit    int    `json:"row" validate:"min=1,max=100"`
 	Before   *uint  `json:"before" validate:"omitempty,min=0"`
 	After    *uint  `json:"after" validate:"omitempty,min=0"`
 	BlockNum uint   `json:"block_num" validate:"omitempty,min=0"`
@@ -291,7 +291,7 @@ func transactionsHandle(w http.ResponseWriter, r *http.Request) error {
 }
 
 type EvmAccountParams struct {
-	Limit   int     `json:"limit" validate:"min=1,max=100"`
+	Limit   int     `json:"row" validate:"min=1,max=100"`
 	Before  *string `json:"before" validate:"omitempty,min=0"`
 	After   *string `json:"after" validate:"omitempty,min=0"`
 	Address string  `json:"address" validate:"omitempty,eth_addr"`
@@ -342,7 +342,7 @@ func contractHandle(w http.ResponseWriter, r *http.Request) error {
 }
 
 type contractsParams struct {
-	Limit  int     `json:"limit" validate:"min=1,max=100"`
+	Limit  int     `json:"row" validate:"min=1,max=100"`
 	Before *string `json:"before" validate:"omitempty,min=0"`
 	After  *string `json:"after" validate:"omitempty,min=0"`
 }
