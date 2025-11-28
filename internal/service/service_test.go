@@ -69,6 +69,10 @@ type MockDao struct {
 	mock.Mock
 }
 
+func (m *MockDao) GetExtrinsicCount(ctx context.Context, queryWhere ...model.Option) int64 {
+	return 0
+}
+
 func (m *MockDao) GetSessionValidatorsById(ctx context.Context, sessionId uint) []string {
 	return nil
 }
@@ -148,8 +152,9 @@ func (m *MockDao) GetFillFinalizedBlockNum(c context.Context) (num int, err erro
 	return args.Int(0), args.Error(1)
 }
 
-func (m *MockDao) GetBlockList(ctx context.Context, page, row int) []model.ChainBlock {
-	return []model.ChainBlock{testBlock}
+func (m *MockDao) GetBlockList(ctx context.Context, page, row int) []model.ChainBlock { return nil }
+func (m *MockDao) GetBlockListCursor(ctx context.Context, limit int, before, after uint) ([]model.ChainBlock, bool, bool) {
+	return []model.ChainBlock{testBlock}, false, false
 }
 
 func (m *MockDao) BlockAsJson(c context.Context, block *model.ChainBlock) *model.ChainBlockJson {
@@ -170,7 +175,10 @@ func (m *MockDao) GetEventByBlockNum(blockNum uint, where ...string) []model.Cha
 }
 
 func (m *MockDao) GetEventList(ctx context.Context, page, row int, order string, fixedTableIndex int, afterId uint, where ...model.Option) ([]model.ChainEvent, int) {
-	return []model.ChainEvent{testEvent}, 1
+	return nil, 0
+}
+func (m *MockDao) GetEventListCursor(ctx context.Context, limit int, order string, fixedTableIndex int, beforeId uint, afterId uint, where ...model.Option) ([]model.ChainEvent, bool, bool) {
+	return []model.ChainEvent{testEvent}, false, false
 }
 
 func (m *MockDao) GetEventsByIndex(extrinsicIndex string) []model.ChainEvent {
@@ -194,7 +202,10 @@ func (m *MockDao) GetExtrinsicsByBlockNum(blockNum uint) []model.ChainExtrinsicJ
 }
 
 func (m *MockDao) GetExtrinsicList(c context.Context, page, row int, order string, fixedTableIndex int, afterId uint, queryWhere ...model.Option) ([]model.ChainExtrinsic, int) {
-	return []model.ChainExtrinsic{testSignedExtrinsic}, 1
+	return nil, 0
+}
+func (m *MockDao) GetExtrinsicListCursor(c context.Context, limit int, fixedTableIndex int, beforeId, afterId uint, queryWhere ...model.Option) ([]model.ChainExtrinsic, bool, bool) {
+	return []model.ChainExtrinsic{testSignedExtrinsic}, false, false
 }
 
 func (m *MockDao) GetExtrinsicsByHash(c context.Context, hash string) *model.ChainExtrinsic {

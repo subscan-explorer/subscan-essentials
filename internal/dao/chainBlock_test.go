@@ -36,11 +36,6 @@ func TestDao_GetBlockByNum(t *testing.T) {
 	assert.Equal(t, testBlock.ParentHash, block.ParentHash)
 }
 
-func TestDao_GetBlockList(t *testing.T) {
-	blocks := testDao.GetBlockList(context.TODO(), 0, 100)
-	assert.GreaterOrEqual(t, 1, len(blocks))
-}
-
 func TestDao_UpdateEventAndExtrinsic(t *testing.T) {
 	txn := testDao.DbBegin()
 	err := testDao.UpdateEventAndExtrinsic(txn, &testBlock, 1, 2, 1594791900, "60e2feb892e672d5579ed10ecae0d162031fe5adc3692498ad262fb126a65732", false, true)

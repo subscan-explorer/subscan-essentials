@@ -21,10 +21,25 @@ func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic []model.
 	return query.Error
 }
 
-func (d *Dao) GetExtrinsicList(c context.Context, page, row int, _ string, fixedTableIndex int, afterId uint, queryWhere ...model.Option) ([]model.ChainExtrinsic, int) {
-	var extrinsics []model.ChainExtrinsic
+func (d *Dao) GetExtrinsicCount(ctx context.Context, queryWhere ...model.Option) int64 {
 	var count int64
+	blockNum, _ := d.GetFillBestBlockNum(context.TODO())
+	for index := blockNum / int(model.SplitTableBlockNum); index >= 0; index-- {
+		var tableDataCount int64
+		q := d.db.WithContext(ctx).Scopes(d.TableNameFunc(&model.ChainExtrinsic{BlockNum: uint(index) * model.SplitTableBlockNum}))
+		q = q.Scopes(queryWhere...)
+		q.Model(&model.ChainExtrinsic{}).Count(&tableDataCount)
+		count += tableDataCount
+	}
+	return count
 
+}
+
+// GetExtrinsicListCursor implements bidirectional cursor pagination using id as cursor.
+// When afterId > 0, fetch records with id < afterId in DESC order.
+// When beforeId > 0, fetch records with id > beforeId in ASC order then reverse.
+func (d *Dao) GetExtrinsicListCursor(c context.Context, limit int, fixedTableIndex int, beforeId, afterId uint, queryWhere ...model.Option) (list []model.ChainExtrinsic, hasPrev, hasNext bool) {
+	fetchLimit := limit + 1
 	blockNum, _ := d.GetFillBestBlockNum(context.TODO())
 	maxTableIndex := blockNum / int(model.SplitTableBlockNum)
 	if afterId > 0 {
@@ -33,36 +48,81 @@ func (d *Dao) GetExtrinsicList(c context.Context, page, row int, _ string, fixed
 	if fixedTableIndex >= 0 {
 		maxTableIndex = fixedTableIndex
 	}
-	for index := maxTableIndex; index >= 0; index-- {
-		var (
-			tableData  []model.ChainExtrinsic
-			tableCount int64
-		)
+
+	if afterId > 0 { // next page
+		for index := maxTableIndex; index >= 0 && len(list) < fetchLimit; index-- {
+			if fixedTableIndex >= 0 && index != fixedTableIndex {
+				continue
+			}
+			var tableData []model.ChainExtrinsic
+			q := d.db.WithContext(c).Scopes(d.TableNameFunc(&model.ChainExtrinsic{BlockNum: uint(index) * model.SplitTableBlockNum}))
+			q = q.Scopes(queryWhere...)
+			q = q.Where("id < ?", afterId).Order("id desc").Limit(fetchLimit - len(list))
+			if err := q.Find(&tableData).Error; err != nil {
+				continue
+			}
+			list = append(list, tableData...)
+		}
+		hasNext = len(list) > limit
+		if hasNext {
+			list = list[:limit]
+		}
+		hasPrev = true
+		return
+	}
+
+	if beforeId > 0 { // previous page
+		startIdx := int(beforeId/model.SplitTableBlockNum) / model.IdGenerateCoefficient
+		if fixedTableIndex >= 0 {
+			startIdx = fixedTableIndex
+		}
+		for index := startIdx; index <= maxTableIndex && len(list) < fetchLimit; index++ {
+			if fixedTableIndex >= 0 && index != fixedTableIndex {
+				continue
+			}
+			var tableData []model.ChainExtrinsic
+			q := d.db.WithContext(c).Scopes(d.TableNameFunc(&model.ChainExtrinsic{BlockNum: uint(index) * model.SplitTableBlockNum}))
+			q = q.Scopes(queryWhere...)
+			if index == startIdx {
+				q = q.Where("id > ?", beforeId)
+			}
+			q = q.Order("id asc").Limit(fetchLimit - len(list))
+			if err := q.Find(&tableData).Error; err != nil {
+				continue
+			}
+			list = append(list, tableData...)
+		}
+		hasPrev = len(list) > limit
+		if hasPrev {
+			list = list[:limit]
+		}
+		// reverse to keep DESC order in response
+		for i, j := 0, len(list)-1; i < j; i, j = i+1, j-1 {
+			list[i], list[j] = list[j], list[i]
+		}
+		hasNext = true
+		return
+	}
+
+	// first page
+	for index := maxTableIndex; index >= 0 && len(list) < fetchLimit; index-- {
 		if fixedTableIndex >= 0 && index != fixedTableIndex {
 			continue
 		}
-		queryOrigin := d.db.WithContext(c).Scopes(d.TableNameFunc(&model.ChainExtrinsic{BlockNum: uint(index) * model.SplitTableBlockNum}))
-		queryOrigin.Scopes(queryWhere...)
-		queryOrigin.Count(&tableCount)
-
-		if tableCount == 0 {
+		var tableData []model.ChainExtrinsic
+		q := d.db.WithContext(c).Scopes(d.TableNameFunc(&model.ChainExtrinsic{BlockNum: uint(index) * model.SplitTableBlockNum}))
+		q = q.Scopes(queryWhere...).Order("id desc").Limit(fetchLimit - len(list))
+		if err := q.Find(&tableData).Error; err != nil {
 			continue
 		}
-		preCount := count
-		count += tableCount
-		if len(extrinsics) >= row {
-			continue
-		}
-		if afterId > 0 {
-			queryOrigin = queryOrigin.Where("id < ?", afterId)
-		}
-		query := queryOrigin.Order("id desc").Offset(page*row - int(preCount)).Limit(row - len(extrinsics)).Find(&tableData)
-		if query == nil || query.Error != nil {
-			continue
-		}
-		extrinsics = append(extrinsics, tableData...)
+		list = append(list, tableData...)
 	}
-	return extrinsics, int(count)
+	hasNext = len(list) > limit
+	if hasNext {
+		list = list[:limit]
+	}
+	hasPrev = false
+	return
 }
 
 func (d *Dao) GetExtrinsicsByHash(c context.Context, hash string) *model.ChainExtrinsic {

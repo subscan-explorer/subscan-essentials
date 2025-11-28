@@ -14,11 +14,6 @@ func TestDao_CreateEvent(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestDao_GetEventList(t *testing.T) {
-	events, _ := testDao.GetEventList(context.TODO(), 0, 100, "desc", -1, 0)
-	assert.GreaterOrEqual(t, 2, len(events))
-}
-
 func TestDao_GetEventsByIndex(t *testing.T) {
 	events := testDao.GetEventsByIndex("947687-0")
 	assert.Equal(t, uint(947687), events[0].BlockNum)

@@ -6,7 +6,6 @@ import (
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/plugins/evm/contract"
 	"github.com/itering/subscan/plugins/evm/dao"
-	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/validator"
 	"net/http"
 )
@@ -62,10 +61,11 @@ func accountTokensHandle(w http.ResponseWriter, r *http.Request) error {
 }
 
 type collectiblesParams struct {
-	Address  string `json:"address" validate:"omitempty,eth_addr"`
-	Contract string `json:"contract" validate:"omitempty,eth_addr"`
-	Page     int    `json:"page" validate:"min=0"`
-	Row      int    `json:"row" validate:"min=1,max=100"`
+	Address  string  `json:"address" validate:"omitempty,eth_addr"`
+	Contract string  `json:"contract" validate:"omitempty,eth_addr"`
+	Limit    int     `json:"limit" validate:"min=1,max=100"`
+	Before   *string `json:"before" validate:"omitempty,min=0"`
+	After    *string `json:"after" validate:"omitempty,min=0"`
 }
 
 // @Summary Evm Erc721 collectibles
@@ -73,7 +73,7 @@ type collectiblesParams struct {
 // @Accept json
 // @Produce json
 // @Param params body collectiblesParams true "params"
-// @Success 200 {object} J{data=object{list=[]dao.Erc721Holders,count=int}}
+// @Success 200 {object} J{data=object{list=[]dao.Erc721Holders,pagination=object}}
 // @Router /api/plugin/evm/token/erc721/collectibles [post]
 func collectiblesHandle(w http.ResponseWriter, r *http.Request) error {
 	p := new(collectiblesParams)
@@ -85,16 +85,17 @@ func collectiblesHandle(w http.ResponseWriter, r *http.Request) error {
 		toJson(w, 10001, nil, fmt.Errorf("address or contract is required"))
 		return nil
 	}
-	collectibles, count := srv.Collectibles(r.Context(), p.Address, p.Contract, p.Page, p.Row)
-	toJson(w, 0, map[string]interface{}{"list": collectibles, "count": count}, nil)
+	collectibles, page := srv.CollectiblesCursor(r.Context(), p.Address, p.Contract, p.Limit, p.Before, p.After)
+	toJson(w, 0, map[string]interface{}{"list": collectibles, "pagination": page}, nil)
 	return nil
 }
 
 type tokenListParams struct {
-	Page     int    `json:"page" validate:"min=0"`
-	Row      int    `json:"row" validate:"min=1,max=100"`
-	Category string `json:"category" validate:"omitempty,oneof=erc20 erc721"`
-	Contract string `json:"contract" validate:"omitempty,eth_addr"`
+	Limit    int     `json:"limit" validate:"min=1,max=100"`
+	Before   *string `json:"before" validate:"omitempty,min=0"`
+	After    *string `json:"after" validate:"omitempty,min=0"`
+	Category string  `json:"category" validate:"omitempty,oneof=erc20 erc721"`
+	Contract string  `json:"contract" validate:"omitempty,eth_addr"`
 }
 
 // @Summary Evm token list
@@ -102,7 +103,7 @@ type tokenListParams struct {
 // @Accept json
 // @Produce json
 // @Param params body tokenListParams true "params"
-// @Success 200 {object} J{data=object{list=[]dao.Token,count=int}}
+// @Success 200 {object} J{data=object{list=[]dao.Token,pagination=object}}
 // @Router /api/plugin/evm/tokens [post]
 func tokenListHandle(w http.ResponseWriter, r *http.Request) error {
 	p := new(tokenListParams)
@@ -110,16 +111,17 @@ func tokenListHandle(w http.ResponseWriter, r *http.Request) error {
 		toJson(w, 10001, nil, err)
 		return nil
 	}
-	list, count := srv.TokenList(r.Context(), p.Contract, p.Category, p.Page, p.Row)
-	toJson(w, 0, map[string]interface{}{"list": list, "count": count}, nil)
+	list, page := srv.TokenListCursor(r.Context(), p.Contract, p.Category, p.Limit, p.Before, p.After)
+	toJson(w, 0, map[string]interface{}{"list": list, "pagination": page}, nil)
 	return nil
 }
 
 type tokenTransferParams struct {
 	TokenAddress string `json:"token_address" validate:"omitempty,eth_addr"`
 	Address      string `json:"address" validate:"omitempty,eth_addr"`
-	Page         int    `json:"page" validate:"min=0"`
-	Row          int    `json:"row" validate:"min=1,max=100"`
+	Limit        int    `json:"limit" validate:"min=1,max=100"`
+	Before       *uint  `json:"before" validate:"omitempty,min=0"`
+	After        *uint  `json:"after" validate:"omitempty,min=0"`
 	Category     string `json:"category" validate:"omitempty,oneof=erc20 erc721"`
 }
 
@@ -128,7 +130,7 @@ type tokenTransferParams struct {
 // @Accept json
 // @Produce json
 // @Param params body tokenTransferParams true "params"
-// @Success 200 {object} J{data=object{list=[]dao.TokenTransferJson,count=int}}
+// @Success 200 {object} J{data=object{transfers=[]dao.TokenTransferJson,pagination=object}}
 // @Router /api/plugin/evm/token/transfer [post]
 func tokenTransferHandle(w http.ResponseWriter, r *http.Request) error {
 	p := new(tokenTransferParams)
@@ -140,15 +142,16 @@ func tokenTransferHandle(w http.ResponseWriter, r *http.Request) error {
 		toJson(w, 10001, nil, fmt.Errorf("token_address or address is required"))
 		return nil
 	}
-	transfers, count := srv.TokenTransfers(r.Context(), p.Address, p.TokenAddress, p.Category, p.Page, p.Row)
-	toJson(w, 0, map[string]interface{}{"transfers": transfers, "count": count}, nil)
+	transfers, page := srv.TokenTransfersCursor(r.Context(), p.Address, p.TokenAddress, p.Category, p.Limit, p.Before, p.After)
+	toJson(w, 0, map[string]interface{}{"transfers": transfers, "pagination": page}, nil)
 	return nil
 }
 
 type tokenHolderParams struct {
-	TokenAddress string `json:"token_address" validate:"required,eth_addr"`
-	Page         int    `json:"page" validate:"min=0"`
-	Row          int    `json:"row" validate:"min=1,max=100"`
+	TokenAddress string  `json:"token_address" validate:"required,eth_addr"`
+	Limit        int     `json:"limit" validate:"min=1,max=100"`
+	Before       *string `json:"before" validate:"omitempty,min=0"`
+	After        *string `json:"after" validate:"omitempty,min=0"`
 }
 
 // @Summary Evm token holder
@@ -156,7 +159,7 @@ type tokenHolderParams struct {
 // @Accept json
 // @Produce json
 // @Param params body tokenHolderParams true "params"
-// @Success 200 {object} J{data=object{list=[]dao.TokenHolder,count=int}}
+// @Success 200 {object} J{data=object{holders=[]dao.TokenHolder,pagination=object}}
 // @Router /api/plugin/evm/token/holder [post]
 func tokenHolderHandle(w http.ResponseWriter, r *http.Request) error {
 	p := new(tokenHolderParams)
@@ -164,14 +167,15 @@ func tokenHolderHandle(w http.ResponseWriter, r *http.Request) error {
 		toJson(w, 10001, nil, err)
 		return nil
 	}
-	holders, count := srv.TokenHolders(r.Context(), p.TokenAddress, p.Page, p.Row)
-	toJson(w, 0, map[string]interface{}{"holders": holders, "count": count}, nil)
+	holders, page := srv.TokenHoldersCursor(r.Context(), p.TokenAddress, p.Limit, p.Before, p.After)
+	toJson(w, 0, map[string]interface{}{"holders": holders, "pagination": page}, nil)
 	return nil
 }
 
 type EvmBlocks struct {
-	Row  int `json:"row" validate:"min=1,max=100"`
-	Page int `json:"page" validate:"min=0"`
+	Limit  int   `json:"limit" validate:"min=1,max=100"`
+	Before *uint `json:"before" validate:"omitempty,min=0"`
+	After  *uint `json:"after" validate:"omitempty,min=0"`
 }
 
 // @Summary Evm blocks
@@ -179,7 +183,7 @@ type EvmBlocks struct {
 // @Accept json
 // @Produce json
 // @Param params body EvmBlocks true "params"
-// @Success 200 {object} J{data=object{list=[]dao.EvmBlockJson,count=int}}
+// @Success 200 {object} J{data=object{list=[]dao.EvmBlockJson,pagination=object}}
 // @Router /api/plugin/evm/blocks [post]
 func blocksHandle(w http.ResponseWriter, r *http.Request) error {
 	p := new(EvmBlocks)
@@ -188,9 +192,9 @@ func blocksHandle(w http.ResponseWriter, r *http.Request) error {
 		return nil
 	}
 
-	list, count := srv.Blocks(r.Context(), p.Page, p.Row)
+	list, page := srv.BlocksCursor(r.Context(), p.Limit, p.Before, p.After)
 	toJson(w, 0, map[string]interface{}{
-		"list": list, "count": count,
+		"list": list, "pagination": page,
 	}, nil)
 	return nil
 }
@@ -254,11 +258,11 @@ func transactionHandle(w http.ResponseWriter, r *http.Request) error {
 }
 
 type transactionsParams struct {
-	Page     int    `json:"page" validate:"min=0"`
-	Row      int    `json:"row" validate:"min=1,max=100"`
+	Limit    int    `json:"limit" validate:"min=1,max=100"`
+	Before   *uint  `json:"before" validate:"omitempty,min=0"`
+	After    *uint  `json:"after" validate:"omitempty,min=0"`
 	BlockNum uint   `json:"block_num" validate:"omitempty,min=0"`
 	Address  string `json:"address" validate:"omitempty,eth_addr"`
-	AfterId  uint   `json:"after_id" validate:"omitempty,min=0"`
 }
 
 // @Summary Evm transactions
@@ -266,16 +270,12 @@ type transactionsParams struct {
 // @Accept json
 // @Produce json
 // @Param params body transactionsParams true "params"
-// @Success 200 {object} J{data=object{list=[]dao.TransactionSampleJson,count=int}}
+// @Success 200 {object} J{data=object{list=[]dao.TransactionSampleJson,pagination=object}}
 // @Router /api/plugin/evm/transactions [post]
 func transactionsHandle(w http.ResponseWriter, r *http.Request) error {
 	p := new(transactionsParams)
 	if err := validator.Validate(r.Body, p); err != nil {
 		toJson(w, 10001, nil, err)
-		return nil
-	}
-	if p.Row*p.Page > 10000 {
-		toJson(w, 10005, nil, util.InvalidPagination)
 		return nil
 	}
 	var opts []model.Option
@@ -285,18 +285,16 @@ func transactionsHandle(w http.ResponseWriter, r *http.Request) error {
 	if p.BlockNum > 0 {
 		opts = append(opts, model.Where("block_num = ?", p.BlockNum))
 	}
-	if p.AfterId > 0 {
-		opts = append(opts, model.Where("transaction_id > ?", p.AfterId))
-	}
-	list, count := srv.TransactionsJson(r.Context(), model.WithLimit(p.Row*p.Page, p.Row), opts...)
-	toJson(w, 0, map[string]interface{}{"list": list, "count": count}, nil)
+	list, page := srv.TransactionsCursor(r.Context(), p.Limit, p.Before, p.After, opts...)
+	toJson(w, 0, map[string]interface{}{"list": list, "pagination": page}, nil)
 	return nil
 }
 
 type EvmAccountParams struct {
-	Page    int    `json:"page" validate:"min=0"`
-	Row     int    `json:"row" validate:"min=1,max=100"`
-	Address string `json:"address" validate:"omitempty,eth_addr"`
+	Limit   int     `json:"limit" validate:"min=1,max=100"`
+	Before  *string `json:"before" validate:"omitempty,min=0"`
+	After   *string `json:"after" validate:"omitempty,min=0"`
+	Address string  `json:"address" validate:"omitempty,eth_addr"`
 }
 
 // @Summary Evm accounts list
@@ -304,7 +302,7 @@ type EvmAccountParams struct {
 // @Accept json
 // @Produce json
 // @Param params body EvmAccountParams true "params"
-// @Success 200 {object} J{data=object{list=[]dao.AccountsJson,count=int}}
+// @Success 200 {object} J{data=object{lixst=[]dao.AccountsJson,pagination=object}}
 // @Router /api/plugin/evm/accounts [post]
 func accountsHandle(w http.ResponseWriter, r *http.Request) error {
 	p := new(EvmAccountParams)
@@ -312,8 +310,8 @@ func accountsHandle(w http.ResponseWriter, r *http.Request) error {
 		toJson(w, 10001, nil, err)
 		return nil
 	}
-	list, count := srv.Accounts(r.Context(), p.Address, p.Page, p.Row)
-	toJson(w, 0, map[string]interface{}{"list": list, "count": count}, nil)
+	list, page := srv.AccountsCursor(r.Context(), p.Address, p.Limit, p.Before, p.After)
+	toJson(w, 0, map[string]interface{}{"list": list, "pagination": page}, nil)
 	return nil
 }
 
@@ -344,8 +342,9 @@ func contractHandle(w http.ResponseWriter, r *http.Request) error {
 }
 
 type contractsParams struct {
-	Page int `json:"page" validate:"min=0"`
-	Row  int `json:"row" validate:"min=1,max=100"`
+	Limit  int     `json:"limit" validate:"min=1,max=100"`
+	Before *string `json:"before" validate:"omitempty,min=0"`
+	After  *string `json:"after" validate:"omitempty,min=0"`
 }
 
 // @Summary Evm contract list
@@ -353,7 +352,7 @@ type contractsParams struct {
 // @Accept json
 // @Produce json
 // @Param params body contractsParams true "params"
-// @Success 200 {object} J{data=object{list=[]dao.ContractsJson,count=int}}
+// @Success 200 {object} J{data=object{list=[]dao.ContractsJson,pagination=object}}
 // @Router /api/plugin/evm/contracts [post]
 func contractsHandle(w http.ResponseWriter, r *http.Request) error {
 	p := new(contractsParams)
@@ -361,8 +360,8 @@ func contractsHandle(w http.ResponseWriter, r *http.Request) error {
 		toJson(w, 10001, nil, err)
 		return nil
 	}
-	list, count := srv.Contracts(r.Context(), p.Page, p.Row)
-	toJson(w, 0, map[string]interface{}{"list": list, "count": count}, nil)
+	list, page := srv.ContractsCursor(r.Context(), p.Limit, p.Before, p.After)
+	toJson(w, 0, map[string]interface{}{"list": list, "pagination": page}, nil)
 	return nil
 }
 

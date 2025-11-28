@@ -97,14 +97,14 @@ const docTemplate = `{
                                         "data": {
                                             "type": "object",
                                             "properties": {
-                                                "count": {
-                                                    "type": "integer"
-                                                },
                                                 "list": {
                                                     "type": "array",
                                                     "items": {
                                                         "$ref": "#/definitions/github_com_itering_subscan_plugins_balance_model.Account"
                                                     }
+                                                },
+                                                "pagination": {
+                                                    "type": "object"
                                                 }
                                             }
                                         }
@@ -153,14 +153,14 @@ const docTemplate = `{
                                         "data": {
                                             "type": "object",
                                             "properties": {
-                                                "count": {
-                                                    "type": "integer"
-                                                },
                                                 "list": {
                                                     "type": "array",
                                                     "items": {
                                                         "$ref": "#/definitions/github_com_itering_subscan_plugins_balance_model.Transfer"
                                                     }
+                                                },
+                                                "pagination": {
+                                                    "type": "object"
                                                 }
                                             }
                                         }
@@ -257,14 +257,14 @@ const docTemplate = `{
                                         "data": {
                                             "type": "object",
                                             "properties": {
-                                                "count": {
-                                                    "type": "integer"
-                                                },
-                                                "list": {
+                                                "lixst": {
                                                     "type": "array",
                                                     "items": {
                                                         "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.AccountsJson"
                                                     }
+                                                },
+                                                "pagination": {
+                                                    "type": "object"
                                                 }
                                             }
                                         }
@@ -358,14 +358,14 @@ const docTemplate = `{
                                         "data": {
                                             "type": "object",
                                             "properties": {
-                                                "count": {
-                                                    "type": "integer"
-                                                },
                                                 "list": {
                                                     "type": "array",
                                                     "items": {
                                                         "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.EvmBlockJson"
                                                     }
+                                                },
+                                                "pagination": {
+                                                    "type": "object"
                                                 }
                                             }
                                         }
@@ -496,14 +496,14 @@ const docTemplate = `{
                                         "data": {
                                             "type": "object",
                                             "properties": {
-                                                "count": {
-                                                    "type": "integer"
-                                                },
                                                 "list": {
                                                     "type": "array",
                                                     "items": {
                                                         "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.ContractsJson"
                                                     }
+                                                },
+                                                "pagination": {
+                                                    "type": "object"
                                                 }
                                             }
                                         }
@@ -552,14 +552,14 @@ const docTemplate = `{
                                         "data": {
                                             "type": "object",
                                             "properties": {
-                                                "count": {
-                                                    "type": "integer"
-                                                },
                                                 "list": {
                                                     "type": "array",
                                                     "items": {
                                                         "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.Erc721Holders"
                                                     }
+                                                },
+                                                "pagination": {
+                                                    "type": "object"
                                                 }
                                             }
                                         }
@@ -608,14 +608,14 @@ const docTemplate = `{
                                         "data": {
                                             "type": "object",
                                             "properties": {
-                                                "count": {
-                                                    "type": "integer"
-                                                },
-                                                "list": {
+                                                "holders": {
                                                     "type": "array",
                                                     "items": {
                                                         "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.TokenHolder"
                                                     }
+                                                },
+                                                "pagination": {
+                                                    "type": "object"
                                                 }
                                             }
                                         }
@@ -664,10 +664,10 @@ const docTemplate = `{
                                         "data": {
                                             "type": "object",
                                             "properties": {
-                                                "count": {
-                                                    "type": "integer"
+                                                "pagination": {
+                                                    "type": "object"
                                                 },
-                                                "list": {
+                                                "transfers": {
                                                     "type": "array",
                                                     "items": {
                                                         "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.TokenTransferJson"
@@ -720,14 +720,14 @@ const docTemplate = `{
                                         "data": {
                                             "type": "object",
                                             "properties": {
-                                                "count": {
-                                                    "type": "integer"
-                                                },
                                                 "list": {
                                                     "type": "array",
                                                     "items": {
                                                         "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.Token"
                                                     }
+                                                },
+                                                "pagination": {
+                                                    "type": "object"
                                                 }
                                             }
                                         }
@@ -821,14 +821,14 @@ const docTemplate = `{
                                         "data": {
                                             "type": "object",
                                             "properties": {
-                                                "count": {
-                                                    "type": "integer"
-                                                },
                                                 "list": {
                                                     "type": "array",
                                                     "items": {
                                                         "$ref": "#/definitions/github_com_itering_subscan_plugins_evm_dao.TransactionSampleJson"
                                                     }
+                                                },
+                                                "pagination": {
+                                                    "type": "object"
                                                 }
                                             }
                                         }
@@ -928,8 +928,8 @@ const docTemplate = `{
                                                         "$ref": "#/definitions/model.SampleBlockJson"
                                                     }
                                                 },
-                                                "count": {
-                                                    "type": "integer"
+                                                "pagination": {
+                                                    "type": "object"
                                                 }
                                             }
                                         }
@@ -1023,14 +1023,14 @@ const docTemplate = `{
                                         "data": {
                                             "type": "object",
                                             "properties": {
-                                                "count": {
-                                                    "type": "integer"
-                                                },
                                                 "events": {
                                                     "type": "array",
                                                     "items": {
                                                         "$ref": "#/definitions/model.ChainEventJson"
                                                     }
+                                                },
+                                                "pagination": {
+                                                    "type": "object"
                                                 }
                                             }
                                         }
@@ -1172,14 +1172,14 @@ const docTemplate = `{
                                         "data": {
                                             "type": "object",
                                             "properties": {
-                                                "count": {
-                                                    "type": "integer"
-                                                },
                                                 "extrinsics": {
                                                     "type": "array",
                                                     "items": {
                                                         "$ref": "#/definitions/model.ChainExtrinsicJson"
                                                     }
+                                                },
+                                                "pagination": {
+                                                    "type": "object"
                                                 }
                                             }
                                         }
@@ -1989,11 +1989,13 @@ const docTemplate = `{
         "internal_server_http.BlocksParams": {
             "type": "object",
             "properties": {
-                "page": {
-                    "type": "integer",
-                    "minimum": 0
+                "after": {
+                    "type": "integer"
                 },
-                "row": {
+                "before": {
+                    "type": "integer"
+                },
+                "limit": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2037,7 +2039,10 @@ const docTemplate = `{
         "internal_server_http.eventsParams": {
             "type": "object",
             "properties": {
-                "after_id": {
+                "after": {
+                    "type": "integer"
+                },
+                "before": {
                     "type": "integer"
                 },
                 "block_num": {
@@ -2053,17 +2058,13 @@ const docTemplate = `{
                     "description": "hide event params in response",
                     "type": "boolean"
                 },
-                "module": {
-                    "type": "string"
-                },
-                "page": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "row": {
+                "limit": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
+                },
+                "module": {
+                    "type": "string"
                 }
             }
         },
@@ -2084,7 +2085,10 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
-                "after_id": {
+                "after": {
+                    "type": "integer"
+                },
+                "before": {
                     "type": "integer"
                 },
                 "block_num": {
@@ -2097,17 +2101,13 @@ const docTemplate = `{
                     "description": "hide extrinsic params in response",
                     "type": "boolean"
                 },
-                "module": {
-                    "type": "string"
-                },
-                "page": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "row": {
+                "limit": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
+                },
+                "module": {
+                    "type": "string"
                 },
                 "signed": {
                     "type": "string"
@@ -2317,6 +2317,9 @@ const docTemplate = `{
         "model.EventParam": {
             "type": "object",
             "properties": {
+                "name": {
+                    "type": "string"
+                },
                 "type": {
                     "type": "string"
                 },
@@ -2405,6 +2408,9 @@ const docTemplate = `{
         "model.RuntimeVersion": {
             "type": "object",
             "properties": {
+                "block_num": {
+                    "type": "integer"
+                },
                 "modules": {
                     "type": "string"
                 },
@@ -2468,11 +2474,15 @@ const docTemplate = `{
         "plugins_balance_http.accountsParams": {
             "type": "object",
             "properties": {
-                "page": {
+                "after": {
                     "type": "integer",
                     "minimum": 0
                 },
-                "row": {
+                "before": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "limit": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2485,7 +2495,11 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
-                "after_id": {
+                "after": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "before": {
                     "type": "integer",
                     "minimum": 0
                 },
@@ -2493,11 +2507,7 @@ const docTemplate = `{
                     "type": "integer",
                     "minimum": 0
                 },
-                "page": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "row": {
+                "limit": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2510,11 +2520,15 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
-                "page": {
-                    "type": "integer",
-                    "minimum": 0
+                "after": {
+                    "type": "string",
+                    "minLength": 0
                 },
-                "row": {
+                "before": {
+                    "type": "string",
+                    "minLength": 0
+                },
+                "limit": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2536,11 +2550,15 @@ const docTemplate = `{
         "plugins_evm_http.EvmBlocks": {
             "type": "object",
             "properties": {
-                "page": {
+                "after": {
                     "type": "integer",
                     "minimum": 0
                 },
-                "row": {
+                "before": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "limit": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2594,14 +2612,18 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
+                "after": {
+                    "type": "string",
+                    "minLength": 0
+                },
+                "before": {
+                    "type": "string",
+                    "minLength": 0
+                },
                 "contract": {
                     "type": "string"
                 },
-                "page": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "row": {
+                "limit": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2622,11 +2644,15 @@ const docTemplate = `{
         "plugins_evm_http.contractsParams": {
             "type": "object",
             "properties": {
-                "page": {
-                    "type": "integer",
-                    "minimum": 0
+                "after": {
+                    "type": "string",
+                    "minLength": 0
                 },
-                "row": {
+                "before": {
+                    "type": "string",
+                    "minLength": 0
+                },
+                "limit": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2639,11 +2665,15 @@ const docTemplate = `{
                 "token_address"
             ],
             "properties": {
-                "page": {
-                    "type": "integer",
-                    "minimum": 0
+                "after": {
+                    "type": "string",
+                    "minLength": 0
                 },
-                "row": {
+                "before": {
+                    "type": "string",
+                    "minLength": 0
+                },
+                "limit": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2656,6 +2686,14 @@ const docTemplate = `{
         "plugins_evm_http.tokenListParams": {
             "type": "object",
             "properties": {
+                "after": {
+                    "type": "string",
+                    "minLength": 0
+                },
+                "before": {
+                    "type": "string",
+                    "minLength": 0
+                },
                 "category": {
                     "type": "string",
                     "enum": [
@@ -2666,11 +2704,7 @@ const docTemplate = `{
                 "contract": {
                     "type": "string"
                 },
-                "page": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "row": {
+                "limit": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2683,6 +2717,14 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
+                "after": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "before": {
+                    "type": "integer",
+                    "minimum": 0
+                },
                 "category": {
                     "type": "string",
                     "enum": [
@@ -2690,11 +2732,7 @@ const docTemplate = `{
                         "erc721"
                     ]
                 },
-                "page": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "row": {
+                "limit": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1
@@ -2721,7 +2759,11 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
-                "after_id": {
+                "after": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "before": {
                     "type": "integer",
                     "minimum": 0
                 },
@@ -2729,11 +2771,7 @@ const docTemplate = `{
                     "type": "integer",
                     "minimum": 0
                 },
-                "page": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "row": {
+                "limit": {
                     "type": "integer",
                     "maximum": 100,
                     "minimum": 1

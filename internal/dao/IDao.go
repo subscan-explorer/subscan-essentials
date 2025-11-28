@@ -26,21 +26,23 @@ type IDao interface {
 	GetFillBestBlockNum(c context.Context) (num int, err error)
 	GetBlockNumArr(ctx context.Context, start, end uint) []int
 	GetFillFinalizedBlockNum(c context.Context) (num int, err error)
-	GetBlockList(ctx context.Context, page, row int) []model.ChainBlock
+
+	GetBlockListCursor(ctx context.Context, limit int, before, after uint) (list []model.ChainBlock, hasPrev, hasNext bool)
 	BlockAsJson(c context.Context, block *model.ChainBlock) *model.ChainBlockJson
 
 	CreateEvent(txn *GormDB, event []model.ChainEvent) error
-	GetEventList(ctx context.Context, page, row int, order string, fixedTableIndex int, afterId uint, where ...model.Option) ([]model.ChainEvent, int)
+	GetEventListCursor(ctx context.Context, limit int, order string, fixedTableIndex int, beforeId uint, afterId uint, where ...model.Option) (list []model.ChainEvent, hasPrev, hasNext bool)
 	GetEventsByIndex(extrinsicIndex string) []model.ChainEvent
 	GetEventByIdx(ctx context.Context, index string) *model.ChainEvent
 
 	CreateExtrinsic(c context.Context, txn *GormDB, extrinsic []model.ChainExtrinsic, u int) error
-	GetExtrinsicList(c context.Context, page, row int, order string, fixedTableIndex int, afterId uint, queryWhere ...model.Option) ([]model.ChainExtrinsic, int)
+	GetExtrinsicListCursor(c context.Context, limit int, fixedTableIndex int, beforeId, afterId uint, queryWhere ...model.Option) (list []model.ChainExtrinsic, hasPrev, hasNext bool)
 	GetExtrinsicsByHash(c context.Context, hash string) *model.ChainExtrinsic
 	GetExtrinsicsByIndex(c context.Context, index string) *model.ChainExtrinsic
 	GetExtrinsicsDetailByHash(c context.Context, hash string) *model.ExtrinsicDetail
 	GetExtrinsicsDetailByIndex(c context.Context, index string) *model.ExtrinsicDetail
 	ExtrinsicsAsJson(e *model.ChainExtrinsic) *model.ChainExtrinsicJson
+	GetExtrinsicCount(ctx context.Context, queryWhere ...model.Option) int64
 
 	CreateLog(txn *GormDB, ce []model.ChainLog) error
 	GetLogByBlockNum(ctx context.Context, blockNum uint) []model.ChainLogJson

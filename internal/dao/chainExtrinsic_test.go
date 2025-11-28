@@ -28,12 +28,6 @@ func TestDao_GetExtrinsicsByHash(t *testing.T) {
 	assert.EqualValues(t, &expect, extrinsics)
 }
 
-func TestDao_ExtrinsicList(t *testing.T) {
-	ctx := context.TODO()
-	extrinsic, _ := testDao.GetExtrinsicList(ctx, 0, 100, "desc", -1, 0)
-	assert.GreaterOrEqual(t, 2, len(extrinsic))
-}
-
 func TestDao_GetExtrinsicsDetailByIndex(t *testing.T) {
 	ctx := context.TODO()
 	extrinsic := testDao.GetExtrinsicsDetailByIndex(ctx, "947689-1")

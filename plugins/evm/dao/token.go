@@ -42,6 +42,10 @@ func (c *Token) RefreshTokenHolder(ctx context.Context, holderCount int) {
 	sg.db.Model(Token{}).WithContext(ctx).Where("contract = ?", c.Contract).Updates(map[string]interface{}{"holders": holderCount})
 }
 
+func (c Token) Cursor() string {
+	return util.Base64Encode(fmt.Sprintf("%d_%s", c.Holders, c.Contract))
+}
+
 func TouchToken(ctx context.Context, address, category string) *Token {
 	var token Token
 	sg.db.Scopes(model.IgnoreDuplicate).WithContext(ctx).FirstOrCreate(&token, Token{Contract: address, Category: category})
@@ -146,6 +150,10 @@ type TokenHolder struct {
 	Contract string          `json:"contract" gorm:"index:contract;index:contract_hold,unique;size:100"`
 	Holder   string          `json:"holder" gorm:"index:hold;index:contract_hold,unique;size:100" `
 	Balance  decimal.Decimal `json:"balance" gorm:"default: 0;type:decimal(65);"`
+}
+
+func (c TokenHolder) Cursor() string {
+	return util.Base64Encode(fmt.Sprintf("%s_%d", c.Balance.String(), c.ID))
 }
 
 func (c *TokenHolder) TableName() string {

@@ -2,7 +2,6 @@ package dao
 
 import (
 	"context"
-	"fmt"
 	"github.com/gomodule/redigo/redis"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
@@ -33,7 +32,7 @@ func (d *Dao) CreateBlock(ctx context.Context, txn *GormDB, cb *model.ChainBlock
 			go func() {
 				db := d.db
 				if d.DbDriver == "mysql" {
-					db = db.Set("gorm:table_options", "ENGINE=InnoDB")
+					db.Set("gorm:table_options", "ENGINE=InnoDB")
 				}
 				d.AddIndex(cb.BlockNum + model.SplitTableBlockNum)
 			}()
@@ -81,41 +80,81 @@ func (d *Dao) GetFillFinalizedBlockNum(c context.Context) (num int, err error) {
 	return
 }
 
-func (d *Dao) GetBlockList(ctx context.Context, page, row int) []model.ChainBlock {
-	var blocks []model.ChainBlock
-	blockNum, _ := d.GetFillBestBlockNum(ctx)
-	head := blockNum - page*row
-	if head < 0 {
-		return nil
-	}
-	end := head - row + 1
-	if end < 0 {
-		end = 0
-	}
-	bestNum := uint(blockNum)
-	headBlock := uint(head)
-	endBlock := uint(end)
-	d.db.Scopes(model.TableNameFunc(model.ChainBlock{BlockNum: headBlock})).
-		Joins(fmt.Sprintf("JOIN (SELECT id from %s where block_num BETWEEN %d and %d order by block_num desc ) as t on %s.id=t.id",
-			model.ChainBlock{BlockNum: headBlock}.TableName(),
-			end, head,
-			model.ChainBlock{BlockNum: headBlock}.TableName(),
-		)).
-		Order("block_num desc").Scan(&blocks)
+// GetBlockListCursor implements cursor pagination on blocks across split tables.
+func (d *Dao) GetBlockListCursor(ctx context.Context, limit int, before, after uint) (list []model.ChainBlock, hasPrev, hasNext bool) {
+	fetch := limit + 1
+	// determine max split-table index from best block
+	best, _ := d.GetFillBestBlockNum(context.TODO())
+	maxIdx := uint(best) / model.SplitTableBlockNum
 
-	if headBlock/model.SplitTableBlockNum != endBlock/model.SplitTableBlockNum {
-		var endBlocks []model.ChainBlock
-		d.db.Scopes(model.TableNameFunc(model.ChainBlock{BlockNum: bestNum - model.SplitTableBlockNum})).
-			Joins(fmt.Sprintf("JOIN (SELECT id from %s order by block_num desc limit %d) as t on %s.id=t.id",
-				model.ChainBlock{BlockNum: bestNum - model.SplitTableBlockNum}.TableName(),
-				uint(row)-(headBlock%model.SplitTableBlockNum),
-				model.ChainBlock{BlockNum: bestNum - model.SplitTableBlockNum}.TableName(),
-			)).
-			Order("block_num desc").Scan(&endBlocks)
-		blocks = append(blocks, endBlocks...)
+	// next page: block_num < after, walk tables downward
+	if after > 0 {
+		startIdx := int(after / model.SplitTableBlockNum)
+		for idx := startIdx; idx >= 0 && len(list) < fetch; idx-- {
+			var tableData []model.ChainBlock
+			q := d.db.WithContext(ctx).Scopes(d.TableNameFunc(&model.ChainBlock{BlockNum: uint(idx) * model.SplitTableBlockNum}))
+			if idx == startIdx {
+				q = q.Where("block_num < ?", after)
+			}
+			q = q.Order("block_num desc").Limit(fetch - len(list))
+			if err := q.Find(&tableData).Error; err != nil {
+				continue
+			}
+			list = append(list, tableData...)
+		}
+		hasNext = len(list) > limit
+		if hasNext {
+			list = list[:limit]
+		}
+		hasPrev = true
+		return list, hasPrev, hasNext
 	}
 
-	return blocks
+	// previous page: block_num > before, walk tables upward (asc, then reverse)
+	if before > 0 {
+		startIdx := int(before / model.SplitTableBlockNum)
+		for idx := startIdx; uint(idx) <= maxIdx && len(list) < fetch; idx++ {
+			var tableData []model.ChainBlock
+			q := d.db.WithContext(ctx).Scopes(d.TableNameFunc(&model.ChainBlock{BlockNum: uint(idx) * model.SplitTableBlockNum}))
+			if idx == startIdx {
+				q = q.Where("block_num > ?", before)
+			}
+			q = q.Order("block_num asc").Limit(fetch - len(list))
+			if err := q.Find(&tableData).Error; err != nil {
+				continue
+			}
+			list = append(list, tableData...)
+		}
+		hasPrev = len(list) > limit
+		if hasPrev {
+			list = list[:limit]
+		}
+		// reverse to keep response in desc order
+		for i, j := 0, len(list)-1; i < j; i, j = i+1, j-1 {
+			list[i], list[j] = list[j], list[i]
+		}
+		hasNext = true
+		return list, hasPrev, hasNext
+	}
+
+	// first page: walk from newest table downward
+	for idx := maxIdx; len(list) < fetch; idx-- {
+		var tableData []model.ChainBlock
+		q := d.db.WithContext(ctx).Scopes(d.TableNameFunc(&model.ChainBlock{BlockNum: uint(idx) * model.SplitTableBlockNum}))
+		q = q.Order("block_num desc").Limit(fetch - len(list))
+		if err := q.Find(&tableData).Error; err != nil {
+			break
+		}
+		list = append(list, tableData...)
+		if idx == 0 {
+			break
+		}
+	}
+	hasNext = len(list) > limit
+	if hasNext {
+		list = list[:limit]
+	}
+	return list, false, hasNext
 }
 
 func (d *Dao) GetBlockByHash(c context.Context, hash string) *model.ChainBlock {
@@ -174,7 +213,7 @@ func (d *Dao) UpdateEventAndExtrinsic(txn *GormDB, block *model.ChainBlock, even
 
 func (d *Dao) GetNearBlock(blockNum uint) *model.ChainBlock {
 	var block model.ChainBlock
-	query := d.db.Model(model.TableNameFunc(model.ChainBlock{BlockNum: blockNum})).Where("block_num > ?", blockNum).Order("block_num desc").Scan(&block)
+	query := d.db.Scopes(model.TableNameFunc(model.ChainBlock{BlockNum: blockNum})).Where("block_num > ?", blockNum).Order("block_num desc").Find(&block)
 	if query == nil || query.Error != nil {
 		return nil
 	}

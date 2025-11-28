@@ -5,7 +5,6 @@ import (
 	"github.com/itering/subscan-plugin/router"
 	_ "github.com/itering/subscan/plugins/balance/model"
 	"github.com/itering/subscan/plugins/balance/service"
-	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/address"
 	"github.com/itering/subscan/util/validator"
 	"github.com/pkg/errors"
@@ -26,8 +25,9 @@ func Router(s *service.Service) []router.Http {
 }
 
 type accountsParams struct {
-	Row  int `json:"row" validate:"min=1,max=100"`
-	Page int `json:"page" validate:"min=0"`
+	Limit  int   `json:"limit" validate:"min=1,max=100"`
+	Before *uint `json:"before" validate:"omitempty,min=0"`
+	After  *uint `json:"after" validate:"omitempty,min=0"`
 }
 
 // @Summary Get accounts list
@@ -35,7 +35,7 @@ type accountsParams struct {
 // @Accept json
 // @Produce json
 // @Param params body accountsParams true "params"
-// @Success 200 {object} J{data=object{list=[]model.Account,count=int}}
+// @Success 200 {object} J{data=object{list=[]model.Account,pagination=object}}
 // @Router /api/plugin/balance/accounts [post]
 func accountsHandle(w http.ResponseWriter, r *http.Request) error {
 	p := new(accountsParams)
@@ -44,9 +44,9 @@ func accountsHandle(w http.ResponseWriter, r *http.Request) error {
 		return nil
 	}
 
-	list, count := svc.GetAccountListJson(p.Page, p.Row)
+	list, page := svc.GetAccountListCursor(r.Context(), p.Limit, p.Before, p.After)
 	toJson(w, 0, map[string]interface{}{
-		"list": list, "count": count,
+		"list": list, "pagination": page,
 	}, nil)
 	return nil
 }
@@ -76,9 +76,9 @@ func accountHandle(w http.ResponseWriter, r *http.Request) error {
 type transferParams struct {
 	Address  string `json:"address" validate:"omitempty,addr"`
 	BlockNum uint   `json:"block_num" validate:"omitempty,min=0"`
-	Row      int    `json:"row" validate:"min=1,max=100"`
-	Page     int    `json:"page" validate:"min=0"`
-	AfterId  uint   `json:"after_id" validate:"omitempty,min=0"`
+	Limit    int    `json:"limit" validate:"min=1,max=100"`
+	Before   *uint  `json:"before" validate:"omitempty,min=0"`
+	After    *uint  `json:"after" validate:"omitempty,min=0"`
 }
 
 // @Summary Get transfer list
@@ -86,7 +86,7 @@ type transferParams struct {
 // @Accept json
 // @Produce json
 // @Param params body transferParams true "params"
-// @Success 200 {object} J{data=object{list=[]model.Transfer,count=int}}
+// @Success 200 {object} J{data=object{list=[]model.Transfer,pagination=object}}
 // @Router /api/plugin/balance/transfer [post]
 func transferHandle(w http.ResponseWriter, r *http.Request) error {
 	p := new(transferParams)
@@ -94,13 +94,9 @@ func transferHandle(w http.ResponseWriter, r *http.Request) error {
 		toJson(w, 10001, nil, err)
 		return nil
 	}
-	if p.Row*p.Page > 10000 {
-		toJson(w, 10005, nil, util.InvalidPagination)
-		return nil
-	}
-	list, count := svc.GetTransferJson(r.Context(), address.Decode(p.Address), p.BlockNum, p.AfterId, p.Page, p.Row)
+	list, page := svc.GetTransferCursor(r.Context(), address.Decode(p.Address), p.BlockNum, p.Limit, p.Before, p.After)
 	toJson(w, 0, map[string]interface{}{
-		"list": list, "count": count,
+		"list": list, "pagination": page,
 	}, nil)
 	return nil
 }

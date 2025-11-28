@@ -2,7 +2,6 @@ package dao
 
 import (
 	"context"
-	"fmt"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"strings"
@@ -16,11 +15,9 @@ func (d *Dao) CreateEvent(txn *GormDB, events []model.ChainEvent) error {
 	return query.Error
 }
 
-func (d *Dao) GetEventList(ctx context.Context, page, row int, order string, fixedTableIndex int, afterId uint, where ...model.Option) ([]model.ChainEvent, int) {
-	var Events []model.ChainEvent
-
-	var count int64
-
+// GetEventListCursor implements bidirectional cursor pagination on events using id as cursor.
+func (d *Dao) GetEventListCursor(ctx context.Context, limit int, _ string, fixedTableIndex int, beforeId uint, afterId uint, where ...model.Option) (list []model.ChainEvent, hasPrev, hasNext bool) {
+	fetchLimit := limit + 1
 	blockNum, _ := d.GetFillBestBlockNum(context.TODO())
 	maxTableIndex := blockNum / int(model.SplitTableBlockNum)
 	if afterId > 0 {
@@ -29,37 +26,79 @@ func (d *Dao) GetEventList(ctx context.Context, page, row int, order string, fix
 	if fixedTableIndex >= 0 {
 		maxTableIndex = fixedTableIndex
 	}
-	for index := maxTableIndex; index >= 0; index-- {
-		var tableData []model.ChainEvent
-		var tableCount int64
 
+	if afterId > 0 { // next page
+		for index := maxTableIndex; index >= 0 && len(list) < fetchLimit; index-- {
+			if fixedTableIndex >= 0 && index != fixedTableIndex {
+				continue
+			}
+			var tableData []model.ChainEvent
+			q := d.db.WithContext(ctx).Scopes(d.TableNameFunc(&model.ChainEvent{BlockNum: uint(index) * model.SplitTableBlockNum}))
+			q = q.Scopes(where...).Where("id < ?", afterId).Order("id desc").Limit(fetchLimit - len(list))
+			if err := q.Find(&tableData).Error; err != nil {
+				continue
+			}
+			list = append(list, tableData...)
+		}
+		hasNext = len(list) > limit
+		if hasNext {
+			list = list[:limit]
+		}
+		hasPrev = true
+		return
+	}
+
+	if beforeId > 0 { // previous page
+		startIdx := int(beforeId/model.SplitTableBlockNum) / model.IdGenerateCoefficient
+		if fixedTableIndex >= 0 {
+			startIdx = fixedTableIndex
+		}
+		for index := startIdx; index <= maxTableIndex && len(list) < fetchLimit; index++ {
+			if fixedTableIndex >= 0 && index != fixedTableIndex {
+				continue
+			}
+			var tableData []model.ChainEvent
+			q := d.db.WithContext(ctx).Scopes(d.TableNameFunc(&model.ChainEvent{BlockNum: uint(index) * model.SplitTableBlockNum}))
+			q = q.Scopes(where...)
+			if index == startIdx {
+				q = q.Where("id > ?", beforeId)
+			}
+			q = q.Order("id asc").Limit(fetchLimit - len(list))
+			if err := q.Find(&tableData).Error; err != nil {
+				continue
+			}
+			list = append(list, tableData...)
+		}
+		hasPrev = len(list) > limit
+		if hasPrev {
+			list = list[:limit]
+		}
+		for i, j := 0, len(list)-1; i < j; i, j = i+1, j-1 {
+			list[i], list[j] = list[j], list[i]
+		}
+		hasNext = true
+		return
+	}
+
+	// first page
+	for index := maxTableIndex; index >= 0 && len(list) < fetchLimit; index-- {
 		if fixedTableIndex >= 0 && index != fixedTableIndex {
 			continue
 		}
-
-		queryOrigin := d.db.WithContext(ctx).Scopes(d.TableNameFunc(&model.ChainEvent{BlockNum: uint(index) * model.SplitTableBlockNum}))
-		queryOrigin.Scopes(where...)
-		queryOrigin.Count(&tableCount)
-
-		if tableCount == 0 {
+		var tableData []model.ChainEvent
+		q := d.db.WithContext(ctx).Scopes(d.TableNameFunc(&model.ChainEvent{BlockNum: uint(index) * model.SplitTableBlockNum}))
+		q = q.Scopes(where...).Order("id desc").Limit(fetchLimit - len(list))
+		if err := q.Find(&tableData).Error; err != nil {
 			continue
 		}
-		preCount := count
-		count += tableCount
-		if len(Events) >= row {
-			continue
-		}
-		if afterId > 0 {
-			queryOrigin = queryOrigin.Where("id < ?", afterId)
-		}
-		query := queryOrigin.Order(fmt.Sprintf("id %s", order)).Offset(page*row - int(preCount)).Limit(row - len(Events)).Find(&tableData)
-		if query == nil || query.Error != nil {
-			continue
-		}
-		Events = append(Events, tableData...)
-
+		list = append(list, tableData...)
 	}
-	return Events, int(count)
+	hasNext = len(list) > limit
+	if hasNext {
+		list = list[:limit]
+	}
+	hasPrev = false
+	return
 }
 
 func (d *Dao) GetEventsByIndex(extrinsicIndex string) []model.ChainEvent {

@@ -27,6 +27,10 @@ type Erc721Holders struct {
 	StorageUrl string   `json:"storage_url" gorm:"type:text"`
 }
 
+func (t Erc721Holders) Cursor() string {
+	return util.Base64Encode(fmt.Sprintf("%s_%s", t.Contract, t.TokenId))
+}
+
 func (t *Erc721Holders) TableName() string {
 	return "evm_erc721_holders"
 }

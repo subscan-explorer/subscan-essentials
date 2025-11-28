@@ -116,8 +116,6 @@ func (c *ChainEvent) AfterFind(tx *gorm.DB) error {
 		}
 		// use ParamsRawBytes to store the decoded params
 		c.Params = convertScaleEventParams(params)
-	} else {
-		// skip
 	}
 	return nil
 }
@@ -250,8 +248,6 @@ func (c *ChainExtrinsic) AfterFind(tx *gorm.DB) error {
 		}
 		// use ParamsRawBytes to store the decoded params
 		c.Params = convertScaleExtrinsicParams(params)
-	} else {
-		// skip
 	}
 	return nil
 }

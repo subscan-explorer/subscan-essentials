@@ -133,10 +133,8 @@ func RefreshMetadata() {
 	u := make(map[string]interface{})
 	// extrinsic
 	{
-		_, count := d.GetExtrinsicList(ctx, 0, 1, "desc", -1, 0)
-		u["count_extrinsic"] = count
-		_, count = d.GetExtrinsicList(ctx, 0, 1, "desc", -1, 0, model.Where("is_signed = ?", true))
-		u["count_signed_extrinsic"] = count
+		u["count_extrinsic"] = d.GetExtrinsicCount(ctx)
+		u["count_signed_extrinsic"] = d.GetExtrinsicCount(ctx, model.Where("is_signed = ?", true))
 	}
 	util.Logger().Error(srv.GetDao().SetMetadata(ctx, u))
 	// balance plugin

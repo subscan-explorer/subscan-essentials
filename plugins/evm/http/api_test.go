@@ -11,6 +11,38 @@ import (
 type MockServer struct {
 }
 
+func (m MockServer) BlocksCursor(ctx context.Context, limit int, before, after *uint) ([]dao.EvmBlockJson, map[string]interface{}) {
+	return nil, nil
+}
+
+func (m MockServer) TransactionsCursor(ctx context.Context, limit int, before, after *uint, opts ...model.Option) ([]dao.TransactionSampleJson, map[string]interface{}) {
+	return nil, nil
+}
+
+func (m MockServer) AccountsCursor(ctx context.Context, address string, limit int, before, after *string) ([]dao.AccountsJson, map[string]interface{}) {
+	return nil, nil
+}
+
+func (m MockServer) ContractsCursor(ctx context.Context, limit int, before, after *string) ([]dao.ContractsJson, map[string]interface{}) {
+	return nil, nil
+}
+
+func (m MockServer) CollectiblesCursor(ctx context.Context, address string, contract string, limit int, before, after *string) ([]dao.Erc721Holders, map[string]interface{}) {
+	return nil, nil
+}
+
+func (m MockServer) TokenListCursor(ctx context.Context, contract, category string, limit int, before, after *string) ([]dao.Token, map[string]interface{}) {
+	return nil, nil
+}
+
+func (m MockServer) TokenTransfersCursor(ctx context.Context, address, tokenAddress, category string, limit int, before, after *uint) ([]dao.TokenTransferJson, map[string]interface{}) {
+	return nil, nil
+}
+
+func (m MockServer) TokenHoldersCursor(ctx context.Context, address string, limit int, before, after *string) ([]dao.TokenHolder, map[string]interface{}) {
+	return nil, nil
+}
+
 func (m MockServer) AccountTokens(ctx context.Context, address, _ string) []dao.AccountTokenJson {
 	return nil
 }
@@ -52,8 +84,7 @@ func (m MockServer) Accounts(ctx context.Context, address string, page int, row 
 }
 
 func (m MockServer) Contracts(ctx context.Context, page int, row int) ([]dao.ContractsJson, int64) {
-	// TODO implement me
-	panic("implement me")
+	return nil, 0
 }
 
 func (m MockServer) GetTransactionByHash(_ context.Context, _ string) *dao.Transaction {

@@ -15,12 +15,22 @@ type Service struct {
 	pool subscan_plugin.RedisPool
 }
 
-func (s *Service) GetAccountListJson(page, row int) ([]model.Account, int) {
-	list, count := dao.GetAccountList(s.d, page, row)
+func (s *Service) GetAccountListCursor(_ context.Context, limit int, before, after *uint) ([]model.Account, map[string]interface{}) {
+	list, hasPrev, hasNext := dao.GetAccountListCursor(s.d, limit, before, after)
 	for i := range list {
 		list[i].Address = address.Encode(list[i].Address)
 	}
-	return list, count
+	var start, end *uint
+	if len(list) > 0 {
+		start = &list[0].ID
+		end = &list[len(list)-1].ID
+	}
+	return list, map[string]interface{}{
+		"start_cursor":      start,
+		"end_cursor":        end,
+		"has_previous_page": hasPrev,
+		"has_next_page":     hasNext,
+	}
 }
 
 func (s *Service) GetAccountJson(ctx context.Context, addr string) *model.Account {
@@ -32,7 +42,7 @@ func (s *Service) GetAccountJson(ctx context.Context, addr string) *model.Accoun
 	return account
 }
 
-func (s *Service) GetTransferJson(ctx context.Context, addr string, blockNum uint, afterId uint, page, row int) ([]model.Transfer, int) {
+func (s *Service) GetTransferCursor(ctx context.Context, addr string, blockNum uint, limit int, before, after *uint) ([]model.Transfer, map[string]interface{}) {
 	var opts []cmodel.Option
 	if blockNum > 0 {
 		opts = append(opts, cmodel.Where("block_num = ?", blockNum))
@@ -40,15 +50,22 @@ func (s *Service) GetTransferJson(ctx context.Context, addr string, blockNum uin
 	if addr != "" {
 		opts = append(opts, cmodel.Where("sender = ? or receiver = ?", addr, addr))
 	}
-	if afterId > 0 {
-		opts = append(opts, cmodel.Where("id < ?", afterId))
-	}
-	list, count := dao.Transfers(ctx, s.d, cmodel.WithLimit(page*row, row), opts...)
+	list, hasPrev, hasNext := dao.TransfersCursor(ctx, s.d, limit, before, after, opts...)
 	for index := range list {
 		list[index].Sender = address.Encode(list[index].Sender)
 		list[index].Receiver = address.Encode(list[index].Receiver)
 	}
-	return list, count
+	var start, end *uint
+	if len(list) > 0 {
+		start = &list[0].Id
+		end = &list[len(list)-1].Id
+	}
+	return list, map[string]interface{}{
+		"start_cursor":      start,
+		"end_cursor":        end,
+		"has_previous_page": hasPrev,
+		"has_next_page":     hasNext,
+	}
 }
 
 func New(d storage.Dao, pool subscan_plugin.RedisPool) *Service {

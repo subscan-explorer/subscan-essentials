@@ -378,10 +378,11 @@ definitions:
     type: object
   internal_server_http.BlocksParams:
     properties:
-      page:
-        minimum: 0
+      after:
         type: integer
-      row:
+      before:
+        type: integer
+      limit:
         maximum: 100
         minimum: 1
         type: integer
@@ -410,7 +411,9 @@ definitions:
     type: object
   internal_server_http.eventsParams:
     properties:
-      after_id:
+      after:
+        type: integer
+      before:
         type: integer
       block_num:
         type: integer
@@ -421,15 +424,12 @@ definitions:
       hidden_params:
         description: hide event params in response
         type: boolean
-      module:
-        type: string
-      page:
-        minimum: 0
-        type: integer
-      row:
+      limit:
         maximum: 100
         minimum: 1
         type: integer
+      module:
+        type: string
     type: object
   internal_server_http.extrinsicParams:
     properties:
@@ -442,7 +442,9 @@ definitions:
     properties:
       address:
         type: string
-      after_id:
+      after:
+        type: integer
+      before:
         type: integer
       block_num:
         type: integer
@@ -451,15 +453,12 @@ definitions:
       hidden_params:
         description: hide extrinsic params in response
         type: boolean
-      module:
-        type: string
-      page:
-        minimum: 0
-        type: integer
-      row:
+      limit:
         maximum: 100
         minimum: 1
         type: integer
+      module:
+        type: string
       signed:
         type: string
     type: object
@@ -596,6 +595,8 @@ definitions:
     type: object
   model.EventParam:
     properties:
+      name:
+        type: string
       type:
         type: string
       type_name:
@@ -654,6 +655,8 @@ definitions:
     type: object
   model.RuntimeVersion:
     properties:
+      block_num:
+        type: integer
       modules:
         type: string
       spec_version:
@@ -695,10 +698,13 @@ definitions:
     type: object
   plugins_balance_http.accountsParams:
     properties:
-      page:
+      after:
         minimum: 0
         type: integer
-      row:
+      before:
+        minimum: 0
+        type: integer
+      limit:
         maximum: 100
         minimum: 1
         type: integer
@@ -707,16 +713,16 @@ definitions:
     properties:
       address:
         type: string
-      after_id:
+      after:
+        minimum: 0
+        type: integer
+      before:
         minimum: 0
         type: integer
       block_num:
         minimum: 0
         type: integer
-      page:
-        minimum: 0
-        type: integer
-      row:
+      limit:
         maximum: 100
         minimum: 1
         type: integer
@@ -725,10 +731,13 @@ definitions:
     properties:
       address:
         type: string
-      page:
-        minimum: 0
-        type: integer
-      row:
+      after:
+        minLength: 0
+        type: string
+      before:
+        minLength: 0
+        type: string
+      limit:
         maximum: 100
         minimum: 1
         type: integer
@@ -743,10 +752,13 @@ definitions:
     type: object
   plugins_evm_http.EvmBlocks:
     properties:
-      page:
+      after:
         minimum: 0
         type: integer
-      row:
+      before:
+        minimum: 0
+        type: integer
+      limit:
         maximum: 100
         minimum: 1
         type: integer
@@ -782,12 +794,15 @@ definitions:
     properties:
       address:
         type: string
+      after:
+        minLength: 0
+        type: string
+      before:
+        minLength: 0
+        type: string
       contract:
         type: string
-      page:
-        minimum: 0
-        type: integer
-      row:
+      limit:
         maximum: 100
         minimum: 1
         type: integer
@@ -801,20 +816,26 @@ definitions:
     type: object
   plugins_evm_http.contractsParams:
     properties:
-      page:
-        minimum: 0
-        type: integer
-      row:
+      after:
+        minLength: 0
+        type: string
+      before:
+        minLength: 0
+        type: string
+      limit:
         maximum: 100
         minimum: 1
         type: integer
     type: object
   plugins_evm_http.tokenHolderParams:
     properties:
-      page:
-        minimum: 0
-        type: integer
-      row:
+      after:
+        minLength: 0
+        type: string
+      before:
+        minLength: 0
+        type: string
+      limit:
         maximum: 100
         minimum: 1
         type: integer
@@ -825,6 +846,12 @@ definitions:
     type: object
   plugins_evm_http.tokenListParams:
     properties:
+      after:
+        minLength: 0
+        type: string
+      before:
+        minLength: 0
+        type: string
       category:
         enum:
         - erc20
@@ -832,10 +859,7 @@ definitions:
         type: string
       contract:
         type: string
-      page:
-        minimum: 0
-        type: integer
-      row:
+      limit:
         maximum: 100
         minimum: 1
         type: integer
@@ -844,15 +868,18 @@ definitions:
     properties:
       address:
         type: string
+      after:
+        minimum: 0
+        type: integer
+      before:
+        minimum: 0
+        type: integer
       category:
         enum:
         - erc20
         - erc721
         type: string
-      page:
-        minimum: 0
-        type: integer
-      row:
+      limit:
         maximum: 100
         minimum: 1
         type: integer
@@ -870,16 +897,16 @@ definitions:
     properties:
       address:
         type: string
-      after_id:
+      after:
+        minimum: 0
+        type: integer
+      before:
         minimum: 0
         type: integer
       block_num:
         minimum: 0
         type: integer
-      page:
-        minimum: 0
-        type: integer
-      row:
+      limit:
         maximum: 100
         minimum: 1
         type: integer
@@ -1242,12 +1269,12 @@ paths:
             - properties:
                 data:
                   properties:
-                    count:
-                      type: integer
                     list:
                       items:
                         $ref: '#/definitions/github_com_itering_subscan_plugins_balance_model.Account'
                       type: array
+                    pagination:
+                      type: object
                   type: object
               type: object
       summary: Get accounts list
@@ -1275,12 +1302,12 @@ paths:
             - properties:
                 data:
                   properties:
-                    count:
-                      type: integer
                     list:
                       items:
                         $ref: '#/definitions/github_com_itering_subscan_plugins_balance_model.Transfer'
                       type: array
+                    pagination:
+                      type: object
                   type: object
               type: object
       summary: Get transfer list
@@ -1336,12 +1363,12 @@ paths:
             - properties:
                 data:
                   properties:
-                    count:
-                      type: integer
-                    list:
+                    lixst:
                       items:
                         $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.AccountsJson'
                       type: array
+                    pagination:
+                      type: object
                   type: object
               type: object
       summary: Evm accounts list
@@ -1395,12 +1422,12 @@ paths:
             - properties:
                 data:
                   properties:
-                    count:
-                      type: integer
                     list:
                       items:
                         $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.EvmBlockJson'
                       type: array
+                    pagination:
+                      type: object
                   type: object
               type: object
       summary: Evm blocks
@@ -1475,12 +1502,12 @@ paths:
             - properties:
                 data:
                   properties:
-                    count:
-                      type: integer
                     list:
                       items:
                         $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.ContractsJson'
                       type: array
+                    pagination:
+                      type: object
                   type: object
               type: object
       summary: Evm contract list
@@ -1508,12 +1535,12 @@ paths:
             - properties:
                 data:
                   properties:
-                    count:
-                      type: integer
                     list:
                       items:
                         $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.Erc721Holders'
                       type: array
+                    pagination:
+                      type: object
                   type: object
               type: object
       summary: Evm Erc721 collectibles
@@ -1541,12 +1568,12 @@ paths:
             - properties:
                 data:
                   properties:
-                    count:
-                      type: integer
-                    list:
+                    holders:
                       items:
                         $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.TokenHolder'
                       type: array
+                    pagination:
+                      type: object
                   type: object
               type: object
       summary: Evm token holder
@@ -1574,9 +1601,9 @@ paths:
             - properties:
                 data:
                   properties:
-                    count:
-                      type: integer
-                    list:
+                    pagination:
+                      type: object
+                    transfers:
                       items:
                         $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.TokenTransferJson'
                       type: array
@@ -1607,12 +1634,12 @@ paths:
             - properties:
                 data:
                   properties:
-                    count:
-                      type: integer
                     list:
                       items:
                         $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.Token'
                       type: array
+                    pagination:
+                      type: object
                   type: object
               type: object
       summary: Evm token list
@@ -1666,12 +1693,12 @@ paths:
             - properties:
                 data:
                   properties:
-                    count:
-                      type: integer
                     list:
                       items:
                         $ref: '#/definitions/github_com_itering_subscan_plugins_evm_dao.TransactionSampleJson'
                       type: array
+                    pagination:
+                      type: object
                   type: object
               type: object
       summary: Evm transactions
@@ -1729,8 +1756,8 @@ paths:
                       items:
                         $ref: '#/definitions/model.SampleBlockJson'
                       type: array
-                    count:
-                      type: integer
+                    pagination:
+                      type: object
                   type: object
               type: object
       summary: Blocks list
@@ -1784,12 +1811,12 @@ paths:
             - properties:
                 data:
                   properties:
-                    count:
-                      type: integer
                     events:
                       items:
                         $ref: '#/definitions/model.ChainEventJson'
                       type: array
+                    pagination:
+                      type: object
                   type: object
               type: object
       summary: Get events list
@@ -1871,12 +1898,12 @@ paths:
             - properties:
                 data:
                   properties:
-                    count:
-                      type: integer
                     extrinsics:
                       items:
                         $ref: '#/definitions/model.ChainExtrinsicJson'
                       type: array
+                    pagination:
+                      type: object
                   type: object
               type: object
       summary: Get extrinsics list

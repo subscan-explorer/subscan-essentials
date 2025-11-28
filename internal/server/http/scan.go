@@ -11,11 +11,6 @@ import (
 	"github.com/itering/subscan/util"
 )
 
-type Pagination struct {
-	Row  int `json:"row" binding:"min=1,max=100"`
-	Page int `json:"page" binding:"min=0"`
-}
-
 // @Summary Current network metadata
 // @Description get metadata info, include chain customer info, runtime info, etc.
 // @Tags metadata
@@ -38,7 +33,9 @@ func tokenHandle(c *gin.Context) {
 }
 
 type BlocksParams struct {
-	Pagination
+	Limit  int  `json:"limit" binding:"min=1,max=100"`
+	Before uint `json:"before" binding:"omitempty"`
+	After  uint `json:"after" binding:"omitempty"`
 }
 
 // @Summary Blocks list
@@ -46,7 +43,7 @@ type BlocksParams struct {
 // @Accept json
 // @Produce json
 // @Param params body BlocksParams true "params"
-// @Success 200 {object} http.J{data=object{blocks=[]model.SampleBlockJson,count=int}}
+// @Success 200 {object} http.J{data=object{blocks=[]model.SampleBlockJson,pagination=object}}
 // @Router /api/scan/blocks [post]
 func blocksHandle(c *gin.Context) {
 	p := new(BlocksParams)
@@ -56,12 +53,10 @@ func blocksHandle(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	blockNum, err := svc.GetFinalizedBlock(ctx)
-	list := svc.GetBlocksSampleByNums(ctx, p.Page, p.Row)
-
+	list, pageInfo := svc.GetBlocksSampleCursor(ctx, p.Limit, p.Before, p.After)
 	toJson(c, map[string]interface{}{
-		"blocks": list, "count": blockNum,
-	}, err)
+		"blocks": list, "pagination": pageInfo,
+	}, nil)
 }
 
 type BlockParams struct {
@@ -92,13 +87,14 @@ func blockHandle(c *gin.Context) {
 }
 
 type extrinsicsParams struct {
-	Pagination
+	Limit        int    `json:"limit" binding:"min=1,max=100"`
+	Before       uint   `json:"before" binding:"omitempty"`
+	After        uint   `json:"after" binding:"omitempty"`
 	Signed       string `json:"signed" binding:"omitempty"`
 	Address      string `json:"address" binding:"omitempty"`
 	Module       string `json:"module" binding:"omitempty"`
 	Call         string `json:"call" binding:"omitempty"`
 	BlockNum     uint   `json:"block_num" binding:"omitempty"`
-	AfterId      uint   `json:"after_id" binding:"omitempty"`
 	HiddenParams bool   `json:"hidden_params" binding:"omitempty"` // hide extrinsic params in response
 }
 
@@ -108,7 +104,7 @@ type extrinsicsParams struct {
 // @Accept json
 // @Produce json
 // @Param params body extrinsicsParams true "params"
-// @Success 200 {object} http.J{data=object{extrinsics=[]model.ChainExtrinsicJson,count=int}}
+// @Success 200 {object} http.J{data=object{extrinsics=[]model.ChainExtrinsicJson,pagination=object}}
 // @Router /api/scan/extrinsics [post]
 func extrinsicsHandle(c *gin.Context) {
 	p := new(extrinsicsParams)
@@ -117,10 +113,6 @@ func extrinsicsHandle(c *gin.Context) {
 		return
 	}
 	ctx := c.Request.Context()
-	if p.Row*p.Page > 10000 {
-		toJson(c, nil, util.InvalidPagination)
-		return
-	}
 	var query []model.Option
 	var fixedTableIndex = -1
 
@@ -151,9 +143,10 @@ func extrinsicsHandle(c *gin.Context) {
 		query = append(query, model.Omit("params", "params_raw_bytes"))
 	}
 
-	list, count := svc.GetExtrinsicList(ctx, p.Page, p.Row, fixedTableIndex, p.AfterId, query...)
+	list, pageInfo := svc.GetExtrinsicList(ctx, p.Limit, fixedTableIndex, p.Before, p.After, query...)
 	toJson(c, map[string]interface{}{
-		"extrinsics": list, "count": count,
+		"extrinsics": list,
+		"pagination": pageInfo,
 	}, nil)
 
 }
@@ -192,13 +185,13 @@ func extrinsicHandle(c *gin.Context) {
 }
 
 type eventsParams struct {
-	Row            int    `json:"row" binding:"min=1,max=100"`
-	Page           int    `json:"page" binding:"min=0"`
+	Limit          int    `json:"limit" binding:"min=1,max=100"`
+	Before         uint   `json:"before" binding:"omitempty"`
+	After          uint   `json:"after" binding:"omitempty"`
 	Module         string `json:"module" binding:"omitempty"`
 	Event          string `json:"event" binding:"omitempty"`
 	BlockNum       uint   `json:"block_num" binding:"omitempty"`
 	ExtrinsicIndex string `json:"extrinsic_index" binding:"omitempty"`
-	AfterId        uint   `json:"after_id" binding:"omitempty"`
 	HiddenParams   bool   `json:"hidden_params" binding:"omitempty"` // hide event params in response
 }
 
@@ -208,16 +201,12 @@ type eventsParams struct {
 // @Accept json
 // @Produce json
 // @Param params body eventsParams true "params"
-// @Success 200 {object} http.J{data=object{events=[]model.ChainEventJson,count=int}}
+// @Success 200 {object} http.J{data=object{events=[]model.ChainEventJson,pagination=object}}
 // @Router /api/scan/events [post]
 func eventsHandle(c *gin.Context) {
 	p := new(eventsParams)
 	if err := c.MustBindWith(p, binding.JSON); err != nil {
 		toJson(c, nil, err)
-		return
-	}
-	if p.Row*p.Page > 10000 {
-		toJson(c, nil, util.InvalidPagination)
 		return
 	}
 	ctx := c.Request.Context()
@@ -248,8 +237,8 @@ func eventsHandle(c *gin.Context) {
 		query = append(query, model.Omit("params", "params_raw_bytes"))
 	}
 
-	events, count := svc.EventsList(ctx, p.Page, p.Row, fixedTableIndex, p.AfterId, query...)
-	toJson(c, map[string]interface{}{"events": events, "count": count}, nil)
+	events, pageInfo := svc.EventsList(ctx, p.Limit, fixedTableIndex, p.Before, p.After, query...)
+	toJson(c, map[string]interface{}{"events": events, "pagination": pageInfo}, nil)
 }
 
 type eventParams struct {

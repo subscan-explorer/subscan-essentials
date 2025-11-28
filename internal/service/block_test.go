@@ -45,13 +45,13 @@ func TestService_GetCurrentRuntimeSpecVersion(t *testing.T) {
 }
 
 func TestService_GetExtrinsicList(t *testing.T) {
-	_, count := testSrv.GetExtrinsicList(context.Background(), 0, 10, -1, 0)
-	assert.Equal(t, 1, count)
+	_, page := testSrv.GetExtrinsicList(context.Background(), 10, -1, 0, 0)
+	assert.Equal(t, false, page.HasPreviousPage)
 }
 
 func TestService_GetBlocksSampleByNums(t *testing.T) {
 	util.AddressType = "42"
-	blocks := testSrv.GetBlocksSampleByNums(context.TODO(), 0, 10)
+	blocks, _ := testSrv.GetBlocksSampleCursor(context.TODO(), 10, 0, 0)
 	assert.Equal(t, []model.SampleBlockJson{{
 		BlockNum:       947687,
 		BlockTimestamp: 1594791900,

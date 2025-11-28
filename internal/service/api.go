@@ -38,14 +38,21 @@ func (s *Service) Metadata(ctx context.Context) (map[string]interface{}, error) 
 	return m, err
 }
 
-func (s *Service) GetBlocksSampleByNums(ctx context.Context, page, row int) []model.SampleBlockJson {
+func (s *Service) GetBlocksSampleCursor(ctx context.Context, limit int, before, after uint) ([]model.SampleBlockJson, CursorPage) {
 	var blockJson []model.SampleBlockJson
-	blocks := s.dao.GetBlockList(ctx, page, row)
+	blocks, hasPrev, hasNext := s.dao.GetBlockListCursor(ctx, limit, before, after)
 	for _, block := range blocks {
 		bj := s.BlockAsSampleJson(&block)
 		blockJson = append(blockJson, *bj)
 	}
-	return blockJson
+	var start, end *uint
+	if len(blocks) > 0 {
+		startBlock := blocks[0].BlockNum
+		endBlock := blocks[len(blocks)-1].BlockNum
+		start = &startBlock
+		end = &endBlock
+	}
+	return blockJson, CursorPage{StartCursor: start, EndCursor: end, HasNextPage: hasNext, HasPreviousPage: hasPrev}
 }
 
 func (s *Service) BlockAsSampleJson(block *model.ChainBlock) *model.SampleBlockJson {
@@ -81,13 +88,25 @@ func (s *Service) GetFinalizedBlock(c context.Context) (uint64, error) {
 	return s.dao.GetFinalizedBlockNum(c)
 }
 
-func (s *Service) GetExtrinsicList(ctx context.Context, page, row int, fixedTableIndex int, afterId uint, query ...model.Option) ([]*model.ChainExtrinsicJson, int) {
-	list, count := s.dao.GetExtrinsicList(ctx, page, row, "desc", fixedTableIndex, afterId, query...)
+type CursorPage struct {
+	StartCursor     *uint `json:"start_cursor,omitempty"`
+	EndCursor       *uint `json:"end_cursor,omitempty"`
+	HasNextPage     bool  `json:"has_next_page"`
+	HasPreviousPage bool  `json:"has_previous_page"`
+}
+
+func (s *Service) GetExtrinsicList(ctx context.Context, limit int, fixedTableIndex int, beforeId, afterId uint, query ...model.Option) ([]*model.ChainExtrinsicJson, CursorPage) {
+	list, hasPrev, hasNext := s.dao.GetExtrinsicListCursor(ctx, limit, fixedTableIndex, beforeId, afterId, query...)
 	var ejs []*model.ChainExtrinsicJson
 	for _, extrinsic := range list {
 		ejs = append(ejs, s.dao.ExtrinsicsAsJson(&extrinsic))
 	}
-	return ejs, count
+	var start, end *uint
+	if len(list) > 0 {
+		start = &list[0].ID
+		end = &list[len(list)-1].ID
+	}
+	return ejs, CursorPage{StartCursor: start, EndCursor: end, HasNextPage: hasNext, HasPreviousPage: hasPrev}
 }
 
 func (s *Service) GetExtrinsicByIndex(ctx context.Context, index string) *model.ExtrinsicDetail {
@@ -98,13 +117,13 @@ func (s *Service) GetExtrinsicDetailByHash(ctx context.Context, hash string) *mo
 	return s.dao.GetExtrinsicsDetailByHash(ctx, hash)
 }
 
-func (s *Service) EventsList(ctx context.Context, page, row int, fixedTableIndex int, afterId uint, where ...model.Option) ([]model.ChainEventJson, int) {
+func (s *Service) EventsList(ctx context.Context, limit int, fixedTableIndex int, beforeId uint, afterId uint, where ...model.Option) ([]model.ChainEventJson, CursorPage) {
 	var (
 		result    []model.ChainEventJson
 		blockNums []uint
 	)
 
-	list, count := s.dao.GetEventList(ctx, page, row, "desc", fixedTableIndex, afterId, where...)
+	list, hasPrev, hasNext := s.dao.GetEventListCursor(ctx, limit, "desc", fixedTableIndex, beforeId, afterId, where...)
 	for _, event := range list {
 		blockNums = append(blockNums, event.BlockNum)
 	}
@@ -127,7 +146,12 @@ func (s *Service) EventsList(ctx context.Context, page, row int, fixedTableIndex
 		}
 		result = append(result, ej)
 	}
-	return result, count
+	var start, end *uint
+	if len(list) > 0 {
+		start = &list[0].ID
+		end = &list[len(list)-1].ID
+	}
+	return result, CursorPage{StartCursor: start, EndCursor: end, HasNextPage: hasNext, HasPreviousPage: hasPrev}
 }
 
 func (s *Service) EventById(ctx context.Context, eventIndex string) *model.ChainEventJson {

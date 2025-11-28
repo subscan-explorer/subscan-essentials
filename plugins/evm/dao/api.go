@@ -21,17 +21,18 @@ type ISrv interface {
 	ContractsByAddr(ctx context.Context, address string) (contract *Contract)
 	GetTransactionByHash(c context.Context, hash string) *Transaction
 	Blocks(ctx context.Context, page int, row int) ([]EvmBlockJson, int)
+	BlocksCursor(ctx context.Context, limit int, before, after *uint) ([]EvmBlockJson, map[string]interface{})
 	BlockByNum(ctx context.Context, blockNum uint) *EvmBlock
 	BlockByHash(ctx context.Context, hash string) *EvmBlock
-	TransactionsJson(ctx context.Context, page model.Option, opts ...model.Option) ([]TransactionSampleJson, int)
-	Accounts(ctx context.Context, adress string, page int, row int) ([]AccountsJson, int64)
-	Contracts(ctx context.Context, page int, row int) ([]ContractsJson, int64)
+	TransactionsCursor(ctx context.Context, limit int, before, after *uint, opts ...model.Option) ([]TransactionSampleJson, map[string]interface{})
+	AccountsCursor(ctx context.Context, address string, limit int, before, after *string) ([]AccountsJson, map[string]interface{})
+	ContractsCursor(ctx context.Context, limit int, before, after *string) ([]ContractsJson, map[string]interface{})
 
 	AccountTokens(ctx context.Context, address, category string) []AccountTokenJson
-	Collectibles(ctx context.Context, address string, contract string, page, row int) ([]Erc721Holders, int)
-	TokenList(ctx context.Context, contract, category string, page, row int) ([]Token, int)
-	TokenTransfers(ctx context.Context, address, tokenAddress, category string, page, row int) ([]TokenTransferJson, int)
-	TokenHolders(ctx context.Context, address string, page int, row int) ([]TokenHolder, int)
+	CollectiblesCursor(ctx context.Context, address string, contract string, limit int, before, after *string) ([]Erc721Holders, map[string]interface{})
+	TokenListCursor(ctx context.Context, contract, category string, limit int, before, after *string) ([]Token, map[string]interface{})
+	TokenTransfersCursor(ctx context.Context, address, tokenAddress, category string, limit int, before, after *uint) ([]TokenTransferJson, map[string]interface{})
+	TokenHoldersCursor(ctx context.Context, address string, limit int, before, after *string) ([]TokenHolder, map[string]interface{})
 }
 
 type ApiSrv struct{}
@@ -345,18 +346,52 @@ type EvmBlockJson struct {
 	BlockTimestamp uint   `json:"block_timestamp"`
 }
 
-func (a *ApiSrv) Blocks(ctx context.Context, page int, row int) ([]EvmBlockJson, int) {
-	list, count := GetBlockList(ctx, page, row)
-	var res []EvmBlockJson
-	for _, v := range list {
-		res = append(res, EvmBlockJson{
-			BlockNum:       uint(v.BlockNum),
-			Miner:          v.Miner,
-			Transactions:   v.TransactionCount,
-			BlockTimestamp: v.Timestamp,
-		})
+func (a *ApiSrv) Blocks(ctx context.Context, page int, row int) ([]EvmBlockJson, int) { return nil, 0 }
+
+func (a *ApiSrv) BlocksCursor(ctx context.Context, limit int, before, after *uint) ([]EvmBlockJson, map[string]interface{}) {
+	var blocks []EvmBlock
+	fetch := limit + 1
+	q := sg.db.WithContext(ctx).Model(&EvmBlock{})
+	if after != nil && *after > 0 {
+		q = q.Where("block_num < ?", *after).Order("block_num desc")
+	} else if before != nil && *before > 0 {
+		q = q.Where("block_num > ?", *before).Order("block_num asc")
+	} else {
+		q = q.Order("block_num desc")
 	}
-	return res, count
+	q = q.Limit(fetch).Find(&blocks)
+	if q.Error != nil {
+		return nil, nil
+	}
+	var hasPrev, hasNext bool
+	if before != nil && *before > 0 {
+		hasPrev = len(blocks) > limit
+		if hasPrev {
+			blocks = blocks[:limit]
+		}
+		for i, j := 0, len(blocks)-1; i < j; i, j = i+1, j-1 {
+			blocks[i], blocks[j] = blocks[j], blocks[i]
+		}
+		hasNext = true
+	} else {
+		hasNext = len(blocks) > limit
+		if hasNext {
+			blocks = blocks[:limit]
+		}
+		hasPrev = after != nil && *after > 0
+	}
+	var res []EvmBlockJson
+	for _, v := range blocks {
+		res = append(res, EvmBlockJson{BlockNum: uint(v.BlockNum), Miner: v.Miner, Transactions: v.TransactionCount, BlockTimestamp: v.Timestamp})
+	}
+	var start, end *uint
+	if len(blocks) > 0 {
+		s := uint(blocks[0].BlockNum)
+		e := uint(blocks[len(blocks)-1].BlockNum)
+		start = &s
+		end = &e
+	}
+	return res, map[string]interface{}{"start_cursor": start, "end_cursor": end, "has_previous_page": hasPrev, "has_next_page": hasNext}
 }
 
 func (a *ApiSrv) BlockByNum(ctx context.Context, blockNum uint) *EvmBlock {
@@ -378,29 +413,50 @@ type TransactionSampleJson struct {
 	Value          decimal.Decimal `json:"value"`
 }
 
-func (a *ApiSrv) TransactionsJson(ctx context.Context, page model.Option, opts ...model.Option) ([]TransactionSampleJson, int) {
-	var list []Transaction
-	var count int64
-	sg.db.WithContext(ctx).Model(Transaction{}).Scopes(opts...).Count(&count)
-	if count == 0 {
-		return nil, 0
+func (a *ApiSrv) TransactionsCursor(ctx context.Context, limit int, before, after *uint, opts ...model.Option) ([]TransactionSampleJson, map[string]interface{}) {
+	var txs []Transaction
+	fetch := limit + 1
+	q := sg.db.WithContext(ctx).Model(Transaction{}).Scopes(opts...)
+	if after != nil && *after > 0 {
+		q = q.Where("transaction_id < ?", *after).Order("transaction_id desc")
+	} else if before != nil && *before > 0 {
+		q = q.Where("transaction_id > ?", *before).Order("transaction_id asc")
+	} else {
+		q = q.Order("transaction_id desc")
 	}
-	sg.db.WithContext(ctx).Scopes(page).Scopes(opts...).Order("transaction_id desc").Find(&list)
-
+	q = q.Limit(fetch).Find(&txs)
+	if q.Error != nil {
+		return nil, nil
+	}
+	var hasPrev, hasNext bool
+	if before != nil && *before > 0 {
+		hasPrev = len(txs) > limit
+		if hasPrev {
+			txs = txs[:limit]
+		}
+		for i, j := 0, len(txs)-1; i < j; i, j = i+1, j-1 {
+			txs[i], txs[j] = txs[j], txs[i]
+		}
+		hasNext = true
+	} else {
+		hasNext = len(txs) > limit
+		if hasNext {
+			txs = txs[:limit]
+		}
+		hasPrev = after != nil && *after > 0
+	}
 	var res []TransactionSampleJson
-	for _, v := range list {
-		res = append(res, TransactionSampleJson{
-			Hash:           v.Hash,
-			BlockNum:       v.BlockNum,
-			BlockTimestamp: v.BlockTimestamp,
-			FromAddress:    v.FromAddress,
-			ToAddress:      v.ToAddress,
-			Value:          v.Value,
-			Create:         v.Contract,
-			TransactionId:  v.TransactionId,
-		})
+	for _, v := range txs {
+		res = append(res, TransactionSampleJson{Hash: v.Hash, BlockNum: v.BlockNum, BlockTimestamp: v.BlockTimestamp, FromAddress: v.FromAddress, ToAddress: v.ToAddress, Value: v.Value, Create: v.Contract, TransactionId: v.TransactionId})
 	}
-	return res, int(count)
+	var start, end *uint
+	if len(txs) > 0 {
+		s := uint(txs[0].TransactionId)
+		e := uint(txs[len(txs)-1].TransactionId)
+		start = &s
+		end = &e
+	}
+	return res, map[string]interface{}{"start_cursor": start, "end_cursor": end, "has_previous_page": hasPrev, "has_next_page": hasNext}
 }
 
 type AccountsJson struct {
@@ -408,23 +464,50 @@ type AccountsJson struct {
 	Balance    decimal.Decimal `json:"balance"`
 }
 
-func (a *ApiSrv) Accounts(ctx context.Context, address string, page int, row int) ([]AccountsJson, int64) {
-	var count int64
-	q := sg.db.WithContext(ctx).Model(&Account{})
+func (a AccountsJson) Cursor() string {
+	return util.Base64Encode(fmt.Sprintf("%s_%s", a.Balance.String(), a.EvmAccount))
+}
+
+func (a *ApiSrv) AccountsCursor(ctx context.Context, address string, limit int, before, after *string) ([]AccountsJson, map[string]interface{}) {
+	var list []AccountsJson
+	fetch := limit + 1
+	q := sg.db.WithContext(ctx).Select("evm_account,balance").Model(&Account{}).Joins("left join balance_accounts on evm_accounts.address=balance_accounts.address")
 	if address != "" {
 		q.Where("evm_account = ?", address)
 	}
-	q.Count(&count)
-	if count == 0 {
-		return nil, 0
+	if cursor := cursorDecode(after); len(cursor) == 2 {
+		q = q.Where("(balance,evm_account) < (?,?)", cursor[0], cursor[1]).Order("balance desc").Order("evm_account desc")
+	} else if cursor = cursorDecode(after); len(cursor) == 2 {
+		q = q.Where("(balance,evm_account) < (?,?)", cursor[0], cursor[1]).Order("balance asc").Order("evm_account asc")
+	} else {
+		q = q.Order("balance desc").Order("evm_account desc")
 	}
-	var res []AccountsJson
-	query := sg.db.WithContext(ctx).Select("evm_account,balance").Model(&Account{}).Joins("left join balance_accounts on evm_accounts.address=balance_accounts.address")
-	if address != "" {
-		query.Where("evm_account = ?", address)
+	q.Limit(fetch).Scan(&list)
+	var hasPrev, hasNext bool
+	if before != nil && *before != "" {
+		hasPrev = len(list) > limit
+		if hasPrev {
+			list = list[:limit]
+		}
+		for i, j := 0, len(list)-1; i < j; i, j = i+1, j-1 {
+			list[i], list[j] = list[j], list[i]
+		}
+		hasNext = true
+	} else {
+		hasNext = len(list) > limit
+		if hasNext {
+			list = list[:limit]
+		}
+		hasPrev = after != nil && *after != ""
 	}
-	query.Order("balance desc").Order("evm_account desc").Limit(row).Offset((page - 1) * row).Scan(&res)
-	return res, count
+	var start, end *string
+	if len(list) > 0 {
+		s := list[0].Cursor()
+		e := list[len(list)-1].Cursor()
+		start = &s
+		end = &e
+	}
+	return list, map[string]interface{}{"start_cursor": start, "end_cursor": end, "has_previous_page": hasPrev, "has_next_page": hasNext}
 }
 
 type ContractsJson struct {
@@ -434,15 +517,50 @@ type ContractsJson struct {
 	VerifyStatus     string `json:"verify_status"`
 }
 
-func (a *ApiSrv) Contracts(ctx context.Context, page int, row int) ([]ContractsJson, int64) {
-	var count int64
-	sg.db.WithContext(ctx).Model(&Contract{}).Count(&count)
-	if count == 0 {
-		return nil, 0
+func (c ContractsJson) Cursor() string {
+	return util.Base64Encode(fmt.Sprintf("%d_%s", c.TransactionCount, c.Address))
+}
+
+func (a *ApiSrv) ContractsCursor(ctx context.Context, limit int, before, after *string) ([]ContractsJson, map[string]interface{}) {
+	var list []ContractsJson
+	fetch := limit + 1
+	q := sg.db.WithContext(ctx).Model(&Contract{}).Select("contract_name,address,transaction_count,verify_status")
+	if cursor := cursorDecode(after); len(cursor) == 2 {
+		q = q.Where("(transaction_count,address) < (?,?)", cursor[0], cursor[1]).Order("transaction_count desc").Order("address desc")
+	} else if cursor = cursorDecode(before); len(cursor) == 2 {
+		q = q.Where("(transaction_count,address) > (?,?)", cursor[0], cursor[1]).Order("transaction_count asc").Order("address asc")
+	} else {
+		q = q.Order("transaction_count desc").Order("address desc")
 	}
-	var res []ContractsJson
-	sg.db.WithContext(ctx).Model(&Contract{}).Select("contract_name,address,transaction_count,verify_status").Limit(row).Offset((page - 1) * row).Scan(&res)
-	return res, count
+	q = q.Limit(fetch).Scan(&list)
+	if q.Error != nil {
+		return nil, nil
+	}
+	var hasPrev, hasNext bool
+	if before != nil && *before != "" {
+		hasPrev = len(list) > limit
+		if hasPrev {
+			list = list[:limit]
+		}
+		for i, j := 0, len(list)-1; i < j; i, j = i+1, j-1 {
+			list[i], list[j] = list[j], list[i]
+		}
+		hasNext = true
+	} else {
+		hasNext = len(list) > limit
+		if hasNext {
+			list = list[:limit]
+		}
+		hasPrev = after != nil && *after != ""
+	}
+	var start, end *string
+	if len(list) > 0 {
+		s := list[0].Cursor()
+		e := list[len(list)-1].Cursor()
+		start = &s
+		end = &e
+	}
+	return list, map[string]interface{}{"start_cursor": start, "end_cursor": end, "has_previous_page": hasPrev, "has_next_page": hasNext}
 }
 
 type AccountTokenJson struct {
@@ -466,8 +584,25 @@ func (a *ApiSrv) AccountTokens(ctx context.Context, address, category string) []
 	return tokenHolders
 }
 
-func (a *ApiSrv) Collectibles(ctx context.Context, address string, contract string, page, row int) ([]Erc721Holders, int) {
-	var holders []Erc721Holders
+var cursorDecode = func(c *string) []string {
+	// decode base64
+	if c == nil || *c == "" {
+		return nil
+	}
+	decoded := util.Base64Decode(*c)
+	if decoded == "" {
+		return nil
+	}
+	parts := strings.SplitN(decoded, "_", 2)
+	if len(parts) != 2 {
+		return nil
+	}
+	return []string{parts[0], parts[1]}
+}
+
+func (a *ApiSrv) CollectiblesCursor(ctx context.Context, address string, contract string, limit int, before, after *string) ([]Erc721Holders, map[string]interface{}) {
+	var list []Erc721Holders
+	fetch := limit + 1
 	q := sg.db.WithContext(ctx).Model(&Erc721Holders{})
 	if address != "" {
 		q.Where("holder = ?", address)
@@ -475,44 +610,143 @@ func (a *ApiSrv) Collectibles(ctx context.Context, address string, contract stri
 	if contract != "" {
 		q.Where("contract = ?", contract)
 	}
-	var count int64
-	q.Count(&count)
-	q.Offset(page * row).Limit(row).Find(&holders)
-	return holders, int(count)
+	if cursor := cursorDecode(after); len(cursor) == 2 {
+		q = q.Where("(contract,token_id) < (?,?)", cursor[0], cursor[1]).Order("contract desc").Order("token_id desc")
+	} else if cursor = cursorDecode(before); len(cursor) == 2 {
+		q = q.Where("(contract,token_id) > (?,?)", cursor[0], cursor[1]).Order("contract asc").Order("token_id asc")
+	} else {
+		q = q.Order("contract desc").Order("token_id desc")
+	}
+	q = q.Limit(fetch).Find(&list)
+	if q.Error != nil {
+		return nil, nil
+	}
+	var hasPrev, hasNext bool
+	if before != nil && *before != "" {
+		hasPrev = len(list) > limit
+		if hasPrev {
+			list = list[:limit]
+		}
+		for i, j := 0, len(list)-1; i < j; i, j = i+1, j-1 {
+			list[i], list[j] = list[j], list[i]
+		}
+		hasNext = true
+	} else {
+		hasNext = len(list) > limit
+		if hasNext {
+			list = list[:limit]
+		}
+		hasPrev = after != nil && *after != ""
+	}
+	var start, end *string
+	if len(list) > 0 {
+		s := list[0].Cursor()
+		e := list[len(list)-1].Cursor()
+		start = &s
+		end = &e
+	}
+	return list, map[string]interface{}{
+		"start_cursor":      start,
+		"end_cursor":        end,
+		"has_previous_page": hasPrev,
+		"has_next_page":     hasNext,
+	}
 }
 
-func (a *ApiSrv) TokenList(ctx context.Context, contract, category string, page, row int) ([]Token, int) {
-	var tokens []Token
-	var count int64
-	query := sg.db.WithContext(ctx).Model(&Token{})
+func (a *ApiSrv) TokenListCursor(ctx context.Context, contract, category string, limit int, before, after *string) ([]Token, map[string]interface{}) {
+	var list []Token
+	fetch := limit + 1
+	q := sg.db.WithContext(ctx).Model(&Token{})
 	if category != "" {
-		query.Where("category = ?", category)
+		q.Where("category = ?", category)
 	}
 	if contract != "" {
-		query.Where("contract = ?", contract)
+		q.Where("contract = ?", contract)
 	}
-	query.Count(&count)
-	query.Offset(page * row).Limit(row).Find(&tokens)
-	return tokens, int(count)
+	if cursor := cursorDecode(after); len(cursor) == 2 {
+		q = q.Where("(holders,contract) < (?,?)", cursor[0], cursor[1]).Order("holders desc").Order("contract desc")
+	} else if cursor = cursorDecode(before); len(cursor) == 2 {
+		q = q.Where("(holders,contract) > (?,?)", cursor[0], cursor[1]).Order("holders asc").Order("contract asc")
+	} else {
+		q = q.Order("holders desc").Order("contract desc")
+	}
+	q = q.Limit(fetch).Find(&list)
+	if q.Error != nil {
+		return nil, nil
+	}
+	var hasPrev, hasNext bool
+	if before != nil && *before != "" {
+		hasPrev = len(list) > limit
+		if hasPrev {
+			list = list[:limit]
+		}
+		for i, j := 0, len(list)-1; i < j; i, j = i+1, j-1 {
+			list[i], list[j] = list[j], list[i]
+		}
+		hasNext = true
+	} else {
+		hasNext = len(list) > limit
+		if hasNext {
+			list = list[:limit]
+		}
+		hasPrev = after != nil && *after != ""
+	}
+	var start, end *string
+	if len(list) > 0 {
+		s := list[0].Cursor()
+		e := list[len(list)-1].Cursor()
+		start = &s
+		end = &e
+	}
+	return list, map[string]interface{}{
+		"start_cursor":      start,
+		"end_cursor":        end,
+		"has_previous_page": hasPrev,
+		"has_next_page":     hasNext,
+	}
 }
 
-func (a *ApiSrv) TokenTransfers(ctx context.Context, address, tokenAddress, category string, page, row int) ([]TokenTransferJson, int) {
+func (a *ApiSrv) TokenTransfersCursor(ctx context.Context, address, tokenAddress, category string, limit int, before, after *uint) ([]TokenTransferJson, map[string]interface{}) {
 	var transfers []TokensTransfers
-	var count int64
-
-	query := sg.db.WithContext(ctx).Model(&TokensTransfers{})
+	fetch := limit + 1
+	q := sg.db.WithContext(ctx).Model(&TokensTransfers{})
 	if address != "" {
-		query.Where("sender = ? or receiver = ?", address, address)
+		q.Where("sender = ? or receiver = ?", address, address)
 	}
 	if tokenAddress != "" {
-		query.Where("contract = ?", tokenAddress)
+		q.Where("contract = ?", tokenAddress)
 	}
 	if category != "" {
-		query.Where("category = ?", category)
+		q.Where("category = ?", category)
 	}
-	query.Count(&count)
-	query.Offset(page * row).Limit(row).Find(&transfers)
-
+	if after != nil && *after > 0 {
+		q = q.Where("transfer_id < ?", *after).Order("transfer_id desc")
+	} else if before != nil && *before > 0 {
+		q = q.Where("transfer_id > ?", *before).Order("transfer_id asc")
+	} else {
+		q = q.Order("transfer_id desc")
+	}
+	q = q.Limit(fetch).Find(&transfers)
+	if q.Error != nil {
+		return nil, nil
+	}
+	var hasPrev, hasNext bool
+	if before != nil && *before > 0 {
+		hasPrev = len(transfers) > limit
+		if hasPrev {
+			transfers = transfers[:limit]
+		}
+		for i, j := 0, len(transfers)-1; i < j; i, j = i+1, j-1 {
+			transfers[i], transfers[j] = transfers[j], transfers[i]
+		}
+		hasNext = true
+	} else {
+		hasNext = len(transfers) > limit
+		if hasNext {
+			transfers = transfers[:limit]
+		}
+		hasPrev = after != nil && *after > 0
+	}
 	var res []TokenTransferJson
 	var tokensAddress []string
 	for _, v := range transfers {
@@ -521,15 +755,7 @@ func (a *ApiSrv) TokenTransfers(ctx context.Context, address, tokenAddress, cate
 	addr2Token := ContractAddr2Token(ctx, tokensAddress)
 	for index := range transfers {
 		transfer := transfers[index]
-		tj := TokenTransferJson{
-			ID:       transfer.TransferId,
-			Contract: transfer.Contract,
-			Hash:     transfer.Hash,
-			CreateAt: transfer.CreateAt,
-			From:     transfer.Sender,
-			To:       transfer.Receiver,
-			Value:    &transfer.Value,
-		}
+		tj := TokenTransferJson{ID: transfer.TransferId, Contract: transfer.Contract, Hash: transfer.Hash, CreateAt: transfer.CreateAt, From: transfer.Sender, To: transfer.Receiver, Value: &transfer.Value}
 		if token, ok := addr2Token[transfer.Contract]; ok {
 			tj.Decimals = &token.Decimals
 			tj.Symbol = token.Symbol
@@ -538,10 +764,55 @@ func (a *ApiSrv) TokenTransfers(ctx context.Context, address, tokenAddress, cate
 		}
 		res = append(res, tj)
 	}
-	return res, int(count)
+	var start, end *uint64
+	if len(transfers) > 0 {
+		s := transfers[0].TransferId
+		e := transfers[len(transfers)-1].TransferId
+		start = &s
+		end = &e
+	}
+	return res, map[string]interface{}{"start_cursor": start, "end_cursor": end, "has_previous_page": hasPrev, "has_next_page": hasNext}
 }
 
-func (a *ApiSrv) TokenHolders(ctx context.Context, address string, page int, row int) ([]TokenHolder, int) {
-	tokens, count := TokenHolders(ctx, address, page, row)
-	return tokens, int(count)
+func (a *ApiSrv) TokenHoldersCursor(ctx context.Context, address string, limit int, before, after *string) ([]TokenHolder, map[string]interface{}) {
+	var list []TokenHolder
+	fetch := limit + 1
+	q := sg.db.WithContext(ctx).Model(&TokenHolder{}).Where("balance > 0")
+	q.Where("contract = ?", address)
+	if cursor := cursorDecode(after); len(cursor) == 2 {
+		q = q.Where("(balance,id) < (?,?)", cursor[0], cursor[1]).Order("balance desc").Order("id desc")
+	} else if cursor = cursorDecode(before); len(cursor) == 2 {
+		q = q.Where("(balance,id) > (?,?)", cursor[0], cursor[1]).Order("balance asc").Order("id asc")
+	} else {
+		q = q.Order("balance desc").Order("id desc")
+	}
+	q = q.Limit(fetch).Find(&list)
+	if q.Error != nil {
+		return nil, nil
+	}
+	var hasPrev, hasNext bool
+	if before != nil && *before != "" {
+		hasPrev = len(list) > limit
+		if hasPrev {
+			list = list[:limit]
+		}
+		for i, j := 0, len(list)-1; i < j; i, j = i+1, j-1 {
+			list[i], list[j] = list[j], list[i]
+		}
+		hasNext = true
+	} else {
+		hasNext = len(list) > limit
+		if hasNext {
+			list = list[:limit]
+		}
+		hasPrev = after != nil && *after != ""
+	}
+	var start, end *string
+	if len(list) > 0 {
+		s := list[0].Cursor()
+		e := list[len(list)-1].Cursor()
+		start = &s
+		end = &e
+	}
+	return list, map[string]interface{}{"start_cursor": start, "end_cursor": end, "has_previous_page": hasPrev, "has_next_page": hasNext}
 }

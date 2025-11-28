@@ -12,11 +12,40 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func GetAccountList(db storage.DB, page, row int) ([]bModel.Account, int) {
+func GetAccountListCursor(db storage.DB, limit int, before, after *uint) ([]bModel.Account, bool, bool) {
 	var accounts []bModel.Account
-	opt := storage.Option{Page: page, PageSize: row}
-	db.FindBy(&accounts, nil, &opt)
-	return accounts, len(accounts)
+	d := db.GetDbInstance().(*gorm.DB)
+	fetch := limit + 1
+	var hasPrev, hasNext bool
+	q := d.Model(bModel.Account{})
+	if after != nil && *after > 0 {
+		q = q.Where("id < ?", *after).Order("id desc")
+	} else if before != nil && *before > 0 {
+		q = q.Where("id > ?", *before).Order("id asc")
+	} else {
+		q = q.Order("id desc")
+	}
+	q = q.Limit(fetch).Find(&accounts)
+	if q.Error != nil {
+		return nil, false, false
+	}
+	if before != nil && *before > 0 {
+		hasPrev = len(accounts) > limit
+		if hasPrev {
+			accounts = accounts[:limit]
+		}
+		for i, j := 0, len(accounts)-1; i < j; i, j = i+1, j-1 {
+			accounts[i], accounts[j] = accounts[j], accounts[i]
+		}
+		hasNext = true
+	} else {
+		hasNext = len(accounts) > limit
+		if hasNext {
+			accounts = accounts[:limit]
+		}
+		hasPrev = after != nil && *after > 0
+	}
+	return accounts, hasPrev, hasNext
 }
 
 func GetAccountByAddress(ctx context.Context, db storage.DB, address string) *bModel.Account {
