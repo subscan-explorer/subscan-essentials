@@ -208,7 +208,7 @@ type ChainExtrinsic struct {
 	CallModule         string `json:"call_module"  gorm:"size:255;index:query_function"`
 
 	Params        ExtrinsicParams `json:"params" gorm:"type:json;"`
-	AccountId     string          `json:"account_id"`
+	AccountId     string          `json:"account_id" gorm:"size:255;index:account_id"`
 	Signature     string          `json:"signature"`
 	Nonce         int             `json:"nonce"`
 	Era           string          `json:"era"`
