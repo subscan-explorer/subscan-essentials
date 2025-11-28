@@ -73,8 +73,7 @@ POST http://127.0.0.1:4399/api/plugin/evm/accounts
 Content-Type: application/json
 
 {
-  "row": 5,
-  "after": "MTMwNDQzODQ3NzE3NjEzMjE1MjA5MF8weGMzMDU3ZDUyMWY2OWFhNjEyYmZmNGM0MGY3MTdmZTA5M2ZhYTdhOWU"
+  "row": 5
 }
 
 ### Evm Contracts

@@ -23,7 +23,7 @@ import (
 )
 
 type Contract struct {
-	Address string `json:"address" gorm:"primaryKey;autoIncrement:false;size:255"`
+	Address string `json:"address" gorm:"primaryKey;autoIncrement:false;size:255;index:txn_count_address,priority:2"`
 
 	Abi          datatypes.JSON `json:"abi" `
 	SourceCode   string         `json:"source_code" gorm:"type:string"`
@@ -47,7 +47,7 @@ type Contract struct {
 	OptimizationRuns  uint           `json:"optimization_runs"  gorm:"size:32"`
 	ExtrinsicIndex    string         `json:"extrinsic_index" gorm:"size:255"`
 	VerifyTime        uint           `json:"verify_time" gorm:"size:32"`
-	TransactionCount  uint           `json:"transaction_count" gorm:"size:32;index:transaction_count"`
+	TransactionCount  uint           `json:"transaction_count" gorm:"size:32;index:transaction_count;index:txn_count_address,priority:1"`
 	Precompile        uint           `json:"precompile"`
 	CompileSettings   datatypes.JSON `json:"CompileSettings"`
 

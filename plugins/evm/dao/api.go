@@ -35,6 +35,10 @@ type ISrv interface {
 	TokenHoldersCursor(ctx context.Context, address string, limit int, before, after *string) ([]TokenHolder, map[string]interface{})
 }
 
+type IPagination interface {
+	Cursor() string
+}
+
 type ApiSrv struct{}
 
 type EtherscanLogsRes struct {
@@ -471,16 +475,16 @@ func (a AccountsJson) Cursor() string {
 func (a *ApiSrv) AccountsCursor(ctx context.Context, address string, limit int, before, after *string) ([]AccountsJson, map[string]interface{}) {
 	var list []AccountsJson
 	fetch := limit + 1
-	q := sg.db.WithContext(ctx).Select("evm_account,balance").Model(&Account{}).Joins("left join balance_accounts on evm_accounts.address=balance_accounts.address")
+	q := sg.db.WithContext(ctx).Select("evm_account,balance").Model(&Account{}).Joins("join balance_accounts on evm_accounts.address=balance_accounts.address")
 	if address != "" {
 		q.Where("evm_account = ?", address)
 	}
 	if cursor := cursorDecode(after); len(cursor) == 2 {
-		q = q.Where("(balance,evm_account) < (?,?)", cursor[0], cursor[1]).Order("balance desc").Order("evm_account desc")
+		q = q.Where("(balance,evm_account) < (?,?)", cursor[0], cursor[1]).Order("balance desc").Order("balance_accounts.address desc")
 	} else if cursor = cursorDecode(after); len(cursor) == 2 {
-		q = q.Where("(balance,evm_account) < (?,?)", cursor[0], cursor[1]).Order("balance asc").Order("evm_account asc")
+		q = q.Where("(balance,evm_account) < (?,?)", cursor[0], cursor[1]).Order("balance asc").Order("balance_accounts.address asc")
 	} else {
-		q = q.Order("balance desc").Order("evm_account desc")
+		q = q.Order("balance desc").Order("balance_accounts.address desc")
 	}
 	q.Limit(fetch).Scan(&list)
 	var hasPrev, hasNext bool
