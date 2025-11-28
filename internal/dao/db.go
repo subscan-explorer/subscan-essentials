@@ -231,7 +231,7 @@ func newDb() (db *gorm.DB) {
 	dbDriver := util.GetEnv("DB_DRIVER", "mysql")
 	util.Logger().Debug(fmt.Sprintf("Set DB_DRIVER %s", dbDriver))
 	conf := &gorm.Config{
-		Logger: logger.Default,
+		Logger: logger.Default, SafetyAutoMigration: true,
 	}
 	if dbDriver == "mysql" {
 		conf.NamingStrategy = NamingStrategy{}

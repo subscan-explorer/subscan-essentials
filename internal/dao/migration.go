@@ -16,7 +16,8 @@ func (d *Dao) Migration() {
 	if d.DbDriver == "mysql" {
 		db = db.Set("gorm:table_options", "ENGINE=InnoDB")
 	}
-	_ = db.AutoMigrate(d.internalTables(blockNum)...)
+	internalTables := d.internalTables(blockNum)
+	_ = db.AutoMigrate(internalTables...)
 	for i := 0; uint(i) <= blockNum/model.SplitTableBlockNum; i++ {
 		d.AddIndex(uint(i) * model.SplitTableBlockNum)
 	}
