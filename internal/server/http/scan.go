@@ -124,7 +124,7 @@ func extrinsicsHandle(c *gin.Context) {
 	}
 
 	if p.Signed == "signed" {
-		query = append(query, model.Where("is_signed = 1"))
+		query = append(query, model.Where("is_signed = ?", true))
 	}
 	if p.BlockNum > 0 {
 		query = append(query, model.Where("block_num = ?", p.BlockNum))
@@ -137,13 +137,13 @@ func extrinsicsHandle(c *gin.Context) {
 			toJson(c, nil, util.InvalidAccountAddress)
 			return
 		}
-		query = append(query, model.Where("account_id = ?", account))
+		query = append(query, model.Where("account_id = ? and is_signed = ?", account, true))
 	}
 	if p.HiddenParams {
 		query = append(query, model.Omit("params", "params_raw_bytes"))
 	}
 
-	list, pageInfo := svc.GetExtrinsicList(ctx, p.Limit, fixedTableIndex, p.Before, p.After, query...)
+	list, pageInfo := svc.GetExtrinsicList(ctx, p.Limit, fixedTableIndex, p.Before, p.After, address.Decode(p.Address), query...)
 	toJson(c, map[string]interface{}{
 		"extrinsics": list,
 		"pagination": pageInfo,

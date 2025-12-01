@@ -45,7 +45,7 @@ func TestService_GetCurrentRuntimeSpecVersion(t *testing.T) {
 }
 
 func TestService_GetExtrinsicList(t *testing.T) {
-	_, page := testSrv.GetExtrinsicList(context.Background(), 10, -1, 0, 0)
+	_, page := testSrv.GetExtrinsicList(context.Background(), 10, -1, 0, 0, "")
 	assert.Equal(t, false, page.HasPreviousPage)
 }
 

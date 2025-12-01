@@ -35,6 +35,10 @@ func (s *Service) GetDao() dao.IDao {
 	return s.dao
 }
 
+func (s *Service) GetDbStorage() *dao.DbStorage {
+	return s.dbStorage
+}
+
 // Close close the resource.
 func (s *Service) Close() {
 	s.dao.Close()

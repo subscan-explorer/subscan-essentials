@@ -4,16 +4,17 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/itering/subscan/internal/service"
+	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/plugins"
 	"github.com/itering/subscan/plugins/balance"
 	"github.com/itering/subscan/plugins/evm"
+	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/mq"
+	"gorm.io/gorm"
 	"io"
 	"os"
-
-	"github.com/itering/subscan/internal/service"
-	"github.com/itering/subscan/model"
-	"github.com/itering/subscan/util"
+	"sort"
 )
 
 func Install(conf string) {
@@ -143,4 +144,75 @@ func RefreshMetadata() {
 	// evm plugin
 	e := plugins.RegisteredPlugins["evm"].(*evm.EVM)
 	e.RefreshMetadata()
+}
+
+func MigrateAccountExtrinsicMapping() error {
+	srv := service.New()
+	defer srv.Close()
+	db := srv.GetDbStorage().GetDbInstance().(*gorm.DB)
+	// collect existing chain_extrinsics* tables
+
+	mapping := map[string]map[int]struct{}{}
+
+	tableName := fmt.Sprintf("chain_extrinsics")
+	idx := 0
+	for {
+		if idx > 0 {
+			tableName = fmt.Sprintf("chain_extrinsics_%d", idx)
+		}
+		if !db.Migrator().HasTable(tableName) {
+			break
+		}
+		var accounts []string
+		if err := db.Table(tableName).Distinct("account_id").Where("account_id <> ''").Pluck("account_id", &accounts).Error; err != nil {
+			return err
+		}
+		for _, a := range accounts {
+			if a == "" {
+				continue
+			}
+			if _, ok := mapping[a]; !ok {
+				mapping[a] = map[int]struct{}{}
+			}
+			mapping[a][idx] = struct{}{}
+		}
+		idx++
+	}
+	// upsert into account_extrinsic_mapping
+	for acc, idxMap := range mapping {
+		var m model.AccountExtrinsicMapping
+		if err := db.Where("account_id = ?", acc).First(&m).Error; err != nil {
+			idxs := model.IntSlice{}
+			for k := range idxMap {
+				idxs = append(idxs, k)
+			}
+			sort.Ints(idxs)
+			m = model.AccountExtrinsicMapping{AccountId: acc, ExtrinsicTable: idxs}
+			if err = db.Scopes(model.IgnoreDuplicate).Create(&m).Error; err != nil {
+				return err
+			}
+			continue
+		}
+
+		exist := map[int]struct{}{}
+		for _, v := range m.ExtrinsicTable {
+			exist[v] = struct{}{}
+		}
+
+		changed := false
+		for k := range idxMap {
+			if _, ok := exist[k]; !ok {
+				m.ExtrinsicTable = append(m.ExtrinsicTable, k)
+				changed = true
+			}
+		}
+		if changed {
+			sort.Ints(m.ExtrinsicTable)
+			if err := db.Model(&model.AccountExtrinsicMapping{}).Where("id = ?", m.Id).Update("extrinsic_table", m.ExtrinsicTable).Error; err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

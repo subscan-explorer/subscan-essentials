@@ -35,10 +35,19 @@ func (d *Dao) GetExtrinsicCount(ctx context.Context, queryWhere ...model.Option)
 
 }
 
+func (d *Dao) GetAccountExtrinsicMapping(ctx context.Context, accountId string) []int {
+	var mapping model.AccountExtrinsicMapping
+	query := d.db.WithContext(ctx).Where("account_id = ?", accountId).First(&mapping)
+	if query != nil && query.Error == nil {
+		return mapping.ExtrinsicTable
+	}
+	return nil
+}
+
 // GetExtrinsicListCursor implements bidirectional cursor pagination using id as cursor.
 // When afterId > 0, fetch records with id < afterId in DESC order.
 // When beforeId > 0, fetch records with id > beforeId in ASC order then reverse.
-func (d *Dao) GetExtrinsicListCursor(c context.Context, limit int, fixedTableIndex int, beforeId, afterId uint, queryWhere ...model.Option) (list []model.ChainExtrinsic, hasPrev, hasNext bool) {
+func (d *Dao) GetExtrinsicListCursor(c context.Context, limit int, fixedTableIndex int, beforeId, afterId uint, accountId string, queryWhere ...model.Option) (list []model.ChainExtrinsic, hasPrev, hasNext bool) {
 	fetchLimit := limit + 1
 	blockNum, _ := d.GetFillBestBlockNum(context.TODO())
 	maxTableIndex := blockNum / int(model.SplitTableBlockNum)
@@ -49,9 +58,22 @@ func (d *Dao) GetExtrinsicListCursor(c context.Context, limit int, fixedTableInd
 		maxTableIndex = fixedTableIndex
 	}
 
+	var accountExtrinsics []int
+	if accountId != "" {
+		// find extrinsic table by AccountExtrinsicMapping
+		accountExtrinsics = d.GetAccountExtrinsicMapping(c, accountId)
+	}
+
+	var checkTableIndex = func(index int) bool {
+		if len(accountId) == 0 || (len(accountId) > 0 && util.IntInSlice(index, accountExtrinsics)) {
+			return true
+		}
+		return false
+	}
+
 	if afterId > 0 { // next page
 		for index := maxTableIndex; index >= 0 && len(list) < fetchLimit; index-- {
-			if fixedTableIndex >= 0 && index != fixedTableIndex {
+			if (fixedTableIndex >= 0 && index != fixedTableIndex) || !checkTableIndex(index) {
 				continue
 			}
 			var tableData []model.ChainExtrinsic
@@ -77,7 +99,7 @@ func (d *Dao) GetExtrinsicListCursor(c context.Context, limit int, fixedTableInd
 			startIdx = fixedTableIndex
 		}
 		for index := startIdx; index <= maxTableIndex && len(list) < fetchLimit; index++ {
-			if fixedTableIndex >= 0 && index != fixedTableIndex {
+			if (fixedTableIndex >= 0 && index != fixedTableIndex) || !checkTableIndex(index) {
 				continue
 			}
 			var tableData []model.ChainExtrinsic
@@ -106,7 +128,7 @@ func (d *Dao) GetExtrinsicListCursor(c context.Context, limit int, fixedTableInd
 
 	// first page
 	for index := maxTableIndex; index >= 0 && len(list) < fetchLimit; index-- {
-		if fixedTableIndex >= 0 && index != fixedTableIndex {
+		if (fixedTableIndex >= 0 && index != fixedTableIndex) || !checkTableIndex(index) {
 			continue
 		}
 		var tableData []model.ChainExtrinsic

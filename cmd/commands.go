@@ -53,6 +53,13 @@ var commands = []cli.Command{
 		},
 	},
 	{
+		Name:  "MigrateAccountExtrinsicMapping",
+		Usage: "refresh metadata",
+		Action: func(c *cli.Context) error {
+			return script.MigrateAccountExtrinsicMapping()
+		},
+	},
+	{
 		Name:  "plugin",
 		Usage: "plugin sub commands",
 		Before: func(c *cli.Context) error {

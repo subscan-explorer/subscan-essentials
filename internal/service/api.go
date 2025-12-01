@@ -95,8 +95,8 @@ type CursorPage struct {
 	HasPreviousPage bool  `json:"has_previous_page"`
 }
 
-func (s *Service) GetExtrinsicList(ctx context.Context, limit int, fixedTableIndex int, beforeId, afterId uint, query ...model.Option) ([]*model.ChainExtrinsicJson, CursorPage) {
-	list, hasPrev, hasNext := s.dao.GetExtrinsicListCursor(ctx, limit, fixedTableIndex, beforeId, afterId, query...)
+func (s *Service) GetExtrinsicList(ctx context.Context, limit int, fixedTableIndex int, beforeId, afterId uint, accountId string, query ...model.Option) ([]*model.ChainExtrinsicJson, CursorPage) {
+	list, hasPrev, hasNext := s.dao.GetExtrinsicListCursor(ctx, limit, fixedTableIndex, beforeId, afterId, accountId, query...)
 	var ejs []*model.ChainExtrinsicJson
 	for _, extrinsic := range list {
 		ejs = append(ejs, s.dao.ExtrinsicsAsJson(&extrinsic))

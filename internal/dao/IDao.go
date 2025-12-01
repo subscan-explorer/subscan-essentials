@@ -36,7 +36,7 @@ type IDao interface {
 	GetEventByIdx(ctx context.Context, index string) *model.ChainEvent
 
 	CreateExtrinsic(c context.Context, txn *GormDB, extrinsic []model.ChainExtrinsic, u int) error
-	GetExtrinsicListCursor(c context.Context, limit int, fixedTableIndex int, beforeId, afterId uint, queryWhere ...model.Option) (list []model.ChainExtrinsic, hasPrev, hasNext bool)
+	GetExtrinsicListCursor(c context.Context, limit int, fixedTableIndex int, beforeId, afterId uint, accountId string, queryWhere ...model.Option) (list []model.ChainExtrinsic, hasPrev, hasNext bool)
 	GetExtrinsicsByHash(c context.Context, hash string) *model.ChainExtrinsic
 	GetExtrinsicsByIndex(c context.Context, index string) *model.ChainExtrinsic
 	GetExtrinsicsDetailByHash(c context.Context, hash string) *model.ExtrinsicDetail

@@ -269,6 +269,13 @@ func (c *ChainExtrinsic) BeforeCreate(_ *gorm.DB) error {
 	return nil
 }
 
+func (c *ChainExtrinsic) AfterCreate(tx *gorm.DB) error {
+	if c.AccountId == "" {
+		return nil
+	}
+	return UpdateAccountExtrinsicMapping(tx, c.AccountId, c.BlockNum)
+}
+
 func (j *ExtrinsicParams) Scan(src interface{}) error { return json.Unmarshal(src.([]byte), j) }
 
 func (j *ExtrinsicParams) Marshal() []byte {
@@ -297,6 +304,10 @@ func (c ChainExtrinsic) TableName() string {
 		return "chain_extrinsics"
 	}
 	return fmt.Sprintf("chain_extrinsics_%d", c.BlockNum/SplitTableBlockNum)
+}
+
+func ExtrinsicTableIndexByBlock(blockNum uint) int {
+	return int(blockNum / SplitTableBlockNum)
 }
 
 func (c *ChainExtrinsic) AsPlugin() *storage.Extrinsic {
@@ -506,4 +517,42 @@ func CheckoutWeight(events []ChainEvent) (decimal.Decimal, decimal.Decimal, bool
 		}
 	}
 	return weight, actualFee, isV2Weight
+}
+
+type IntSlice []int
+
+func (s IntSlice) Value() (driver.Value, error) {
+	return json.Marshal(s)
+}
+
+func (s *IntSlice) Scan(src interface{}) error { return json.Unmarshal(src.([]byte), s) }
+
+type AccountExtrinsicMapping struct {
+	Id             uint     `gorm:"primary_key;autoIncrement:true"`
+	AccountId      string   `json:"account_id" gorm:"size:255;index:account_id_extrinsic,unique"`
+	ExtrinsicTable IntSlice `json:"extrinsic_table" gorm:"type:json;"`
+}
+
+func (a AccountExtrinsicMapping) TableName() string { return "account_extrinsic_mapping" }
+
+func UpdateAccountExtrinsicMapping(tx *gorm.DB, accountId string, blockNum uint) error {
+	if accountId == "" {
+		return nil
+	}
+	var m AccountExtrinsicMapping
+	if err := tx.Where("account_id = ?", accountId).First(&m).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			m = AccountExtrinsicMapping{AccountId: accountId, ExtrinsicTable: IntSlice{ExtrinsicTableIndexByBlock(blockNum)}}
+			return tx.Scopes(IgnoreDuplicate).Create(&m).Error
+		}
+		return err
+	}
+	idx := ExtrinsicTableIndexByBlock(blockNum)
+	for _, v := range m.ExtrinsicTable {
+		if v == idx {
+			return nil
+		}
+	}
+	m.ExtrinsicTable = append(m.ExtrinsicTable, idx)
+	return tx.Model(&AccountExtrinsicMapping{}).Where("id = ?", m.Id).Update("extrinsic_table", m.ExtrinsicTable).Error
 }
