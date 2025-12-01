@@ -4,7 +4,7 @@
 server:
   http:
     addr: 0.0.0.0:4399
-    timeout: 30s
+    timeout: 10s
   grpc:
     addr: 0.0.0.0:9000
 database:
