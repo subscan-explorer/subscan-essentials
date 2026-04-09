@@ -1,4 +1,4 @@
-FROM golang:1.23.9 as builder
+FROM golang:1.24.0 AS builder
 
 WORKDIR /subscan
 
@@ -10,12 +10,12 @@ RUN go build -o subscan
 
 FROM alpine:3
 
-WORKDIR subscan
+WORKDIR /subscan
 COPY configs configs
 COPY configs/config.yaml.example configs/config.yaml
 
 COPY --from=builder /subscan/cmd/subscan cmd/subscan
-WORKDIR cmd
+WORKDIR /subscan/cmd
 RUN apk update && apk add gcompat
 ENTRYPOINT ["/subscan/cmd/subscan"]
 EXPOSE 4399
