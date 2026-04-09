@@ -6,6 +6,7 @@ var (
 	RedisMetadataKey           = model.RedisKeyPrefix() + "metadata"
 	RedisFillAlreadyBlockNum   = model.RedisKeyPrefix() + "FillAlreadyBlockNum"
 	RedisFillFinalizedBlockNum = model.RedisKeyPrefix() + "FillFinalizedBlockNum"
+	RedisExtrinsicCountKey     = model.RedisKeyPrefix() + "extrinsic_count"
 )
 
 // local cache value

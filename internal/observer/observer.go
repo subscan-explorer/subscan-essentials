@@ -3,12 +3,13 @@ package observer
 import (
 	"context"
 	"fmt"
-	"github.com/itering/subscan/internal/script"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/itering/subscan/internal/script"
 
 	"github.com/itering/subscan/internal/service"
 	"github.com/itering/subscan/util"
@@ -63,7 +64,7 @@ func enableTermSignalHandler(cancel func()) {
 func RunCron() {
 	// or use cron.DefaultLogger
 	c := cron.New(cron.WithChain(cron.Recover(cron.DefaultLogger)))
-	if _, err := c.AddFunc("@every 3m", func() {
+	if _, err := c.AddFunc("@every 20m", func() {
 		script.RefreshMetadata()
 	}); err != nil {
 		util.Logger().Error(fmt.Errorf("failed to register cron job: %v", err))

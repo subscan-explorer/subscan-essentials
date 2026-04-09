@@ -2,11 +2,21 @@ package dao
 
 import (
 	"context"
+	"crypto/sha1"
+	"encoding/hex"
+	"fmt"
 	"github.com/itering/subscan/model"
 	"github.com/itering/subscan/util"
 	"github.com/itering/subscan/util/address"
 	"github.com/itering/substrate-api-rpc"
+	"gorm.io/gorm"
+	"math/rand"
 	"strings"
+)
+
+const (
+	extrinsicCountCacheTTL       = 24 * 3600
+	extrinsicCountCacheTTLJitter = 3600
 )
 
 func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic []model.ChainExtrinsic, signedExtrinsicCount int) error {
@@ -24,15 +34,49 @@ func (d *Dao) CreateExtrinsic(c context.Context, txn *GormDB, extrinsic []model.
 func (d *Dao) GetExtrinsicCount(ctx context.Context, queryWhere ...model.Option) int64 {
 	var count int64
 	blockNum, _ := d.GetFillBestBlockNum(context.TODO())
-	for index := blockNum / int(model.SplitTableBlockNum); index >= 0; index-- {
-		var tableDataCount int64
-		q := d.db.WithContext(ctx).Scopes(d.TableNameFunc(&model.ChainExtrinsic{BlockNum: uint(index) * model.SplitTableBlockNum}))
-		q = q.Scopes(queryWhere...)
-		q.Model(&model.ChainExtrinsic{}).Count(&tableDataCount)
+	latestTableIndex := blockNum / int(model.SplitTableBlockNum)
+	for index := latestTableIndex; index >= 0; index-- {
+		if index == latestTableIndex || d.redis == nil {
+			count += d.getExtrinsicTableCount(ctx, index, queryWhere...)
+			continue
+		}
+		key := d.extrinsicCountCacheKey(index, queryWhere...)
+		if cache := d.redis.GetCacheString(ctx, key); cache != "" {
+			count += util.Int64FromInterface(cache)
+			continue
+		}
+		tableDataCount := d.getExtrinsicTableCount(ctx, index, queryWhere...)
+		_ = d.redis.SetCache(ctx, key, tableDataCount, extrinsicCountCacheTTL+rand.Intn(extrinsicCountCacheTTLJitter+1))
 		count += tableDataCount
 	}
 	return count
 
+}
+
+func (d *Dao) getExtrinsicTableCount(ctx context.Context, tableIndex int, queryWhere ...model.Option) int64 {
+	var tableDataCount int64
+	q := d.db.WithContext(ctx).Scopes(d.TableNameFunc(&model.ChainExtrinsic{BlockNum: uint(tableIndex) * model.SplitTableBlockNum}))
+	q = q.Scopes(queryWhere...)
+	q.Model(&model.ChainExtrinsic{}).Count(&tableDataCount)
+	return tableDataCount
+}
+
+func (d *Dao) extrinsicCountCacheKey(tableIndex int, queryWhere ...model.Option) string {
+	return fmt.Sprintf("%s:table:%d:%s", RedisExtrinsicCountKey, tableIndex, d.extrinsicCountQuerySignature(queryWhere...))
+}
+
+func (d *Dao) extrinsicCountQuerySignature(queryWhere ...model.Option) string {
+	if len(queryWhere) == 0 {
+		return "all"
+	}
+	tx := d.db.Session(&gorm.Session{DryRun: true}).Model(&model.ChainExtrinsic{})
+	tx = tx.Scopes(queryWhere...).Count(new(int64))
+	signature := tx.Statement.SQL.String() + "|" + util.ToString(tx.Statement.Vars)
+	if signature == "|" {
+		return "all"
+	}
+	sum := sha1.Sum([]byte(signature))
+	return hex.EncodeToString(sum[:])
 }
 
 func (d *Dao) GetAccountExtrinsicMapping(ctx context.Context, accountId string) []int {

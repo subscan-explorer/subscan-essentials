@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 
@@ -235,6 +236,7 @@ func newDb() (db *gorm.DB) {
 	}
 	if dbDriver == "mysql" {
 		conf.NamingStrategy = NamingStrategy{}
+		util.Logger().Debug(fmt.Sprintf("mysql dsn %s", configs.Boot.Database.Mysql.DSN))
 		db, err = gorm.Open(mysql.Open(configs.Boot.Database.Mysql.DSN), conf)
 	} else {
 		db, err = gorm.Open(postgres.Open(configs.Boot.Database.Postgres.DSN), conf)
