@@ -49,7 +49,7 @@ the Subscan team and powering [subscan.io](https://www.subscan.io/), it provides
 
 - Linux/macOS
 - Git
-- **Go 1.23+**
+- **Go 1.26.10** (matching `go.mod` and Docker)
 - **Redis 3.0.4+**
 - **MySQL 8.0+** or **PostgreSQL 16+**
 
@@ -60,13 +60,31 @@ the Subscan team and powering [subscan.io](https://www.subscan.io/), it provides
 
 ```
 
+### Validation
+
+CI uses Go 1.26.10 and fresh MySQL/Redis services in
+`.github/workflows/docker.yaml`. Tests reset database tables and Redis keys;
+use a disposable `subscan_test` database and Redis instance when running them locally.
+After copying `configs/config.yaml.example` to `configs/config.yaml` and setting
+the `MYSQL_*` and `REDIS_*` environment variables for those services, run:
+
+```bash
+go build ./...
+go test -mod=mod -p 1 -timeout 90s -v ./...
+make lint
+```
+
+The serial package setting prevents the existing integration suites from resetting
+shared test data concurrently. `make lint` pins golangci-lint 2.12.2; an existing
+binary can be selected with `GOLANGCI_LINT=/absolute/path/to/golangci-lint`.
+
 ### React UI Configuration
 
 Subscan Essentials supports a React-based UI for a modern frontend experience. The React UI repository is available at [subscan-essentials-ui-react](https://github.com/subscan-explorer/subscan-essentials-ui-react).
 
 #### Prerequisites
 
-- Node.js 18+
+- Node.js 24.22.1 (matching the UI repository runtime)
 - npm or yarn
 
 #### Installation
@@ -81,9 +99,9 @@ cd subscan-essentials-ui-react
 2. Install dependencies:
 
 ```bash
-npm install
-# or
-yarn
+nvm install
+nvm use
+npm ci --no-audit --no-fund
 ```
 
 #### Configuration

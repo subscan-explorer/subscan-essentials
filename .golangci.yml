@@ -1,10 +1,35 @@
-issues:
-  exclude-dirs:
-    - typecheck
-    - govet
-    - pkg/go-solidity-sha3
-    - pkg/recws
-    - pkg/go-web3
-    - pkg/time
-    - pkg/ecode
-    - plugins/balance
+version: "2"
+linters:
+  settings:
+    staticcheck:
+      # v1 enabled staticcheck (SA) and gosimple (S1), but not stylecheck or quickfix.
+      # Keep those checks while moving to the merged v2 staticcheck linter.
+      checks:
+        - SA*
+        - S1*
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - typecheck
+      - govet
+      - pkg/go-solidity-sha3
+      - pkg/recws
+      - pkg/go-web3
+      - pkg/time
+      - pkg/ecode
+      - plugins/balance
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

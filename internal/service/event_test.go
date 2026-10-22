@@ -15,8 +15,8 @@ func TestService_AddEvent(t *testing.T) {
 }
 
 func TestService_GetEventList(t *testing.T) {
-	list, count := testSrv.EventsList(context.TODO(), 0, 1000, 0, 0)
-	assert.Equal(t, 1, count)
+	list, page := testSrv.EventsList(context.TODO(), 0, 1000, 0, 0)
+	assert.Equal(t, CursorPage{StartCursor: &testEvent.ID, EndCursor: &testEvent.ID}, page)
 	assert.Equal(t, []model.ChainEventJson{
 		{EventIndex: "947687-0",
 			BlockNum:       947687,

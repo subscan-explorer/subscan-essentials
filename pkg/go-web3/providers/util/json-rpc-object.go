@@ -37,7 +37,7 @@ func (jrpc *JSONRPCObject) AsJsonString() string {
 	resultBytes, err := json.Marshal(jrpc)
 
 	if err != nil {
-		log.Printf(err.Error())
+		log.Print(err)
 		return ""
 	}
 	return string(resultBytes)
