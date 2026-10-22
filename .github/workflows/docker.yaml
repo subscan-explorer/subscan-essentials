@@ -1,22 +1,77 @@
 name: Build Dev Docker Image
 on:
+  pull_request:
   push:
     tags:
-      - 'v*'
+      - "v*"
     branches:
       - master
 
 jobs:
+  validate:
+    name: Go validation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+          MYSQL_ROOT_HOST: "%"
+          MYSQL_DATABASE: subscan_test
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=12
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=12
+    env:
+      DB_DRIVER: mysql
+      MYSQL_HOST: 127.0.0.1
+      MYSQL_PORT: "3306"
+      MYSQL_USER: root
+      MYSQL_DB: subscan_test
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: "6379"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+      - name: Configure disposable test services
+        run: cp configs/config.yaml.example configs/config.yaml
+      - name: Build
+        run: go build ./...
+      # Existing integration packages reset their tables and Redis keys.
+      - name: Unit and integration tests
+        run: go test -mod=mod -p 1 -timeout 90s -v ./...
+      - uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.12.2
   build:
+    needs: validate
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Docker login
-        uses: docker/login-action@v1
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.QUAY_IO_BOT_USERNAME }}
           password: ${{ secrets.QUAY_IO_BOT_PASSWORD }}
@@ -28,14 +83,14 @@ jobs:
         with:
           length: 7
       - name: Build and publish tag docker image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         if: startsWith(github.ref, 'refs/tags/')
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           tags: quay.io/subscan-explorer/subscan-essentials:${{ steps.tag-name.outputs.tag }}
       - name: Build and publish SHA docker image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         if: startsWith(github.ref, 'refs/tags/') == false
         with:
           context: .

@@ -13,27 +13,27 @@ import (
 func Router() []router.Http {
 	srv = &dao.ApiSrv{}
 	return []router.Http{
-		{"etherscan", etherscanHandle, http.MethodGet},
+		{Router: "etherscan", Handle: etherscanHandle, Method: http.MethodGet},
 
-		{"blocks", blocksHandle, http.MethodPost},
-		{"block", blockHandle, http.MethodPost},
+		{Router: "blocks", Handle: blocksHandle, Method: http.MethodPost},
+		{Router: "block", Handle: blockHandle, Method: http.MethodPost},
 
-		{"transactions", transactionsHandle, http.MethodPost},
-		{"transaction", transactionHandle, http.MethodPost},
+		{Router: "transactions", Handle: transactionsHandle, Method: http.MethodPost},
+		{Router: "transaction", Handle: transactionHandle, Method: http.MethodPost},
 
-		{"accounts", accountsHandle, http.MethodPost},
+		{Router: "accounts", Handle: accountsHandle, Method: http.MethodPost},
 
-		{"contract", contractHandle, http.MethodPost},
-		{"contracts", contractsHandle, http.MethodPost},
-		{"contract/solcs", solcVersions, http.MethodPost},
-		{"contract/resolcs", resolcVersions, http.MethodPost},
+		{Router: "contract", Handle: contractHandle, Method: http.MethodPost},
+		{Router: "contracts", Handle: contractsHandle, Method: http.MethodPost},
+		{Router: "contract/solcs", Handle: solcVersions, Method: http.MethodPost},
+		{Router: "contract/resolcs", Handle: resolcVersions, Method: http.MethodPost},
 
 		// token holder
-		{"token/holder", tokenHolderHandle, http.MethodPost},
-		{"tokens", tokenListHandle, http.MethodPost},
-		{"token/transfer", tokenTransferHandle, http.MethodPost},
-		{"token/erc721/collectibles", collectiblesHandle, http.MethodPost},
-		{"account/tokens", accountTokensHandle, http.MethodPost},
+		{Router: "token/holder", Handle: tokenHolderHandle, Method: http.MethodPost},
+		{Router: "tokens", Handle: tokenListHandle, Method: http.MethodPost},
+		{Router: "token/transfer", Handle: tokenTransferHandle, Method: http.MethodPost},
+		{Router: "token/erc721/collectibles", Handle: collectiblesHandle, Method: http.MethodPost},
+		{Router: "account/tokens", Handle: accountTokensHandle, Method: http.MethodPost},
 	}
 }
 

@@ -204,7 +204,7 @@ func (m *MockDao) GetExtrinsicsByBlockNum(blockNum uint) []model.ChainExtrinsicJ
 func (m *MockDao) GetExtrinsicList(c context.Context, page, row int, order string, fixedTableIndex int, afterId uint, queryWhere ...model.Option) ([]model.ChainExtrinsic, int) {
 	return nil, 0
 }
-func (m *MockDao) GetExtrinsicListCursor(c context.Context, limit int, fixedTableIndex int, beforeId, afterId uint, queryWhere ...model.Option) ([]model.ChainExtrinsic, bool, bool) {
+func (m *MockDao) GetExtrinsicListCursor(c context.Context, limit int, fixedTableIndex int, beforeId, afterId uint, accountId string, queryWhere ...model.Option) ([]model.ChainExtrinsic, bool, bool) {
 	return []model.ChainExtrinsic{testSignedExtrinsic}, false, false
 }
 

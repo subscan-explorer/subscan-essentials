@@ -1,19 +1,23 @@
 .PHONY: check run build
 
 GOCMD=go
+GOLANGCI_LINT_VERSION=2.12.2
+GOLANGCI_LINT?=$(GOPATH)/bin/golangci-lint
 BUILD_PATH=cmd
 CURRENT_DIR=$(shell pwd)
 
-export CGO_ENABLED=0
+# substrate-api-rpc/keyring imports C, so lint and builds require cgo.
+export CGO_ENABLED=1
 
 getdeps:
-	mkdir -p $(GOPATH)/bin
-	which golangci-lint 1>/dev/null || (echo "Installing golangci-lint" && $(GOCMD) install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.5)
+	@$(GOLANGCI_LINT) --version 2>/dev/null | grep -q "version $(GOLANGCI_LINT_VERSION) " || ( \
+		mkdir -p "$(dir $(GOLANGCI_LINT))" && \
+		GOBIN="$(abspath $(dir $(GOLANGCI_LINT)))" $(GOCMD) install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v$(GOLANGCI_LINT_VERSION) \
+	)
 
 lint: getdeps
 	echo "Running $@ check"
-	${GOPATH}/bin/golangci-lint cache clean
-	${GOPATH}/bin/golangci-lint run --timeout=5m --config ./.golangci.yml
+	$(GOLANGCI_LINT) run --timeout=5m --config ./.golangci.yml
 
 check: lint
 

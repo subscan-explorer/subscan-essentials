@@ -154,7 +154,7 @@ func MigrateAccountExtrinsicMapping() error {
 
 	mapping := map[string]map[int]struct{}{}
 
-	tableName := fmt.Sprintf("chain_extrinsics")
+	tableName := "chain_extrinsics"
 	idx := 0
 	for {
 		if idx > 0 {
