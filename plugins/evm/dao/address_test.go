@@ -2,7 +2,6 @@ package dao
 
 import (
 	"context"
-	"github.com/itering/subscan/util"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -34,8 +33,8 @@ func TestH160ToAccountIdByNetwork(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		util.IsEvmChain = test.isEvmChain
-		result := h160ToAccountIdByNetwork(context.Background(), test.addr, "")
+		result, err := resolveH160Account(context.Background(), test.addr, test.isEvmChain, true, func(context.Context, string) (string, error) { return "", nil })
+		assert.NoError(t, err)
 		assert.Equal(t, test.expected, result)
 	}
 	assert.Equal(t, "750ea21c1e98cced0d4557196b6f4a5974ccb6f5eeeeeeeeeeeeeeeeeeeeeeee", reviveAccount("0x750ea21c1e98cced0d4557196b6f4a5974ccb6f5"))

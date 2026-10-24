@@ -20,7 +20,10 @@ func TouchAccount(ctx context.Context, h160 string) error {
 	if !address.VerifyEthereumAddress(h160) {
 		return nil
 	}
-	addr := h160ToAccountIdByNetwork(ctx, h160, util.NetworkNode)
+	addr, err := h160ToAccountIdByNetwork(ctx, h160, util.NetworkNode)
+	if err != nil {
+		return err
+	}
 	if !sg.redis.SAdd(ctx, EvmAddressMemberKey, 86400, h160) {
 		return nil
 	}

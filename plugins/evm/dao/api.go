@@ -105,7 +105,10 @@ func (a *ApiSrv) API_GetAccounts(ctx context.Context, h160 []string) (map[string
 	var addr2H160 = make(map[string]string)
 
 	for _, v := range h160 {
-		addr := h160ToAccountIdByNetwork(ctx, v, util.NetworkNode)
+		addr, err := h160ToAccountIdByNetwork(ctx, v, util.NetworkNode)
+		if err != nil {
+			return nil, err
+		}
 		if addr == "" {
 			return nil, fmt.Errorf("address %s not a valid address", v)
 		}
